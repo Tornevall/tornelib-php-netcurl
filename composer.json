@@ -18,10 +18,10 @@
   ],
   "autoload": {
     "files": [
-      "source/classes/tornevall_network.php"
+      "source/tornevall_network.php"
     ],
     "psr-4": {
-      "\\TorneLIB\\": "source/classes/tornevall_network.php"
+      "\\TorneLIB\\": "source/tornevall_network.php"
     }
   }
 }

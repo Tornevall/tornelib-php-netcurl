@@ -15,7 +15,7 @@
       "homepage": "https://tornevall.net",
       "role": "Developer"
     }
-  ]
+  ],
   "autoload": {
     "files": [
       "source/classes/tornevall_network.php"

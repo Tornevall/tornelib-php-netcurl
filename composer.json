@@ -6,7 +6,8 @@
   "require": {
     "php": ">=5.3",
     "ext-soap": "*",
-    "ext-curl": "*"
+    "ext-curl": "*",
+    "tornevall/tornelib-php-crypto": "6.0.0"
   },
   "authors": [
     {

@@ -10,4 +10,4 @@ Well. Yes. Almost. The other libraries out there, are probably doing the exact s
 
 ## Compatibility
 
-This library should be compatible with at least PHP 5.3 up to 7.0 (it is unconfirmed in 7.1 and the upcoming release of 7.2)
+This library should be compatible with at least PHP 5.3 up to PHP 7.2 (RC1)

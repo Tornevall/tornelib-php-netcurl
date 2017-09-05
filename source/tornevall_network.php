@@ -8,7 +8,7 @@ if ( ! class_exists( 'TorneLIB_Network' ) && ! class_exists( 'TorneLIB\TorneLIB_
      * Library for handling network related things (currently not sockets). A conversion of a legacy PHP library called "TorneEngine" and family.
      *
      * Class TorneLIB_Network
-     * @version 6.0.2
+     * @version 6.0.1
      * @link https://phpdoc.tornevall.net/TorneLIBv5/class-TorneLIB.TorneLIB_Network.html PHPDoc/Staging - TorneLIB_Network
      * @link https://docs.tornevall.net/x/KQCy TorneLIB (PHP) Landing documentation
      * @link https://bitbucket.tornevall.net/projects/LIB/repos/tornelib-php/browse Sources of TorneLIB
@@ -398,7 +398,7 @@ if ( ! class_exists( 'TorneLIB_Network' ) && ! class_exists( 'TorneLIB\TorneLIB_
 	 * Class Tornevall_cURL
 	 *
 	 * @package TorneLIB
-	 * @version 6.0.1
+	 * @version 6.0.2
 	 * @link https://phpdoc.tornevall.net/TorneLIBv5/source-class-TorneLIB.Tornevall_cURL.html PHPDoc/Staging - Tornevall_cURL
 	 * @link https://docs.tornevall.net/x/KQCy TorneLIB (PHP) Landing documentation
 	 * @link https://bitbucket.tornevall.net/projects/LIB/repos/tornelib-php/browse Sources of TorneLIB
@@ -414,11 +414,11 @@ if ( ! class_exists( 'TorneLIB_Network' ) && ! class_exists( 'TorneLIB\TorneLIB_
 		private $NETWORK;
 
 		/** @var string Internal version that is being used to find out if we are running the latest version of this library */
-		private $TorneCurlVersion = "6.0.1";
+		private $TorneCurlVersion = "6.0.2";
 		private $CurlVersion = null;
 
 		/** @var string Internal release snapshot that is being used to find out if we are running the latest version of this library */
-		private $TorneCurlRelease = "20170902";
+		private $TorneCurlRelease = "20170905";
 
 		/**
 		 * Target environment (if target is production some debugging values will be skipped)
@@ -1824,7 +1824,6 @@ if ( ! class_exists( 'TorneLIB_Network' ) && ! class_exists( 'TorneLIB\TorneLIB_
 			}
 
 			$this->init();
-
 			$this->CurlHeaders = array();
 
 			// Find out if CURLOPT_FOLLOWLOCATION can be set by user/developer or not.

@@ -398,7 +398,7 @@ if ( ! class_exists( 'TorneLIB_Network' ) && ! class_exists( 'TorneLIB\TorneLIB_
 	 * Class Tornevall_cURL
 	 *
 	 * @package TorneLIB
-	 * @version 6.0.2
+	 * @version 6.0.3
 	 * @link https://phpdoc.tornevall.net/TorneLIBv5/source-class-TorneLIB.Tornevall_cURL.html PHPDoc/Staging - Tornevall_cURL
 	 * @link https://docs.tornevall.net/x/KQCy TorneLIB (PHP) Landing documentation
 	 * @link https://bitbucket.tornevall.net/projects/LIB/repos/tornelib-php/browse Sources of TorneLIB
@@ -414,11 +414,11 @@ if ( ! class_exists( 'TorneLIB_Network' ) && ! class_exists( 'TorneLIB\TorneLIB_
 		private $NETWORK;
 
 		/** @var string Internal version that is being used to find out if we are running the latest version of this library */
-		private $TorneCurlVersion = "6.0.2";
+		private $TorneCurlVersion = "6.0.3";
 		private $CurlVersion = null;
 
 		/** @var string Internal release snapshot that is being used to find out if we are running the latest version of this library */
-		private $TorneCurlRelease = "20170905";
+		private $TorneCurlRelease = "20170906";
 
 		/**
 		 * Target environment (if target is production some debugging values will be skipped)

@@ -662,13 +662,13 @@ class Tornevall_cURLTest extends TestCase
 		    $this->markTestSkipped("Safe mode has been removed from this platform, so tests can not be performed");
 		    return;
 	    }
-    	if (ini_get('safe_mode')) {
+	    if ( filter_var( ini_get( 'safe_mode' ), FILTER_VALIDATE_BOOLEAN ) === true ) {
 		    $this->pemDefault();
-		    $this->CURL = new Tornevall_cURL();
-		    $redirectResponse = $this->CURL->doGet("http://developer.tornevall.net/tests/tornevall_network/redirect.php?run");
-		    $redirectedUrls = $this->CURL->getRedirectedUrls();
-		    $this->assertTrue($redirectResponse['code'] >= 300 && $redirectResponse['code'] <= 350 && !preg_match("/rerun/i", $redirectResponse['body']) && count($redirectedUrls));
-		    return;
+		    $this->CURL       = new Tornevall_cURL();
+		    $redirectResponse = $this->CURL->doGet( "http://developer.tornevall.net/tests/tornevall_network/redirect.php?run" );
+		    $redirectedUrls   = $this->CURL->getRedirectedUrls();
+		    $this->assertTrue( $redirectResponse['code'] >= 300 && $redirectResponse['code'] <= 350 && ! preg_match( "/rerun/i", $redirectResponse['body'] ) && count( $redirectedUrls ) );
+		   return;
 	    }
 	    $this->markTestSkipped("Safe mode is available as an option. It is however not enabled on this platform and can not therefore be tested.");
     }

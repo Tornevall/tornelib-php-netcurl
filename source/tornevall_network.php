@@ -1834,9 +1834,9 @@ if ( ! class_exists( 'TorneLIB_Network' ) && ! class_exists( 'TorneLIB\TorneLIB_
 			// to only set any flags if the security levels of PHP allows it, and only if the follow flag is enabled.
 			//
 			// Refers to http://php.net/manual/en/ini.sect.safe-mode.php
-			if ( ini_get( 'open_basedir' ) == '' && ! ini_get( 'safe_mode' ) ) {
+			if ( ini_get( 'open_basedir' ) == '' && ! filter_var( ini_get( 'safe_mode' ), FILTER_VALIDATE_BOOLEAN ) ) {
 				// To disable the default behaviour of this function, use setEnforceFollowLocation([bool]).
-				if ($this->followLocationSet) {
+				if ( $this->followLocationSet ) {
 					curl_setopt( $this->CurlSession, CURLOPT_FOLLOWLOCATION, $this->followLocationSet );
 					$this->curlopt[ CURLOPT_FOLLOWLOCATION ] = $this->followLocationSet;
 				}

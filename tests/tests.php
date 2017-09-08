@@ -56,9 +56,14 @@ class Tornevall_cURLTest extends TestCase
         $this->Urls = array(
             'simple' => 'http://identifier.tornevall.net/',
             'simplejson' => 'http://identifier.tornevall.net/?json',
-            'tests' => 'developer.tornevall.net/tests/tornevall_network/'
+            'tests' => 'developer.tornevall.net/tests/tornevall_network/',
+            'soap' => 'developer.tornevall.net/tests/tornevall_network/index.wsdl?wsdl',
         );
     }
+
+	public function __construct( $name = null, array $data = [], $dataName = '' ) {
+		parent::__construct( $name, $data, $dataName );
+	}
 
 	private function pemDefault()
 	{
@@ -691,5 +696,25 @@ class Tornevall_cURLTest extends TestCase
 	    } catch (\Exception $putUrlResponse) {
 	    }
 	    $this->assertTrue(true);
+    }
+
+	/**
+	 * Test SoapClient by making a standard doGet()
+	 */
+    function testSoapClient() {
+    	$assertThis = true;
+    	try {
+		    $this->CURL->doGet( "http://" . $this->Urls['soap'] );
+	    } catch (\Exception $e) {
+    		$assertThis = false;
+	    }
+	    $this->assertTrue($assertThis);
+    }
+
+	/**
+	 * Test Soap by internal controllers
+	 */
+    function testHasSoap() {
+	    $this->assertTrue($this->CURL->hasSoap());
     }
 }

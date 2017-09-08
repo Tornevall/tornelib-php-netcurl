@@ -418,7 +418,7 @@ if ( ! class_exists( 'TorneLIB_Network' ) && ! class_exists( 'TorneLIB\TorneLIB_
 		private $CurlVersion = null;
 
 		/** @var string Internal release snapshot that is being used to find out if we are running the latest version of this library */
-		private $TorneCurlRelease = "20170907";
+		private $TorneCurlRelease = "20170908";
 
 		/**
 		 * Target environment (if target is production some debugging values will be skipped)
@@ -1686,6 +1686,34 @@ if ( ! class_exists( 'TorneLIB_Network' ) && ! class_exists( 'TorneLIB\TorneLIB_
 		}
 
 		/**
+		 * Check if SOAP exists in system
+		 *
+		 * @param bool $extendedSearch Extend search for SOAP (unsafe method, looking for constants defined as SOAP_*)
+		 *
+		 * @return bool
+		 */
+		public function hasSoap( $extendedSearch = false ) {
+			$soapClassBoolean = false;
+			if ( ( class_exists( 'SoapClient' ) || class_exists( '\SoapClient' ) ) ) {
+				$soapClassBoolean = true;
+			}
+			$sysConst = get_defined_constants();
+			if ( in_array( 'SOAP_1_1', $sysConst ) || in_array( 'SOAP_1_2', $sysConst ) ) {
+				$soapClassBoolean = true;
+			} else {
+				if ( $extendedSearch ) {
+					foreach ( $sysConst as $constantKey => $constantValue ) {
+						if ( preg_match( '/^SOAP_/', $constantKey ) ) {
+							$soapClassBoolean = true;
+						}
+					}
+				}
+			}
+
+			return $soapClassBoolean;
+		}
+
+		/**
 		 * Return number of tries resolver has been working
 		 *
 		 * @return int
@@ -1857,6 +1885,9 @@ if ( ! class_exists( 'TorneLIB_Network' ) && ! class_exists( 'TorneLIB\TorneLIB_
 
 			// Prepare SOAPclient if requested
 			if ( preg_match( "/\?wsdl$|\&wsdl$/i", $this->CurlURL ) || $postAs == CURL_POST_AS::POST_AS_SOAP ) {
+				if ( ! $this->hasSoap() ) {
+					throw new \Exception( "SoapClient is not available in this system", 500 );
+				}
 				$Soap = new Tornevall_SimpleSoap( $this->CurlURL, $this->curlopt );
 				$Soap->setCustomUserAgent( $this->CustomUserAgent );
 				$Soap->setThrowableState( $this->canThrow );

@@ -28,6 +28,9 @@ class Tornevall_cURLTest extends TestCase
     private $testLongCompressString = "The following string contains data: This is a longer string to test the best compression on something that is worth compression.";
     private $testLongCompressedString = "H4sIAAAAAAACA02MQQrDMAwEv6IX5N68Ix9QU9UyONpgLQTy-tqFQmFg9zBMuR_r5iZvtIarRpFkn7MjqDVSXkpdZfOaMlBpiGL9pxFCSwpH4znPjuPsllkRMkgcRv-arpyFC53-ry0flwqd0IQAAAA";
 
+    public $specUrlUsername;
+    public $specUrlPassword;
+
     //function tearDown() {}
     function setUp()
     {
@@ -671,15 +674,22 @@ class Tornevall_cURLTest extends TestCase
 	    $this->markTestSkipped("Safe mode is available as an option. It is however not enabled on this platform and can not therefore be tested.");
     }
 
+	/**
+	 * This function should not end up in death
+	 */
     function testMemberNull() {
 	    $localCurl       = new Tornevall_cURL();
-	    $localCurl->setAuthentication('atest', 'atest');
+	    $username = $this->specUrlUsername;
+	    $password = $this->specUrlPassword;
+	    if (!empty($username)) {
+	    	$this->markTestSkipped("Can not run without credentials");
+	    }
+	    $localCurl->setAuthentication($username, $password, CURL_AUTH_TYPES::AUTHTYPE_BASIC);
 	    $specUrl = "https://omnitest.resurs.com/checkout/payments/null/updatePaymentReference";
 	    try {
-		    $null = $this->CURL->getParsedResponse( $localCurl->doPut( $specUrl, array( 'paymentReference' => null ) ) );
+		    $null = $this->CURL->getParsedResponse( $localCurl->doPut( $specUrl, array( 'paymentReference' => null ), CURL_POST_AS::POST_AS_JSON ) );
 	    } catch (\Exception $putUrlResponse) {
-	    	print_R($putUrlResponse->getMessage());
 	    }
-
+	    $this->assertTrue(true);
     }
 }

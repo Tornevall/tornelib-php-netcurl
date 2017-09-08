@@ -28,7 +28,6 @@ class Tornevall_cURLTest extends TestCase
     private $testLongCompressString = "The following string contains data: This is a longer string to test the best compression on something that is worth compression.";
     private $testLongCompressedString = "H4sIAAAAAAACA02MQQrDMAwEv6IX5N68Ix9QU9UyONpgLQTy-tqFQmFg9zBMuR_r5iZvtIarRpFkn7MjqDVSXkpdZfOaMlBpiGL9pxFCSwpH4znPjuPsllkRMkgcRv-arpyFC53-ry0flwqd0IQAAAA";
 
-
     //function tearDown() {}
     function setUp()
     {
@@ -664,12 +663,23 @@ class Tornevall_cURLTest extends TestCase
 	    }
 	    if ( filter_var( ini_get( 'safe_mode' ), FILTER_VALIDATE_BOOLEAN ) === true ) {
 		    $this->pemDefault();
-		    $this->CURL       = new Tornevall_cURL();
 		    $redirectResponse = $this->CURL->doGet( "http://developer.tornevall.net/tests/tornevall_network/redirect.php?run" );
 		    $redirectedUrls   = $this->CURL->getRedirectedUrls();
 		    $this->assertTrue( $redirectResponse['code'] >= 300 && $redirectResponse['code'] <= 350 && ! preg_match( "/rerun/i", $redirectResponse['body'] ) && count( $redirectedUrls ) );
 		   return;
 	    }
 	    $this->markTestSkipped("Safe mode is available as an option. It is however not enabled on this platform and can not therefore be tested.");
+    }
+
+    function testMemberNull() {
+	    $localCurl       = new Tornevall_cURL();
+	    $localCurl->setAuthentication('atest', 'atest');
+	    $specUrl = "https://omnitest.resurs.com/checkout/payments/null/updatePaymentReference";
+	    try {
+		    $null = $this->CURL->getParsedResponse( $localCurl->doPut( $specUrl, array( 'paymentReference' => null ) ) );
+	    } catch (\Exception $putUrlResponse) {
+	    	print_R($putUrlResponse->getMessage());
+	    }
+
     }
 }

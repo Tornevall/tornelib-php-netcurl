@@ -1485,14 +1485,15 @@ if ( ! class_exists( 'TorneLIB_Network' ) && ! class_exists( 'TorneLIB\TorneLIB_
 		 * @throws \Exception
 		 */
 		public function getParsedResponse( $ResponseContent = null ) {
-			if (isset($ResponseContent['code']) && $ResponseContent['code'] >= 400) {
-				throw new \Exception("Unexpected response code from server: " . $ResponseContent['code'], $ResponseContent['code']);
+			if ( isset( $ResponseContent['code'] ) && $ResponseContent['code'] >= 400 ) {
+				throw new \Exception( "Unexpected response code from server: " . $ResponseContent['code'], $ResponseContent['code'] );
 			}
 			if ( is_null( $ResponseContent ) && ! empty( $this->TemporaryResponse ) ) {
 				return $this->TemporaryResponse['parsed'];
 			} else if ( isset( $ResponseContent['parsed'] ) ) {
 				return $ResponseContent['parsed'];
 			}
+
 			return null;
 		}
 
@@ -1503,7 +1504,7 @@ if ( ! class_exists( 'TorneLIB_Network' ) && ! class_exists( 'TorneLIB\TorneLIB_
 		 * @return int
 		 */
 		public function getResponseCode( $ResponseContent = null ) {
-			if ( is_null( $ResponseContent ) && ! empty( $this->TemporaryResponse ) ) {
+			if ( is_null( $ResponseContent ) && ! empty( $this->TemporaryResponse ) && isset( $this->TemporaryResponse['code'] ) ) {
 				return (int) $this->TemporaryResponse['code'];
 			} else if ( isset( $ResponseContent['code'] ) ) {
 				return (int) $ResponseContent['code'];
@@ -1518,7 +1519,7 @@ if ( ! class_exists( 'TorneLIB_Network' ) && ! class_exists( 'TorneLIB\TorneLIB_
 		 * @return null
 		 */
 		public function getResponseBody( $ResponseContent = null ) {
-			if ( is_null( $ResponseContent ) && ! empty( $this->TemporaryResponse ) ) {
+			if ( is_null( $ResponseContent ) && ! empty( $this->TemporaryResponse ) && isset( $this->TemporaryResponse['body'] ) ) {
 				return $this->TemporaryResponse['body'];
 			} else if ( isset( $ResponseContent['body'] ) ) {
 				return $ResponseContent['body'];

@@ -673,10 +673,10 @@ class Tornevall_cURLTest extends TestCase
 
     function testMemberNull() {
 	    $localCurl       = new Tornevall_cURL();
-	    $localCurl->setAuthentication('atest', 'atest');
+	    $localCurl->setAuthentication('atest', 'atest', CURL_AUTH_TYPES::AUTHTYPE_BASIC);
 	    $specUrl = "https://omnitest.resurs.com/checkout/payments/null/updatePaymentReference";
 	    try {
-		    $null = $this->CURL->getParsedResponse( $localCurl->doPut( $specUrl, array( 'paymentReference' => null ) ) );
+		    $null = $this->CURL->getParsedResponse( $localCurl->doPut( $specUrl, array( 'paymentReference' => null ), CURL_POST_AS::POST_AS_JSON ) );
 	    } catch (\Exception $putUrlResponse) {
 	    	print_R($putUrlResponse->getMessage());
 	    }

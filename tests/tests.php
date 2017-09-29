@@ -698,6 +698,8 @@ class Tornevall_cURLTest extends TestCase
 	    $this->assertTrue(true);
     }
 
+    // Include but not run.
+    /*
     function testSoapError() {
     	$this->markTestSkipped("testSoapError is a special exceptions test. Normally we do not want to run this");
     	$localCurl = new Tornevall_cURL();
@@ -710,6 +712,7 @@ class Tornevall_cURLTest extends TestCase
 	    }
 
     }
+    */
 
     function testHostResolveValidationSuccess() {
     	$localNetwork = new TorneLIB_Network();
@@ -748,4 +751,87 @@ class Tornevall_cURLTest extends TestCase
     function testHasSoap() {
 	    $this->assertTrue($this->CURL->hasSoap());
     }
+
+    function testBitStructure() {
+    	$myBits = array(
+    		'TEST1' => 1,
+    		'TEST2' => 2,
+    		'TEST4' => 4,
+    		'TEST8' => 8,
+	    );
+    	$myBit = new TorneLIB_NetBits($myBits);
+	    $this->assertCount(9, $myBit->getBitStructure());
+    }
+
+	/**
+	 * Test if one bit is on (1)
+	 */
+    function testBitActive() {
+	    $myBits = array(
+		    'TEST1' => 1,
+		    'TEST2' => 2,
+		    'TEST4' => 4,
+		    'TEST8' => 8,
+	    );
+	    $myBit = new TorneLIB_NetBits($myBits);
+		$this->assertTrue($myBit->isBit(8, 12));
+    }
+
+	/**
+	 * Test if one bit is off (0)
+	 */
+    function testBitNotActive() {
+	    $myBits = array(
+		    'TEST1' => 1,
+		    'TEST2' => 2,
+		    'TEST4' => 4,
+		    'TEST8' => 8,
+	    );
+	    $myBit = new TorneLIB_NetBits($myBits);
+		$this->assertFalse($myBit->isBit(64, 12));
+    }
+
+	/**
+	 * Test if multiple bits are active (muliple settings by bit)
+	 */
+	function testMultiBitActive() {
+		$myBits = array(
+			'TEST1' => 1,
+			'TEST2' => 2,
+			'TEST4' => 4,
+			'TEST8' => 8,
+		);
+		$myBit = new TorneLIB_NetBits($myBits);
+		$this->assertTrue($myBit->isBit((array(8,2)), 14));
+	}
+
+	/**
+	 * Test correct returning bits
+	 */
+	function testBitArray() {
+		$myBit = new TorneLIB_NetBits();
+		$bitArray = $myBit->getBitArray("88");      // 8 + 16 + 64
+		$this->assertCount(3, $bitArray);
+	}
+
+	/**
+	 * Test large setup of bits
+	 */
+	function test16BitArray() {
+		$myBit = new TorneLIB_NetBits();
+		$myBit->setMaxBits(16);
+		$bitArray = $myBit->getBitArray((8+256+4096+8192+32768));
+		$this->assertCount(5, $bitArray);
+
+	}
+
+	/**
+	 * Test the same large setup of bits as above, but via the network library
+	 */
+	function testBitFromNet() {
+		$this->NET = new TorneLIB_Network();
+		$this->NET->BIT->setMaxBits(16);
+		$this->assertCount(5, $this->NET->BIT->getBitArray(8+256+4096+8192+32768));
+	}
+
 }

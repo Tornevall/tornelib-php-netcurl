@@ -698,6 +698,37 @@ class Tornevall_cURLTest extends TestCase
 	    $this->assertTrue(true);
     }
 
+    function testSoapError() {
+    	$this->markTestSkipped("testSoapError is a special exceptions test. Normally we do not want to run this");
+    	$localCurl = new Tornevall_cURL();
+    	$wsdl = $localCurl->doGet('https://test.resurs.com/ecommerce-test/ws/V4/SimplifiedShopFlowService?wsdl');
+    	try {
+		    $wsdl->getPaymentMethods();
+	    } catch (\Exception $e) {
+    		$previousException = $e->getPrevious();
+    		$this->assertTrue(isset($previousException->faultstring) && !empty($previousException->faultstring));
+	    }
+
+    }
+
+    function testHostResolveValidationSuccess() {
+    	$localNetwork = new TorneLIB_Network();
+    	$localNetwork->setAlwaysResolveHostvalidation(true);
+    	$urlData = $localNetwork->getUrlDomain("http://www.tornevall.net/");
+    	$this->assertTrue($urlData[0] == "www.tornevall.net");
+    }
+    function testHostResolveValidationFail() {
+    	$localNetwork = new TorneLIB_Network();
+    	$localNetwork->setAlwaysResolveHostvalidation(true);
+    	$urlData = $localNetwork->getUrlDomain("http://failing.domain/");
+    	$this->assertTrue($urlData[0] == "");
+    }
+    function testHostValidationNoResolve() {
+    	$localNetwork = new TorneLIB_Network();
+    	$urlData = $localNetwork->getUrlDomain("http://failing.domain/");
+    	$this->assertTrue($urlData[0] == "failing.domain");
+    }
+
 	/**
 	 * Test SoapClient by making a standard doGet()
 	 */

@@ -390,7 +390,7 @@ if ( ! class_exists( 'TorneLIB_Network' ) && ! class_exists( 'TorneLIB\TorneLIB_
 		 *
 		 * @param bool $activate
 		 */
-		public function setAlwaysResolveHostvalidation($activate = false) {
+		public function setAlwaysResolveHostvalidation( $activate = false ) {
 			$this->alwaysResolveHostvalidation = $activate;
 		}
 
@@ -769,7 +769,7 @@ if ( ! class_exists( 'TorneLIB_Network' ) && ! class_exists( 'TorneLIB\TorneLIB_
 		 * @since 5.0.0/2017.4
 		 */
 		public function setEnforceFollowLocation( $setEnabledState = true ) {
-			$this->followLocationSet     = $setEnabledState;
+			$this->followLocationSet = $setEnabledState;
 		}
 
 
@@ -906,6 +906,7 @@ if ( ! class_exists( 'TorneLIB_Network' ) && ! class_exists( 'TorneLIB\TorneLIB_
 		public function init() {
 			$this->initCookiePath();
 			$this->CurlSession = curl_init( $this->CurlURL );
+
 			return $this->CurlSession;
 		}
 
@@ -1353,7 +1354,7 @@ if ( ! class_exists( 'TorneLIB_Network' ) && ! class_exists( 'TorneLIB\TorneLIB_
 				}
 			}
 			if ( is_null( $parsedContent ) && ( preg_match( "/xml version/", $content ) || preg_match( "/rss version/", $content ) || preg_match( "/xml/i", $contentType ) ) ) {
-				$trimmedContent = trim( $content ); // PHP 5.3: Can't use function return value in write context
+				$trimmedContent        = trim( $content ); // PHP 5.3: Can't use function return value in write context
 				$overrideXmlSerializer = false;
 				if ( $this->useXmlSerializer ) {
 					$serializerPath = stream_resolve_include_path( 'XML/Unserializer.php' );
@@ -1381,6 +1382,7 @@ if ( ! class_exists( 'TorneLIB_Network' ) && ! class_exists( 'TorneLIB\TorneLIB_
 					if ( $overrideXmlSerializer ) {
 						$xmlSerializer = new \XML_Unserializer();
 						$xmlSerializer->unserialize( $content );
+
 						return $xmlSerializer->getUnserializedData();
 					}
 
@@ -1638,7 +1640,7 @@ if ( ! class_exists( 'TorneLIB_Network' ) && ! class_exists( 'TorneLIB\TorneLIB_
 			// If response code starts with 3xx, this is probably a redirect
 			if ( preg_match( "/^3/", $code ) ) {
 				$this->redirectedUrls[] = $this->CurlURL;
-				$redirectArray[] = array(
+				$redirectArray[]        = array(
 					'header' => $header,
 					'body'   => $body,
 					'code'   => $code
@@ -1759,10 +1761,11 @@ if ( ! class_exists( 'TorneLIB_Network' ) && ! class_exists( 'TorneLIB\TorneLIB_
 		 */
 		public function doPost( $url = '', $postData = array(), $postAs = CURL_POST_AS::POST_AS_NORMAL ) {
 			$response = null;
-			if (!empty($url)) {
-				$content       = $this->handleUrlCall( $url, $postData, CURL_METHODS::METHOD_POST, $postAs );
+			if ( ! empty( $url ) ) {
+				$content  = $this->handleUrlCall( $url, $postData, CURL_METHODS::METHOD_POST, $postAs );
 				$response = $this->ParseResponse( $content );
 			}
+
 			return $response;
 		}
 
@@ -1775,10 +1778,11 @@ if ( ! class_exists( 'TorneLIB_Network' ) && ! class_exists( 'TorneLIB\TorneLIB_
 		 */
 		public function doPut( $url = '', $postData = array(), $postAs = CURL_POST_AS::POST_AS_NORMAL ) {
 			$response = null;
-			if (!empty($url)) {
-				$content       = $this->handleUrlCall( $url, $postData, CURL_METHODS::METHOD_PUT, $postAs );
+			if ( ! empty( $url ) ) {
+				$content  = $this->handleUrlCall( $url, $postData, CURL_METHODS::METHOD_PUT, $postAs );
 				$response = $this->ParseResponse( $content );
 			}
+
 			return $response;
 		}
 
@@ -1791,10 +1795,11 @@ if ( ! class_exists( 'TorneLIB_Network' ) && ! class_exists( 'TorneLIB\TorneLIB_
 		 */
 		public function doDelete( $url = '', $postData = array(), $postAs = CURL_POST_AS::POST_AS_NORMAL ) {
 			$response = null;
-			if (!empty($url)) {
+			if ( ! empty( $url ) ) {
 				$content  = $this->handleUrlCall( $url, $postData, CURL_METHODS::METHOD_DELETE, $postAs );
 				$response = $this->ParseResponse( $content );
 			}
+
 			return $response;
 		}
 
@@ -1808,10 +1813,11 @@ if ( ! class_exists( 'TorneLIB_Network' ) && ! class_exists( 'TorneLIB\TorneLIB_
 		 */
 		public function doGet( $url = '', $postAs = CURL_POST_AS::POST_AS_NORMAL ) {
 			$response = null;
-			if (!empty($url)) {
-				$content       = $this->handleUrlCall( $url, array(), CURL_METHODS::METHOD_GET, $postAs );
+			if ( ! empty( $url ) ) {
+				$content  = $this->handleUrlCall( $url, array(), CURL_METHODS::METHOD_GET, $postAs );
 				$response = $this->ParseResponse( $content );
 			}
+
 			return $response;
 		}
 
@@ -1912,9 +1918,10 @@ if ( ! class_exists( 'TorneLIB_Network' ) && ! class_exists( 'TorneLIB\TorneLIB_
 				$Soap->SoapTryOnce = $this->SoapTryOnce;
 				try {
 					$getSoapResponse = $Soap->getSoap();
-				} catch (\Exception $getSoapResponseException) {
-					throw new \Exception($getSoapResponseException->getMessage(), $getSoapResponseException->getCode());
+				} catch ( \Exception $getSoapResponseException ) {
+					throw new \Exception( $getSoapResponseException->getMessage(), $getSoapResponseException->getCode() );
 				}
+
 				return $getSoapResponse;
 			}
 
@@ -2207,9 +2214,9 @@ if ( ! class_exists( 'TorneLIB_Network' ) && ! class_exists( 'TorneLIB\TorneLIB_
 			if ( $this->SoapTryOnce ) {
 				try {
 					$this->soapClient = new \SoapClient( $this->soapUrl, $this->soapOptions );
-				} catch (\Exception $soapException) {
+				} catch ( \Exception $soapException ) {
 					$soapCode = $soapException->getCode();
-					if (!$soapCode) {
+					if ( ! $soapCode ) {
 						$soapCode = 500;
 					}
 					throw new \Exception( $soapException->getMessage(), $soapCode );
@@ -2237,6 +2244,7 @@ if ( ! class_exists( 'TorneLIB_Network' ) && ! class_exists( 'TorneLIB\TorneLIB_
 					}
 				}
 			}
+
 			return $this;
 		}
 
@@ -2268,7 +2276,7 @@ if ( ! class_exists( 'TorneLIB_Network' ) && ! class_exists( 'TorneLIB\TorneLIB_
 				$returnResponse['code']    = isset( $parsedHeader['code'] ) ? $parsedHeader['code'] : 0;
 				$returnResponse['body']    = $this->soapResponse;
 				// Collect the response received internally, before throwing
-				$this->libResponse = $returnResponse;
+				$this->libResponse              = $returnResponse;
 				$this->soapFaultExceptionObject = $e;
 				if ( $this->canThrowSoapFaults ) {
 					throw new \Exception( $e->getMessage(), $e->getCode(), $e );

@@ -2,794 +2,745 @@
 
 namespace TorneLIB;
 
-require_once('../vendor/autoload.php');
+require_once( '../vendor/autoload.php' );
 
 use PHPUnit\Framework\TestCase;
 
-class Tornevall_cURLTest extends TestCase
-{
-    private $StartErrorReporting;
+class Tornevall_cURLTest extends TestCase {
+	private $StartErrorReporting;
 
-    private $CURL;
-    private $Crypto;
-    private $Urls;
-    private $TorSetupAddress = "127.0.0.1:9050";
-    private $TorSetupType = 4;      /* CURLPROXY_SOCKS4*/
-    private $CurlVersion = null;
+	private $CURL;
+	private $Crypto;
+	private $Urls;
+	private $TorSetupAddress = "127.0.0.1:9050";
+	private $TorSetupType = 4;      /* CURLPROXY_SOCKS4*/
+	private $CurlVersion = null;
 
-    /*
-     * Compressed strings over base64
-     */
-    private $testCompressString = "Testing my string";
-    private $gz0Base = "H4sIAAAAAAAEAwERAO7_VGVzdGluZyBteSBzdHJpbmf030_XEQAAAA";
-    private $gz9Base = "H4sIAAAAAAACAwtJLS7JzEtXyK1UKC4pArIA9N9P1xEAAAA";
-    private $bzBase = "QlpoNDFBWSZTWajSZJAAAAETgEAABAACoxwgIAAhoaA0IBppoKc4F16DpQXi7kinChIVGkySAA";
+	/*
+	 * Compressed strings over base64
+	 */
+	private $testCompressString = "Testing my string";
+	private $gz0Base = "H4sIAAAAAAAEAwERAO7_VGVzdGluZyBteSBzdHJpbmf030_XEQAAAA";
+	private $gz9Base = "H4sIAAAAAAACAwtJLS7JzEtXyK1UKC4pArIA9N9P1xEAAAA";
+	private $bzBase = "QlpoNDFBWSZTWajSZJAAAAETgEAABAACoxwgIAAhoaA0IBppoKc4F16DpQXi7kinChIVGkySAA";
 
-    private $testLongCompressString = "The following string contains data: This is a longer string to test the best compression on something that is worth compression.";
-    private $testLongCompressedString = "H4sIAAAAAAACA02MQQrDMAwEv6IX5N68Ix9QU9UyONpgLQTy-tqFQmFg9zBMuR_r5iZvtIarRpFkn7MjqDVSXkpdZfOaMlBpiGL9pxFCSwpH4znPjuPsllkRMkgcRv-arpyFC53-ry0flwqd0IQAAAA";
+	private $testLongCompressString = "The following string contains data: This is a longer string to test the best compression on something that is worth compression.";
+	private $testLongCompressedString = "H4sIAAAAAAACA02MQQrDMAwEv6IX5N68Ix9QU9UyONpgLQTy-tqFQmFg9zBMuR_r5iZvtIarRpFkn7MjqDVSXkpdZfOaMlBpiGL9pxFCSwpH4znPjuPsllkRMkgcRv-arpyFC53-ry0flwqd0IQAAAA";
 
-    public $specUrlUsername;
-    public $specUrlPassword;
+	public $specUrlUsername;
+	public $specUrlPassword;
 
-    //function tearDown() {}
-    function setUp()
-    {
-        //$this->setDebug(true);
-        $this->StartErrorReporting = error_reporting();
-        $this->NET = new \TorneLIB\TorneLIB_Network();
-        $this->CURL = new \TorneLIB\Tornevall_cURL();
-        $this->Crypto = new \TorneLIB\TorneLIB_Crypto();
+	//function tearDown() {}
+	function setUp() {
+		//$this->setDebug(true);
+		$this->StartErrorReporting = error_reporting();
+		$this->NET                 = new \TorneLIB\TorneLIB_Network();
+		$this->CURL                = new \TorneLIB\Tornevall_cURL();
+		$this->Crypto              = new \TorneLIB\TorneLIB_Crypto();
 
-        if (function_exists('curl_version')) {
-            $CurlVersionRequest = curl_version();
-            $this->CurlVersion = $CurlVersionRequest['version'];
-        }
+		if ( function_exists( 'curl_version' ) ) {
+			$CurlVersionRequest = curl_version();
+			$this->CurlVersion  = $CurlVersionRequest['version'];
+		}
 
-        /*
-         * Enable test mode
-         */
-        $this->CURL->setTestEnabled();
+		/*
+		 * Enable test mode
+		 */
+		$this->CURL->setTestEnabled();
 
-        /*
-         * Set up testing URLS
-         */
-        $this->Urls = array(
-            'simple' => 'http://identifier.tornevall.net/',
-            'simplejson' => 'http://identifier.tornevall.net/?json',
-            'tests' => 'developer.tornevall.net/tests/tornevall_network/',
-            'soap' => 'developer.tornevall.net/tests/tornevall_network/index.wsdl?wsdl',
-        );
-    }
+		/*
+		 * Set up testing URLS
+		 */
+		$this->Urls = array(
+			'simple'     => 'http://identifier.tornevall.net/',
+			'simplejson' => 'http://identifier.tornevall.net/?json',
+			'tests'      => 'developer.tornevall.net/tests/tornevall_network/',
+			'soap'       => 'developer.tornevall.net/tests/tornevall_network/index.wsdl?wsdl',
+		);
+	}
 
 	public function __construct( $name = null, array $data = [], $dataName = '' ) {
 		parent::__construct( $name, $data, $dataName );
 	}
 
-	private function pemDefault()
-	{
+	private function pemDefault() {
 		$this->CURL->_DEBUG_TCURL_UNSET_LOCAL_PEM_LOCATION = false;
-		$this->CURL->setSslUnverified(true);
-		$this->CURL->setSslVerify(true);
+		$this->CURL->setSslUnverified( true );
+		$this->CURL->setSslVerify( true );
 	}
 
-	private function setDebug($setActive = false)
-    {
-        if (!$setActive) {
-            error_reporting(E_ALL);
-        } else {
-            error_reporting($this->StartErrorReporting);
-        }
-    }
+	private function setDebug( $setActive = false ) {
+		if ( ! $setActive ) {
+			error_reporting( E_ALL );
+		} else {
+			error_reporting( $this->StartErrorReporting );
+		}
+	}
 
-    private function simpleGet()
-    {
-        return $this->CURL->doGet($this->Urls['simple']);
-    }
+	private function simpleGet() {
+		return $this->CURL->doGet( $this->Urls['simple'] );
+	}
 
-    /**
-     * Make sure we always get a protocol
-     * @param string $protocol
-     * @return string
-     */
-    private function getProtocol($protocol = 'http')
-    {
-        if (empty($protocol)) {
-            $protocol = "http";
-        }
-        return $protocol;
-    }
+	/**
+	 * Make sure we always get a protocol
+	 *
+	 * @param string $protocol
+	 *
+	 * @return string
+	 */
+	private function getProtocol( $protocol = 'http' ) {
+		if ( empty( $protocol ) ) {
+			$protocol = "http";
+		}
 
-    private function urlGet($parameters = '', $protocol = "http", $indexFile = 'index.php')
-    {
-        $theUrl = $this->getProtocol($protocol) . "://" . $this->Urls['tests'] . $indexFile . "?" . $parameters;
-        return $this->CURL->doGet($theUrl);
-    }
+		return $protocol;
+	}
 
-    private function urlPost($parameters = array(), $protocol = "http", $indexFile = 'index.php')
-    {
-        $theUrl = $this->getProtocol($protocol) . "://" . $this->Urls['tests'] . $indexFile;
-        return $this->CURL->doPost($theUrl, $parameters);
-    }
+	private function urlGet( $parameters = '', $protocol = "http", $indexFile = 'index.php' ) {
+		$theUrl = $this->getProtocol( $protocol ) . "://" . $this->Urls['tests'] . $indexFile . "?" . $parameters;
 
-    private function hasBody($container)
-    {
-        if (is_array($container) && isset($container['body'])) {
-            return true;
-        }
-    }
+		return $this->CURL->doGet( $theUrl );
+	}
 
-    private function getBody($container)
-    {
-        if ($this->hasBody($container)) {
-            return $container['body'];
-        }
-    }
+	private function urlPost( $parameters = array(), $protocol = "http", $indexFile = 'index.php' ) {
+		$theUrl = $this->getProtocol( $protocol ) . "://" . $this->Urls['tests'] . $indexFile;
 
-    private function getParsed($container)
-    {
-        if ($this->hasBody($container)) {
-            return $container['parsed'];
-        }
-        return null;
-    }
+		return $this->CURL->doPost( $theUrl, $parameters );
+	}
 
-    /*
-    function ignoreTestNoSsl()
-    {
-        if ($this->CURL->hasSsl()) {
-            $this->markTestSkipped("This instance seems to have SSL available so we can't assume it doesn't");
-        } else {
-            $this->assertFalse($this->CURL->hasSsl());
-        }
-    }
-    */
+	private function hasBody( $container ) {
+		if ( is_array( $container ) && isset( $container['body'] ) ) {
+			return true;
+		}
+	}
 
-    function testBase64GzEncodeLevel0()
-    {
-        $gzString = $this->Crypto->base64_gzencode($this->testCompressString, 0);
-        $this->assertTrue($gzString == $this->gz0Base);
-    }
+	private function getBody( $container ) {
+		if ( $this->hasBody( $container ) ) {
+			return $container['body'];
+		}
+	}
 
-    function testBase64GzEncodeLevel9()
-    {
-        $myString = "Testing my string";
-        $gzString = $this->Crypto->base64_gzencode($myString, 9);
-        $this->assertTrue($gzString == $this->gz9Base);
-    }
+	private function getParsed( $container ) {
+		if ( $this->hasBody( $container ) ) {
+			return $container['parsed'];
+		}
 
-    function testBase64GzDecodeLevel0()
-    {
-        $gzString = $this->Crypto->base64_gzdecode($this->gz0Base);
-        $this->assertTrue($gzString == $this->testCompressString);
-    }
+		return null;
+	}
 
-    function testBase64GzDecodeLevel9()
-    {
-        $gzString = $this->Crypto->base64_gzdecode($this->gz9Base);
-        $this->assertTrue($gzString == $this->testCompressString);
-    }
+	/*
+	function ignoreTestNoSsl()
+	{
+		if ($this->CURL->hasSsl()) {
+			$this->markTestSkipped("This instance seems to have SSL available so we can't assume it doesn't");
+		} else {
+			$this->assertFalse($this->CURL->hasSsl());
+		}
+	}
+	*/
 
-    function testBase64BzEncode()
-    {
-        $bzString = $this->Crypto->base64_bzencode($this->testCompressString);
-        $this->assertTrue($bzString == $this->bzBase);
-    }
+	function testBase64GzEncodeLevel0() {
+		$gzString = $this->Crypto->base64_gzencode( $this->testCompressString, 0 );
+		$this->assertTrue( $gzString == $this->gz0Base );
+	}
 
-    function testBase64BzDecode()
-    {
-        $bzString = $this->Crypto->base64_bzdecode($this->bzBase);
-        $this->assertTrue($bzString == $this->testCompressString);
-    }
+	function testBase64GzEncodeLevel9() {
+		$myString = "Testing my string";
+		$gzString = $this->Crypto->base64_gzencode( $myString, 9 );
+		$this->assertTrue( $gzString == $this->gz9Base );
+	}
 
-    function testBestCompression()
-    {
-        $compressedString = $this->Crypto->base64_compress($this->testLongCompressString);
-        $uncompressedString = $this->Crypto->base64_decompress($compressedString);
-        $uncompressedStringCompressionType = $this->Crypto->base64_decompress($compressedString, true);
-        // In this case the compression type has really nothing to do with the test. We just know that gz9 is the best type for our chosen data string.
-        $this->assertTrue($uncompressedString == $this->testLongCompressString && $uncompressedStringCompressionType == "gz9");
-    }
+	function testBase64GzDecodeLevel0() {
+		$gzString = $this->Crypto->base64_gzdecode( $this->gz0Base );
+		$this->assertTrue( $gzString == $this->testCompressString );
+	}
 
-    /**
-     * Runs a simple test to see if there is a container as it should
-     */
-    function testSimpleGet()
-    {
-        $this->pemDefault();
-        $container = $this->simpleGet();
-        $this->assertTrue($this->hasBody($container));
-    }
+	function testBase64GzDecodeLevel9() {
+		$gzString = $this->Crypto->base64_gzdecode( $this->gz9Base );
+		$this->assertTrue( $gzString == $this->testCompressString );
+	}
 
-    /**
-     * Fetch a response and immediately pick up the parsed response, from the internally stored last response
-     */
-    function testGetParsedSelf()
-    {
-        $this->pemDefault();
-        $this->urlGet("ssl&bool&o=json&method=get");
-        $ParsedResponse = $this->CURL->getParsedResponse();
-        $this->assertTrue(is_object($ParsedResponse));
-    }
+	function testBase64BzEncode() {
+		$bzString = $this->Crypto->base64_bzencode( $this->testCompressString );
+		$this->assertTrue( $bzString == $this->bzBase );
+	}
 
-    /**
-     * Make a direct call to the curl library
-     */
-    function testQuickInitParsed()
-    {
-        $TempCurl = new Tornevall_cURL("https://identifier.tornevall.net/?json");
-        $this->assertTrue(is_object($TempCurl->getParsedResponse()));
-    }
+	function testBase64BzDecode() {
+		$bzString = $this->Crypto->base64_bzdecode( $this->bzBase );
+		$this->assertTrue( $bzString == $this->testCompressString );
+	}
 
-    /**
-     * Make a direct call to the curl library and get the response code
-     */
-    function testQuickInitResponseCode()
-    {
-        $TempCurl = new Tornevall_cURL("https://identifier.tornevall.net/?json");
-        $this->assertTrue($TempCurl->getResponseCode() == 200);
-    }
+	function testBestCompression() {
+		$compressedString                  = $this->Crypto->base64_compress( $this->testLongCompressString );
+		$uncompressedString                = $this->Crypto->base64_decompress( $compressedString );
+		$uncompressedStringCompressionType = $this->Crypto->base64_decompress( $compressedString, true );
+		// In this case the compression type has really nothing to do with the test. We just know that gz9 is the best type for our chosen data string.
+		$this->assertTrue( $uncompressedString == $this->testLongCompressString && $uncompressedStringCompressionType == "gz9" );
+	}
 
-    /**
-     * Make a direct call to the curl library and get the content of the body
-     */
-    function testQuickInitResponseBody()
-    {
-        $TempCurl = new Tornevall_cURL("https://identifier.tornevall.net/?json");
-        // Some content must exists in the body
-        $this->assertTrue(strlen($TempCurl->getResponseBody()) >= 10);
-    }
+	/**
+	 * Runs a simple test to see if there is a container as it should
+	 */
+	function testSimpleGet() {
+		$this->pemDefault();
+		$container = $this->simpleGet();
+		$this->assertTrue( $this->hasBody( $container ) );
+	}
 
-    /**
-     * Fetch a response and immediately pick up the parsed response, from own content
-     */
-    function testGetParsedFromResponse()
-    {
-        $this->pemDefault();
-        $container = $this->urlGet("ssl&bool&o=json&method=get");
-        $ParsedResponse = $this->CURL->getParsedResponse($container);
-        $this->assertTrue(is_object($ParsedResponse));
-    }
+	/**
+	 * Fetch a response and immediately pick up the parsed response, from the internally stored last response
+	 */
+	function testGetParsedSelf() {
+		$this->pemDefault();
+		$this->urlGet( "ssl&bool&o=json&method=get" );
+		$ParsedResponse = $this->CURL->getParsedResponse();
+		$this->assertTrue( is_object( $ParsedResponse ) );
+	}
 
-    /**
-     * Request a specific value from a parsed response
-     */
-    function testGetParsedValue()
-    {
-        $this->pemDefault();
-        $this->urlGet("ssl&bool&o=json&method=get");
-        $this->CURL->getParsedResponse();
-        $ValueFrom = $this->CURL->getParsedValue('methods');
-        $this->assertTrue(is_object($ValueFrom->_REQUEST));
-    }
+	/**
+	 * Make a direct call to the curl library
+	 */
+	function testQuickInitParsed() {
+		$TempCurl = new Tornevall_cURL( "https://identifier.tornevall.net/?json" );
+		$this->assertTrue( is_object( $TempCurl->getParsedResponse() ) );
+	}
 
-    /**
-     * Request a nested value from a parsed response
-     */
-    function testGetParsedSubValue()
-    {
-        $this->pemDefault();
-        $this->urlGet("ssl&bool&o=json&method=get");
-        $ValueFrom = $this->CURL->getParsedValue(array('nesting', 'subarr4', 'child4'));
-        $this->assertTrue(count($ValueFrom) === 3);
-    }
+	/**
+	 * Make a direct call to the curl library and get the response code
+	 */
+	function testQuickInitResponseCode() {
+		$TempCurl = new Tornevall_cURL( "https://identifier.tornevall.net/?json" );
+		$this->assertTrue( $TempCurl->getResponseCode() == 200 );
+	}
 
-    /**
-     * Request a value by sending wrong value into the parser (crash test)
-     */
-    function testGetParsedSubValueNoArray()
-    {
-        $this->pemDefault();
-        $this->urlGet("ssl&bool&o=json&method=get");
-        $ValueFrom = $this->CURL->getParsedValue(new \stdClass());
-        $this->assertTrue(empty($ValueFrom));
-    }
+	/**
+	 * Make a direct call to the curl library and get the content of the body
+	 */
+	function testQuickInitResponseBody() {
+		$TempCurl = new Tornevall_cURL( "https://identifier.tornevall.net/?json" );
+		// Some content must exists in the body
+		$this->assertTrue( strlen( $TempCurl->getResponseBody() ) >= 10 );
+	}
 
-    /**
-     * Request a value that does not exist in a parsed response (Receive an exception)
-     */
-    function testGetParsedSubValueFail()
-    {
-        $this->pemDefault();
-        $this->urlGet("ssl&bool&o=json&method=get");
-        $ExpectFailure = false;
-        try {
-            $this->CURL->getParsedValue(array('nesting', 'subarrfail'));
-        } catch (\Exception $parseException) {
-            $ExpectFailure = true;
-        }
-        $this->assertTrue($ExpectFailure);
-    }
+	/**
+	 * Fetch a response and immediately pick up the parsed response, from own content
+	 */
+	function testGetParsedFromResponse() {
+		$this->pemDefault();
+		$container      = $this->urlGet( "ssl&bool&o=json&method=get" );
+		$ParsedResponse = $this->CURL->getParsedResponse( $container );
+		$this->assertTrue( is_object( $ParsedResponse ) );
+	}
 
-    /**
-     * Test if a web request has a valid body
-     */
-    function testValidBody()
-    {
-        $this->pemDefault();
-        $container = $this->simpleGet();
-        $testBody = $this->getBody($container);
-        $this->assertTrue(!empty($testBody));
-    }
+	/**
+	 * Request a specific value from a parsed response
+	 */
+	function testGetParsedValue() {
+		$this->pemDefault();
+		$this->urlGet( "ssl&bool&o=json&method=get" );
+		$this->CURL->getParsedResponse();
+		$ValueFrom = $this->CURL->getParsedValue( 'methods' );
+		$this->assertTrue( is_object( $ValueFrom->_REQUEST ) );
+	}
 
-    /**
-     * Receive a standard 200 code
-     */
-    function testSimple200()
-    {
-        $this->pemDefault();
-        $simpleContent = $this->simpleGet();
-        $this->assertTrue(is_array($simpleContent) && isset($simpleContent['code']) && $simpleContent['code'] == 200);
-    }
+	/**
+	 * Request a nested value from a parsed response
+	 */
+	function testGetParsedSubValue() {
+		$this->pemDefault();
+		$this->urlGet( "ssl&bool&o=json&method=get" );
+		$ValueFrom = $this->CURL->getParsedValue( array( 'nesting', 'subarr4', 'child4' ) );
+		$this->assertTrue( count( $ValueFrom ) === 3 );
+	}
 
-    /**
-     * Test SSL based web request
-     */
-    function testSslUrl()
-    {
-        $this->pemDefault();
-        $container = $this->urlGet("ssl&bool", "https");
-	    $testBody = $this->getBody($container);
-        $this->assertTrue($this->getBody($container) && !empty($testBody));
-    }
+	/**
+	 * Request a value by sending wrong value into the parser (crash test)
+	 */
+	function testGetParsedSubValueNoArray() {
+		$this->pemDefault();
+		$this->urlGet( "ssl&bool&o=json&method=get" );
+		$ValueFrom = $this->CURL->getParsedValue( new \stdClass() );
+		$this->assertTrue( empty( $ValueFrom ) );
+	}
 
-    /**
-     * Test parsed json response
-     */
-    function testGetJson()
-    {
-        $this->pemDefault();
-        $container = $this->urlGet("ssl&bool&o=json&method=get");
-        $this->assertTrue(is_object($container['parsed']->methods->_GET));
-    }
+	/**
+	 * Request a value that does not exist in a parsed response (Receive an exception)
+	 */
+	function testGetParsedSubValueFail() {
+		$this->pemDefault();
+		$this->urlGet( "ssl&bool&o=json&method=get" );
+		$ExpectFailure = false;
+		try {
+			$this->CURL->getParsedValue( array( 'nesting', 'subarrfail' ) );
+		} catch ( \Exception $parseException ) {
+			$ExpectFailure = true;
+		}
+		$this->assertTrue( $ExpectFailure );
+	}
 
-    /**
-     * Check if we can parse a serialized response
-     */
-    function testGetSerialize()
-    {
-        $this->pemDefault();
-        $container = $this->urlGet("ssl&bool&o=serialize&method=get");
-        $this->assertTrue(is_array($container['parsed']['methods']['_GET']));
-    }
+	/**
+	 * Test if a web request has a valid body
+	 */
+	function testValidBody() {
+		$this->pemDefault();
+		$container = $this->simpleGet();
+		$testBody  = $this->getBody( $container );
+		$this->assertTrue( ! empty( $testBody ) );
+	}
 
-    /**
-     * Test if XML/Serializer are parsed correctly
-     */
-    function testGetXmlSerializer()
-    {
-        $this->pemDefault();
-        // XML_Serializer
-        $container = $this->getParsed($this->urlGet("ssl&bool&o=xml&method=get"));
-        $this->assertTrue(isset($container->using) && is_object($container->using) && $container->using['0'] == "XML/Serializer");
-    }
+	/**
+	 * Receive a standard 200 code
+	 */
+	function testSimple200() {
+		$this->pemDefault();
+		$simpleContent = $this->simpleGet();
+		$this->assertTrue( is_array( $simpleContent ) && isset( $simpleContent['code'] ) && $simpleContent['code'] == 200 );
+	}
 
-    /**
-     * Test if SimpleXml are parsed correctly
-     */
-    function testGetSimpleXml()
-    {
-        $this->pemDefault();
-        // SimpleXMLElement
-        $container = $this->getParsed($this->urlGet("ssl&bool&o=xml&method=get&using=SimpleXMLElement"));
-        $this->assertTrue(isset($container->using) && is_object($container->using) && $container->using == "SimpleXMLElement");
-    }
+	/**
+	 * Test SSL based web request
+	 */
+	function testSslUrl() {
+		$this->pemDefault();
+		$container = $this->urlGet( "ssl&bool", "https" );
+		$testBody  = $this->getBody( $container );
+		$this->assertTrue( $this->getBody( $container ) && ! empty( $testBody ) );
+	}
 
-    /**
-     * Test if a html response are converted to a proper array
-     */
-    function testGetSimpleDom()
-    {
-        $this->pemDefault();
-        $this->CURL->setParseHtml(true);
-        try {
-            $container = $this->getParsed($this->urlGet("ssl&bool&o=xml&method=get&using=SimpleXMLElement", null, "simple.html"));
-        } catch (\Exception $e) {
+	/**
+	 * Test parsed json response
+	 */
+	function testGetJson() {
+		$this->pemDefault();
+		$container = $this->urlGet( "ssl&bool&o=json&method=get" );
+		$this->assertTrue( is_object( $container['parsed']->methods->_GET ) );
+	}
 
-        }
-        // ByNodes, ByClosestTag, ById
-        $this->assertTrue(isset($container['ById']) && count($container['ById']) > 0);
-    }
+	/**
+	 * Check if we can parse a serialized response
+	 */
+	function testGetSerialize() {
+		$this->pemDefault();
+		$container = $this->urlGet( "ssl&bool&o=serialize&method=get" );
+		$this->assertTrue( is_array( $container['parsed']['methods']['_GET'] ) );
+	}
 
-    function testGetArpaLocalhost4()
-    {
-        $this->assertTrue($this->NET->getArpaFromIpv4("127.0.0.1") === "1.0.0.127");
-    }
+	/**
+	 * Test if XML/Serializer are parsed correctly
+	 */
+	function testGetXmlSerializer() {
+		$this->pemDefault();
+		// XML_Serializer
+		$container = $this->getParsed( $this->urlGet( "ssl&bool&o=xml&method=get" ) );
+		$this->assertTrue( isset( $container->using ) && is_object( $container->using ) && $container->using['0'] == "XML/Serializer" );
+	}
 
-    function testGetArpaLocalhost6()
-    {
-        $this->assertTrue($this->NET->getArpaFromIpv6("::1") === "1.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0");
-    }
+	/**
+	 * Test if SimpleXml are parsed correctly
+	 */
+	function testGetSimpleXml() {
+		$this->pemDefault();
+		// SimpleXMLElement
+		$container = $this->getParsed( $this->urlGet( "ssl&bool&o=xml&method=get&using=SimpleXMLElement" ) );
+		$this->assertTrue( isset( $container->using ) && is_object( $container->using ) && $container->using == "SimpleXMLElement" );
+	}
 
-    function testGetArpaLocalhost4Second()
-    {
-        $this->assertTrue($this->NET->getArpaFromIpv4("192.168.12.36") === "36.12.168.192");
-    }
+	/**
+	 * Test if a html response are converted to a proper array
+	 */
+	function testGetSimpleDom() {
+		$this->pemDefault();
+		$this->CURL->setParseHtml( true );
+		try {
+			$container = $this->getParsed( $this->urlGet( "ssl&bool&o=xml&method=get&using=SimpleXMLElement", null, "simple.html" ) );
+		} catch ( \Exception $e ) {
 
-    function testGetArpaLocalhost6Second()
-    {
-        $this->assertTrue($this->NET->getArpaFromIpv6("2a01:299:a0:ff:10:128:255:2") === "2.0.0.0.5.5.2.0.8.2.1.0.0.1.0.0.f.f.0.0.0.a.0.0.9.9.2.0.1.0.a.2");
-    }
+		}
+		// ByNodes, ByClosestTag, ById
+		$this->assertTrue( isset( $container['ById'] ) && count( $container['ById'] ) > 0 );
+	}
 
-    function testGetArpaLocalhost4Nulled()
-    {
-        $this->assertEmpty($this->NET->getArpaFromIpv4(null));
-    }
+	function testGetArpaLocalhost4() {
+		$this->assertTrue( $this->NET->getArpaFromIpv4( "127.0.0.1" ) === "1.0.0.127" );
+	}
 
-    function testGetArpaLocalhost6Nulled()
-    {
-        $this->assertEmpty($this->NET->getArpaFromIpv6(null));
-    }
+	function testGetArpaLocalhost6() {
+		$this->assertTrue( $this->NET->getArpaFromIpv6( "::1" ) === "1.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0" );
+	}
 
-    function testGetArpaLocalhost4String()
-    {
-        $this->assertEmpty($this->NET->getArpaFromIpv4("fail here"));
-    }
+	function testGetArpaLocalhost4Second() {
+		$this->assertTrue( $this->NET->getArpaFromIpv4( "192.168.12.36" ) === "36.12.168.192" );
+	}
 
-    function testGetArpaLocalhost6String()
-    {
-        $this->assertEmpty($this->NET->getArpaFromIpv6("fail here"));
-    }
+	function testGetArpaLocalhost6Second() {
+		$this->assertTrue( $this->NET->getArpaFromIpv6( "2a01:299:a0:ff:10:128:255:2" ) === "2.0.0.0.5.5.2.0.8.2.1.0.0.1.0.0.f.f.0.0.0.a.0.0.9.9.2.0.1.0.a.2" );
+	}
 
-    function testGetArpaLocalhost6CorruptString1()
-    {
-        $this->assertEmpty($this->NET->getArpaFromIpv6("a : b \\"));
-    }
+	function testGetArpaLocalhost4Nulled() {
+		$this->assertEmpty( $this->NET->getArpaFromIpv4( null ) );
+	}
 
-    function testGetArpaLocalhost6CorruptString2()
-    {
-        $badString = "";
-        for ($i = 0; $i < 255; $i++) {
-            $badString .= chr($i);
-        }
-        $this->assertEmpty($this->NET->getArpaFromIpv6($badString));
-    }
+	function testGetArpaLocalhost6Nulled() {
+		$this->assertEmpty( $this->NET->getArpaFromIpv6( null ) );
+	}
 
-    function testOctetV6()
-    {
-        $this->assertTrue($this->NET->getIpv6FromOctets("2.0.0.0.5.5.2.0.8.2.1.0.0.1.0.0.f.f.0.0.0.a.0.0.9.9.2.0.1.0.a.2") === "2a01:299:a0:ff:10:128:255:2");
-    }
+	function testGetArpaLocalhost4String() {
+		$this->assertEmpty( $this->NET->getArpaFromIpv4( "fail here" ) );
+	}
 
-    function testGetArpaAuto4()
-    {
-        $this->assertTrue($this->NET->getArpaFromAddr("172.16.12.3") === "3.12.16.172");
-    }
+	function testGetArpaLocalhost6String() {
+		$this->assertEmpty( $this->NET->getArpaFromIpv6( "fail here" ) );
+	}
 
-    function testGetArpaAuto6()
-    {
-        $this->assertTrue($this->NET->getArpaFromAddr("2a00:1450:400f:802::200e") === "e.0.0.2.0.0.0.0.0.0.0.0.0.0.0.0.2.0.8.0.f.0.0.4.0.5.4.1.0.0.a.2");
-    }
+	function testGetArpaLocalhost6CorruptString1() {
+		$this->assertEmpty( $this->NET->getArpaFromIpv6( "a : b \\" ) );
+	}
 
-    function testGetIpType4()
-    {
-        $this->assertTrue($this->NET->getArpaFromAddr("172.22.1.83", true) === 4);
-    }
+	function testGetArpaLocalhost6CorruptString2() {
+		$badString = "";
+		for ( $i = 0; $i < 255; $i ++ ) {
+			$badString .= chr( $i );
+		}
+		$this->assertEmpty( $this->NET->getArpaFromIpv6( $badString ) );
+	}
 
-    function testGetIpType6()
-    {
-        $this->assertTrue($this->NET->getArpaFromAddr("2a03:2880:f113:83:face:b00c:0:25de", true) === 6);
-    }
+	function testOctetV6() {
+		$this->assertTrue( $this->NET->getIpv6FromOctets( "2.0.0.0.5.5.2.0.8.2.1.0.0.1.0.0.f.f.0.0.0.a.0.0.9.9.2.0.1.0.a.2" ) === "2a01:299:a0:ff:10:128:255:2" );
+	}
 
-    function testGetIpTypeFail()
-    {
-        $this->assertTrue($this->NET->getArpaFromAddr("This.Aint.An.Address", true) === TorneLIB_Network_IP::IPTYPE_NONE);
-    }
+	function testGetArpaAuto4() {
+		$this->assertTrue( $this->NET->getArpaFromAddr( "172.16.12.3" ) === "3.12.16.172" );
+	}
 
-    /***************
-     *  SSL TESTS  *
-     **************/
+	function testGetArpaAuto6() {
+		$this->assertTrue( $this->NET->getArpaFromAddr( "2a00:1450:400f:802::200e" ) === "e.0.0.2.0.0.0.0.0.0.0.0.0.0.0.0.2.0.8.0.f.0.0.4.0.5.4.1.0.0.a.2" );
+	}
 
-    /**
-     * Test: SSL Certificates at custom location
-     * Expected Result: Successful lookup with verified peer
-     */
-    function testSslCertLocation()
-    {
-        $this->CURL->_DEBUG_TCURL_UNSET_LOCAL_PEM_LOCATION = true;
-        $successfulVerification = false;
-        try {
-            $this->CURL->sslPemLocations = array(__DIR__ . "/ca-certificates.crt");
-            $container = $this->getParsed($this->urlGet("ssl&bool&o=json", "https"));
-            $successfulVerification = true;
-        } catch (\Exception $e) {
-        }
-        $this->assertTrue($successfulVerification);
-    }
+	function testGetIpType4() {
+		$this->assertTrue( $this->NET->getArpaFromAddr( "172.22.1.83", true ) === 4 );
+	}
 
-    /**
-     * Test: SSL Certificates at default location
-     * Expected Result: Successful lookup with verified peer
-     */
-    function testSslDefaultCertLocation()
-    {
-        $this->pemDefault();
+	function testGetIpType6() {
+		$this->assertTrue( $this->NET->getArpaFromAddr( "2a03:2880:f113:83:face:b00c:0:25de", true ) === 6 );
+	}
 
-        $successfulVerification = false;
-        try {
-            $container = $this->getParsed($this->urlGet("ssl&bool&o=json", "https"));
-            $successfulVerification = true;
-        } catch (\Exception $e) {
-        }
-        $this->assertTrue($successfulVerification);
-    }
+	function testGetIpTypeFail() {
+		$this->assertTrue( $this->NET->getArpaFromAddr( "This.Aint.An.Address", true ) === TorneLIB_Network_IP::IPTYPE_NONE );
+	}
 
-    /**
-     * Test: SSL Certificates are missing and certificate location is mismatching
-     * Expected Result: Failing the url call
-     */
-    function testFailingSsl()
-    {
-        $this->CURL->_DEBUG_TCURL_UNSET_LOCAL_PEM_LOCATION = true;
-        $successfulVerification = true;
-        try {
-            $this->CURL->setSslVerify(false);
-            $this->CURL->setSslUnverified(true);
-            $container = $this->getParsed($this->urlGet("ssl&bool&o=json", "https"));
-        } catch (\Exception $e) {
-            $successfulVerification = false;
-        }
-        $this->assertFalse($successfulVerification);
-    }
+	/***************
+	 *  SSL TESTS  *
+	 **************/
 
-    /**
-     * Test: SSL Certificates are missing and peer verification is disabled
-     * Expected Result: Successful lookup with unverified peer
-     */
-    function testUnverifiedSsl()
-    {
-        $this->CURL->_DEBUG_TCURL_UNSET_LOCAL_PEM_LOCATION = true;
-        $successfulVerification = false;
-        $this->CURL->sslPemLocations = array("non-existent-file");
-        try {
-            $this->CURL->setSslUnverified(true);
-            $container = $this->getParsed($this->urlGet("ssl&bool&o=json", "https"));
-            $successfulVerification = true;
-        } catch (\Exception $e) {
-        }
-        $this->assertTrue($successfulVerification);
-    }
+	/**
+	 * Test: SSL Certificates at custom location
+	 * Expected Result: Successful lookup with verified peer
+	 */
+	function testSslCertLocation() {
+		$this->CURL->_DEBUG_TCURL_UNSET_LOCAL_PEM_LOCATION = true;
+		$successfulVerification                            = false;
+		try {
+			$this->CURL->sslPemLocations = array( __DIR__ . "/ca-certificates.crt" );
+			$container                   = $this->getParsed( $this->urlGet( "ssl&bool&o=json", "https" ) );
+			$successfulVerification      = true;
+		} catch ( \Exception $e ) {
+		}
+		$this->assertTrue( $successfulVerification );
+	}
 
-    private function getIpListByIpRoute()
-    {
-        // Don't fetch 127.0.0.1
-        exec("ip addr|grep \"inet \"|sed 's/\// /'|awk '{print $2}'|grep -v ^127", $returnedExecResponse);
-        return $returnedExecResponse;
-    }
+	/**
+	 * Test: SSL Certificates at default location
+	 * Expected Result: Successful lookup with verified peer
+	 */
+	function testSslDefaultCertLocation() {
+		$this->pemDefault();
 
-    /**
-     * Test the customized ip address
-     */
-    function testCustomIpAddrSimple()
-    {
-        $this->pemDefault();
-        $returnedExecResponse = $this->getIpListByIpRoute();
-        // Probably a bad shortcut for some systems, but it works for us in tests
-        if (!empty($returnedExecResponse) && is_array($returnedExecResponse)) {
-            $NETWORK = new TorneLIB_Network();
-            $ipArray = array();
-            foreach ($returnedExecResponse as $ip) {
-            	// Making sure this test is running safely with non locals only
-                if (!in_array($ip, $ipArray) && $NETWORK->getArpaFromAddr($ip, true) > 0 && !preg_match("/^10\./", $ip) && !preg_match("/^172\./", $ip) && !preg_match("/^192\./", $ip)) {
-                    $ipArray[] = $ip;
-                }
-            }
-            $this->CURL->IpAddr = $ipArray;
-            $CurlJson = $this->CURL->doGet($this->Urls['simplejson']);
-            $this->assertNotEmpty($CurlJson['parsed']->ip);
-        }
-    }
+		$successfulVerification = false;
+		try {
+			$container              = $this->getParsed( $this->urlGet( "ssl&bool&o=json", "https" ) );
+			$successfulVerification = true;
+		} catch ( \Exception $e ) {
+		}
+		$this->assertTrue( $successfulVerification );
+	}
 
-    /**
-     * Test custom ip address setup (if more than one ip is set on the interface)
-     */
-    function testCustomIpAddrAllString()
-    {
-        $this->pemDefault();
-        $ipArray = array();
-        $responses = array();
-        $returnedExecResponse = $this->getIpListByIpRoute();
-        if (!empty($returnedExecResponse) && is_array($returnedExecResponse)) {
-            $NETWORK = new TorneLIB_Network();
-            foreach ($returnedExecResponse as $ip) {
-	            // Making sure this test is running safely with non locals only
-	            if (!in_array($ip, $ipArray) && $NETWORK->getArpaFromAddr($ip, true) > 0 && !preg_match("/^10\./", $ip) && !preg_match("/^172\./", $ip) && !preg_match("/^192\./", $ip)) {
-		            $ipArray[] = $ip;
-	            }
-            }
-            if (is_array($ipArray) && count($ipArray) > 1) {
-                foreach ($ipArray as $ip) {
-                    $this->CURL->IpAddr = $ip;
-                    try {
-                        $CurlJson = $this->CURL->doGet($this->Urls['simplejson']);
-                    } catch (\Exception $e) {
+	/**
+	 * Test: SSL Certificates are missing and certificate location is mismatching
+	 * Expected Result: Failing the url call
+	 */
+	function testFailingSsl() {
+		$this->CURL->_DEBUG_TCURL_UNSET_LOCAL_PEM_LOCATION = true;
+		$successfulVerification                            = true;
+		try {
+			$this->CURL->setSslVerify( false );
+			$this->CURL->setSslUnverified( true );
+			$container = $this->getParsed( $this->urlGet( "ssl&bool&o=json", "https" ) );
+		} catch ( \Exception $e ) {
+			$successfulVerification = false;
+		}
+		$this->assertFalse( $successfulVerification );
+	}
 
-                    }
-                    if (isset($CurlJson['parsed']->ip) && $this->NET->getArpaFromAddr($CurlJson['parsed']->ip, true) > 0) {
-                        $responses[$ip] = $CurlJson['parsed']->ip;
-                    }
-                }
-            } else {
-                $this->markTestSkipped("ip address array is too short to be tested (" . print_R($ipArray, true) . ")");
-            }
-        }
-        $this->assertTrue(count($responses) === count($ipArray));
-    }
+	/**
+	 * Test: SSL Certificates are missing and peer verification is disabled
+	 * Expected Result: Successful lookup with unverified peer
+	 */
+	function testUnverifiedSsl() {
+		$this->CURL->_DEBUG_TCURL_UNSET_LOCAL_PEM_LOCATION = true;
+		$successfulVerification                            = false;
+		$this->CURL->sslPemLocations                       = array( "non-existent-file" );
+		try {
+			$this->CURL->setSslUnverified( true );
+			$container              = $this->getParsed( $this->urlGet( "ssl&bool&o=json", "https" ) );
+			$successfulVerification = true;
+		} catch ( \Exception $e ) {
+		}
+		$this->assertTrue( $successfulVerification );
+	}
 
-    /**
-     * Test proxy by using Tor Network (Requires Tor)
-     * @link https://www.torproject.org/ Required application
-     */
-    function testTorNetwork()
-    {
-        $this->pemDefault();
-        exec("service tor status", $ubuntuService);
-        $serviceFound = false;
-        foreach ($ubuntuService as $row) {
-            // Unsafe control
-            if (preg_match("/loaded: loaded/i", $row)) {
-                $serviceFound = true;
-            }
-        }
-        if (!$serviceFound) {
-            $this->markTestSkipped("Skip TOR Network tests: TOR Service not found in the current control");
-        } else {
-            $this->CURL->setProxy($this->TorSetupAddress, $this->TorSetupType);
-            $CurlJson = $this->CURL->doGet($this->Urls['simplejson']);
-            $parsedIp = $this->NET->getArpaFromAddr($CurlJson['parsed']->ip, true);
-            $this->assertTrue($parsedIp > 0);
-        }
-    }
+	private function getIpListByIpRoute() {
+		// Don't fetch 127.0.0.1
+		exec( "ip addr|grep \"inet \"|sed 's/\// /'|awk '{print $2}'|grep -v ^127", $returnedExecResponse );
+
+		return $returnedExecResponse;
+	}
+
+	/**
+	 * Test the customized ip address
+	 */
+	function testCustomIpAddrSimple() {
+		$this->pemDefault();
+		$returnedExecResponse = $this->getIpListByIpRoute();
+		// Probably a bad shortcut for some systems, but it works for us in tests
+		if ( ! empty( $returnedExecResponse ) && is_array( $returnedExecResponse ) ) {
+			$NETWORK = new TorneLIB_Network();
+			$ipArray = array();
+			foreach ( $returnedExecResponse as $ip ) {
+				// Making sure this test is running safely with non locals only
+				if ( ! in_array( $ip, $ipArray ) && $NETWORK->getArpaFromAddr( $ip, true ) > 0 && ! preg_match( "/^10\./", $ip ) && ! preg_match( "/^172\./", $ip ) && ! preg_match( "/^192\./", $ip ) ) {
+					$ipArray[] = $ip;
+				}
+			}
+			$this->CURL->IpAddr = $ipArray;
+			$CurlJson           = $this->CURL->doGet( $this->Urls['simplejson'] );
+			$this->assertNotEmpty( $CurlJson['parsed']->ip );
+		}
+	}
+
+	/**
+	 * Test custom ip address setup (if more than one ip is set on the interface)
+	 */
+	function testCustomIpAddrAllString() {
+		$this->pemDefault();
+		$ipArray              = array();
+		$responses            = array();
+		$returnedExecResponse = $this->getIpListByIpRoute();
+		if ( ! empty( $returnedExecResponse ) && is_array( $returnedExecResponse ) ) {
+			$NETWORK = new TorneLIB_Network();
+			foreach ( $returnedExecResponse as $ip ) {
+				// Making sure this test is running safely with non locals only
+				if ( ! in_array( $ip, $ipArray ) && $NETWORK->getArpaFromAddr( $ip, true ) > 0 && ! preg_match( "/^10\./", $ip ) && ! preg_match( "/^172\./", $ip ) && ! preg_match( "/^192\./", $ip ) ) {
+					$ipArray[] = $ip;
+				}
+			}
+			if ( is_array( $ipArray ) && count( $ipArray ) > 1 ) {
+				foreach ( $ipArray as $ip ) {
+					$this->CURL->IpAddr = $ip;
+					try {
+						$CurlJson = $this->CURL->doGet( $this->Urls['simplejson'] );
+					} catch ( \Exception $e ) {
+
+					}
+					if ( isset( $CurlJson['parsed']->ip ) && $this->NET->getArpaFromAddr( $CurlJson['parsed']->ip, true ) > 0 ) {
+						$responses[ $ip ] = $CurlJson['parsed']->ip;
+					}
+				}
+			} else {
+				$this->markTestSkipped( "ip address array is too short to be tested (" . print_R( $ipArray, true ) . ")" );
+			}
+		}
+		$this->assertTrue( count( $responses ) === count( $ipArray ) );
+	}
+
+	/**
+	 * Test proxy by using Tor Network (Requires Tor)
+	 * @link https://www.torproject.org/ Required application
+	 */
+	function testTorNetwork() {
+		$this->pemDefault();
+		exec( "service tor status", $ubuntuService );
+		$serviceFound = false;
+		foreach ( $ubuntuService as $row ) {
+			// Unsafe control
+			if ( preg_match( "/loaded: loaded/i", $row ) ) {
+				$serviceFound = true;
+			}
+		}
+		if ( ! $serviceFound ) {
+			$this->markTestSkipped( "Skip TOR Network tests: TOR Service not found in the current control" );
+		} else {
+			$this->CURL->setProxy( $this->TorSetupAddress, $this->TorSetupType );
+			$CurlJson = $this->CURL->doGet( $this->Urls['simplejson'] );
+			$parsedIp = $this->NET->getArpaFromAddr( $CurlJson['parsed']->ip, true );
+			$this->assertTrue( $parsedIp > 0 );
+		}
+	}
 
 	/**
 	 * Run in default mode, when follows are enabled
 	 */
-    function testFollowRedirectEnabled() {
-    	$this->pemDefault();
-    	$redirectResponse = $this->CURL->doGet("http://developer.tornevall.net/tests/tornevall_network/redirect.php?run");
-	    $redirectedUrls = $this->CURL->getRedirectedUrls();
-	    $this->assertTrue($redirectResponse['code'] >= 300 && $redirectResponse['code'] <= 350 && preg_match("/rerun/i", $redirectResponse['body']) && count($redirectedUrls));
-    }
+	function testFollowRedirectEnabled() {
+		$this->pemDefault();
+		$redirectResponse = $this->CURL->doGet( "http://developer.tornevall.net/tests/tornevall_network/redirect.php?run" );
+		$redirectedUrls   = $this->CURL->getRedirectedUrls();
+		$this->assertTrue( $redirectResponse['code'] >= 300 && $redirectResponse['code'] <= 350 && preg_match( "/rerun/i", $redirectResponse['body'] ) && count( $redirectedUrls ) );
+	}
 
 	/**
 	 * Run with redirect follows disabled
 	 */
-    function testFollowRedirectDisabled() {
-    	$this->pemDefault();
-    	$this->CURL->setEnforceFollowLocation(false);
-	    $redirectResponse = $this->CURL->doGet("http://developer.tornevall.net/tests/tornevall_network/redirect.php?run");
-	    $redirectedUrls = $this->CURL->getRedirectedUrls();
-	    $this->assertTrue($redirectResponse['code'] >= 300 && $redirectResponse['code'] <= 350 && !preg_match("/rerun/i", $redirectResponse['body']) && count($redirectedUrls));
-    }
+	function testFollowRedirectDisabled() {
+		$this->pemDefault();
+		$this->CURL->setEnforceFollowLocation( false );
+		$redirectResponse = $this->CURL->doGet( "http://developer.tornevall.net/tests/tornevall_network/redirect.php?run" );
+		$redirectedUrls   = $this->CURL->getRedirectedUrls();
+		$this->assertTrue( $redirectResponse['code'] >= 300 && $redirectResponse['code'] <= 350 && ! preg_match( "/rerun/i", $redirectResponse['body'] ) && count( $redirectedUrls ) );
+	}
 
 	/**
 	 * Run in a platform (deprecated) and make sure follows are disabled per default
 	 */
-    function testFollowRedirectSafeMode() {
-    	// http://php.net/manual/en/ini.sect.safe-mode.php
-	    if (version_compare(PHP_VERSION, "5.4.0", ">=")) {
-		    $this->markTestSkipped("Safe mode has been removed from this platform, so tests can not be performed");
-		    return;
-	    }
-	    if ( filter_var( ini_get( 'safe_mode' ), FILTER_VALIDATE_BOOLEAN ) === true ) {
-		    $this->pemDefault();
-		    $redirectResponse = $this->CURL->doGet( "http://developer.tornevall.net/tests/tornevall_network/redirect.php?run" );
-		    $redirectedUrls   = $this->CURL->getRedirectedUrls();
-		    $this->assertTrue( $redirectResponse['code'] >= 300 && $redirectResponse['code'] <= 350 && ! preg_match( "/rerun/i", $redirectResponse['body'] ) && count( $redirectedUrls ) );
-		   return;
-	    }
-	    $this->markTestSkipped("Safe mode is available as an option. It is however not enabled on this platform and can not therefore be tested.");
-    }
+	function testFollowRedirectSafeMode() {
+		// http://php.net/manual/en/ini.sect.safe-mode.php
+		if ( version_compare( PHP_VERSION, "5.4.0", ">=" ) ) {
+			$this->markTestSkipped( "Safe mode has been removed from this platform, so tests can not be performed" );
+
+			return;
+		}
+		if ( filter_var( ini_get( 'safe_mode' ), FILTER_VALIDATE_BOOLEAN ) === true ) {
+			$this->pemDefault();
+			$redirectResponse = $this->CURL->doGet( "http://developer.tornevall.net/tests/tornevall_network/redirect.php?run" );
+			$redirectedUrls   = $this->CURL->getRedirectedUrls();
+			$this->assertTrue( $redirectResponse['code'] >= 300 && $redirectResponse['code'] <= 350 && ! preg_match( "/rerun/i", $redirectResponse['body'] ) && count( $redirectedUrls ) );
+
+			return;
+		}
+		$this->markTestSkipped( "Safe mode is available as an option. It is however not enabled on this platform and can not therefore be tested." );
+	}
 
 	/**
 	 * This function should not end up in death
 	 */
-    function testMemberNull() {
-	    $localCurl       = new Tornevall_cURL();
-	    $username = $this->specUrlUsername;
-	    $password = $this->specUrlPassword;
-	    if (!empty($username)) {
-	    	$this->markTestSkipped("Can not run without credentials");
-	    }
-	    $localCurl->setAuthentication($username, $password, CURL_AUTH_TYPES::AUTHTYPE_BASIC);
-	    $specUrl = "https://omnitest.resurs.com/checkout/payments/null/updatePaymentReference";
-	    try {
-		    $null = $this->CURL->getParsedResponse( $localCurl->doPut( $specUrl, array( 'paymentReference' => null ), CURL_POST_AS::POST_AS_JSON ) );
-	    } catch (\Exception $putUrlResponse) {
-	    }
-	    $this->assertTrue(true);
-    }
+	function testMemberNull() {
+		$localCurl = new Tornevall_cURL();
+		$username  = $this->specUrlUsername;
+		$password  = $this->specUrlPassword;
+		if ( ! empty( $username ) ) {
+			$this->markTestSkipped( "Can not run without credentials" );
+		}
+		$localCurl->setAuthentication( $username, $password, CURL_AUTH_TYPES::AUTHTYPE_BASIC );
+		$specUrl = "https://omnitest.resurs.com/checkout/payments/null/updatePaymentReference";
+		try {
+			$null = $this->CURL->getParsedResponse( $localCurl->doPut( $specUrl, array( 'paymentReference' => null ), CURL_POST_AS::POST_AS_JSON ) );
+		} catch ( \Exception $putUrlResponse ) {
+		}
+		$this->assertTrue( true );
+	}
 
-    // Include but not run.
-    /*
-    function testSoapError() {
-    	$this->markTestSkipped("testSoapError is a special exceptions test. Normally we do not want to run this");
-    	$localCurl = new Tornevall_cURL();
-    	$wsdl = $localCurl->doGet('https://test.resurs.com/ecommerce-test/ws/V4/SimplifiedShopFlowService?wsdl');
-    	try {
-		    $wsdl->getPaymentMethods();
-	    } catch (\Exception $e) {
-    		$previousException = $e->getPrevious();
-    		$this->assertTrue(isset($previousException->faultstring) && !empty($previousException->faultstring));
-	    }
+	// Include but not run.
+	/*
+	function testSoapError() {
+		$this->markTestSkipped("testSoapError is a special exceptions test. Normally we do not want to run this");
+		$localCurl = new Tornevall_cURL();
+		$wsdl = $localCurl->doGet('https://test.resurs.com/ecommerce-test/ws/V4/SimplifiedShopFlowService?wsdl');
+		try {
+			$wsdl->getPaymentMethods();
+		} catch (\Exception $e) {
+			$previousException = $e->getPrevious();
+			$this->assertTrue(isset($previousException->faultstring) && !empty($previousException->faultstring));
+		}
 
-    }
-    */
+	}
+	*/
 
-    function testHostResolveValidationSuccess() {
-    	$localNetwork = new TorneLIB_Network();
-    	$localNetwork->setAlwaysResolveHostvalidation(true);
-    	$urlData = $localNetwork->getUrlDomain("http://www.tornevall.net/");
-    	$this->assertTrue($urlData[0] == "www.tornevall.net");
-    }
-    function testHostResolveValidationFail() {
-    	$localNetwork = new TorneLIB_Network();
-    	$localNetwork->setAlwaysResolveHostvalidation(true);
-    	$urlData = $localNetwork->getUrlDomain("http://failing.domain/");
-    	$this->assertTrue($urlData[0] == "");
-    }
-    function testHostValidationNoResolve() {
-    	$localNetwork = new TorneLIB_Network();
-    	$urlData = $localNetwork->getUrlDomain("http://failing.domain/");
-    	$this->assertTrue($urlData[0] == "failing.domain");
-    }
+	function testHostResolveValidationSuccess() {
+		$localNetwork = new TorneLIB_Network();
+		$localNetwork->setAlwaysResolveHostvalidation( true );
+		$urlData = $localNetwork->getUrlDomain( "http://www.tornevall.net/" );
+		$this->assertTrue( $urlData[0] == "www.tornevall.net" );
+	}
+
+	function testHostResolveValidationFail() {
+		$localNetwork = new TorneLIB_Network();
+		$localNetwork->setAlwaysResolveHostvalidation( true );
+		$urlData = $localNetwork->getUrlDomain( "http://failing.domain/" );
+		$this->assertTrue( $urlData[0] == "" );
+	}
+
+	function testHostValidationNoResolve() {
+		$localNetwork = new TorneLIB_Network();
+		$urlData      = $localNetwork->getUrlDomain( "http://failing.domain/" );
+		$this->assertTrue( $urlData[0] == "failing.domain" );
+	}
 
 	/**
 	 * Test SoapClient by making a standard doGet()
 	 */
-    function testSoapClient() {
-    	$assertThis = true;
-    	try {
-		    $this->CURL->doGet( "http://" . $this->Urls['soap'] );
-	    } catch (\Exception $e) {
-    		$assertThis = false;
-	    }
-	    $this->assertTrue($assertThis);
-    }
+	function testSoapClient() {
+		$assertThis = true;
+		try {
+			$this->CURL->doGet( "http://" . $this->Urls['soap'] );
+		} catch ( \Exception $e ) {
+			$assertThis = false;
+		}
+		$this->assertTrue( $assertThis );
+	}
 
 	/**
 	 * Test Soap by internal controllers
 	 */
-    function testHasSoap() {
-	    $this->assertTrue($this->CURL->hasSoap());
-    }
+	function testHasSoap() {
+		$this->assertTrue( $this->CURL->hasSoap() );
+	}
 
-    function testBitStructure() {
-    	$myBits = array(
-    		'TEST1' => 1,
-    		'TEST2' => 2,
-    		'TEST4' => 4,
-    		'TEST8' => 8,
-	    );
-    	$myBit = new TorneLIB_NetBits($myBits);
-	    $this->assertCount(9, $myBit->getBitStructure());
-    }
+	function testBitStructure() {
+		$myBits = array(
+			'TEST1' => 1,
+			'TEST2' => 2,
+			'TEST4' => 4,
+			'TEST8' => 8,
+		);
+		$myBit  = new TorneLIB_NetBits( $myBits );
+		$this->assertCount( 9, $myBit->getBitStructure() );
+	}
 
 	/**
 	 * Test if one bit is on (1)
 	 */
-    function testBitActive() {
-	    $myBits = array(
-		    'TEST1' => 1,
-		    'TEST2' => 2,
-		    'TEST4' => 4,
-		    'TEST8' => 8,
-	    );
-	    $myBit = new TorneLIB_NetBits($myBits);
-		$this->assertTrue($myBit->isBit(8, 12));
-    }
+	function testBitActive() {
+		$myBits = array(
+			'TEST1' => 1,
+			'TEST2' => 2,
+			'TEST4' => 4,
+			'TEST8' => 8,
+		);
+		$myBit  = new TorneLIB_NetBits( $myBits );
+		$this->assertTrue( $myBit->isBit( 8, 12 ) );
+	}
 
 	/**
 	 * Test if one bit is off (0)
 	 */
-    function testBitNotActive() {
-	    $myBits = array(
-		    'TEST1' => 1,
-		    'TEST2' => 2,
-		    'TEST4' => 4,
-		    'TEST8' => 8,
-	    );
-	    $myBit = new TorneLIB_NetBits($myBits);
-		$this->assertFalse($myBit->isBit(64, 12));
-    }
+	function testBitNotActive() {
+		$myBits = array(
+			'TEST1' => 1,
+			'TEST2' => 2,
+			'TEST4' => 4,
+			'TEST8' => 8,
+		);
+		$myBit  = new TorneLIB_NetBits( $myBits );
+		$this->assertFalse( $myBit->isBit( 64, 12 ) );
+	}
 
 	/**
 	 * Test if multiple bits are active (muliple settings by bit)
@@ -801,17 +752,17 @@ class Tornevall_cURLTest extends TestCase
 			'TEST4' => 4,
 			'TEST8' => 8,
 		);
-		$myBit = new TorneLIB_NetBits($myBits);
-		$this->assertTrue($myBit->isBit((array(8,2)), 14));
+		$myBit  = new TorneLIB_NetBits( $myBits );
+		$this->assertTrue( $myBit->isBit( ( array( 8, 2 ) ), 14 ) );
 	}
 
 	/**
 	 * Test correct returning bits
 	 */
 	function testBitArray() {
-		$myBit = new TorneLIB_NetBits();
-		$bitArray = $myBit->getBitArray("88");      // 8 + 16 + 64
-		$this->assertCount(3, $bitArray);
+		$myBit    = new TorneLIB_NetBits();
+		$bitArray = $myBit->getBitArray( "88" );      // 8 + 16 + 64
+		$this->assertCount( 3, $bitArray );
 	}
 
 	/**
@@ -819,9 +770,9 @@ class Tornevall_cURLTest extends TestCase
 	 */
 	function test16BitArray() {
 		$myBit = new TorneLIB_NetBits();
-		$myBit->setMaxBits(16);
-		$bitArray = $myBit->getBitArray((8+256+4096+8192+32768));
-		$this->assertCount(5, $bitArray);
+		$myBit->setMaxBits( 16 );
+		$bitArray = $myBit->getBitArray( ( 8 + 256 + 4096 + 8192 + 32768 ) );
+		$this->assertCount( 5, $bitArray );
 
 	}
 
@@ -830,8 +781,7 @@ class Tornevall_cURLTest extends TestCase
 	 */
 	function testBitFromNet() {
 		$this->NET = new TorneLIB_Network();
-		$this->NET->BIT->setMaxBits(16);
-		$this->assertCount(5, $this->NET->BIT->getBitArray(8+256+4096+8192+32768));
+		$this->NET->BIT->setMaxBits( 16 );
+		$this->assertCount( 5, $this->NET->BIT->getBitArray( 8 + 256 + 4096 + 8192 + 32768 ) );
 	}
-
 }

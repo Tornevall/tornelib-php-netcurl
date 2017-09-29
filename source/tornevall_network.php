@@ -398,7 +398,7 @@ if ( ! class_exists( 'TorneLIB_Network' ) && ! class_exists( 'TorneLIB\TorneLIB_
 	 * Class Tornevall_cURL
 	 *
 	 * @package TorneLIB
-	 * @version 6.0.4
+	 * @version 6.0.5
 	 * @link https://phpdoc.tornevall.net/TorneLIBv5/source-class-TorneLIB.Tornevall_cURL.html PHPDoc/Staging - Tornevall_cURL
 	 * @link https://docs.tornevall.net/x/KQCy TorneLIB (PHP) Landing documentation
 	 * @link https://bitbucket.tornevall.net/projects/LIB/repos/tornelib-php/browse Sources of TorneLIB
@@ -414,7 +414,7 @@ if ( ! class_exists( 'TorneLIB_Network' ) && ! class_exists( 'TorneLIB\TorneLIB_
 		private $NETWORK;
 
 		/** @var string Internal version that is being used to find out if we are running the latest version of this library */
-		private $TorneCurlVersion = "6.0.4";
+		private $TorneCurlVersion = "6.0.5";
 		private $CurlVersion = null;
 
 		/** @var string Internal release snapshot that is being used to find out if we are running the latest version of this library */
@@ -1333,7 +1333,6 @@ if ( ! class_exists( 'TorneLIB_Network' ) && ! class_exists( 'TorneLIB\TorneLIB_
 			}
 			if ( is_null( $parsedContent ) && ( preg_match( "/xml version/", $content ) || preg_match( "/rss version/", $content ) || preg_match( "/xml/i", $contentType ) ) ) {
 				$trimmedContent = trim( $content ); // PHP 5.3: Can't use function return value in write context
-
 				$overrideXmlSerializer = false;
 				if ( $this->useXmlSerializer ) {
 					$serializerPath = stream_resolve_include_path( 'XML/Unserializer.php' );
@@ -1357,13 +1356,10 @@ if ( ! class_exists( 'TorneLIB_Network' ) && ! class_exists( 'TorneLIB\TorneLIB_
 						return null;
 					}
 				} else {
-					/*
-                 * Returns empty class if the SimpleXMLElement is missing.
-                 */
+					// Returns empty class if the SimpleXMLElement is missing.
 					if ( $overrideXmlSerializer ) {
 						$xmlSerializer = new \XML_Unserializer();
 						$xmlSerializer->unserialize( $content );
-
 						return $xmlSerializer->getUnserializedData();
 					}
 
@@ -2122,6 +2118,7 @@ if ( ! class_exists( 'TorneLIB_Network' ) && ! class_exists( 'TorneLIB\TorneLIB_
 		private $libResponse;
 		private $canThrowSoapFaults = true;
 		private $CustomUserAgent;
+		private $soapFaultExceptionObject;
 
 		public $SoapFaultString = null;
 		public $SoapFaultCode = 0;
@@ -2249,12 +2246,11 @@ if ( ! class_exists( 'TorneLIB_Network' ) && ! class_exists( 'TorneLIB\TorneLIB_
 				$returnResponse['header']  = $parsedHeader['header'];
 				$returnResponse['code']    = isset( $parsedHeader['code'] ) ? $parsedHeader['code'] : 0;
 				$returnResponse['body']    = $this->soapResponse;
-				/*
-             * Collect the response received internally, before throwing
-             */
+				// Collect the response received internally, before throwing
 				$this->libResponse = $returnResponse;
+				$this->soapFaultExceptionObject = $e;
 				if ( $this->canThrowSoapFaults ) {
-					throw new \Exception( $e->getMessage(), $e->getCode() );
+					throw new \Exception( $e->getMessage(), $e->getCode(), $e );
 				}
 				$this->SoapFaultString = $e->getMessage();
 				$this->SoapFaultCode   = $e->getCode();
@@ -2285,9 +2281,31 @@ if ( ! class_exists( 'TorneLIB_Network' ) && ! class_exists( 'TorneLIB\TorneLIB_
 		 * Get the SOAP response independently on exceptions or successes
 		 *
 		 * @return mixed
+		 * @since 5.0.0
+		 * @deprecated 6.0.5 Use getSoapResponse()
 		 */
 		public function getLibResponse() {
 			return $this->libResponse;
+		}
+
+		/**
+		 * Get the SOAP response independently on exceptions or successes
+		 *
+		 * @return mixed
+		 * @since 6.0.5
+		 */
+		public function getSoapResponse() {
+			return $this->libResponse;
+		}
+
+		/**
+		 * Get the last thrown soapfault object
+		 *
+		 * @return mixed
+		 * @since 6.0.5
+		 */
+		public function getSoapFault() {
+			return $this->soapFaultExceptionObject;
 		}
 	}
 

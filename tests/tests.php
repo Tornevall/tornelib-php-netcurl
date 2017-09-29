@@ -773,7 +773,6 @@ class Tornevall_cURLTest extends TestCase {
 		$myBit->setMaxBits( 16 );
 		$bitArray = $myBit->getBitArray( ( 8 + 256 + 4096 + 8192 + 32768 ) );
 		$this->assertCount( 5, $bitArray );
-
 	}
 
 	/**
@@ -782,6 +781,18 @@ class Tornevall_cURLTest extends TestCase {
 	function testBitFromNet() {
 		$this->NET = new TorneLIB_Network();
 		$this->NET->BIT->setMaxBits( 16 );
-		$this->assertCount( 5, $this->NET->BIT->getBitArray( 8 + 256 + 4096 + 8192 + 32768 ) );
+		$bitArrList = $this->NET->BIT->getBitArray( 8 + 256 + 4096 + 8192 + 32768 );
+		$this->assertCount( 5, $bitArrList );
+	}
+
+	function testBitModes() {
+		$myBit = array(
+			'DEBIT' => 1,
+			'CREDIT' => 2,
+			'ANNUL' => 4
+		);
+		$bitClass = new TorneLIB_NetBits($myBit);
+		$bitArray = $bitClass->getBitArray(255);
+		$this->assertTrue(in_array('DEBIT', $bitArray) && in_array('CREDIT', $bitArray) && in_array('ANNUL', $bitArray) && in_array('BIT_128', $bitArray));
 	}
 }

@@ -42,9 +42,13 @@ if ( ! class_exists( 'TorneLIB_Network' ) && ! class_exists( 'TorneLIB\TorneLIB_
 		private $cookieDefaultPrefix;
 		private $alwaysResolveHostvalidation = false;
 
+		/** @var TorneLIB_NetBits BitMask handler with 8 bits as default */
+		public $BIT;
+
 		function __construct() {
 			// Initiate and get client headers.
 			$this->renderProxyHeaders();
+			$this->BIT = new TorneLIB_NetBits();
 		}
 
 		/**
@@ -2405,8 +2409,6 @@ if ( ! class_exists( 'TorneLIB_Network' ) && ! class_exists( 'TorneLIB\TorneLIB_
 		const RESPONSETYPE_OBJECT = 1;
 	}
 
-	/** @noinspection PhpUndefinedClassInspection */
-
 	/**
 	 * Class TORNELIB_CURLOBJECT
 	 * @package TorneLIB
@@ -2418,5 +2420,164 @@ if ( ! class_exists( 'TorneLIB_Network' ) && ! class_exists( 'TorneLIB\TorneLIB_
 		public $parsed;
 		public $url;
 		public $ip;
+	}
+
+	/**
+	 * Class TorneLIB_NetBits Netbits Library for calculations with bitmasks
+	 *
+	 * @package TorneLIB
+	 * @version 6.0.0
+	 */
+	class TorneLIB_NetBits {
+		/** @var array Standard bitmask setup */
+		private $BIT_SETUP;
+		private $maxBits = 8;
+
+		function __construct( $bitStructure = array() ) {
+			$this->BIT_SETUP = array(
+				'OFF'     => 0,
+				'BIT_1'   => 1,
+				'BIT_2'   => 2,
+				'BIT_4'   => 4,
+				'BIT_8'   => 8,
+				'BIT_16'  => 16,
+				'BIT_32'  => 32,
+				'BIT_64'  => 64,
+				'BIT_128' => 128
+			);
+			if ( count( $bitStructure ) ) {
+				$this->BIT_SETUP = $this->validateBitStructure( $bitStructure );
+			}
+		}
+
+		public function setMaxBits( $maxBits = 8 ) {
+			$this->maxBits = $maxBits;
+			$this->validateBitStructure( $maxBits );
+		}
+
+		public function getMaxBits() {
+			return $this->maxBits;
+		}
+
+		private function getRequiredBits( $maxBits = 8 ) {
+			$requireArray = array();
+			if ( $this->maxBits != $maxBits ) {
+				$maxBits = $this->maxBits;
+			}
+			for ( $curBit = 0; $curBit <= $maxBits; $curBit ++ ) {
+				$requireArray[] = (int) pow( 2, $curBit );
+			}
+
+			return $requireArray;
+		}
+
+		private function validateBitStructure( $bitStructure = array() ) {
+			if ( is_numeric( $bitStructure ) ) {
+				$newBitStructure = array(
+					'OFF' => 0
+				);
+				for ( $bitIndex = 0; $bitIndex <= $bitStructure; $bitIndex ++ ) {
+					$powIndex                              = pow( 2, $bitIndex );
+					$newBitStructure[ "BIT_" . $powIndex ] = $powIndex;
+				}
+				$bitStructure    = $newBitStructure;
+				$this->BIT_SETUP = $bitStructure;
+			}
+			$require                  = $this->getRequiredBits( count( $bitStructure ) );
+			$validated                = array();
+			$newValidatedBitStructure = array();
+			foreach ( $bitStructure as $key => $value ) {
+				if ( in_array( $value, $require ) ) {
+					$newValidatedBitStructure[ $key ] = $value;
+					$validated[]                      = $value;
+				}
+			}
+			foreach ( $require as $bitIndex ) {
+				if ( ! in_array( $bitIndex, $validated ) ) {
+					if ( $bitIndex == "0" ) {
+						$newValidatedBitStructure["OFF"] = $bitIndex;
+					} else {
+						$newValidatedBitStructure[ "BIT_" . $bitIndex ] = $bitIndex;
+					}
+				}
+			}
+			asort( $newValidatedBitStructure );
+
+			return $newValidatedBitStructure;
+		}
+
+		public function setBitStructure( $bitStructure = array() ) {
+			$this->validateBitStructure( $bitStructure );
+		}
+
+		public function getBitStructure() {
+			return $this->BIT_SETUP;
+		}
+
+		/**
+		 * Finds out if a bitmasked value is located in a bitarray
+		 *
+		 * @param int $requestedExistingBit
+		 * @param int $requestedBitSum
+		 *
+		 * @return bool
+		 */
+		public function isBit( $requestedExistingBit = 0, $requestedBitSum = 0 ) {
+			$return = false;
+			if ( is_array( $requestedExistingBit ) ) {
+				foreach ( $requestedExistingBit as $bitKey ) {
+					if ( ! $this->isBit( $bitKey, $requestedBitSum ) ) {
+						return false;
+					}
+				}
+
+				return true;
+			}
+
+			// Solution that works with unlimited bits
+			for ( $bitCount = 0; $bitCount < count( $this->getBitStructure() ); $bitCount ++ ) {
+				if ( $requestedBitSum & pow( 2, $bitCount ) ) {
+					if ( $requestedExistingBit == pow( 2, $bitCount ) ) {
+						$return = true;
+					}
+				}
+			}
+
+			// Solution that works with bits up to 8
+			/*
+			$sum = 0;
+			preg_match_all("/\d/", sprintf("%08d", decbin( $requestedBitSum)), $bitArray);
+			for ($bitCount = count($bitArray[0]); $bitCount >= 0; $bitCount--) {
+				if (isset($bitArray[0][$bitCount])) {
+					if ( $requestedBitSum & pow(2, $bitCount)) {
+						if ( $requestedExistingBit == pow(2, $bitCount)) {
+							$return = true;
+						}
+					}
+				}
+			}
+			*/
+
+			return $return;
+		}
+
+		/**
+		 * Get active bits in an array
+		 *
+		 * @param int $bitValue
+		 *
+		 * @return array
+		 */
+		public function getBitArray( $bitValue = 0 ) {
+			$returnBitList = array();
+			foreach ( $this->BIT_SETUP as $key => $value ) {
+				if ( $this->isBit( $value, $bitValue ) ) {
+					$returnBitList[] = $key;
+				}
+			}
+
+			return $returnBitList;
+		}
+
 	}
 }

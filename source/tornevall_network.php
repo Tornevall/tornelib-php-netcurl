@@ -40,6 +40,7 @@ if ( ! class_exists( 'TorneLIB_Network' ) && ! class_exists( 'TorneLIB\TorneLIB_
 		private $cookieUseSecure;
 		private $cookieDefaultDomain;
 		private $cookieDefaultPrefix;
+		private $alwaysResolveHostvalidation = false;
 
 		function __construct() {
 			// Initiate and get client headers.
@@ -66,7 +67,7 @@ if ( ! class_exists( 'TorneLIB_Network' ) && ! class_exists( 'TorneLIB\TorneLIB_
 			if ( ! isset( $urlParsed['host'] ) || ! $urlParsed['scheme'] ) {
 				return array( null, null, null );
 			}
-			if ( $validateHost ) {
+			if ( $validateHost || $this->alwaysResolveHostvalidation === true ) {
 				// Make sure that the host is not invalid
 				$hostRecord = dns_get_record( $urlParsed['host'], DNS_ANY );
 				if ( ! count( $hostRecord ) ) {
@@ -378,6 +379,22 @@ if ( ! class_exists( 'TorneLIB_Network' ) && ! class_exists( 'TorneLIB\TorneLIB_
 		function Redirect( $redirectToUrl = '', $replaceHeader = false, $responseCode = 301 ) {
 			header( "Location: $redirectToUrl", $replaceHeader, $responseCode );
 			exit;
+		}
+
+		/**
+		 * When active: Force this libray to always validate hosts with a DNS resolve during a getUrlDomain()-call.
+		 *
+		 * @param bool $activate
+		 */
+		public function setAlwaysResolveHostvalidation($activate = false) {
+			$this->alwaysResolveHostvalidation = $activate;
+		}
+
+		/**
+		 * Return the current boolean value for alwaysResolveHostvalidation.
+		 */
+		public function getAlwaysResolveHostvalidation() {
+			$this->alwaysResolveHostvalidation;
 		}
 
 	}

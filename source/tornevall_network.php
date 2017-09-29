@@ -1,5 +1,11 @@
 <?php
 
+/**
+ * NetCurl Library
+ *
+ * @version 6.0.5
+ */
+
 namespace TorneLIB;
 
 // Make sure this library won't conflict with others

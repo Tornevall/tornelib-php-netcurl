@@ -786,13 +786,13 @@ class Tornevall_cURLTest extends TestCase {
 	}
 
 	function testBitModes() {
-		$myBit = array(
-			'DEBIT' => 1,
+		$myBit    = array(
+			'DEBIT'  => 1,
 			'CREDIT' => 2,
-			'ANNUL' => 4
+			'ANNUL'  => 4
 		);
-		$bitClass = new TorneLIB_NetBits($myBit);
-		$bitArray = $bitClass->getBitArray(255);
-		$this->assertTrue(in_array('DEBIT', $bitArray) && in_array('CREDIT', $bitArray) && in_array('ANNUL', $bitArray) && in_array('BIT_128', $bitArray));
+		$bitClass = new TorneLIB_NetBits( $myBit );
+		$bitArray = $bitClass->getBitArray( 255 );
+		$this->assertTrue( in_array( 'DEBIT', $bitArray ) && in_array( 'CREDIT', $bitArray ) && in_array( 'ANNUL', $bitArray ) && in_array( 'BIT_128', $bitArray ) );
 	}
 }

@@ -408,19 +408,9 @@ if ( ! class_exists( 'TorneLIB_Network' ) && ! class_exists( 'TorneLIB\TorneLIB_
 		}
 
 	}
+}
 
-	/** @noinspection PhpUndefinedClassInspection */
-
-	/**
-	 * Class TorneLIB_Network_IP IP Address Types class
-	 * @package TorneLIB
-	 */
-	abstract class TorneLIB_Network_IP {
-		const IPTYPE_NONE = 0;
-		const IPTYPE_V4 = 4;
-		const IPTYPE_V6 = 6;
-	}
-
+if ( ! class_exists( 'Tornevall_cURL' ) && ! class_exists( 'TorneLIB\Tornevall_cURL' ) ) {
 	/**
 	 * Class Tornevall_cURL
 	 *
@@ -720,8 +710,8 @@ if ( ! class_exists( 'TorneLIB_Network' ) && ! class_exists( 'TorneLIB\TorneLIB_
 		 */
 		function tornecurl_terminate() {
 			/*
-         * If this indicates that we created the path, make sure it's removed if empty after session completion
-         */
+		 * If this indicates that we created the path, make sure it's removed if empty after session completion
+		 */
 			if ( ! count( glob( $this->CookiePath . "/*" ) ) && $this->CookiePathCreated ) {
 				@rmdir( $this->CookiePath );
 			}
@@ -828,8 +818,8 @@ if ( ! class_exists( 'TorneLIB_Network' ) && ! class_exists( 'TorneLIB\TorneLIB_
 		 */
 		private function getHasUpdateState( $libName = 'tornelib_curl' ) {
 			/*
-         * Currently only supporting this internal module (through $myRelease).
-         */
+		 * Currently only supporting this internal module (through $myRelease).
+		 */
 			$myRelease  = $this->getInternalRelease();
 			$libRequest = ( ! empty( $libName ) ? "lib/" . $libName : "" );
 			$getInfo    = $this->doGet( "https://api.tornevall.net/2.0/libs/getLibs/" . $libRequest . "/me/" . $myRelease );
@@ -1062,9 +1052,9 @@ if ( ! class_exists( 'TorneLIB_Network' ) && ! class_exists( 'TorneLIB\TorneLIB_
 		 */
 		private function openssl_guess( $forceTesting = false ) {
 			/*
-         * The certificate location here will be set up for the curl engine later on, during preparation of the connection.
-         * NOTE: ini_set() does not work for setting up the cafile, this has to be done through php.ini, .htaccess, httpd.conf or .user.ini
-         */
+		 * The certificate location here will be set up for the curl engine later on, during preparation of the connection.
+		 * NOTE: ini_set() does not work for setting up the cafile, this has to be done through php.ini, .htaccess, httpd.conf or .user.ini
+		 */
 			if ( ini_get( 'open_basedir' ) == '' ) {
 				if ( $this->testssl || $forceTesting ) {
 					$this->openSslGuessed = true;
@@ -1293,8 +1283,8 @@ if ( ! class_exists( 'TorneLIB_Network' ) && ! class_exists( 'TorneLIB\TorneLIB_
 				} elseif ( count( $this->IpAddr ) > 1 ) {
 					if ( ! $this->IpAddrRandom ) {
 						/*
-                     * If we have multiple ip addresses in the list, but the randomizer is not active, always use the first address in the list.
-                     */
+					 * If we have multiple ip addresses in the list, but the randomizer is not active, always use the first address in the list.
+					 */
 						$UseIp = ( isset( $this->IpAddr[0] ) && ! empty( $this->IpAddr[0] ) ? $this->IpAddr[0] : null );
 					} else {
 						$IpAddrNum = rand( 0, count( $this->IpAddr ) - 1 );
@@ -1306,12 +1296,12 @@ if ( ! class_exists( 'TorneLIB_Network' ) && ! class_exists( 'TorneLIB\TorneLIB_
 			}
 			$ipType = $this->NETWORK->getArpaFromAddr( $UseIp, true );
 			/*
-         * Bind interface to specific ip only if any are found
-         */
+		 * Bind interface to specific ip only if any are found
+		 */
 			if ( $ipType == "0" ) {
 				/*
-             * If the ip type is 0 and it shows up there is something defined here, throw an exception.
-             */
+			 * If the ip type is 0 and it shows up there is something defined here, throw an exception.
+			 */
 				if ( ! empty( $UseIp ) ) {
 					throw new \Exception( __FUNCTION__ . ": " . $UseIp . " is not a valid ip-address", 1003 );
 				}
@@ -1966,8 +1956,8 @@ if ( ! class_exists( 'TorneLIB_Network' ) && ! class_exists( 'TorneLIB\TorneLIB_
 
 				if ( $postAs == CURL_POST_AS::POST_AS_JSON ) {
 					/*
-                 * Using $jsonRealData to validate the string
-                 */
+				 * Using $jsonRealData to validate the string
+				 */
 					$jsonRealData = null;
 					if ( ! is_string( $postData ) ) {
 						$jsonRealData = json_encode( $postData );
@@ -2125,9 +2115,191 @@ if ( ! class_exists( 'TorneLIB_Network' ) && ! class_exists( 'TorneLIB\TorneLIB_
 			return $returnContent;
 		}
 	}
+}
 
-	/** @noinspection PhpUndefinedClassInspection */
+if ( ! class_exists( 'TorneLIB_NetBits' ) && ! class_exists( 'TorneLIB\TorneLIB_NetBits' ) ) {
+	/**
+	 * Class TorneLIB_NetBits Netbits Library for calculations with bitmasks
+	 *
+	 * @package TorneLIB
+	 * @version 6.0.1
+	 */
+	class TorneLIB_NetBits {
+		/** @var array Standard bitmask setup */
+		private $BIT_SETUP;
+		private $maxBits = 8;
 
+		function __construct( $bitStructure = array() ) {
+			$this->BIT_SETUP = array(
+				'OFF'     => 0,
+				'BIT_1'   => 1,
+				'BIT_2'   => 2,
+				'BIT_4'   => 4,
+				'BIT_8'   => 8,
+				'BIT_16'  => 16,
+				'BIT_32'  => 32,
+				'BIT_64'  => 64,
+				'BIT_128' => 128
+			);
+			if ( count( $bitStructure ) ) {
+				$this->BIT_SETUP = $this->validateBitStructure( $bitStructure );
+			}
+		}
+
+		public function setMaxBits( $maxBits = 8 ) {
+			$this->maxBits = $maxBits;
+			$this->validateBitStructure( $maxBits );
+		}
+
+		public function getMaxBits() {
+			return $this->maxBits;
+		}
+
+		private function getRequiredBits( $maxBits = 8 ) {
+			$requireArray = array();
+			if ( $this->maxBits != $maxBits ) {
+				$maxBits = $this->maxBits;
+			}
+			for ( $curBit = 0; $curBit <= $maxBits; $curBit ++ ) {
+				$requireArray[] = (int) pow( 2, $curBit );
+			}
+
+			return $requireArray;
+		}
+
+		private function validateBitStructure( $bitStructure = array() ) {
+			if ( is_numeric( $bitStructure ) ) {
+				$newBitStructure = array(
+					'OFF' => 0
+				);
+				for ( $bitIndex = 0; $bitIndex <= $bitStructure; $bitIndex ++ ) {
+					$powIndex                              = pow( 2, $bitIndex );
+					$newBitStructure[ "BIT_" . $powIndex ] = $powIndex;
+				}
+				$bitStructure    = $newBitStructure;
+				$this->BIT_SETUP = $bitStructure;
+			}
+			$require                  = $this->getRequiredBits( count( $bitStructure ) );
+			$validated                = array();
+			$newValidatedBitStructure = array();
+			$valueKeys                = array();
+			foreach ( $bitStructure as $key => $value ) {
+				if ( in_array( $value, $require ) ) {
+					$newValidatedBitStructure[ $key ] = $value;
+					$valueKeys[ $value ]              = $key;
+					$validated[]                      = $value;
+				}
+			}
+			foreach ( $require as $bitIndex ) {
+				if ( ! in_array( $bitIndex, $validated ) ) {
+					if ( $bitIndex == "0" ) {
+						$newValidatedBitStructure["OFF"] = $bitIndex;
+					} else {
+						$bitIdentificationName                              = "BIT_" . $bitIndex;
+						$newValidatedBitStructure[ $bitIdentificationName ] = $bitIndex;
+					}
+				} else {
+					if ( isset( $valueKeys[ $bitIndex ] ) && ! empty( $valueKeys[ $bitIndex ] ) ) {
+						$bitIdentificationName                              = $valueKeys[ $bitIndex ];
+						$newValidatedBitStructure[ $bitIdentificationName ] = $bitIndex;
+					}
+				}
+			}
+			asort( $newValidatedBitStructure );
+			$this->BIT_SETUP = $newValidatedBitStructure;
+
+			return $newValidatedBitStructure;
+		}
+
+		public function setBitStructure( $bitStructure = array() ) {
+			$this->validateBitStructure( $bitStructure );
+		}
+
+		public function getBitStructure() {
+			return $this->BIT_SETUP;
+		}
+
+		/**
+		 * Finds out if a bitmasked value is located in a bitarray
+		 *
+		 * @param int $requestedExistingBit
+		 * @param int $requestedBitSum
+		 *
+		 * @return bool
+		 */
+		public function isBit( $requestedExistingBit = 0, $requestedBitSum = 0 ) {
+			$return = false;
+			if ( is_array( $requestedExistingBit ) ) {
+				foreach ( $requestedExistingBit as $bitKey ) {
+					if ( ! $this->isBit( $bitKey, $requestedBitSum ) ) {
+						return false;
+					}
+				}
+
+				return true;
+			}
+
+			// Solution that works with unlimited bits
+			for ( $bitCount = 0; $bitCount < count( $this->getBitStructure() ); $bitCount ++ ) {
+				if ( $requestedBitSum & pow( 2, $bitCount ) ) {
+					if ( $requestedExistingBit == pow( 2, $bitCount ) ) {
+						$return = true;
+					}
+				}
+			}
+
+			// Solution that works with bits up to 8
+			/*
+			$sum = 0;
+			preg_match_all("/\d/", sprintf("%08d", decbin( $requestedBitSum)), $bitArray);
+			for ($bitCount = count($bitArray[0]); $bitCount >= 0; $bitCount--) {
+				if (isset($bitArray[0][$bitCount])) {
+					if ( $requestedBitSum & pow(2, $bitCount)) {
+						if ( $requestedExistingBit == pow(2, $bitCount)) {
+							$return = true;
+						}
+					}
+				}
+			}
+			*/
+
+			return $return;
+		}
+
+		/**
+		 * Get active bits in an array
+		 *
+		 * @param int $bitValue
+		 *
+		 * @return array
+		 */
+		public function getBitArray( $bitValue = 0 ) {
+			$returnBitList = array();
+			foreach ( $this->BIT_SETUP as $key => $value ) {
+				if ( $this->isBit( $value, $bitValue ) ) {
+					$returnBitList[] = $key;
+				}
+			}
+
+			return $returnBitList;
+		}
+
+	}
+}
+
+if ( ! class_exists( 'TorneLIB_Network_IP' ) && ! class_exists( 'TorneLIB\TorneLIB_Network_IP' ) ) {
+	/**
+	 * Class TorneLIB_Network_IP IP Address Types class
+	 * @package TorneLIB
+	 */
+	abstract class TorneLIB_Network_IP {
+		const IPTYPE_NONE = 0;
+		const IPTYPE_V4 = 4;
+		const IPTYPE_V6 = 6;
+	}
+}
+
+if ( ! class_exists( 'Tornevall_SimpleSoap' ) && ! class_exists( 'TorneLIB\Tornevall_SimpleSoap' ) ) {
 	/**
 	 * Class TorneLIB_SimpleSoap Simple SOAP client.
 	 *
@@ -2343,9 +2515,9 @@ if ( ! class_exists( 'TorneLIB_Network' ) && ! class_exists( 'TorneLIB\TorneLIB_
 			return $this->soapFaultExceptionObject;
 		}
 	}
+}
 
-	/** @noinspection PhpUndefinedClassInspection */
-
+if ( ! class_exists( 'CURL_METHODS' ) && ! class_exists( 'TorneLIB\CURL_METHODS' ) ) {
 	/**
 	 * Class CURL_METHODS List of methods available in this library
 	 *
@@ -2357,9 +2529,9 @@ if ( ! class_exists( 'TorneLIB_Network' ) && ! class_exists( 'TorneLIB\TorneLIB_
 		const METHOD_PUT = 2;
 		const METHOD_DELETE = 3;
 	}
+}
 
-	/** @noinspection PhpUndefinedClassInspection */
-
+if ( ! class_exists( 'CURL_RESOLVER' ) && ! class_exists( 'TorneLIB\CURL_RESOLVER' ) ) {
 	/**
 	 * Class CURL_RESOLVER Resolver methods that is available when trying to connect
 	 *
@@ -2370,9 +2542,8 @@ if ( ! class_exists( 'TorneLIB_Network' ) && ! class_exists( 'TorneLIB\TorneLIB_
 		const RESOLVER_IPV4 = 1;
 		const RESOLVER_IPV6 = 2;
 	}
-
-	/** @noinspection PhpUndefinedClassInspection */
-
+}
+if ( ! class_exists( 'CURL_POST_AS' ) && ! class_exists( 'TorneLIB\CURL_POST_AS' ) ) {
 	/**
 	 * Class CURL_POST_AS Prepared formatting for POST-content in this library (Also available from for example PUT)
 	 *
@@ -2383,9 +2554,9 @@ if ( ! class_exists( 'TorneLIB_Network' ) && ! class_exists( 'TorneLIB\TorneLIB_
 		const POST_AS_JSON = 1;
 		const POST_AS_SOAP = 2;
 	}
+}
 
-	/** @noinspection PhpUndefinedClassInspection */
-
+if ( ! class_exists( 'CURL_AUTH_TYPES' ) && ! class_exists( 'TorneLIB\CURL_AUTH_TYPES' ) ) {
 	/**
 	 * Class CURL_AUTH_TYPES Available authentication types for use with password protected sites
 	 *
@@ -2397,9 +2568,9 @@ if ( ! class_exists( 'TorneLIB_Network' ) && ! class_exists( 'TorneLIB\TorneLIB_
 		const AUTHTYPE_NONE = 0;
 		const AUTHTYPE_BASIC = 1;
 	}
+}
 
-	/** @noinspection PhpUndefinedClassInspection */
-
+if ( ! class_exists( 'TORNELIB_CURL_ENVIRONMENT' ) && ! class_exists( 'TorneLIB\TORNELIB_CURL_ENVIRONMENT' ) ) {
 	/**
 	 * Class TORNELIB_CURL_ENVIRONMENT
 	 *
@@ -2411,9 +2582,9 @@ if ( ! class_exists( 'TorneLIB_Network' ) && ! class_exists( 'TorneLIB\TorneLIB_
 		const ENVIRONMENT_PRODUCTION = 0;
 		const ENVIRONMENT_TEST = 1;
 	}
+}
 
-	/** @noinspection PhpUndefinedClassInspection */
-
+if ( ! class_exists( 'TORNELIB_CURL_RESPONSETYPE' ) && ! class_exists( 'TorneLIB\TORNELIB_CURL_RESPONSETYPE' ) ) {
 	/**
 	 * Class TORNELIB_CURL_RESPONSETYPE
 	 * @package TorneLIB
@@ -2422,7 +2593,9 @@ if ( ! class_exists( 'TorneLIB_Network' ) && ! class_exists( 'TorneLIB\TorneLIB_
 		const RESPONSETYPE_ARRAY = 0;
 		const RESPONSETYPE_OBJECT = 1;
 	}
+}
 
+if ( ! class_exists( 'TORNELIB_CURLOBJECT' ) && ! class_exists( 'TorneLIB\TORNELIB_CURLOBJECT' ) ) {
 	/**
 	 * Class TORNELIB_CURLOBJECT
 	 * @package TorneLIB
@@ -2434,173 +2607,5 @@ if ( ! class_exists( 'TorneLIB_Network' ) && ! class_exists( 'TorneLIB\TorneLIB_
 		public $parsed;
 		public $url;
 		public $ip;
-	}
-
-	/**
-	 * Class TorneLIB_NetBits Netbits Library for calculations with bitmasks
-	 *
-	 * @package TorneLIB
-	 * @version 6.0.1
-	 */
-	class TorneLIB_NetBits {
-		/** @var array Standard bitmask setup */
-		private $BIT_SETUP;
-		private $maxBits = 8;
-
-		function __construct( $bitStructure = array() ) {
-			$this->BIT_SETUP = array(
-				'OFF'     => 0,
-				'BIT_1'   => 1,
-				'BIT_2'   => 2,
-				'BIT_4'   => 4,
-				'BIT_8'   => 8,
-				'BIT_16'  => 16,
-				'BIT_32'  => 32,
-				'BIT_64'  => 64,
-				'BIT_128' => 128
-			);
-			if ( count( $bitStructure ) ) {
-				$this->BIT_SETUP = $this->validateBitStructure( $bitStructure );
-			}
-		}
-
-		public function setMaxBits( $maxBits = 8 ) {
-			$this->maxBits = $maxBits;
-			$this->validateBitStructure( $maxBits );
-		}
-
-		public function getMaxBits() {
-			return $this->maxBits;
-		}
-
-		private function getRequiredBits( $maxBits = 8 ) {
-			$requireArray = array();
-			if ( $this->maxBits != $maxBits ) {
-				$maxBits = $this->maxBits;
-			}
-			for ( $curBit = 0; $curBit <= $maxBits; $curBit ++ ) {
-				$requireArray[] = (int) pow( 2, $curBit );
-			}
-
-			return $requireArray;
-		}
-
-		private function validateBitStructure( $bitStructure = array() ) {
-			if ( is_numeric( $bitStructure ) ) {
-				$newBitStructure = array(
-					'OFF' => 0
-				);
-				for ( $bitIndex = 0; $bitIndex <= $bitStructure; $bitIndex ++ ) {
-					$powIndex                              = pow( 2, $bitIndex );
-					$newBitStructure[ "BIT_" . $powIndex ] = $powIndex;
-				}
-				$bitStructure    = $newBitStructure;
-				$this->BIT_SETUP = $bitStructure;
-			}
-			$require                  = $this->getRequiredBits( count( $bitStructure ) );
-			$validated                = array();
-			$newValidatedBitStructure = array();
-			$valueKeys = array();
-			foreach ( $bitStructure as $key => $value ) {
-				if ( in_array( $value, $require ) ) {
-					$newValidatedBitStructure[ $key ] = $value;
-					$valueKeys[$value] = $key;
-					$validated[]                      = $value;
-				}
-			}
-			foreach ( $require as $bitIndex ) {
-				if ( ! in_array( $bitIndex, $validated ) ) {
-					if ( $bitIndex == "0" ) {
-						$newValidatedBitStructure["OFF"] = $bitIndex;
-					} else {
-						$bitIdentificationName = "BIT_" . $bitIndex;
-						$newValidatedBitStructure[ $bitIdentificationName ] = $bitIndex;
-					}
-				} else {
-					if (isset($valueKeys[$bitIndex]) && !empty($valueKeys[$bitIndex])) {
-						$bitIdentificationName = $valueKeys[$bitIndex];
-						$newValidatedBitStructure[ $bitIdentificationName ] = $bitIndex;
-					}
-				}
-			}
-			asort( $newValidatedBitStructure );
-			$this->BIT_SETUP = $newValidatedBitStructure;
-
-			return $newValidatedBitStructure;
-		}
-
-		public function setBitStructure( $bitStructure = array() ) {
-			$this->validateBitStructure( $bitStructure );
-		}
-
-		public function getBitStructure() {
-			return $this->BIT_SETUP;
-		}
-
-		/**
-		 * Finds out if a bitmasked value is located in a bitarray
-		 *
-		 * @param int $requestedExistingBit
-		 * @param int $requestedBitSum
-		 *
-		 * @return bool
-		 */
-		public function isBit( $requestedExistingBit = 0, $requestedBitSum = 0 ) {
-			$return = false;
-			if ( is_array( $requestedExistingBit ) ) {
-				foreach ( $requestedExistingBit as $bitKey ) {
-					if ( ! $this->isBit( $bitKey, $requestedBitSum ) ) {
-						return false;
-					}
-				}
-
-				return true;
-			}
-
-			// Solution that works with unlimited bits
-			for ( $bitCount = 0; $bitCount < count( $this->getBitStructure() ); $bitCount ++ ) {
-				if ( $requestedBitSum & pow( 2, $bitCount ) ) {
-					if ( $requestedExistingBit == pow( 2, $bitCount ) ) {
-						$return = true;
-					}
-				}
-			}
-
-			// Solution that works with bits up to 8
-			/*
-			$sum = 0;
-			preg_match_all("/\d/", sprintf("%08d", decbin( $requestedBitSum)), $bitArray);
-			for ($bitCount = count($bitArray[0]); $bitCount >= 0; $bitCount--) {
-				if (isset($bitArray[0][$bitCount])) {
-					if ( $requestedBitSum & pow(2, $bitCount)) {
-						if ( $requestedExistingBit == pow(2, $bitCount)) {
-							$return = true;
-						}
-					}
-				}
-			}
-			*/
-
-			return $return;
-		}
-
-		/**
-		 * Get active bits in an array
-		 *
-		 * @param int $bitValue
-		 *
-		 * @return array
-		 */
-		public function getBitArray( $bitValue = 0 ) {
-			$returnBitList = array();
-			foreach ( $this->BIT_SETUP as $key => $value ) {
-				if ( $this->isBit( $value, $bitValue ) ) {
-					$returnBitList[] = $key;
-				}
-			}
-
-			return $returnBitList;
-		}
-
 	}
 }

@@ -56,6 +56,7 @@ class Tornevall_cURLTest extends TestCase {
 			'simplejson' => 'http://identifier.tornevall.net/?json',
 			'tests'      => 'developer.tornevall.net/tests/tornevall_network/',
 			'soap'       => 'developer.tornevall.net/tests/tornevall_network/index.wsdl?wsdl',
+			'httpcode'   => 'developer.tornevall.net/tests/tornevall_network/http.php',
 		);
 	}
 
@@ -794,5 +795,17 @@ class Tornevall_cURLTest extends TestCase {
 		$bitClass = new TorneLIB_NetBits( $myBit );
 		$bitArray = $bitClass->getBitArray( 255 );
 		$this->assertTrue( in_array( 'DEBIT', $bitArray ) && in_array( 'CREDIT', $bitArray ) && in_array( 'ANNUL', $bitArray ) && in_array( 'BIT_128', $bitArray ) );
+	}
+
+	function testThrowable() {
+		$this->pemDefault();
+		$this->CURL->setThrowableHttpCodes();
+		try {
+			$this->CURL->doGet( "https://developer.tornevall.net/tests/tornevall_network/http.php?code=503" );
+		} catch (\Exception $e) {
+			$this->assertTrue($e->getCode() == 503);
+			return;
+		}
+		$this->markTestSkipped("No throwables was set up");
 	}
 }

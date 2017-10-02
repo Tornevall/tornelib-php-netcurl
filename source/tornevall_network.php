@@ -449,6 +449,8 @@ if ( ! class_exists( 'Tornevall_cURL' ) && ! class_exists( 'TorneLIB\Tornevall_c
 		private $TorneCurlVersion = "6.0.6";
 		/** @var null Curl Version */
 		private $CurlVersion = null;
+		/** @var string This modules name (inherited to some exceptions amongst others) */
+		protected $ModuleName = "NetCurl";
 
 		/** @var string Internal release snapshot that is being used to find out if we are running the latest version of this library */
 		private $TorneCurlRelease = "20171001";
@@ -665,7 +667,7 @@ if ( ! class_exists( 'Tornevall_cURL' ) && ! class_exists( 'TorneLIB\Tornevall_c
 			register_shutdown_function( array( $this, 'tornecurl_terminate' ) );
 
 			if ( ! function_exists( 'curl_init' ) ) {
-				throw new \Exception( "curl library not found" );
+				throw new \Exception( $this->ModuleName . " curl init exception: curl library not found" );
 			}
 			// Common ssl checkers (if they fail, there is a sslDriverError to recall
 			if ( ! in_array( 'https', @stream_get_wrappers() ) ) {
@@ -774,7 +776,7 @@ if ( ! class_exists( 'Tornevall_cURL' ) && ! class_exists( 'TorneLIB\Tornevall_c
 			}
 			foreach ( $this->throwableHttpCodes as $codeListArray => $codeArray ) {
 				if ( isset( $codeArray[1] ) && $code >= intval( $codeArray[0] ) && $code <= intval( $codeArray[1] ) ) {
-					throw new \Exception( $message, $code );
+					throw new \Exception( $this->ModuleName . " HTTP Response Exception: " . $message, $code );
 				}
 			}
 		}
@@ -959,7 +961,7 @@ if ( ! class_exists( 'Tornevall_cURL' ) && ! class_exists( 'TorneLIB\Tornevall_c
 			if ( defined( 'TORNELIB_ALLOW_VERSION_REQUESTS' ) && TORNELIB_ALLOW_VERSION_REQUESTS === true ) {
 				return $this->TorneCurlVersion . "," . $this->TorneCurlRelease;
 			}
-			throw new \Exception( "[" . __CLASS__ . "] Version requests are not allowed", 403 );
+			throw new \Exception( $this->ModuleName . " internalReleaseException [" . __CLASS__ . "]: Version requests are not allowed in current state (permissions required)", 403 );
 		}
 
 		/**
@@ -1115,7 +1117,7 @@ if ( ! class_exists( 'Tornevall_cURL' ) && ! class_exists( 'TorneLIB\Tornevall_c
 						$this->CookiePath = realpath( __DIR__ . "/../cookies" );
 					}
 					if ( $this->UseCookieExceptions && ( empty( $this->CookiePath ) || ! is_dir( $this->CookiePath ) ) ) {
-						throw new \Exception( __FUNCTION__ . ": Could not set up a proper cookiepath [To override this, use AllowTempAsCookiePath (not recommended)]", 1002 );
+						throw new \Exception( $this->ModuleName . " " . __FUNCTION__ . " exception: Could not set up a proper cookiepath [To override this, use AllowTempAsCookiePath (not recommended)]", 1002 );
 					}
 				}
 			}
@@ -1320,7 +1322,7 @@ if ( ! class_exists( 'Tornevall_cURL' ) && ! class_exists( 'TorneLIB\Tornevall_c
 			if ( $this->allowSslUnverified ) {
 				$this->sslVerify = $enabledFlag;
 			} else {
-				throw new \Exception( "setSslUnverified(true) has not been set." );
+				throw new \Exception( $this->ModuleName . " setSslVerify exception: setSslUnverified(true) has not been set." );
 			}
 		}
 
@@ -1483,7 +1485,7 @@ if ( ! class_exists( 'Tornevall_cURL' ) && ! class_exists( 'TorneLIB\Tornevall_c
 			if ( $ipType == "0" ) {
 				// If the ip type is 0 and it shows up there is something defined here, throw an exception.
 				if ( ! empty( $UseIp ) ) {
-					throw new \Exception( __FUNCTION__ . ": " . $UseIp . " is not a valid ip-address", 1003 );
+					throw new \Exception( $this->ModuleName . " " . __FUNCTION__ . " exception: " . $UseIp . " is not a valid ip-address", 1003 );
 				}
 			} else {
 				$this->CurlIp = $UseIp;
@@ -1591,7 +1593,7 @@ if ( ! class_exists( 'Tornevall_cURL' ) && ! class_exists( 'TorneLIB\Tornevall_c
 						}
 					}
 				} else {
-					throw new \Exception( "Can not parse DOMDocuments without the DOMDocuments class" );
+					throw new \Exception( $this->ModuleName . " HtmlParse exception: Can not parse DOMDocuments without the DOMDocuments class" );
 				}
 			}
 
@@ -1681,7 +1683,7 @@ if ( ! class_exists( 'Tornevall_cURL' ) && ! class_exists( 'TorneLIB\Tornevall_c
 		 */
 		public function getParsedResponse( $ResponseContent = null ) {
 			if ( isset( $ResponseContent['code'] ) && $ResponseContent['code'] >= 400 ) {
-				throw new \Exception( "Unexpected response code from server: " . $ResponseContent['code'], $ResponseContent['code'] );
+				throw new \Exception( $this->ModuleName . " parseResponse exception - Unexpected response code from server: " . $ResponseContent['code'], $ResponseContent['code'] );
 			}
 			if ( is_null( $ResponseContent ) && ! empty( $this->TemporaryResponse ) ) {
 				return $this->TemporaryResponse['parsed'];
@@ -1779,7 +1781,7 @@ if ( ! class_exists( 'Tornevall_cURL' ) && ! class_exists( 'TorneLIB\Tornevall_c
 					if ( $hasRecursion ) {
 						return $Parsed;
 					} else {
-						throw new \Exception( "Requested key was not found in parsed response" );
+						throw new \Exception( $this->ModuleName . " getParsedValue exception: Requested key was not found in parsed response" );
 					}
 				}
 			}
@@ -2121,7 +2123,7 @@ if ( ! class_exists( 'Tornevall_cURL' ) && ! class_exists( 'TorneLIB\Tornevall_c
 			// Prepare SOAPclient if requested
 			if ( preg_match( "/\?wsdl$|\&wsdl$/i", $this->CurlURL ) || $postAs == CURL_POST_AS::POST_AS_SOAP ) {
 				if ( ! $this->hasSoap() ) {
-					throw new \Exception( "SoapClient is not available in this system", 500 );
+					throw new \Exception( $this->ModuleName . " handleUrlCall exception: SoapClient is not available in this system", 500 );
 				}
 				$Soap = new Tornevall_SimpleSoap( $this->CurlURL, $this->curlopt );
 				$Soap->setCustomUserAgent( $this->CustomUserAgent );
@@ -2131,7 +2133,7 @@ if ( ! class_exists( 'Tornevall_cURL' ) && ! class_exists( 'TorneLIB\Tornevall_c
 				try {
 					$getSoapResponse = $Soap->getSoap();
 				} catch ( \Exception $getSoapResponseException ) {
-					throw new \Exception( $getSoapResponseException->getMessage(), $getSoapResponseException->getCode() );
+					throw new \Exception( $this->ModuleName . " exception from soapClient: " . $getSoapResponseException->getMessage(), $getSoapResponseException->getCode() );
 				}
 
 				return $getSoapResponse;
@@ -2310,7 +2312,7 @@ if ( ! class_exists( 'Tornevall_cURL' ) && ! class_exists( 'TorneLIB\Tornevall_c
 				}
 				$errorCode = curl_errno( $this->CurlSession );
 				if ( $this->CurlResolveForced && $this->CurlResolveRetry >= 2 ) {
-					throw new \Exception( __FUNCTION__ . ": Could not fetch url after internal retries", 1004 );
+					throw new \Exception( $this->ModuleName . " " . __FUNCTION__ . " exception: Could not fetch url after internal retries", 1004 );
 				}
 				if ( $errorCode == CURLE_COULDNT_RESOLVE_HOST || $errorCode === 45 ) {
 					$this->CurlResolveRetry ++;
@@ -2325,7 +2327,7 @@ if ( ! class_exists( 'Tornevall_cURL' ) && ! class_exists( 'TorneLIB\Tornevall_c
 
 					return $this->handleUrlCall( $this->CurlURL, $postData, $CurlMethod );
 				}
-				throw new \Exception( "PHPException at " . __FUNCTION__ . ": " . curl_error( $this->CurlSession ), curl_errno( $this->CurlSession ) );
+				throw new \Exception( $this->ModuleName . " exception from PHP/CURL at " . __FUNCTION__ . ": " . curl_error( $this->CurlSession ), curl_errno( $this->CurlSession ) );
 			}
 
 			return $returnContent;
@@ -2610,7 +2612,7 @@ if ( ! class_exists( 'Tornevall_SimpleSoap' ) && ! class_exists( 'TorneLIB\Torne
 					if ( ! $soapCode ) {
 						$soapCode = 500;
 					}
-					throw new \Exception( $soapException->getMessage(), $soapCode );
+					throw new \Exception( $this->ModuleName . " exception from soapClient: ". $soapException->getMessage(), $soapCode );
 				}
 			} else {
 				try {
@@ -2629,7 +2631,7 @@ if ( ! class_exists( 'Tornevall_SimpleSoap' ) && ! class_exists( 'TorneLIB\Torne
 							try {
 								$this->soapClient = @new \SoapClient( $this->soapUrl, $this->soapOptions );
 							} catch ( \Exception $soapException ) {
-								throw new \Exception( $soapException->getMessage(), $soapException->getCode() );
+								throw new \Exception( $this->ModuleName . " exception from soapClient: " . $soapException->getMessage(), $soapException->getCode() );
 							}
 						}
 					}
@@ -2670,7 +2672,7 @@ if ( ! class_exists( 'Tornevall_SimpleSoap' ) && ! class_exists( 'TorneLIB\Torne
 				$this->libResponse              = $returnResponse;
 				$this->soapFaultExceptionObject = $e;
 				if ( $this->canThrowSoapFaults ) {
-					throw new \Exception( $e->getMessage(), $e->getCode(), $e );
+					throw new \Exception( $this->ModuleName . " exception from soapClient: " . $e->getMessage(), $e->getCode(), $e );
 				}
 				$this->SoapFaultString = $e->getMessage();
 				$this->SoapFaultCode   = $e->getCode();

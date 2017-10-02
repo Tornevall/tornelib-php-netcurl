@@ -674,20 +674,21 @@ class Tornevall_cURLTest extends TestCase {
 	}
 
 	// Include but not run.
-	/*
 	function testSoapError() {
-		$this->markTestSkipped("testSoapError is a special exceptions test. Normally we do not want to run this");
+		$skipThis = true;
+		if ($skipThis) {
+			$this->markTestSkipped("testSoapError is a special exceptions test. Normally we do not want to run this");
+			return;
+		}
 		$localCurl = new Tornevall_cURL();
 		$wsdl = $localCurl->doGet('https://test.resurs.com/ecommerce-test/ws/V4/SimplifiedShopFlowService?wsdl');
 		try {
 			$wsdl->getPaymentMethods();
 		} catch (\Exception $e) {
 			$previousException = $e->getPrevious();
-			$this->assertTrue(isset($previousException->faultstring) && !empty($previousException->faultstring));
+			$this->assertTrue(isset($previousException->faultstring) && !empty($previousException->faultstring) && preg_match("/unauthorized/i", $e->getMessage()));
 		}
-
 	}
-	*/
 
 	function testHostResolveValidationSuccess() {
 		$localNetwork = new TorneLIB_Network();

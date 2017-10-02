@@ -681,12 +681,10 @@ class Tornevall_cURLTest extends TestCase {
 		$this->assertTrue( true );
 	}
 
-	// Include but not run.
 	function testSoapError() {
 		$skipThis = true;
 		if ( $skipThis ) {
 			$this->markTestSkipped( "testSoapError is a special exceptions test. Normally we do not want to run this" );
-
 			return;
 		}
 		$localCurl = new Tornevall_cURL();
@@ -849,7 +847,6 @@ class Tornevall_cURLTest extends TestCase {
 			$this->CURL->doGet( "http://abc" . sha1( microtime( true ) ) );
 		} catch ( \Exception $e ) {
 			$errorMessage = $e->getMessage();
-			echo $errorMessage . "\n";
 			$this->assertTrue( ( preg_match( "/maximum tries/", $errorMessage ) ? true : false ) );
 		}
 	}

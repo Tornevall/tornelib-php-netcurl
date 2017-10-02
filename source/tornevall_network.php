@@ -2126,7 +2126,7 @@ if ( ! class_exists( 'Tornevall_cURL' ) && ! class_exists( 'TorneLIB\Tornevall_c
 			// Prepare SOAPclient if requested
 			if ( preg_match( "/\?wsdl$|\&wsdl$/i", $this->CurlURL ) || $postAs == CURL_POST_AS::POST_AS_SOAP ) {
 				if ( ! $this->hasSoap() ) {
-					throw new \Exception( $this->ModuleName . " handleUrlCall exception: SoapClient is not available in this system", 500 );
+					throw new \Exception( $this->ModuleName . " ".__FUNCTION__." exception: SoapClient is not available in this system", 500 );
 				}
 				$Soap = new Tornevall_SimpleSoap( $this->CurlURL, $this->curlopt );
 				$Soap->setCustomUserAgent( $this->CustomUserAgent );
@@ -2314,8 +2314,9 @@ if ( ! class_exists( 'Tornevall_cURL' ) && ! class_exists( 'TorneLIB\Tornevall_c
 					);
 				}
 				$errorCode = curl_errno( $this->CurlSession );
+				$errorMessage = curl_error($this->CurlSession);
 				if ( $this->CurlResolveForced && $this->CurlResolveRetry >= 2 ) {
-					throw new \Exception( $this->ModuleName . " " . __FUNCTION__ . " exception: Could not fetch url after internal retries", 1004 );
+					throw new \Exception( $this->ModuleName . " exception in " . __FUNCTION__ . ": The maximum tries of curl_exec() for ".$this->CurlURL." has been reached without any successful response. Normally, this happens after " . $this->CurlResolveRetry . " CurlResolveRetries and might be connected with a bad URL or similar that can not resolve properly.\nCurl error message follows: " . $errorMessage, $errorCode );
 				}
 				if ( $errorCode == CURLE_COULDNT_RESOLVE_HOST || $errorCode === 45 ) {
 					$this->CurlResolveRetry ++;

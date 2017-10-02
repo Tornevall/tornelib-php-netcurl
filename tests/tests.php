@@ -11,7 +11,9 @@ ini_set( 'memory_limit', - 1 );    // Free memory limit, some tests requires mor
 class Tornevall_cURLTest extends TestCase {
 	private $StartErrorReporting;
 
+	/** @var Tornevall_cURL */
 	private $CURL;
+	/** @var TorneLIB_Crypto */
 	private $Crypto;
 	private $Urls;
 	private $TorSetupAddress = "127.0.0.1:9050";
@@ -837,9 +839,18 @@ class Tornevall_cURLTest extends TestCase {
 			$this->CURL->doGet( "https://developer.tornevall.net/tests/tornevall_network/http.php?code=503" );
 		} catch ( \Exception $e ) {
 			$this->assertTrue( $e->getCode() == 503 );
-
 			return;
 		}
 		$this->markTestSkipped( "No throwables was set up" );
+	}
+
+	function testFailUrl() {
+		try {
+			$this->CURL->doGet( "http://abc" . sha1( microtime( true ) ) );
+		} catch ( \Exception $e ) {
+			$errorMessage = $e->getMessage();
+			echo $errorMessage . "\n";
+			$this->assertTrue( ( preg_match( "/maximum tries/", $errorMessage ) ? true : false ) );
+		}
 	}
 }

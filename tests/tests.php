@@ -5,7 +5,8 @@ namespace TorneLIB;
 require_once( '../vendor/autoload.php' );
 
 use PHPUnit\Framework\TestCase;
-ini_set('memory_limit', -1);    // Free memory limit, some tests requires more memory (like ip-range handling)
+
+ini_set( 'memory_limit', - 1 );    // Free memory limit, some tests requires more memory (like ip-range handling)
 
 class Tornevall_cURLTest extends TestCase {
 	private $StartErrorReporting;
@@ -431,22 +432,27 @@ class Tornevall_cURLTest extends TestCase {
 	}
 
 	function testMaskRangeArray24() {
-		$this->assertCount(255, $this->NET->getRangeFromMask("192.168.1.0/24"));
+		$this->assertCount( 255, $this->NET->getRangeFromMask( "192.168.1.0/24" ) );
 	}
+
 	function testMaskRangeArray16() {
-		$this->assertCount(65535, $this->NET->getRangeFromMask("192.168.0.0/16"));
+		$this->assertCount( 65535, $this->NET->getRangeFromMask( "192.168.0.0/16" ) );
 	}
-	function testMaskRange24 () {
-		$this->assertTrue($this->NET->isIpInRange("192.168.1.55", "192.168.1.0/24"));
+
+	function testMaskRange24() {
+		$this->assertTrue( $this->NET->isIpInRange( "192.168.1.55", "192.168.1.0/24" ) );
 	}
+
 	function testMaskRange24Fail() {
-		$this->assertFalse($this->NET->isIpInRange("192.168.2.55", "192.168.1.0/24"));
+		$this->assertFalse( $this->NET->isIpInRange( "192.168.2.55", "192.168.1.0/24" ) );
 	}
+
 	function testMaskRange16() {
-		$this->assertTrue($this->NET->isIpInRange("192.168.2.55", "192.168.0.0/16"));
+		$this->assertTrue( $this->NET->isIpInRange( "192.168.2.55", "192.168.0.0/16" ) );
 	}
+
 	function testMaskRange8() {
-		$this->assertTrue($this->NET->isIpInRange("172.213.9.3", "172.0.0.0/8"));
+		$this->assertTrue( $this->NET->isIpInRange( "172.213.9.3", "172.0.0.0/8" ) );
 	}
 	/*
 	function testMaskRangeArray8() {
@@ -676,17 +682,18 @@ class Tornevall_cURLTest extends TestCase {
 	// Include but not run.
 	function testSoapError() {
 		$skipThis = true;
-		if ($skipThis) {
-			$this->markTestSkipped("testSoapError is a special exceptions test. Normally we do not want to run this");
+		if ( $skipThis ) {
+			$this->markTestSkipped( "testSoapError is a special exceptions test. Normally we do not want to run this" );
+
 			return;
 		}
 		$localCurl = new Tornevall_cURL();
-		$wsdl = $localCurl->doGet('https://test.resurs.com/ecommerce-test/ws/V4/SimplifiedShopFlowService?wsdl');
+		$wsdl      = $localCurl->doGet( 'https://test.resurs.com/ecommerce-test/ws/V4/SimplifiedShopFlowService?wsdl' );
 		try {
 			$wsdl->getPaymentMethods();
-		} catch (\Exception $e) {
+		} catch ( \Exception $e ) {
 			$previousException = $e->getPrevious();
-			$this->assertTrue(isset($previousException->faultstring) && !empty($previousException->faultstring) && preg_match("/unauthorized/i", $e->getMessage()));
+			$this->assertTrue( isset( $previousException->faultstring ) && ! empty( $previousException->faultstring ) && preg_match( "/unauthorized/i", $e->getMessage() ) );
 		}
 	}
 
@@ -828,10 +835,11 @@ class Tornevall_cURLTest extends TestCase {
 		$this->CURL->setThrowableHttpCodes();
 		try {
 			$this->CURL->doGet( "https://developer.tornevall.net/tests/tornevall_network/http.php?code=503" );
-		} catch (\Exception $e) {
-			$this->assertTrue($e->getCode() == 503);
+		} catch ( \Exception $e ) {
+			$this->assertTrue( $e->getCode() == 503 );
+
 			return;
 		}
-		$this->markTestSkipped("No throwables was set up");
+		$this->markTestSkipped( "No throwables was set up" );
 	}
 }

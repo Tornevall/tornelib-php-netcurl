@@ -17,11 +17,11 @@
  */
 
 /**
- * Tornevall Networks NETCURL-6.0.7
+ * Tornevall Networks NETCURL-6.0.8
  *
  * Each class in this library has its own version numbering to keep track of where the changes are. However, there is a major version too.
  *
- * @version 6.0.7
+ * @version 6.0.8
  */
 
 namespace TorneLIB;
@@ -446,14 +446,14 @@ if ( ! class_exists( 'Tornevall_cURL' ) && ! class_exists( 'TorneLIB\Tornevall_c
 		private $NETWORK;
 
 		/** @var string Internal version that is being used to find out if we are running the latest version of this library */
-		private $TorneCurlVersion = "6.0.6";
+		private $TorneCurlVersion = "6.0.7";
 		/** @var null Curl Version */
 		private $CurlVersion = null;
 		/** @var string This modules name (inherited to some exceptions amongst others) */
 		protected $ModuleName = "NetCurl";
 
 		/** @var string Internal release snapshot that is being used to find out if we are running the latest version of this library */
-		private $TorneCurlRelease = "20171001";
+		private $TorneCurlRelease = "20171002";
 
 		/**
 		 * Target environment (if target is production some debugging values will be skipped)
@@ -743,6 +743,7 @@ if ( ! class_exists( 'Tornevall_cURL' ) && ! class_exists( 'TorneLIB\Tornevall_c
 		 *
 		 * @param int $throwableMin Minimum value to throw on (Used with >=)
 		 * @param int $throwableMax Maxmimum last value to throw on (Used with <)
+		 *
 		 * @since 6.0.6
 		 */
 		public function setThrowableHttpCodes( $throwableMin = 400, $throwableMax = 599 ) {
@@ -857,6 +858,7 @@ if ( ! class_exists( 'Tornevall_cURL' ) && ! class_exists( 'TorneLIB\Tornevall_c
 		 * $myLib->setPostTypeDefault(CURL_POST_AS::POST_AS_JSON)
 		 *
 		 * @param int $postType
+		 *
 		 * @since 6.0.6
 		 */
 		public function setPostTypeDefault( $postType = CURL_POST_AS::POST_AS_NORMAL ) {
@@ -935,6 +937,7 @@ if ( ! class_exists( 'Tornevall_cURL' ) && ! class_exists( 'TorneLIB\Tornevall_c
 
 		/**
 		 * Set up whether we should allow html parsing or not
+		 *
 		 * @param bool $enabled
 		 */
 		public function setParseHtml( $enabled = false ) {
@@ -970,7 +973,7 @@ if ( ! class_exists( 'Tornevall_cURL' ) && ! class_exists( 'TorneLIB\Tornevall_c
 		 * @return string
 		 */
 		private function getHasUpdateState( $libName = 'tornelib_curl' ) {
-		    // Currently only supporting this internal module (through $myRelease).
+			// Currently only supporting this internal module (through $myRelease).
 			$myRelease  = $this->getInternalRelease();
 			$libRequest = ( ! empty( $libName ) ? "lib/" . $libName : "" );
 			$getInfo    = $this->doGet( "https://api.tornevall.net/2.0/libs/getLibs/" . $libRequest . "/me/" . $myRelease );
@@ -2521,6 +2524,7 @@ if ( ! class_exists( 'Tornevall_SimpleSoap' ) && ! class_exists( 'TorneLIB\Torne
 	 * Masking no difference of a SOAP call and a regular GET/POST
 	 *
 	 * @package TorneLIB
+	 * @version 6.0.2
 	 */
 	class Tornevall_SimpleSoap extends Tornevall_cURL {
 		protected $soapClient;
@@ -2530,6 +2534,7 @@ if ( ! class_exists( 'Tornevall_SimpleSoap' ) && ! class_exists( 'TorneLIB\Torne
 			'trace'      => true,
 			'cache_wsdl' => 0       // Replacing WSDL_CACHE_NONE (WSDL_CACHE_BOTH = 3)
 		);
+		private $simpleSoapVersion = "6.0.2";
 		private $soapUrl;
 		private $AuthData;
 		private $soapRequest;
@@ -2580,7 +2585,7 @@ if ( ! class_exists( 'Tornevall_SimpleSoap' ) && ! class_exists( 'TorneLIB\Torne
 
 		public function setCustomUserAgent( $userAgentString ) {
 			$this->CustomUserAgent = preg_replace( "/\s+$/", '', $userAgentString );
-			$this->setUserAgent( $userAgentString . " +TorneLIB-SimpleSoap" );
+			$this->setUserAgent( $userAgentString . " +TorneLIB-SimpleSoap/" . $this->simpleSoapVersion );
 			$this->sslGetOptionsStream();
 		}
 
@@ -2612,7 +2617,7 @@ if ( ! class_exists( 'Tornevall_SimpleSoap' ) && ! class_exists( 'TorneLIB\Torne
 					if ( ! $soapCode ) {
 						$soapCode = 500;
 					}
-					throw new \Exception( $this->ModuleName . " exception from soapClient: ". $soapException->getMessage(), $soapCode );
+					throw new \Exception( $this->ModuleName . " exception from soapClient: " . $soapException->getMessage(), $soapCode );
 				}
 			} else {
 				try {

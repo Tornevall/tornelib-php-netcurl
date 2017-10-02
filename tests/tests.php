@@ -5,6 +5,7 @@ namespace TorneLIB;
 require_once( '../vendor/autoload.php' );
 
 use PHPUnit\Framework\TestCase;
+ini_set('memory_limit', -1);    // Free memory limit, some tests requires more memory (like ip-range handling)
 
 class Tornevall_cURLTest extends TestCase {
 	private $StartErrorReporting;
@@ -418,16 +419,40 @@ class Tornevall_cURLTest extends TestCase {
 	}
 
 	function testGetIpType4() {
-		$this->assertTrue( $this->NET->getArpaFromAddr( "172.22.1.83", true ) === 4 );
+		$this->assertTrue( $this->NET->getArpaFromAddr( "172.22.1.83", true ) === TorneLIB_Network_IP_Protocols::PROTOCOL_IPV4 );
 	}
 
 	function testGetIpType6() {
-		$this->assertTrue( $this->NET->getArpaFromAddr( "2a03:2880:f113:83:face:b00c:0:25de", true ) === 6 );
+		$this->assertTrue( $this->NET->getArpaFromAddr( "2a03:2880:f113:83:face:b00c:0:25de", true ) === TorneLIB_Network_IP_Protocols::PROTOCOL_IPV6 );
 	}
 
 	function testGetIpTypeFail() {
-		$this->assertTrue( $this->NET->getArpaFromAddr( "This.Aint.An.Address", true ) === TorneLIB_Network_IP::IPTYPE_NONE );
+		$this->assertTrue( $this->NET->getArpaFromAddr( "This.Aint.An.Address", true ) === TorneLIB_Network_IP_Protocols::PROTOCOL_NONE );
 	}
+
+	function testMaskRangeArray24() {
+		$this->assertCount(255, $this->NET->getRangeFromMask("192.168.1.0/24"));
+	}
+	function testMaskRangeArray16() {
+		$this->assertCount(65535, $this->NET->getRangeFromMask("192.168.0.0/16"));
+	}
+	function testMaskRange24 () {
+		$this->assertTrue($this->NET->isIpInRange("192.168.1.55", "192.168.1.0/24"));
+	}
+	function testMaskRange24Fail() {
+		$this->assertFalse($this->NET->isIpInRange("192.168.2.55", "192.168.1.0/24"));
+	}
+	function testMaskRange16() {
+		$this->assertTrue($this->NET->isIpInRange("192.168.2.55", "192.168.0.0/16"));
+	}
+	function testMaskRange8() {
+		$this->assertTrue($this->NET->isIpInRange("172.213.9.3", "172.0.0.0/8"));
+	}
+	/*
+	function testMaskRangeArray8() {
+		$this->assertCount(16777215, $this->NET->getRangeFromMask("192.0.0.0/8"));
+	}
+	*/
 
 	/***************
 	 *  SSL TESTS  *

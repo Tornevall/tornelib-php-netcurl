@@ -300,22 +300,22 @@ if ( ! class_exists( 'TorneLIB_Network' ) && ! class_exists( 'TorneLIB\TorneLIB_
 				if ( $returnIpType === true ) {
 					$vArpaTest = $this->getArpaFromIpv6( $ipAddr );    // PHP 5.3
 					if ( ! empty( $vArpaTest ) ) {
-						return TorneLIB_Network_IP::IPTYPE_V6;
+						return TorneLIB_Network_IP_Protocols::PROTOCOL_IPV6;
 					} else {
-						return TorneLIB_Network_IP::IPTYPE_NONE;
+						return TorneLIB_Network_IP_Protocols::PROTOCOL_NONE;
 					}
 				} else {
 					return $this->getArpaFromIpv6( $ipAddr );
 				}
 			} else if ( filter_var( $ipAddr, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4 ) !== false ) {
 				if ( $returnIpType ) {
-					return TorneLIB_Network_IP::IPTYPE_V4;
+					return TorneLIB_Network_IP_Protocols::PROTOCOL_IPV4;
 				} else {
 					return $this->getArpaFromIpv4( $ipAddr );
 				}
 			} else {
 				if ( $returnIpType ) {
-					return TorneLIB_Network_IP::IPTYPE_NONE;
+					return TorneLIB_Network_IP_Protocols::PROTOCOL_NONE;
 				}
 			}
 
@@ -2501,15 +2501,15 @@ if ( ! class_exists( 'TorneLIB_NetBits' ) && ! class_exists( 'TorneLIB\TorneLIB_
 
 	}
 }
-if ( ! class_exists( 'TorneLIB_Network_IP' ) && ! class_exists( 'TorneLIB\TorneLIB_Network_IP' ) ) {
+if ( ! class_exists( 'TorneLIB_Network_IP_Protocols' ) && ! class_exists( 'TorneLIB\TorneLIB_Network_IP_Protocols' ) ) {
 	/**
 	 * Class TorneLIB_Network_IP IP Address Types class
 	 * @package TorneLIB
 	 */
-	abstract class TorneLIB_Network_IP {
-		const IPTYPE_NONE = 0;
-		const IPTYPE_V4 = 4;
-		const IPTYPE_V6 = 6;
+	abstract class TorneLIB_Network_IP_Protocols {
+		const PROTOCOL_NONE = 0;
+		const PROTOCOL_IPV4 = 4;
+		const PROTOCOL_IPV6 = 6;
 	}
 }
 if ( ! class_exists( 'Tornevall_SimpleSoap' ) && ! class_exists( 'TorneLIB\Tornevall_SimpleSoap' ) ) {

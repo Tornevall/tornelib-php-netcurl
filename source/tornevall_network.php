@@ -17,11 +17,11 @@
  */
 
 /**
- * Tornevall Networks NETCURL-6.0.8
+ * Tornevall Networks NETCURL-6.0.9
  *
  * Each class in this library has its own version numbering to keep track of where the changes are. However, there is a major version too.
  *
- * @version 6.0.8
+ * @version 6.0.9
  */
 
 namespace TorneLIB;
@@ -431,7 +431,7 @@ if ( ! class_exists( 'Tornevall_cURL' ) && ! class_exists( 'TorneLIB\Tornevall_c
 	 * Class Tornevall_cURL
 	 *
 	 * @package TorneLIB
-	 * @version 6.0.6
+	 * @version 6.0.8
 	 * @link https://docs.tornevall.net/x/KQCy TorneLIBv5
 	 * @link https://bitbucket.tornevall.net/projects/LIB/repos/tornelib-php-netcurl/browse Sources of TorneLIB
 	 * @link https://docs.tornevall.net/x/KwCy Network & Curl v5 and v6 Library usage
@@ -446,14 +446,14 @@ if ( ! class_exists( 'Tornevall_cURL' ) && ! class_exists( 'TorneLIB\Tornevall_c
 		private $NETWORK;
 
 		/** @var string Internal version that is being used to find out if we are running the latest version of this library */
-		private $TorneCurlVersion = "6.0.7";
+		private $TorneCurlVersion = "6.0.8";
 		/** @var null Curl Version */
 		private $CurlVersion = null;
 		/** @var string This modules name (inherited to some exceptions amongst others) */
 		protected $ModuleName = "NetCurl";
 
 		/** @var string Internal release snapshot that is being used to find out if we are running the latest version of this library */
-		private $TorneCurlReleaseDate = "20171002";
+		private $TorneCurlReleaseDate = "20171006";
 
 		/**
 		 * Target environment (if target is production some debugging values will be skipped)

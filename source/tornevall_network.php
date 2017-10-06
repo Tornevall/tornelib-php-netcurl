@@ -453,7 +453,7 @@ if ( ! class_exists( 'Tornevall_cURL' ) && ! class_exists( 'TorneLIB\Tornevall_c
 		protected $ModuleName = "NetCurl";
 
 		/** @var string Internal release snapshot that is being used to find out if we are running the latest version of this library */
-		private $TorneCurlRelease = "20171002";
+		private $TorneCurlReleaseDate = "20171002";
 
 		/**
 		 * Target environment (if target is production some debugging values will be skipped)
@@ -677,7 +677,7 @@ if ( ! class_exists( 'Tornevall_cURL' ) && ! class_exists( 'TorneLIB\Tornevall_c
 				$this->sslDriverError[] = "SSL Failure: HTTPS extension can not be found";
 			}
 			// Initial setup
-			$this->CurlUserAgent = 'Mozilla/4.0 (compatible; MSIE 7.0; Windows NT 5.1; .NET CLR 1.0.3705; .NET CLR 1.1.4322; Media Center PC 4.0; +TorneLIB+cUrl ' . $this->TorneCurlVersion . '/' . $this->TorneCurlRelease . ')';
+			$this->CurlUserAgent = 'Mozilla/4.0 (compatible; MSIE 7.0; Windows NT 5.1; .NET CLR 1.0.3705; .NET CLR 1.1.4322; Media Center PC 4.0; +TorneLIB+cUrl ' . $this->TorneCurlVersion . '/' . $this->TorneCurlReleaseDate . ')';
 			if ( function_exists( 'curl_version' ) ) {
 				$CurlVersionRequest = curl_version();
 				$this->CurlVersion  = $CurlVersionRequest['version'];
@@ -734,7 +734,7 @@ if ( ! class_exists( 'Tornevall_cURL' ) && ! class_exists( 'TorneLIB\Tornevall_c
 			if ( ! $fullRelease ) {
 				return $this->TorneCurlVersion;
 			} else {
-				return $this->TorneCurlVersion . "-" . $this->TorneCurlRelease;
+				return $this->TorneCurlVersion . "-" . $this->TorneCurlReleaseDate;
 			}
 		}
 
@@ -962,7 +962,7 @@ if ( ! class_exists( 'Tornevall_cURL' ) && ! class_exists( 'TorneLIB\Tornevall_c
 		 */
 		public function getInternalRelease() {
 			if ( defined( 'TORNELIB_ALLOW_VERSION_REQUESTS' ) && TORNELIB_ALLOW_VERSION_REQUESTS === true ) {
-				return $this->TorneCurlVersion . "," . $this->TorneCurlRelease;
+				return $this->TorneCurlVersion . "," . $this->TorneCurlReleaseDate;
 			}
 			throw new \Exception( $this->ModuleName . " internalReleaseException [" . __CLASS__ . "]: Version requests are not allowed in current state (permissions required)", 403 );
 		}
@@ -1024,9 +1024,9 @@ if ( ! class_exists( 'Tornevall_cURL' ) && ! class_exists( 'TorneLIB\Tornevall_c
 		public function setUserAgent( $CustomUserAgent = "" ) {
 			if ( ! empty( $CustomUserAgent ) ) {
 				$this->CustomUserAgent .= preg_replace( "/\s+$/", '', $CustomUserAgent );
-				$this->CurlUserAgent   = $this->CustomUserAgent . " +TorneLIB+cUrl " . $this->TorneCurlVersion . '/' . $this->TorneCurlRelease;
+				$this->CurlUserAgent   = $this->CustomUserAgent . " +TorneLIB+cUrl " . $this->TorneCurlVersion . '/' . $this->TorneCurlReleaseDate;
 			} else {
-				$this->CurlUserAgent = 'Mozilla/4.0 (compatible; MSIE 7.0; Windows NT 5.1; .NET CLR 1.0.3705; .NET CLR 1.1.4322; Media Center PC 4.0; TorneLIB+cUrl ' . $this->TorneCurlVersion . '/' . $this->TorneCurlRelease . ')';
+				$this->CurlUserAgent = 'Mozilla/4.0 (compatible; MSIE 7.0; Windows NT 5.1; .NET CLR 1.0.3705; .NET CLR 1.1.4322; Media Center PC 4.0; TorneLIB+cUrl ' . $this->TorneCurlVersion . '/' . $this->TorneCurlReleaseDate . ')';
 			}
 		}
 
@@ -2123,6 +2123,45 @@ if ( ! class_exists( 'Tornevall_cURL' ) && ! class_exists( 'TorneLIB\Tornevall_c
 				}
 			}
 
+			// If certificates missing (place above the wsdl, as it has to be inheritaged down to the soapclient
+			if ( ! $this->TestCerts() ) {
+				// And we're allowed to run without them
+				if ( ! $this->sslVerify && $this->allowSslUnverified ) {
+					// Then disable the checking here
+					curl_setopt( $this->CurlSession, CURLOPT_SSL_VERIFYHOST, 0 );
+					curl_setopt( $this->CurlSession, CURLOPT_SSL_VERIFYPEER, 0 );
+					$this->curlopt[CURLOPT_SSL_VERIFYHOST] = 0;
+					$this->curlopt[CURLOPT_SSL_VERIFYPEER] = 0;
+				} else {
+					// From libcurl 7.28.1 CURLOPT_SSL_VERIFYHOST is deprecated. However, using the value 1 can be used
+					// as of PHP 5.4.11, where the deprecation notices was added. The deprecation has started before libcurl
+					// 7.28.1 (this was discovered on a server that was running PHP 5.5 and libcurl-7.22). In full debug
+					// even libcurl-7.22 was generating this message, so from PHP 5.4.11 we are now enforcing the value 2
+					// for CURLOPT_SSL_VERIFYHOST instead. The reason of why we are using the value 1 before this version
+					// is actually a lazy thing, as we don't want to break anything that might be unsupported before this version.
+					if ( version_compare( PHP_VERSION, '5.4.11', ">=" ) ) {
+						curl_setopt( $this->CurlSession, CURLOPT_SSL_VERIFYHOST, 2 );
+						$this->curlopt[CURLOPT_SSL_VERIFYHOST] = 2;
+					} else {
+						curl_setopt( $this->CurlSession, CURLOPT_SSL_VERIFYHOST, 1 );
+						$this->curlopt[CURLOPT_SSL_VERIFYHOST] = 1;
+					}
+					curl_setopt( $this->CurlSession, CURLOPT_SSL_VERIFYPEER, 1 );
+					$this->curlopt[CURLOPT_SSL_VERIFYPEER] = 1;
+				}
+			} else {
+				// Silently configure for https-connections, if exists
+				if ( $this->useCertFile != "" && file_exists( $this->useCertFile ) ) {
+					try {
+						curl_setopt( $this->CurlSession, CURLOPT_CAINFO, $this->useCertFile );
+						curl_setopt( $this->CurlSession, CURLOPT_CAPATH, dirname( $this->useCertFile ) );
+						$this->curlopt[CURLOPT_CAINFO] = $this->useCertFile;
+						$this->curlopt[CURLOPT_CAPATH] = dirname( $this->useCertFile );
+					} catch ( \Exception $e ) {
+					}
+				}
+			}
+
 			// Prepare SOAPclient if requested
 			if ( preg_match( "/\?wsdl$|\&wsdl$/i", $this->CurlURL ) || $postAs == CURL_POST_AS::POST_AS_SOAP ) {
 				if ( ! $this->hasSoap() ) {
@@ -2208,37 +2247,6 @@ if ( ! class_exists( 'Tornevall_cURL' ) && ! class_exists( 'TorneLIB\Tornevall_c
 				}
 			}
 
-			// If certificates missing
-			if ( ! $this->TestCerts() ) {
-				// And we're allowed to run without them
-				if ( ! $this->sslVerify && $this->allowSslUnverified ) {
-					// Then disable the checking here
-					curl_setopt( $this->CurlSession, CURLOPT_SSL_VERIFYHOST, 0 );
-					curl_setopt( $this->CurlSession, CURLOPT_SSL_VERIFYPEER, 0 );
-				} else {
-					// From libcurl 7.28.1 CURLOPT_SSL_VERIFYHOST is deprecated. However, using the value 1 can be used
-					// as of PHP 5.4.11, where the deprecation notices was added. The deprecation has started before libcurl
-					// 7.28.1 (this was discovered on a server that was running PHP 5.5 and libcurl-7.22). In full debug
-					// even libcurl-7.22 was generating this message, so from PHP 5.4.11 we are now enforcing the value 2
-					// for CURLOPT_SSL_VERIFYHOST instead. The reason of why we are using the value 1 before this version
-					// is actually a lazy thing, as we don't want to break anything that might be unsupported before this version.
-					if ( version_compare( PHP_VERSION, '5.4.11', ">=" ) ) {
-						curl_setopt( $this->CurlSession, CURLOPT_SSL_VERIFYHOST, 2 );
-					} else {
-						curl_setopt( $this->CurlSession, CURLOPT_SSL_VERIFYHOST, 1 );
-					}
-					curl_setopt( $this->CurlSession, CURLOPT_SSL_VERIFYPEER, 1 );
-				}
-			} else {
-				// Silently configure for https-connections, if exists
-				if ( $this->useCertFile != "" && file_exists( $this->useCertFile ) ) {
-					try {
-						curl_setopt( $this->CurlSession, CURLOPT_CAINFO, $this->useCertFile );
-						curl_setopt( $this->CurlSession, CURLOPT_CAPATH, dirname( $this->useCertFile ) );
-					} catch ( \Exception $e ) {
-					}
-				}
-			}
 			curl_setopt( $this->CurlSession, CURLOPT_VERBOSE, false );
 			if ( isset( $this->CurlProxy ) && ! empty( $this->CurlProxy ) ) {
 				// Run from proxy

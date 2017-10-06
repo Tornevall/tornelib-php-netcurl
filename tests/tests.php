@@ -11,6 +11,8 @@ ini_set( 'memory_limit', - 1 );    // Free memory limit, some tests requires mor
 class Tornevall_cURLTest extends TestCase {
 	private $StartErrorReporting;
 
+	/** @var TorneLIB_Network */
+	private $NET;
 	/** @var Tornevall_cURL */
 	private $CURL;
 	/** @var TorneLIB_Crypto */
@@ -20,9 +22,7 @@ class Tornevall_cURLTest extends TestCase {
 	private $TorSetupType = 4;      /* CURLPROXY_SOCKS4*/
 	private $CurlVersion = null;
 
-	/*
-	 * Compressed strings over base64
-	 */
+	// Compressed strings setup over base64
 	private $testCompressString = "Testing my string";
 	private $gz0Base = "H4sIAAAAAAAEAwERAO7_VGVzdGluZyBteSBzdHJpbmf030_XEQAAAA";
 	private $gz9Base = "H4sIAAAAAAACAwtJLS7JzEtXyK1UKC4pArIA9N9P1xEAAAA";
@@ -56,11 +56,13 @@ class Tornevall_cURLTest extends TestCase {
 		 * Set up testing URLS
 		 */
 		$this->Urls = array(
-			'simple'     => 'http://identifier.tornevall.net/',
-			'simplejson' => 'http://identifier.tornevall.net/?json',
-			'tests'      => 'developer.tornevall.net/tests/tornevall_network/',
-			'soap'       => 'developer.tornevall.net/tests/tornevall_network/index.wsdl?wsdl',
-			'httpcode'   => 'developer.tornevall.net/tests/tornevall_network/http.php',
+			'simple'      => 'http://identifier.tornevall.net/',
+			'simplejson'  => 'http://identifier.tornevall.net/?json',
+			'tests'       => 'developer.tornevall.net/tests/tornevall_network/',
+			'soap'        => 'developer.tornevall.net/tests/tornevall_network/index.wsdl?wsdl',
+			'httpcode'    => 'developer.tornevall.net/tests/tornevall_network/http.php',
+			'selfsigned'  => 'https://dev-ssl-self.tornevall.nu',
+			'mismatching' => 'https://dev-ssl-mismatch.tornevall.nu',
 		);
 	}
 
@@ -192,6 +194,46 @@ class Tornevall_cURLTest extends TestCase {
 		$this->assertTrue( $this->hasBody( $container ) );
 	}
 
+	function testSimpleGetProxy() {
+		$this->pemDefault();
+		exec( "service tor status", $ubuntuService );
+		$serviceFound = false;
+		foreach ( $ubuntuService as $row ) {
+			// Unsafe control
+			if ( preg_match( "/loaded: loaded/i", $row ) ) {
+				$serviceFound = true;
+			}
+		}
+		if ( $serviceFound ) {
+			$this->CURL->setProxy( "127.0.0.1:9050", CURLPROXY_SOCKS5 );
+			$container = $this->simpleGet();
+			$ipType    = $this->NET->getArpaFromAddr( $container['body'], true );
+			$this->assertTrue( $ipType > 0 );
+
+			return;
+		}
+		$this->markTestSkipped( "I can't test this simpleGetProxy since there are no tor service installed" );
+	}
+	// Currently failing
+
+	/*	function testSimpleGetWsdlProxy() {
+			$this->pemDefault();
+			exec( "service tor status", $ubuntuService );
+			$serviceFound = false;
+			foreach ( $ubuntuService as $row ) {
+				// Unsafe control
+				if ( preg_match( "/loaded: loaded/i", $row ) ) {
+					$serviceFound = true;
+				}
+			}
+			if ( $serviceFound ) {
+				$this->CURL->setProxy( "127.0.0.1:9050", CURLPROXY_SOCKS5 );
+				$container = $this->getBody($this->CURL->doGet("https://" . $this->Urls['soap']));
+				return;
+			}
+			$this->markTestSkipped( "I can't test this simpleGetProxy since there are no tor service installed" );
+		}*/
+
 	/**
 	 * Fetch a response and immediately pick up the parsed response, from the internally stored last response
 	 */
@@ -310,6 +352,54 @@ class Tornevall_cURLTest extends TestCase {
 		$container = $this->urlGet( "ssl&bool", "https" );
 		$testBody  = $this->getBody( $container );
 		$this->assertTrue( $this->getBody( $container ) && ! empty( $testBody ) );
+	}
+
+	function testSslSelfSignedException() {
+		$this->pemDefault();
+		try {
+			$this->CURL->doGet( $this->Urls['selfsigned'] );
+		} catch ( \Exception $e ) {
+			$this->assertTrue( $e->getCode() == "60" );
+		}
+	}
+
+	function testSslMismatching() {
+		$this->pemDefault();
+		try {
+			$this->CURL->doGet( $this->Urls['selfsigned'] );
+		} catch ( \Exception $e ) {
+			$this->assertTrue( $e->getCode() == "60" );
+		}
+	}
+
+	function testSslSelfSignedIgnore() {
+		$this->pemDefault();
+		try {
+			$this->CURL->setSslVerify( false );
+			$this->CURL->setSslUnverified( true );
+			$container = $this->CURL->getParsedResponse( $this->CURL->doGet( $this->Urls['selfsigned'] . "/tests/tornevall_network/index.php?o=json&bool" ) );
+			if ( is_object( $container ) ) {
+				$this->assertTrue( isset( $container->methods ) );
+			}
+		} catch ( \Exception $e ) {
+		}
+	}
+
+	/**
+	 * Test that initially allows unverified ssl certificates should make netcurl to first call the url in a correct way and then,
+	 * if this fails, make a quite risky failover into unverified mode - silently.
+	 */
+	function testSslSelfSignedUnverifyOnRun() {
+		$this->pemDefault();
+		try {
+			$this->CURL->setSslUnverified( true );
+			$container = $this->CURL->getParsedResponse( $this->CURL->doGet( $this->Urls['selfsigned'] . "/tests/tornevall_network/index.php?o=json&bool" ) );
+			// The hasErrors function should return at least one error here
+			if ( is_object( $container ) && count( $this->CURL->hasErrors() ) >= 1 ) {
+				$this->assertTrue( isset( $container->methods ) );
+			}
+		} catch ( \Exception $e ) {
+		}
 	}
 
 	/**
@@ -685,6 +775,7 @@ class Tornevall_cURLTest extends TestCase {
 		$skipThis = true;
 		if ( $skipThis ) {
 			$this->markTestSkipped( "testSoapError is a special exceptions test. Normally we do not want to run this" );
+
 			return;
 		}
 		$localCurl = new Tornevall_cURL();
@@ -837,6 +928,7 @@ class Tornevall_cURLTest extends TestCase {
 			$this->CURL->doGet( "https://developer.tornevall.net/tests/tornevall_network/http.php?code=503" );
 		} catch ( \Exception $e ) {
 			$this->assertTrue( $e->getCode() == 503 );
+
 			return;
 		}
 		$this->markTestSkipped( "No throwables was set up" );

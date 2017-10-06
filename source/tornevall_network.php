@@ -488,6 +488,9 @@ if ( ! class_exists( 'Tornevall_cURL' ) && ! class_exists( 'TorneLIB\Tornevall_c
 		private $sslDriverError = array();
 		private $sslCurlDriver = false;
 
+		/** @var array Storage of invisible errors */
+		private $hasErrorsStore = array();
+
 		/**
 		 * Allow https calls to unverified peers/hosts
 		 *
@@ -603,7 +606,8 @@ if ( ! class_exists( 'Tornevall_cURL' ) && ! class_exists( 'TorneLIB\Tornevall_c
 		/** @var bool Use cookies and save them if needed (Normally not needed, but enabled by default) */
 		public $CurlUseCookies = true;
 		private $CurlResolveForced = false;
-		private $CurlResolveRetry = 0;
+		/** @var array Run-twice-in-handler (replaces CurlResolveRetry, etc) */
+		private $CurlRetryTypes = array( 'resolve' => 0, 'sslunverified' => 0 );
 		/** @var string Custom User-Agent sent in the HTTP-HEADER */
 		private $CurlUserAgent;
 		/** @var string Custom User-Agent Memory */
@@ -760,6 +764,18 @@ if ( ! class_exists( 'Tornevall_cURL' ) && ! class_exists( 'TorneLIB\Tornevall_c
 		 */
 		public function getThrowableHttpCodes() {
 			return $this->throwableHttpCodes;
+		}
+
+		public function hasErrors() {
+			if ( ! count( $this->hasErrorsStore ) ) {
+				return false;
+			}
+
+			return true;
+		}
+
+		public function getErrors() {
+			return $this->hasErrorsStore;
 		}
 
 		/**
@@ -1918,12 +1934,12 @@ if ( ! class_exists( 'Tornevall_cURL' ) && ! class_exists( 'TorneLIB\Tornevall_c
 		}
 
 		/**
-		 * Return number of tries resolver has been working
+		 * Return number of tries, arrayed, that different parts of netcurl has been trying to make a call
 		 *
-		 * @return int
+		 * @return array
 		 */
 		public function getRetries() {
-			return $this->CurlResolveRetry;
+			return $this->CurlRetryTypes;
 		}
 
 		/**
@@ -2130,8 +2146,8 @@ if ( ! class_exists( 'Tornevall_cURL' ) && ! class_exists( 'TorneLIB\Tornevall_c
 					// Then disable the checking here
 					curl_setopt( $this->CurlSession, CURLOPT_SSL_VERIFYHOST, 0 );
 					curl_setopt( $this->CurlSession, CURLOPT_SSL_VERIFYPEER, 0 );
-					$this->curlopt[CURLOPT_SSL_VERIFYHOST] = 0;
-					$this->curlopt[CURLOPT_SSL_VERIFYPEER] = 0;
+					$this->curlopt[ CURLOPT_SSL_VERIFYHOST ] = 0;
+					$this->curlopt[ CURLOPT_SSL_VERIFYPEER ] = 0;
 				} else {
 					// From libcurl 7.28.1 CURLOPT_SSL_VERIFYHOST is deprecated. However, using the value 1 can be used
 					// as of PHP 5.4.11, where the deprecation notices was added. The deprecation has started before libcurl
@@ -2141,44 +2157,33 @@ if ( ! class_exists( 'Tornevall_cURL' ) && ! class_exists( 'TorneLIB\Tornevall_c
 					// is actually a lazy thing, as we don't want to break anything that might be unsupported before this version.
 					if ( version_compare( PHP_VERSION, '5.4.11', ">=" ) ) {
 						curl_setopt( $this->CurlSession, CURLOPT_SSL_VERIFYHOST, 2 );
-						$this->curlopt[CURLOPT_SSL_VERIFYHOST] = 2;
+						$this->curlopt[ CURLOPT_SSL_VERIFYHOST ] = 2;
 					} else {
 						curl_setopt( $this->CurlSession, CURLOPT_SSL_VERIFYHOST, 1 );
-						$this->curlopt[CURLOPT_SSL_VERIFYHOST] = 1;
+						$this->curlopt[ CURLOPT_SSL_VERIFYHOST ] = 1;
 					}
 					curl_setopt( $this->CurlSession, CURLOPT_SSL_VERIFYPEER, 1 );
-					$this->curlopt[CURLOPT_SSL_VERIFYPEER] = 1;
+					$this->curlopt[ CURLOPT_SSL_VERIFYPEER ] = 1;
 				}
 			} else {
 				// Silently configure for https-connections, if exists
 				if ( $this->useCertFile != "" && file_exists( $this->useCertFile ) ) {
-					try {
-						curl_setopt( $this->CurlSession, CURLOPT_CAINFO, $this->useCertFile );
-						curl_setopt( $this->CurlSession, CURLOPT_CAPATH, dirname( $this->useCertFile ) );
-						$this->curlopt[CURLOPT_CAINFO] = $this->useCertFile;
-						$this->curlopt[CURLOPT_CAPATH] = dirname( $this->useCertFile );
-					} catch ( \Exception $e ) {
+					if ( ! $this->sslVerify && $this->allowSslUnverified ) {
+						// Then disable the checking here
+						curl_setopt( $this->CurlSession, CURLOPT_SSL_VERIFYHOST, 0 );
+						curl_setopt( $this->CurlSession, CURLOPT_SSL_VERIFYPEER, 0 );
+						$this->curlopt[ CURLOPT_SSL_VERIFYHOST ] = 0;
+						$this->curlopt[ CURLOPT_SSL_VERIFYPEER ] = 0;
+					} else {
+						try {
+							curl_setopt( $this->CurlSession, CURLOPT_CAINFO, $this->useCertFile );
+							curl_setopt( $this->CurlSession, CURLOPT_CAPATH, dirname( $this->useCertFile ) );
+							$this->curlopt[ CURLOPT_CAINFO ] = $this->useCertFile;
+							$this->curlopt[ CURLOPT_CAPATH ] = dirname( $this->useCertFile );
+						} catch ( \Exception $e ) {
+						}
 					}
 				}
-			}
-
-			// Prepare SOAPclient if requested
-			if ( preg_match( "/\?wsdl$|\&wsdl$/i", $this->CurlURL ) || $postAs == CURL_POST_AS::POST_AS_SOAP ) {
-				if ( ! $this->hasSoap() ) {
-					throw new \Exception( $this->ModuleName . " ".__FUNCTION__." exception: SoapClient is not available in this system", 500 );
-				}
-				$Soap = new Tornevall_SimpleSoap( $this->CurlURL, $this->curlopt );
-				$Soap->setCustomUserAgent( $this->CustomUserAgent );
-				$Soap->setThrowableState( $this->canThrow );
-				$Soap->setSoapAuthentication( $this->AuthData );
-				$Soap->SoapTryOnce = $this->SoapTryOnce;
-				try {
-					$getSoapResponse = $Soap->getSoap();
-				} catch ( \Exception $getSoapResponseException ) {
-					throw new \Exception( $this->ModuleName . " exception from soapClient: " . $getSoapResponseException->getMessage(), $getSoapResponseException->getCode() );
-				}
-
-				return $getSoapResponse;
 			}
 
 			// Picking up externally select outgoing ip if any
@@ -2237,13 +2242,17 @@ if ( ! class_exists( 'Tornevall_cURL' ) && ! class_exists( 'TorneLIB\Tornevall_c
 			if ( isset( $this->CurlTimeout ) && $this->CurlTimeout > 0 ) {
 				curl_setopt( $this->CurlSession, CURLOPT_CONNECTTIMEOUT, ceil( $this->CurlTimeout / 2 ) );
 				curl_setopt( $this->CurlSession, CURLOPT_TIMEOUT, $this->CurlTimeout );
+				$this->curlopt[ CURLOPT_CONNECTTIMEOUT ] = ceil( $this->CurlTimeout / 2 );
+				$this->curlopt[ CURLOPT_TIMEOUT ]        = ceil( $this->CurlTimeout );
 			}
 			if ( isset( $this->CurlResolve ) && $this->CurlResolve !== CURL_RESOLVER::RESOLVER_DEFAULT ) {
 				if ( $this->CurlResolve == CURL_RESOLVER::RESOLVER_IPV4 ) {
 					curl_setopt( $this->CurlSession, CURLOPT_IPRESOLVE, CURL_IPRESOLVE_V4 );
+					$this->curlopt[ CURLOPT_IPRESOLVE ] = CURL_IPRESOLVE_V4;
 				}
 				if ( $this->CurlResolve == CURL_RESOLVER::RESOLVER_IPV6 ) {
 					curl_setopt( $this->CurlSession, CURLOPT_IPRESOLVE, CURL_IPRESOLVE_V6 );
+					$this->curlopt[ CURLOPT_IPRESOLVE ] = CURL_IPRESOLVE_V6;
 				}
 			}
 
@@ -2251,19 +2260,23 @@ if ( ! class_exists( 'Tornevall_cURL' ) && ! class_exists( 'TorneLIB\Tornevall_c
 			if ( isset( $this->CurlProxy ) && ! empty( $this->CurlProxy ) ) {
 				// Run from proxy
 				curl_setopt( $this->CurlSession, CURLOPT_PROXY, $this->CurlProxy );
+				$this->curlopt[ CURLOPT_PROXYTYPE ] = $this->CurlProxy;
 				if ( isset( $this->CurlProxyType ) && ! empty( $this->CurlProxyType ) ) {
 					curl_setopt( $this->CurlSession, CURLOPT_PROXYTYPE, $this->CurlProxyType );
+					$this->curlopt[ CURLOPT_PROXYTYPE ] = $this->CurlProxyType;
 				}
 				unset( $this->CurlIp );
 			}
 			if ( isset( $this->CurlTunnel ) && ! empty( $this->CurlTunnel ) ) {
 				// Run in tunneling mode
 				curl_setopt( $this->CurlSession, CURLOPT_HTTPPROXYTUNNEL, true );
+				$this->curlopt[ CURLOPT_HTTPPROXYTUNNEL ] = true;
 				unset( $this->CurlIp );
 			}
 			// Another HTTP_REFERER
 			if ( isset( $this->CurlReferer ) && ! empty( $this->CurlReferer ) ) {
 				curl_setopt( $this->CurlSession, CURLOPT_REFERER, $this->CurlReferer );
+				$this->curlopt[ CURLOPT_REFERER ] = $this->CurlReferer;
 			}
 
 			$this->fixHttpHeaders( $this->CurlHeadersUserDefined );
@@ -2312,6 +2325,25 @@ if ( ! class_exists( 'Tornevall_cURL' ) && ! class_exists( 'TorneLIB\Tornevall_c
 			curl_setopt( $this->CurlSession, CURLOPT_AUTOREFERER, true );
 			curl_setopt( $this->CurlSession, CURLINFO_HEADER_OUT, true );
 
+			// Override with SoapClient just before the real curl_exec is the most proper way to handle inheritages
+			if ( preg_match( "/\?wsdl$|\&wsdl$/i", $this->CurlURL ) || $postAs == CURL_POST_AS::POST_AS_SOAP ) {
+				if ( ! $this->hasSoap() ) {
+					throw new \Exception( $this->ModuleName . " " . __FUNCTION__ . " exception: SoapClient is not available in this system", 500 );
+				}
+				$Soap = new Tornevall_SimpleSoap( $this->CurlURL, $this->curlopt );
+				$Soap->setCustomUserAgent( $this->CustomUserAgent );
+				$Soap->setThrowableState( $this->canThrow );
+				$Soap->setSoapAuthentication( $this->AuthData );
+				$Soap->SoapTryOnce = $this->SoapTryOnce;
+				try {
+					$getSoapResponse = $Soap->getSoap();
+				} catch ( \Exception $getSoapResponseException ) {
+					throw new \Exception( $this->ModuleName . " exception from soapClient: " . $getSoapResponseException->getMessage(), $getSoapResponseException->getCode() );
+				}
+
+				return $getSoapResponse;
+			}
+
 			$returnContent = curl_exec( $this->CurlSession );
 
 			if ( curl_errno( $this->CurlSession ) ) {
@@ -2321,13 +2353,26 @@ if ( ! class_exists( 'Tornevall_cURL' ) && ! class_exists( 'TorneLIB\Tornevall_c
 						'SessionInfo' => curl_getinfo( $this->CurlSession )
 					);
 				}
-				$errorCode = curl_errno( $this->CurlSession );
-				$errorMessage = curl_error($this->CurlSession);
-				if ( $this->CurlResolveForced && $this->CurlResolveRetry >= 2 ) {
-					throw new \Exception( $this->ModuleName . " exception in " . __FUNCTION__ . ": The maximum tries of curl_exec() for ".$this->CurlURL." has been reached without any successful response. Normally, this happens after " . $this->CurlResolveRetry . " CurlResolveRetries and might be connected with a bad URL or similar that can not resolve properly.\nCurl error message follows: " . $errorMessage, $errorCode );
+				$errorCode    = curl_errno( $this->CurlSession );
+				$errorMessage = curl_error( $this->CurlSession );
+				if ( $this->CurlResolveForced && $this->CurlRetryTypes['resolve'] >= 2 ) {
+					throw new \Exception( $this->ModuleName . " exception in " . __FUNCTION__ . ": The maximum tries of curl_exec() for " . $this->CurlURL . " has been reached without any successful response. Normally, this happens after " . $this->CurlRetryTypes['resolve'] . " CurlResolveRetries and might be connected with a bad URL or similar that can not resolve properly.\nCurl error message follows: " . $errorMessage, $errorCode );
+				}
+				if ( $errorCode == CURLE_SSL_CACERT || $errorCode === 60 && $this->allowSslUnverified ) {
+					if ( $this->CurlRetryTypes['sslunverified'] >= 2 ) {
+						throw new \Exception( $this->ModuleName . " exception in " . __FUNCTION__ . ": The maximum tries of curl_exec() for " . $this->CurlURL . ", during a try to make a SSL connection to work, has been reached without any successful response. This normally happens when allowSslUnverified is activated in the library and " . $this->CurlRetryTypes['resolve'] . " tries to fix the problem has been made, but failed.\nCurl error message follows: " . $errorMessage, $errorCode );
+					} else {
+						$this->hasErrorsStore[] = array( 'code' => $errorCode, 'message' => $errorMessage );
+						$this->setSslVerify( false );
+						$this->setSslUnverified( true );
+						$this->CurlRetryTypes['sslunverified'] ++;
+
+						return $this->handleUrlCall( $this->CurlURL, $postData, $CurlMethod );
+					}
 				}
 				if ( $errorCode == CURLE_COULDNT_RESOLVE_HOST || $errorCode === 45 ) {
-					$this->CurlResolveRetry ++;
+					$this->hasErrorsStore[] = array( 'code' => $errorCode, 'message' => $errorMessage );
+					$this->CurlRetryTypes['resolve'] ++;
 					unset( $this->CurlIp );
 					$this->CurlResolveForced = true;
 					if ( $this->CurlIpType == 6 ) {

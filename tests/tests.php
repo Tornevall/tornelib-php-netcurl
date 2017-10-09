@@ -71,7 +71,7 @@ class Tornevall_cURLTest extends TestCase {
 	}
 
 	private function pemDefault() {
-		$this->CURL->_DEBUG_TCURL_UNSET_LOCAL_PEM_LOCATION = false;
+		$this->CURL->setFlag('_DEBUG_TCURL_UNSET_LOCAL_PEM_LOCATION', false);
 		$this->CURL->setSslUnverified( true );
 		$this->CURL->setSslVerify( true );
 	}
@@ -561,10 +561,10 @@ class Tornevall_cURLTest extends TestCase {
 	 * Expected Result: Successful lookup with verified peer
 	 */
 	function testSslCertLocation() {
-		$this->CURL->_DEBUG_TCURL_UNSET_LOCAL_PEM_LOCATION = true;
+		$this->CURL->setFlag('_DEBUG_TCURL_UNSET_LOCAL_PEM_LOCATION', true);
 		$successfulVerification                            = false;
 		try {
-			$this->CURL->sslPemLocations = array( __DIR__ . "/ca-certificates.crt" );
+			$this->CURL->setSslPemLocations(array( __DIR__ . "/ca-certificates.crt" ));
 			$container                   = $this->getParsed( $this->urlGet( "ssl&bool&o=json", "https" ) );
 			$successfulVerification      = true;
 		} catch ( \Exception $e ) {
@@ -593,7 +593,7 @@ class Tornevall_cURLTest extends TestCase {
 	 * Expected Result: Failing the url call
 	 */
 	function testFailingSsl() {
-		$this->CURL->_DEBUG_TCURL_UNSET_LOCAL_PEM_LOCATION = true;
+		$this->CURL->setFlag('_DEBUG_TCURL_UNSET_LOCAL_PEM_LOCATION', true);
 		$successfulVerification                            = true;
 		try {
 			$this->CURL->setSslVerify( false );
@@ -610,9 +610,9 @@ class Tornevall_cURLTest extends TestCase {
 	 * Expected Result: Successful lookup with unverified peer
 	 */
 	function testUnverifiedSsl() {
-		$this->CURL->_DEBUG_TCURL_UNSET_LOCAL_PEM_LOCATION = true;
+		$this->CURL->setFlag('_DEBUG_TCURL_UNSET_LOCAL_PEM_LOCATION', true);
 		$successfulVerification                            = false;
-		$this->CURL->sslPemLocations                       = array( "non-existent-file" );
+		$this->CURL->setSslPemLocations(array("non-existent-file"),true);
 		try {
 			$this->CURL->setSslUnverified( true );
 			$container              = $this->getParsed( $this->urlGet( "ssl&bool&o=json", "https" ) );
@@ -941,5 +941,12 @@ class Tornevall_cURLTest extends TestCase {
 			$errorMessage = $e->getMessage();
 			$this->assertTrue( ( preg_match( "/maximum tries/", $errorMessage ) ? true : false ) );
 		}
+	}
+
+	public function testSetCurlOpt() {
+		$oldCurl = $this->CURL->getCurlOpt();
+		$this->CURL->setCurlOpt(array(CURLOPT_CONNECTTIMEOUT => 10));
+		$newCurl = $this->CURL->getCurlOpt();
+		$this->assertTrue($oldCurl[CURLOPT_CONNECTTIMEOUT] != $newCurl[CURLOPT_CONNECTTIMEOUT]);
 	}
 }

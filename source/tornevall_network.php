@@ -17,11 +17,11 @@
  */
 
 /**
- * Tornevall Networks NETCURL-6.0.9
+ * Tornevall Networks NETCURL-6.0.10
  *
  * Each class in this library has its own version numbering to keep track of where the changes are. However, there is a major version too.
  *
- * @version 6.0.9
+ * @version 6.0.10
  */
 
 namespace TorneLIB;
@@ -431,7 +431,7 @@ if ( ! class_exists( 'Tornevall_cURL' ) && ! class_exists( 'TorneLIB\Tornevall_c
 	 * Class Tornevall_cURL
 	 *
 	 * @package TorneLIB
-	 * @version 6.0.8
+	 * @version 6.0.9
 	 * @link https://docs.tornevall.net/x/KQCy TorneLIBv5
 	 * @link https://bitbucket.tornevall.net/projects/LIB/repos/tornelib-php-netcurl/browse Sources of TorneLIB
 	 * @link https://docs.tornevall.net/x/KwCy Network & Curl v5 and v6 Library usage
@@ -446,14 +446,14 @@ if ( ! class_exists( 'Tornevall_cURL' ) && ! class_exists( 'TorneLIB\Tornevall_c
 		private $NETWORK;
 
 		/** @var string Internal version that is being used to find out if we are running the latest version of this library */
-		private $TorneCurlVersion = "6.0.8";
+		private $TorneCurlVersion = "6.0.9";
 		/** @var null Curl Version */
 		private $CurlVersion = null;
 		/** @var string This modules name (inherited to some exceptions amongst others) */
 		protected $ModuleName = "NetCurl";
 
 		/** @var string Internal release snapshot that is being used to find out if we are running the latest version of this library */
-		private $TorneCurlReleaseDate = "20171006";
+		private $TorneCurlReleaseDate = "20171009";
 
 		/**
 		 * Target environment (if target is production some debugging values will be skipped)
@@ -648,15 +648,8 @@ if ( ! class_exists( 'Tornevall_cURL' ) && ! class_exists( 'TorneLIB\Tornevall_c
 		/** @var array An array that contains each curl_exec (curl_getinfo) when an exception are thrown */
 		private $sessionsExceptions = array();
 
-		/**
-		 * Defines whether, when there is an incoming SOAP-call, we should try to make the SOAP initialization twice.
-		 * This is a kind of fallback when users forget to add ?wsdl or &wsdl in urls that requires this to call for SOAP.
-		 * It may happen when setting CURL_POST_AS to a SOAP-call but, the URL is not defined as one.
-		 * Setting this to false, may suppress important errors, since this will suppress fatal errors at first try.
-		 *
-		 * @var bool
-		 */
-		public $SoapTryOnce = true;
+		/** @var bool The soapTryOnce variable */
+		private $SoapTryOnce = true;
 
 		/**
 		 * Tornevall_cURL constructor.
@@ -728,11 +721,37 @@ if ( ! class_exists( 'Tornevall_cURL' ) && ! class_exists( 'TorneLIB\Tornevall_c
 		}
 
 		/**
+		 * Allow fallback tests in SOAP mode
+		 *
+		 * Defines whether, when there is a SOAP-call, we should try to make the SOAP initialization twice.
+		 * This is a kind of fallback when users forget to add ?wsdl or &wsdl in urls that requires this to call for SOAP.
+		 * It may happen when setting CURL_POST_AS to a SOAP-call but, the URL is not defined as one.
+		 * Setting this to false, may suppress important errors, since this will suppress fatal errors at first try.
+		 *
+		 * @param bool $enabledMode
+		 * @since 6.0.9
+		 */
+		public function setSoapTryOnce($enabledMode = true) {
+			$this->SoapTryOnce = $enabledMode;
+		}
+
+		/**
+		 * Get the state of soapTryOnce
+		 *
+		 * @return bool
+		 * @since 6.0.9
+		 */
+		public function getSoapTryOnce() {
+			return $this->SoapTryOnce;
+		}
+
+		/**
 		 * Get the current version of the module
 		 *
 		 * @param bool $fullRelease
 		 *
 		 * @return string
+		 * @since 5.0.0
 		 */
 		public function getVersion( $fullRelease = false ) {
 			if ( ! $fullRelease ) {
@@ -766,6 +785,9 @@ if ( ! class_exists( 'Tornevall_cURL' ) && ! class_exists( 'TorneLIB\Tornevall_c
 			return $this->throwableHttpCodes;
 		}
 
+		/**
+		 * @return bool
+		 */
 		public function hasErrors() {
 			if ( ! count( $this->hasErrorsStore ) ) {
 				return false;
@@ -774,6 +796,9 @@ if ( ! class_exists( 'Tornevall_cURL' ) && ! class_exists( 'TorneLIB\Tornevall_c
 			return true;
 		}
 
+		/**
+		 * @return array
+		 */
 		public function getErrors() {
 			return $this->hasErrorsStore;
 		}
@@ -812,6 +837,7 @@ if ( ! class_exists( 'Tornevall_cURL' ) && ! class_exists( 'TorneLIB\Tornevall_c
 		 * When using soap/xml fields returned as CDATA will be returned as text nodes if this is disabled (default: diabled)
 		 *
 		 * @param bool $enabled
+		 * @since 5.0.0
 		 */
 		public function setCdata( $enabled = true ) {
 			$this->allowCdata = $enabled;
@@ -821,6 +847,7 @@ if ( ! class_exists( 'Tornevall_cURL' ) && ! class_exists( 'TorneLIB\Tornevall_c
 		 * Get current state of the setCdata
 		 *
 		 * @return bool
+		 * @since 5.0.0
 		 */
 		public function getCdata() {
 			return $this->allowCdata;
@@ -832,6 +859,7 @@ if ( ! class_exists( 'Tornevall_cURL' ) && ! class_exists( 'TorneLIB\Tornevall_c
 		 * Use this only if necessary and if you are planning to cookies locally while, for example, needs to set a logged in state more permanent during get/post/etc
 		 *
 		 * @param bool $enabled
+		 * @since 5.0.0
 		 */
 		public function setLocalCookies( $enabled = false ) {
 			$this->useLocalCookies = $enabled;
@@ -851,7 +879,7 @@ if ( ! class_exists( 'Tornevall_cURL' ) && ! class_exists( 'TorneLIB\Tornevall_c
 		 *
 		 * @param int $ResponseType
 		 *
-		 * @since 5.0.0/2017.4
+		 * @since 5.0.0
 		 */
 		public function setResponseType( $ResponseType = TORNELIB_CURL_RESPONSETYPE::RESPONSETYPE_ARRAY ) {
 			$this->ResponseType = $ResponseType;
@@ -1937,6 +1965,7 @@ if ( ! class_exists( 'Tornevall_cURL' ) && ! class_exists( 'TorneLIB\Tornevall_c
 		 * Return number of tries, arrayed, that different parts of netcurl has been trying to make a call
 		 *
 		 * @return array
+		 * @since 6.0.8
 		 */
 		public function getRetries() {
 			return $this->CurlRetryTypes;
@@ -2334,7 +2363,7 @@ if ( ! class_exists( 'Tornevall_cURL' ) && ! class_exists( 'TorneLIB\Tornevall_c
 				$Soap->setCustomUserAgent( $this->CustomUserAgent );
 				$Soap->setThrowableState( $this->canThrow );
 				$Soap->setSoapAuthentication( $this->AuthData );
-				$Soap->SoapTryOnce = $this->SoapTryOnce;
+				$Soap->setSoapTryOnce($this->SoapTryOnce);
 				try {
 					$getSoapResponse = $Soap->getSoap();
 				} catch ( \Exception $getSoapResponseException ) {
@@ -2578,7 +2607,7 @@ if ( ! class_exists( 'Tornevall_SimpleSoap' ) && ! class_exists( 'TorneLIB\Torne
 	 * Masking no difference of a SOAP call and a regular GET/POST
 	 *
 	 * @package TorneLIB
-	 * @version 6.0.2
+	 * @version 6.0.3
 	 */
 	class Tornevall_SimpleSoap extends Tornevall_cURL {
 		protected $soapClient;
@@ -2588,7 +2617,7 @@ if ( ! class_exists( 'Tornevall_SimpleSoap' ) && ! class_exists( 'TorneLIB\Torne
 			'trace'      => true,
 			'cache_wsdl' => 0       // Replacing WSDL_CACHE_NONE (WSDL_CACHE_BOTH = 3)
 		);
-		private $simpleSoapVersion = "6.0.2";
+		private $simpleSoapVersion = "6.0.3";
 		private $soapUrl;
 		private $AuthData;
 		private $soapRequest;
@@ -2600,9 +2629,9 @@ if ( ! class_exists( 'Tornevall_SimpleSoap' ) && ! class_exists( 'TorneLIB\Torne
 		private $CustomUserAgent;
 		private $soapFaultExceptionObject;
 
-		public $SoapFaultString = null;
-		public $SoapFaultCode = 0;
-		public $SoapTryOnce = true;
+		private $SoapFaultString = null;
+		private $SoapFaultCode = 0;
+		private $SoapTryOnce = true;
 
 		/**
 		 * Tornevall_SimpleSoap constructor.
@@ -2700,6 +2729,20 @@ if ( ! class_exists( 'Tornevall_SimpleSoap' ) && ! class_exists( 'TorneLIB\Torne
 			return $this;
 		}
 
+		/**
+		 * @param bool $enabledState
+		 */
+		public function setSoapTryOnce($enabledState = true) {
+			$this->SoapTryOnce = $enabledState:
+		}
+
+		/**
+		 * @return bool
+		 */
+		public function getSoapTryOnce() {
+			return $this->SoapTryOnce;
+		}
+
 		function __call( $name, $arguments ) {
 			$returnResponse = array(
 				'header' => array( 'info' => null, 'full' => null ),
@@ -2768,6 +2811,14 @@ if ( ! class_exists( 'Tornevall_SimpleSoap' ) && ! class_exists( 'TorneLIB\Torne
 		public function getLibResponse() {
 			return $this->libResponse;
 		}
+
+		public function getSoapFaultString() {
+			return $this->SoapFaultString;
+		}
+		public function getSoapFaultCode() {
+			return $this->SoapFaultCode;
+		}
+
 
 		/**
 		 * Get the SOAP response independently on exceptions or successes

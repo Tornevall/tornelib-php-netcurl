@@ -634,7 +634,8 @@ if ( ! class_exists( 'Tornevall_cURL' ) && ! class_exists( 'TorneLIB\Tornevall_c
 		private $sessionsExceptions = array();
 		/** @var bool The soapTryOnce variable */
 		private $SoapTryOnce = true;
-		private $curlConstants = array();
+		private $curlConstantsOpt = array();
+		private $curlConstantsErr = array();
 
 		/**
 		 * Set up if this library can throw exceptions, whenever it needs to do that.
@@ -660,8 +661,11 @@ if ( ! class_exists( 'Tornevall_cURL' ) && ! class_exists( 'TorneLIB\Tornevall_c
 			try {
 				$constants = @get_defined_constants();
 				foreach ( $constants as $constKey => $constInt ) {
-					if ( preg_match( "/^curlopt/i", $constKey ) || preg_match( "/^curle/i", $constKey ) ) {
-						$this->curlConstants[ $constInt ] = $constKey;
+					if ( preg_match( "/^curlopt/i", $constKey ) ) {
+						$this->curlConstantsOpt[ $constInt ] = $constKey;
+					}
+					if (preg_match( "/^curle/i", $constKey ) ) {
+						$this->curlConstantsErr[$constInt] = $constKey;
 					}
 				}
 			} catch (\Exception $constantException) {}
@@ -1219,11 +1223,11 @@ if ( ! class_exists( 'Tornevall_cURL' ) && ! class_exists( 'TorneLIB\Tornevall_c
 		 */
 		public function getCurlOptByKeys() {
 			$return = array();
-			if (is_array($this->curlConstants)) {
+			if (is_array($this->curlConstantsOpt)) {
 				$currentCurlOpt = $this->getCurlOpt();
 				foreach ($currentCurlOpt as $curlOptKey => $curlOptValue) {
-					if (isset($this->curlConstants[$curlOptKey])) {
-						$return[$this->curlConstants[$curlOptKey]] = $curlOptValue;
+					if (isset($this->curlConstantsOpt[$curlOptKey])) {
+						$return[$this->curlConstantsOpt[$curlOptKey]] = $curlOptValue;
 					} else {
 						$return[$curlOptKey] = $curlOptValue;
 					}

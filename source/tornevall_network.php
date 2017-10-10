@@ -17,11 +17,11 @@
  */
 
 /**
- * Tornevall Networks NETCURL-6.0.10
+ * Tornevall Networks netCurl library - Yet another http- and network communicator library
  *
  * Each class in this library has its own version numbering to keep track of where the changes are. However, there is a major version too.
  *
- * @version 6.0.10
+ * @version 6.0.11
  */
 
 namespace TorneLIB;
@@ -489,11 +489,11 @@ if ( ! class_exists( 'Tornevall_cURL' ) && ! class_exists( 'TorneLIB\Tornevall_c
 		/** @var string This modules name (inherited to some exceptions amongst others) */
 		protected $ModuleName = "NetCurl";
 		/** @var string Internal version that is being used to find out if we are running the latest version of this library */
-		private $TorneCurlVersion = "6.0.9";
+		private $TorneCurlVersion = "6.0.10";
 		/** @var null Curl Version */
 		private $CurlVersion = null;
 		/** @var string Internal release snapshot that is being used to find out if we are running the latest version of this library */
-		private $TorneCurlReleaseDate = "20171009";
+		private $TorneCurlReleaseDate = "20171010";
 		/**
 		 * Prepare TorneLIB_Network class if it exists (as of the november 2016 it does).
 		 *
@@ -503,7 +503,7 @@ if ( ! class_exists( 'Tornevall_cURL' ) && ! class_exists( 'TorneLIB\Tornevall_c
 		/**
 		 * Target environment (if target is production some debugging values will be skipped)
 		 *
-		 * @since 5.0.0-20170210
+		 * @since 5.0.0
 		 * @var int
 		 */
 		private $TargetEnvironment = TORNELIB_CURL_ENVIRONMENT::ENVIRONMENT_PRODUCTION;
@@ -634,6 +634,8 @@ if ( ! class_exists( 'Tornevall_cURL' ) && ! class_exists( 'TorneLIB\Tornevall_c
 		private $sessionsExceptions = array();
 		/** @var bool The soapTryOnce variable */
 		private $SoapTryOnce = true;
+		private $curlConstants = array();
+
 		/**
 		 * Set up if this library can throw exceptions, whenever it needs to do that.
 		 *
@@ -654,7 +656,16 @@ if ( ! class_exists( 'Tornevall_cURL' ) && ! class_exists( 'TorneLIB\Tornevall_c
 		 */
 		public function __construct( $PreferredURL = '', $PreparedPostData = array(), $PreferredMethod = CURL_METHODS::METHOD_POST ) {
 			register_shutdown_function( array( $this, 'tornecurl_terminate' ) );
-
+			// Store constants of curl errors and curlOptions
+			try {
+				$constants = @get_defined_constants();
+				foreach ( $constants as $constKey => $constInt ) {
+					if ( preg_match( "/^curlopt/i", $constKey ) || preg_match( "/^curle/i", $constKey ) ) {
+						$this->curlConstants[ $constInt ] = $constKey;
+					}
+				}
+			} catch (\Exception $constantException) {}
+			unset($constants);
 			if ( ! function_exists( 'curl_init' ) ) {
 				throw new \Exception( $this->ModuleName . " curl init exception: curl library not found" );
 			}
@@ -817,6 +828,7 @@ if ( ! class_exists( 'Tornevall_cURL' ) && ! class_exists( 'TorneLIB\Tornevall_c
 		 * @param string $flagKey
 		 *
 		 * @return bool
+		 * @since 6.0.9
 		 */
 		public function isFlag($flagKey = '') {
 			if ($this->hasFlag($flagKey)) {
@@ -1057,7 +1069,7 @@ if ( ! class_exists( 'Tornevall_cURL' ) && ! class_exists( 'TorneLIB\Tornevall_c
 		 * To not break production environments by setting for example _DEBUG_TCURL_UNSET_LOCAL_PEM_LOCATION, switching over to test mode is required
 		 * to use those variables.
 		 *
-		 * @since 5.0.0-20170210
+		 * @since 5.0.0
 		 */
 		public function setTestEnabled() {
 			$this->TargetEnvironment = TORNELIB_CURL_ENVIRONMENT::ENVIRONMENT_TEST;
@@ -1200,6 +1212,27 @@ if ( ! class_exists( 'Tornevall_cURL' ) && ! class_exists( 'TorneLIB\Tornevall_c
 		}
 
 		/**
+		 * Easy readable curlopts
+		 *
+		 * @return array
+		 * @since 6.0.10
+		 */
+		public function getCurlOptByKeys() {
+			$return = array();
+			if (is_array($this->curlConstants)) {
+				$currentCurlOpt = $this->getCurlOpt();
+				foreach ($currentCurlOpt as $curlOptKey => $curlOptValue) {
+					if (isset($this->curlConstants[$curlOptKey])) {
+						$return[$this->curlConstants[$curlOptKey]] = $curlOptValue;
+					} else {
+						$return[$curlOptKey] = $curlOptValue;
+					}
+				}
+			}
+			return $return;
+		}
+
+		/**
 		 * Set up special SSL option array for communicators
 		 *
 		 * @param array $sslOptArray
@@ -1262,7 +1295,6 @@ if ( ! class_exists( 'Tornevall_cURL' ) && ! class_exists( 'TorneLIB\Tornevall_c
 		public function getStoredExceptionInformation() {
 			return $this->sessionsExceptions;
 		}
-
 
 		/// SPECIAL FEATURES
 
@@ -1576,7 +1608,7 @@ if ( ! class_exists( 'Tornevall_cURL' ) && ! class_exists( 'TorneLIB\Tornevall_c
 		 * in cases, when crt-files are missing and PHP can not under very specific circumstances verify the peer. To allow this behaviour, the client
 		 * MUST use this function.
 		 *
-		 * @since 5.0.0-20170210
+		 * @since 5.0.0
 		 *
 		 * @param bool $enabledFlag
 		 */

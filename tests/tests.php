@@ -949,4 +949,9 @@ class Tornevall_cURLTest extends TestCase {
 		$newCurl = $this->CURL->getCurlOpt();
 		$this->assertTrue($oldCurl[CURLOPT_CONNECTTIMEOUT] != $newCurl[CURLOPT_CONNECTTIMEOUT]);
 	}
+
+	public function testGetCurlOpt() {
+		 $newCurl = $this->CURL->getCurlOptByKeys();
+		 $this->assertTrue(isset($newCurl['CURLOPT_CONNECTTIMEOUT']));
+	}
 }

@@ -597,7 +597,8 @@ if ( ! class_exists( 'Tornevall_cURL' ) && ! class_exists( 'TorneLIB\Tornevall_c
 		private $CurlHeadersUserDefined = array();
 		private $allowCdata = false;
 		private $useXmlSerializer = false;
-
+		/** @var bool Store information about the URL call and if the SSL was unsafe (disabled) */
+		protected $unsafeSslCall = false;
 
 		//// COOKIE CONFIGS
 		private $useLocalCookies = false;
@@ -1357,6 +1358,16 @@ if ( ! class_exists( 'Tornevall_cURL' ) && ! class_exists( 'TorneLIB\Tornevall_c
 			}
 
 			return "";
+		}
+
+		/**
+		 * Returns true if SSL verification was unset during the URL call
+		 *
+		 * @return bool
+		 * @since 6.0.10
+		 */
+		public function getSslIsUnsafe() {
+			return $this->unsafeSslCall;
 		}
 
 
@@ -2410,6 +2421,7 @@ if ( ! class_exists( 'Tornevall_cURL' ) && ! class_exists( 'TorneLIB\Tornevall_c
 					curl_setopt( $this->CurlSession, CURLOPT_SSL_VERIFYPEER, 0 );
 					$this->curlopt[ CURLOPT_SSL_VERIFYHOST ] = 0;
 					$this->curlopt[ CURLOPT_SSL_VERIFYPEER ] = 0;
+					$this->unsafeSslCall = true;
 				} else {
 					// From libcurl 7.28.1 CURLOPT_SSL_VERIFYHOST is deprecated. However, using the value 1 can be used
 					// as of PHP 5.4.11, where the deprecation notices was added. The deprecation has started before libcurl
@@ -2436,6 +2448,7 @@ if ( ! class_exists( 'Tornevall_cURL' ) && ! class_exists( 'TorneLIB\Tornevall_c
 						curl_setopt( $this->CurlSession, CURLOPT_SSL_VERIFYPEER, 0 );
 						$this->curlopt[ CURLOPT_SSL_VERIFYHOST ] = 0;
 						$this->curlopt[ CURLOPT_SSL_VERIFYPEER ] = 0;
+						$this->unsafeSslCall = true;
 					} else {
 						try {
 							curl_setopt( $this->CurlSession, CURLOPT_CAINFO, $this->useCertFile );
@@ -2627,6 +2640,7 @@ if ( ! class_exists( 'Tornevall_cURL' ) && ! class_exists( 'TorneLIB\Tornevall_c
 						$this->hasErrorsStore[] = array( 'code' => $errorCode, 'message' => $errorMessage );
 						$this->setSslVerify( false );
 						$this->setSslUnverified( true );
+						$this->unsafeSslCall = true;
 						$this->CurlRetryTypes['sslunverified'] ++;
 
 						return $this->handleUrlCall( $this->CurlURL, $postData, $CurlMethod );

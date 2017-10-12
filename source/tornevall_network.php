@@ -574,6 +574,7 @@ if ( ! class_exists( 'Tornevall_cURL' ) && ! class_exists( 'TorneLIB\Tornevall_c
 		//// POST-GET-RESPONSE
 		/** @var null A tempoary set of the response from the url called */
 		private $TemporaryResponse = null;
+		private $isInstant = false;
 		/** @var What post type to use when using POST (Enforced) */
 		private $forcePostType = null;
 		/** @var string Sets an encoding to the http call */
@@ -653,11 +654,15 @@ if ( ! class_exists( 'Tornevall_cURL' ) && ! class_exists( 'TorneLIB\Tornevall_c
 		 * @param string $PreferredURL
 		 * @param array $PreparedPostData
 		 * @param int $PreferredMethod
+		 * @param array $flags
 		 *
 		 * @throws \Exception
 		 */
-		public function __construct( $PreferredURL = '', $PreparedPostData = array(), $PreferredMethod = CURL_METHODS::METHOD_POST ) {
+		public function __construct( $PreferredURL = '', $PreparedPostData = array(), $PreferredMethod = CURL_METHODS::METHOD_POST, $flags = array() ) {
 			register_shutdown_function( array( $this, 'tornecurl_terminate' ) );
+			if (is_array($flags) && count($flags)) {
+				$this->setFlags( $flags );
+			}
 			// Store constants of curl errors and curlOptions
 			try {
 				$constants = @get_defined_constants();
@@ -711,7 +716,9 @@ if ( ! class_exists( 'Tornevall_cURL' ) && ! class_exists( 'TorneLIB\Tornevall_c
 			$this->throwableHttpCodes = array();
 
 			if ( ! empty( $PreferredURL ) ) {
+				$this->CurlURL = $PreferredURL;
 				$InstantResponse = null;
+				$this->isInstant = true;
 				if ( $PreferredMethod == CURL_METHODS::METHOD_GET ) {
 					$InstantResponse = $this->doGet( $PreferredURL );
 				} else if ( $PreferredMethod == CURL_METHODS::METHOD_POST ) {
@@ -736,6 +743,42 @@ if ( ! class_exists( 'Tornevall_cURL' ) && ! class_exists( 'TorneLIB\Tornevall_c
 			if ( ! count( glob( $this->CookiePath . "/*" ) ) && $this->CookiePathCreated ) {
 				@rmdir( $this->CookiePath );
 			}
+		}
+
+		function isAssoc(array $arrayData)
+		{
+			if (array() === $arrayData) return false;
+			return array_keys($arrayData) !== range(0, count($arrayData) - 1);
+		}
+
+		/**
+		 * Set multiple flags
+		 *
+		 * @param array $flags
+		 * @since 6.0.10
+		 */
+		private function setFlags( $flags = array() ) {
+			if ( $this->isAssoc( $flags ) ) {
+				foreach ( $flags as $flagKey => $flagData ) {
+					$this->setFlag( $flagKey, $flagData );
+				}
+			} else {
+				foreach ($flags as $flagKey) {
+					$this->setFlag($flagKey, true);
+				}
+			}
+			if ($this->isFlag("NOCHAIN")) {
+				$this->unsetFlag("CHAIN");
+			}
+		}
+
+		/**
+		 * Return all flags
+		 *
+		 * @return array
+		 */
+		public function getFlags() {
+			return $this->internalFlags;
 		}
 
 		/**
@@ -797,20 +840,39 @@ if ( ! class_exists( 'Tornevall_cURL' ) && ! class_exists( 'TorneLIB\Tornevall_c
 		}
 
 		/**
-		 * Set internal flag parameter
+		 * Set internal flag parameter.
 		 *
 		 * @param string $flagKey
-		 * @param string $flagValue
+		 * @param string $flagValue Nullable since 6.0.10 = If null, then it is considered a true boolean, set setFlag("key") will always be true as an activation key
 		 * @return bool If successful
 		 * @throws \Exception
 		 * @since 6.0.9
 		 */
-		public function setFlag($flagKey = '', $flagValue = '') {
+		public function setFlag($flagKey = '', $flagValue = null) {
 			if (!empty($flagKey)) {
-				$this->internalFlags[$flagKey] = $flagValue ;
+				if (is_null($flagValue)) {
+					$flagValue = true;
+				}
+				$this->internalFlags[ $flagKey ] = $flagValue;
 				return true;
 			}
 			throw new \Exception("Flags can not be empty", 500);
+		}
+
+		/**
+		 * @param string $flagKey
+		 * @return bool
+		 * @since 6.0.10
+		 */
+		public function unsetFlag($flagKey = '') {
+			if ($this->hasFlag($flagKey)) {
+				unset($this->internalFlags[$flagKey]);
+				return true;
+			}
+			return false;
+		}
+		public function removeFlag($flagKey = '') {
+			return $this->unsetFlag($flagKey);
 		}
 
 		/**
@@ -1910,6 +1972,11 @@ if ( ! class_exists( 'Tornevall_cURL' ) && ! class_exists( 'TorneLIB\Tornevall_c
 		 * @return array|string|TORNELIB_CURLOBJECT
 		 */
 		private function ParseResponse( $content = '' ) {
+			// Kill the chaining (for future releases, when we eventually raise chaining mode as default)
+			if ($this->isFlag("NOCHAIN")) {
+				$this->unsetFlag("CHAIN");
+			}
+
 			if ( ! is_string( $content ) ) {
 				return $content;
 			}
@@ -1965,7 +2032,9 @@ if ( ! class_exists( 'Tornevall_cURL' ) && ! class_exists( 'TorneLIB\Tornevall_c
 				return $returnResponseObject;
 			}
 			$this->TemporaryResponse = $returnResponse;
-
+			if ($this->isFlag("CHAIN")) {
+				return $this;
+			}
 			return $returnResponse;
 		}
 
@@ -2256,6 +2325,9 @@ if ( ! class_exists( 'Tornevall_cURL' ) && ! class_exists( 'TorneLIB\Tornevall_c
 		 */
 		public function doPost( $url = '', $postData = array(), $postAs = CURL_POST_AS::POST_AS_NORMAL ) {
 			$response = null;
+			if ($this->isInstant && is_array($this->TemporaryResponse)) {
+				return $this->TemporaryResponse;
+			}
 			if ( ! empty( $url ) ) {
 				$content  = $this->handleUrlCall( $url, $postData, CURL_METHODS::METHOD_POST, $postAs );
 				$response = $this->ParseResponse( $content );
@@ -2273,6 +2345,9 @@ if ( ! class_exists( 'Tornevall_cURL' ) && ! class_exists( 'TorneLIB\Tornevall_c
 		 */
 		public function doPut( $url = '', $postData = array(), $postAs = CURL_POST_AS::POST_AS_NORMAL ) {
 			$response = null;
+			if ($this->isInstant && is_array($this->TemporaryResponse)) {
+				return $this->TemporaryResponse;
+			}
 			if ( ! empty( $url ) ) {
 				$content  = $this->handleUrlCall( $url, $postData, CURL_METHODS::METHOD_PUT, $postAs );
 				$response = $this->ParseResponse( $content );
@@ -2290,6 +2365,9 @@ if ( ! class_exists( 'Tornevall_cURL' ) && ! class_exists( 'TorneLIB\Tornevall_c
 		 */
 		public function doDelete( $url = '', $postData = array(), $postAs = CURL_POST_AS::POST_AS_NORMAL ) {
 			$response = null;
+			if ($this->isInstant && is_array($this->TemporaryResponse)) {
+				return $this->TemporaryResponse;
+			}
 			if ( ! empty( $url ) ) {
 				$content  = $this->handleUrlCall( $url, $postData, CURL_METHODS::METHOD_DELETE, $postAs );
 				$response = $this->ParseResponse( $content );
@@ -2308,6 +2386,9 @@ if ( ! class_exists( 'Tornevall_cURL' ) && ! class_exists( 'TorneLIB\Tornevall_c
 		 */
 		public function doGet( $url = '', $postAs = CURL_POST_AS::POST_AS_NORMAL ) {
 			$response = null;
+			if ($this->isInstant && is_array($this->TemporaryResponse)) {
+				return $this->TemporaryResponse;
+			}
 			if ( ! empty( $url ) ) {
 				$content  = $this->handleUrlCall( $url, array(), CURL_METHODS::METHOD_GET, $postAs );
 				$response = $this->ParseResponse( $content );

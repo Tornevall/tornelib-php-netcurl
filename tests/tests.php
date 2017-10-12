@@ -954,4 +954,24 @@ class Tornevall_cURLTest extends TestCase {
 		 $newCurl = $this->CURL->getCurlOptByKeys();
 		 $this->assertTrue(isset($newCurl['CURLOPT_CONNECTTIMEOUT']));
 	}
+
+	function testUnsetFlag() {
+		$first = $this->CURL->setFlag("CHAIN", true);
+		$this->CURL->unsetFlag("CHAIN");
+		$second = $this->CURL->hasFlag("CHAIN");
+		$this->assertTrue($first && !$second);
+	}
+	function testChainGet() {
+		$this->CURL->setFlag("CHAIN");
+		$this->assertTrue(method_exists($this->CURL->doGet( $this->Urls['simplejson'] ), 'getParsedResponse'));
+		$this->CURL->unsetFlag("CHAIN");
+	}
+	function testChainByInit() {
+		$Chainer = new Tornevall_cURL(null, null, null, array("CHAIN"));
+		print_r($Chainer->doGet($this->Urls['simplejson'])->getParsedResponse());
+	}
+	function testChainGetFail() {
+		$this->CURL->unsetFlag( "CHAIN" );
+		$this->assertFalse(method_exists($this->CURL->doGet( $this->Urls['simplejson'] ), 'getParsedResponse'));
+	}
 }

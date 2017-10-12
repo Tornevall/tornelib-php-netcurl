@@ -42,6 +42,8 @@ class Tornevall_cURLTest extends TestCase {
 		$this->CURL                = new \TorneLIB\Tornevall_cURL();
 		$this->Crypto              = new \TorneLIB\TorneLIB_Crypto();
 
+		$this->CURL->setUserAgent("TorneLIB/NetCurl-PHPUNIT");
+
 		if ( function_exists( 'curl_version' ) ) {
 			$CurlVersionRequest = curl_version();
 			$this->CurlVersion  = $CurlVersionRequest['version'];
@@ -717,7 +719,7 @@ class Tornevall_cURLTest extends TestCase {
 		$this->pemDefault();
 		$redirectResponse = $this->CURL->doGet( "http://developer.tornevall.net/tests/tornevall_network/redirect.php?run" );
 		$redirectedUrls   = $this->CURL->getRedirectedUrls();
-		$this->assertTrue( $redirectResponse['code'] >= 300 && $redirectResponse['code'] <= 350 && preg_match( "/rerun/i", $redirectResponse['body'] ) && count( $redirectedUrls ) );
+		$this->assertTrue( intval($redirectResponse['code']) >= 300 && intval($redirectResponse['code']) <= 350 && count( $redirectedUrls ) );
 	}
 
 	/**
@@ -729,6 +731,27 @@ class Tornevall_cURLTest extends TestCase {
 		$redirectResponse = $this->CURL->doGet( "http://developer.tornevall.net/tests/tornevall_network/redirect.php?run" );
 		$redirectedUrls   = $this->CURL->getRedirectedUrls();
 		$this->assertTrue( $redirectResponse['code'] >= 300 && $redirectResponse['code'] <= 350 && ! preg_match( "/rerun/i", $redirectResponse['body'] ) && count( $redirectedUrls ) );
+	}
+
+	function testFollowRedirectManualDisable() {
+		$this->pemDefault();
+		$this->CURL->setEnforceFollowLocation( false );
+		$redirectResponse = $this->CURL->doGet( "http://developer.tornevall.net/tests/tornevall_network/redirect.php?run" );
+		$redirectedUrls   = $this->CURL->getRedirectedUrls();
+		$this->assertTrue( $redirectResponse['code'] >= 300 && $redirectResponse['code'] <= 350 && ! preg_match( "/rerun/i", $redirectResponse['body'] ) && count( $redirectedUrls ) );
+	}
+
+	/**
+	 * Tests the overriding function setEnforceFollowLocation and the setCurlOpt-overrider.
+	 * The expected result is to have setEnforceFollowLocation to be top prioritized over setCurlOpt here.
+	 */
+	function testFollowRedirectManualEnableWithSetCurlOptEnforcingToFalse() {
+		$this->pemDefault();
+		$this->CURL->setEnforceFollowLocation( true );
+		$this->CURL->setCurlOpt(CURLOPT_FOLLOWLOCATION, false);  // This is the doer since there are internal protection against the above enforcer
+		$redirectResponse = $this->CURL->doGet( "http://developer.tornevall.net/tests/tornevall_network/redirect.php?run" );
+		$redirectedUrls   = $this->CURL->getRedirectedUrls();
+		$this->assertTrue( $redirectResponse['code'] >= 300 && $redirectResponse['code'] <= 350 && preg_match( "/rerun/i", $redirectResponse['body'] ) && count( $redirectedUrls ) );
 	}
 
 	/**
@@ -968,10 +991,13 @@ class Tornevall_cURLTest extends TestCase {
 	}
 	function testChainByInit() {
 		$Chainer = new Tornevall_cURL(null, null, null, array("CHAIN"));
-		print_r($Chainer->doGet($this->Urls['simplejson'])->getParsedResponse());
+		$this->assertTrue(is_object($Chainer->doGet($this->Urls['simplejson'])->getParsedResponse()));
 	}
 	function testChainGetFail() {
 		$this->CURL->unsetFlag( "CHAIN" );
 		$this->assertFalse(method_exists($this->CURL->doGet( $this->Urls['simplejson'] ), 'getParsedResponse'));
+	}
+	function testDeprecatedIpClass() {
+		$this->assertTrue(TorneLIB_Network_IP::PROTOCOL_IPV6 === 6 && TorneLIB_Network_IP::IPTYPE_V6 && TorneLIB_Network_IP_Protocols::PROTOCOL_IPV6);
 	}
 }

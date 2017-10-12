@@ -837,6 +837,7 @@ class Tornevall_cURLTest extends TestCase {
 	function testSoapClient() {
 		$assertThis = true;
 		try {
+			$this->CURL->setUserAgent(" +UnitSoapAgent");
 			$this->CURL->doGet( "http://" . $this->Urls['soap'] );
 		} catch ( \Exception $e ) {
 			$assertThis = false;

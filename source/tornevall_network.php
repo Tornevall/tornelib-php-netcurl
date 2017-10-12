@@ -2984,7 +2984,7 @@ if ( ! class_exists( 'Tornevall_SimpleSoap' ) && ! class_exists( 'TorneLIB\Torne
 			parent::__construct();
 			$this->soapUrl = $Url;
 			$this->sslGetOptionsStream();
-			if ( ! count( $SoapOptions ) ) {
+			if ( count( $SoapOptions ) ) {
 				$this->soapOptions = $SoapOptions;
 			}
 			foreach ( $this->addSoapOptions as $soapKey => $soapValue ) {

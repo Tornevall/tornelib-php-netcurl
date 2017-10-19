@@ -3,3 +3,4 @@ composer.lock
 /vendor/
 .idea
 Makefile
+.composer.json.swp

@@ -18,7 +18,7 @@
  * Tornevall Networks netCurl library - Yet another http- and network communicator library
  * Each class in this library has its own version numbering to keep track of where the changes are. However, there is a major version too.
  * @package TorneLIB
- * @version 6.0.13
+ * @version 6.0.14
  */
 
 namespace TorneLIB;
@@ -32,7 +32,7 @@ if ( ! class_exists( 'TorneLIB_Network' ) && ! class_exists( 'TorneLIB\TorneLIB_
 	 * Library for handling network related things (currently not sockets). A conversion of a legacy PHP library called "TorneEngine" and family.
 	 *
 	 * Class TorneLIB_Network
-	 * @version 6.0.3
+	 * @version 6.0.4
 	 * @link https://phpdoc.tornevall.net/TorneLIBv5/class-TorneLIB.TorneLIB_Network.html PHPDoc/Staging - TorneLIB_Network
 	 * @link https://docs.tornevall.net/x/KQCy TorneLIB (PHP) Landing documentation
 	 * @link https://bitbucket.tornevall.net/projects/LIB/repos/tornelib-php/browse Sources of TorneLIB
@@ -73,6 +73,104 @@ if ( ! class_exists( 'TorneLIB_Network' ) && ! class_exists( 'TorneLIB\TorneLIB_
 			// Initiate and get client headers.
 			$this->renderProxyHeaders();
 			$this->BIT = new TorneLIB_NetBits();
+		}
+
+		/**
+		 * Try to fetch git tags from git URLS
+		 *
+		 * @param string $gitUrl
+		 * @param bool $cleanNonNumerics Normally you do not want to strip anything. This boolean however, decides if we will include non numerical version data in the returned array
+		 * @param bool $sanitizeNumerics If we decide to not include non numeric values from the version tag array (by $cleanNonNumerics), the tags will be sanitized in a preg_replace filter that will the keep numerics in the content only (with $cleanNonNumerics set to false, this boolen will have no effect)
+		 *
+		 * @return array
+		 * @throws \Exception
+		 * @since 6.0.4
+		 */
+		public function getGitTagsByUrl( $gitUrl = '', $cleanNonNumerics = false, $sanitizeNumerics = false ) {
+			$fetchFail = true;
+			$tagArray  = array();
+			$gitUrl    .= "/info/refs?service=git-upload-pack";
+			// Clean up all user auth data in URL if exists
+			$gitUrl = preg_replace( "/\/\/(.*?)@/", '//', $gitUrl );
+			$CURL   = new Tornevall_cURL();
+			try {
+				$gitGet = $CURL->doGet( $gitUrl );
+				$code   = intval( $CURL->getResponseCode() );
+				if ( $code >= 200 && $code <= 299 && ! empty( $gitGet['body'] ) ) {
+					$fetchFail = false;
+					preg_match_all( "/refs\/tags\/(.*?)\n/s", $gitGet['body'], $tagMatches );
+					if ( isset( $tagMatches[1] ) && is_array( $tagMatches[1] ) ) {
+						$tagList = $tagMatches[1];
+						foreach ( $tagList as $tag ) {
+							if ( ! preg_match( "/\^/", $tag ) ) {
+								if ( $cleanNonNumerics ) {
+									$exTag              = explode( ".", $tag );
+									$tagArrayUncombined = array();
+									foreach ( $exTag as $val ) {
+										if ( is_numeric( $val ) ) {
+											$tagArrayUncombined[] = $val;
+										} else {
+											if ( $sanitizeNumerics ) {
+												$tagArrayUncombined[] = preg_replace( "/[^0-9$]/is", '', $val );
+											}
+										}
+									}
+									$tag = implode( ".", $tagArrayUncombined );
+								}
+								// Fill the list here,if it has not already been added
+								if ( ! in_array( $tag, $tagArray ) ) {
+									$tagArray[] = $tag;
+								}
+							}
+						}
+					}
+				}
+				if ( count( $tagArray ) ) {
+					sort( $tagArray );
+				}
+			} catch ( \Exception $gitGetException ) {
+			}
+			if ( $fetchFail ) {
+				throw new \Exception( "Request failure, not 200 from URL", $code );
+			}
+
+			return $tagArray;
+		}
+
+		/**
+		 * @param string $myVersion
+		 * @param string $gitUrl
+		 *
+		 * @return array
+		 * @since 6.0.4
+		 */
+		public function getMyVersionByGitTag($myVersion = '', $gitUrl = '') {
+			$versionArray = $this->getGitTagsByUrl($gitUrl, true, true);
+			$versionsHigher = array();
+			if (in_array($myVersion, $versionArray)) {
+				foreach ($versionArray as $tagVersion) {
+					if (version_compare($tagVersion, $myVersion, ">")) {
+						$versionsHigher[] = $tagVersion;
+					}
+				}
+			}
+			return $versionsHigher;
+		}
+
+		/**
+		 * Find out if your internal version is older than the tag releases in a git repo
+		 *
+		 * @param string $myVersion
+		 * @param string $gitUrl
+		 *
+		 * @return bool
+		 * @since 6.0.4
+		 */
+		public function getVersionTooOld($myVersion = '', $gitUrl = '') {
+			if (count($this->getMyVersionByGitTag($myVersion, $gitUrl))) {
+				return true;
+			}
+			return false;
 		}
 
 		/**
@@ -463,7 +561,7 @@ if ( ! class_exists( 'Tornevall_cURL' ) && ! class_exists( 'TorneLIB\Tornevall_c
 	 * Class Tornevall_cURL
 	 *
 	 * @package TorneLIB
-	 * @version 6.0.12
+	 * @version 6.0.13
 	 * @link https://docs.tornevall.net/x/KQCy TorneLIBv5
 	 * @link https://bitbucket.tornevall.net/projects/LIB/repos/tornelib-php-netcurl/browse Sources of TorneLIB
 	 * @link https://docs.tornevall.net/x/KwCy Network & Curl v5 and v6 Library usage
@@ -899,6 +997,17 @@ if ( ! class_exists( 'Tornevall_cURL' ) && ! class_exists( 'TorneLIB\Tornevall_c
 				return true;
 			}
 			throw new \Exception("Flags can not be empty", 500);
+		}
+
+		/**
+		 * Get internal exceptions or return generic error code when throwing exceptions
+		 * @param string $errorMessageCode
+		 *
+		 * @return int
+		 * @since 6.0.13
+		 */
+		private function getInternalErrorCode($errorMessageCode = '') {
+			return 500;
 		}
 
 		/**
@@ -1749,14 +1858,24 @@ if ( ! class_exists( 'Tornevall_cURL' ) && ! class_exists( 'TorneLIB\Tornevall_c
 		 *
 		 * @param bool $enabledFlag
 		 *
+		 * @return bool
 		 * @throws \Exception
 		 */
 		public function setSslVerify( $enabledFlag = true ) {
+			// allowSslUnverified is set to true, the enabledFlag is also allowed to be set to false
 			if ( $this->allowSslUnverified ) {
 				$this->sslVerify = $enabledFlag;
 			} else {
-				throw new \Exception( $this->ModuleName . " setSslVerify exception: setSslUnverified(true) has not been set." );
+				// If the enabledFlag is false and the allowance is not set, we will not be allowed to disabled SSL verification either
+				if (!$enabledFlag) {
+					throw new \Exception( $this->ModuleName . " setSslVerify exception: setSslUnverified(true) has not been set", 500 );
+				} else {
+					// However, if we force the verify flag to be on, we won't care about the allowance override, as the security
+					// will be enhanced anyway.
+					$this->sslVerify = $enabledFlag;
+				}
 			}
+			return true;
 		}
 
 		/**
@@ -2621,9 +2740,9 @@ if ( ! class_exists( 'Tornevall_cURL' ) && ! class_exists( 'TorneLIB\Tornevall_c
 			if ( ! $this->TestCerts() ) {
 				// And we're allowed to run without them
 				if ( ! $this->sslVerify && $this->allowSslUnverified ) {
-					// Then disable the checking here
-					$this->setCurlOptInternal(CURLOPT_SSL_VERIFYHOST, 0);
-					$this->setCurlOptInternal(CURLOPT_SSL_VERIFYPEER, 0);
+					// Then disable the checking here (overriders should always be enforced)
+					$this->setCurlOpt(CURLOPT_SSL_VERIFYHOST, 0);
+					$this->setCurlOpt(CURLOPT_SSL_VERIFYPEER, 0);
 					$this->unsafeSslCall = true;
 				} else {
 					// From libcurl 7.28.1 CURLOPT_SSL_VERIFYHOST is deprecated. However, using the value 1 can be used
@@ -2644,8 +2763,8 @@ if ( ! class_exists( 'Tornevall_cURL' ) && ! class_exists( 'TorneLIB\Tornevall_c
 				if ( $this->useCertFile != "" && file_exists( $this->useCertFile ) ) {
 					if ( ! $this->sslVerify && $this->allowSslUnverified ) {
 						// Then disable the checking here
-						$this->setCurlOptInternal(CURLOPT_SSL_VERIFYHOST, 0);
-						$this->setCurlOptInternal(CURLOPT_SSL_VERIFYPEER, 0);
+						$this->setCurlOpt(CURLOPT_SSL_VERIFYHOST, 0);
+						$this->setCurlOpt(CURLOPT_SSL_VERIFYPEER, 0);
 						$this->unsafeSslCall = true;
 					} else {
 						try {

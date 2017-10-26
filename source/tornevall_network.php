@@ -681,9 +681,6 @@ if ( ! class_exists( 'Tornevall_cURL' ) && ! class_exists( 'TorneLIB\Tornevall_c
 		 */
 		private $NETWORK;
 
-		/** @var TorneLIB_NETCURL_EXCEPTIONS */
-		private $EXCEPTIONS;
-
 		/**
 		 * Target environment (if target is production some debugging values will be skipped)
 		 *

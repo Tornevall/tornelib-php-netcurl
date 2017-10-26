@@ -182,7 +182,7 @@ if ( ! class_exists( 'TorneLIB_Network' ) && ! class_exists( 'TorneLIB\TorneLIB_
 				$exceptionMessage = $gitGetException->getMessage();
 				$code             = $gitGetException->getCode();
 			}
-			if ( $fetchFail || $code > 0 ) {
+			if ( $fetchFail ) {
 				throw new \Exception( $exceptionMessage, $code );
 			}
 

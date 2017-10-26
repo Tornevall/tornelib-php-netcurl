@@ -2,8 +2,12 @@
 
 namespace TorneLIB;
 
-if (file_exists('../vendor/autoload.php')) {
+if ( file_exists( '../vendor/autoload.php' ) ) {
 	require_once( '../vendor/autoload.php' );
+}
+if (file_exists("../tornelib.php")) {
+	// Work with TorneLIBv5
+	require_once('../tornelib.php');
 }
 
 use PHPUnit\Framework\TestCase;

@@ -322,7 +322,6 @@ class Tornevall_cURLTest extends TestCase {
 		try {
 			$this->CURL->doGet( $this->Urls['selfsigned'] );
 		} catch ( \Exception $e ) {
-			echo $e->getCode();
 			$this->assertTrue( $e->getCode() == 60 || $e->getCode() == 500 || $e->getCode() === TORNELIB_NETCURL_EXCEPTIONS::NETCURL_SETSSLVERIFY_UNVERIFIED_NOT_SET );
 		}
 	}

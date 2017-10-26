@@ -30,7 +30,7 @@ class Tornevall_cURLTest extends TestCase {
 		$this->StartErrorReporting = error_reporting();
 		$this->NET                 = new \TorneLIB\TorneLIB_Network();
 		$this->CURL                = new \TorneLIB\Tornevall_cURL();
-		$this->CURL->setUserAgent("TorneLIB/NetCurl-PHPUNIT");
+		$this->CURL->setUserAgent( "TorneLIB/NetCurl-PHPUNIT" );
 
 		if ( function_exists( 'curl_version' ) ) {
 			$CurlVersionRequest = curl_version();
@@ -67,7 +67,7 @@ class Tornevall_cURLTest extends TestCase {
 	}*/
 
 	private function pemDefault() {
-		$this->CURL->setFlag('_DEBUG_TCURL_UNSET_LOCAL_PEM_LOCATION', false);
+		$this->CURL->setFlag( '_DEBUG_TCURL_UNSET_LOCAL_PEM_LOCATION', false );
 		//$this->CURL->setSslUnverified( true );
 		$this->CURL->setSslVerify( true );
 	}
@@ -316,7 +316,8 @@ class Tornevall_cURLTest extends TestCase {
 		try {
 			$this->CURL->doGet( $this->Urls['selfsigned'] );
 		} catch ( \Exception $e ) {
-			$this->assertTrue( $e->getCode() == 60 || $e->getCode() == 500);
+			echo $e->getCode();
+			$this->assertTrue( $e->getCode() == 60 || $e->getCode() == 500 || $e->getCode() === TORNELIB_NETCURL_EXCEPTIONS::NETCURL_SETSSLVERIFY_UNVERIFIED_NOT_SET );
 		}
 	}
 
@@ -325,7 +326,7 @@ class Tornevall_cURLTest extends TestCase {
 		try {
 			$this->CURL->doGet( $this->Urls['selfsigned'] );
 		} catch ( \Exception $e ) {
-			$this->assertTrue( $e->getCode() == 60 || $e->getCode() == 500);
+			$this->assertTrue( $e->getCode() == 60 || $e->getCode() == 500 || $e->getCode() === TORNELIB_NETCURL_EXCEPTIONS::NETCURL_SETSSLVERIFY_UNVERIFIED_NOT_SET );
 		}
 	}
 
@@ -339,7 +340,7 @@ class Tornevall_cURLTest extends TestCase {
 				$this->assertTrue( isset( $container->methods ) );
 			}
 		} catch ( \Exception $e ) {
-			$this->markTestIncomplete("Got exception " . $e->getCode() . ": " . $e->getMessage());
+			$this->markTestIncomplete( "Got exception " . $e->getCode() . ": " . $e->getMessage() );
 		}
 	}
 
@@ -357,7 +358,7 @@ class Tornevall_cURLTest extends TestCase {
 				$this->assertTrue( isset( $container->methods ) );
 			}
 		} catch ( \Exception $e ) {
-			$this->markTestIncomplete("Got exception " . $e->getCode() . ": " . $e->getMessage());
+			$this->markTestIncomplete( "Got exception " . $e->getCode() . ": " . $e->getMessage() );
 		}
 	}
 
@@ -520,12 +521,12 @@ class Tornevall_cURLTest extends TestCase {
 	 * Expected Result: Successful lookup with verified peer
 	 */
 	function testSslCertLocation() {
-		$this->CURL->setFlag('_DEBUG_TCURL_UNSET_LOCAL_PEM_LOCATION', true);
-		$successfulVerification                            = false;
+		$this->CURL->setFlag( '_DEBUG_TCURL_UNSET_LOCAL_PEM_LOCATION', true );
+		$successfulVerification = false;
 		try {
-			$this->CURL->setSslPemLocations(array( __DIR__ . "/ca-certificates.crt" ));
-			$container                   = $this->getParsed( $this->urlGet( "ssl&bool&o=json", "https" ) );
-			$successfulVerification      = true;
+			$this->CURL->setSslPemLocations( array( __DIR__ . "/ca-certificates.crt" ) );
+			$container              = $this->getParsed( $this->urlGet( "ssl&bool&o=json", "https" ) );
+			$successfulVerification = true;
 		} catch ( \Exception $e ) {
 		}
 		$this->assertTrue( $successfulVerification );
@@ -552,8 +553,8 @@ class Tornevall_cURLTest extends TestCase {
 	 * Expected Result: Failing the url call
 	 */
 	function testFailingSsl() {
-		$this->CURL->setFlag('_DEBUG_TCURL_UNSET_LOCAL_PEM_LOCATION', true);
-		$successfulVerification                            = true;
+		$this->CURL->setFlag( '_DEBUG_TCURL_UNSET_LOCAL_PEM_LOCATION', true );
+		$successfulVerification = true;
 		try {
 			$this->CURL->setSslVerify( false );
 			$this->CURL->setSslUnverified( true );
@@ -569,9 +570,9 @@ class Tornevall_cURLTest extends TestCase {
 	 * Expected Result: Successful lookup with unverified peer
 	 */
 	function testUnverifiedSsl() {
-		$this->CURL->setFlag('_DEBUG_TCURL_UNSET_LOCAL_PEM_LOCATION', true);
-		$successfulVerification                            = false;
-		$this->CURL->setSslPemLocations(array("non-existent-file"),true);
+		$this->CURL->setFlag( '_DEBUG_TCURL_UNSET_LOCAL_PEM_LOCATION', true );
+		$successfulVerification = false;
+		$this->CURL->setSslPemLocations( array( "non-existent-file" ), true );
 		try {
 			$this->CURL->setSslUnverified( true );
 			$container              = $this->getParsed( $this->urlGet( "ssl&bool&o=json", "https" ) );
@@ -676,7 +677,7 @@ class Tornevall_cURLTest extends TestCase {
 		$this->pemDefault();
 		$redirectResponse = $this->CURL->doGet( "http://developer.tornevall.net/tests/tornevall_network/redirect.php?run" );
 		$redirectedUrls   = $this->CURL->getRedirectedUrls();
-		$this->assertTrue( intval($redirectResponse['code']) >= 300 && intval($redirectResponse['code']) <= 350 && count( $redirectedUrls ) );
+		$this->assertTrue( intval( $redirectResponse['code'] ) >= 300 && intval( $redirectResponse['code'] ) <= 350 && count( $redirectedUrls ) );
 	}
 
 	/**
@@ -705,7 +706,7 @@ class Tornevall_cURLTest extends TestCase {
 	function testFollowRedirectManualEnableWithSetCurlOptEnforcingToFalse() {
 		$this->pemDefault();
 		$this->CURL->setEnforceFollowLocation( true );
-		$this->CURL->setCurlOpt(CURLOPT_FOLLOWLOCATION, false);  // This is the doer since there are internal protection against the above enforcer
+		$this->CURL->setCurlOpt( CURLOPT_FOLLOWLOCATION, false );  // This is the doer since there are internal protection against the above enforcer
 		$redirectResponse = $this->CURL->doGet( "http://developer.tornevall.net/tests/tornevall_network/redirect.php?run" );
 		$redirectedUrls   = $this->CURL->getRedirectedUrls();
 		$this->assertTrue( $redirectResponse['code'] >= 300 && $redirectResponse['code'] <= 350 && preg_match( "/rerun/i", $redirectResponse['body'] ) && count( $redirectedUrls ) );
@@ -794,7 +795,7 @@ class Tornevall_cURLTest extends TestCase {
 	function testSoapClient() {
 		$assertThis = true;
 		try {
-			$this->CURL->setUserAgent(" +UnitSoapAgent");
+			$this->CURL->setUserAgent( " +UnitSoapAgent" );
 			$this->CURL->doGet( "http://" . $this->Urls['soap'] );
 		} catch ( \Exception $e ) {
 			$assertThis = false;
@@ -926,65 +927,95 @@ class Tornevall_cURLTest extends TestCase {
 
 	public function testSetCurlOpt() {
 		$oldCurl = $this->CURL->getCurlOpt();
-		$this->CURL->setCurlOpt(array(CURLOPT_CONNECTTIMEOUT => 10));
+		$this->CURL->setCurlOpt( array( CURLOPT_CONNECTTIMEOUT => 10 ) );
 		$newCurl = $this->CURL->getCurlOpt();
-		$this->assertTrue($oldCurl[CURLOPT_CONNECTTIMEOUT] != $newCurl[CURLOPT_CONNECTTIMEOUT]);
+		$this->assertTrue( $oldCurl[ CURLOPT_CONNECTTIMEOUT ] != $newCurl[ CURLOPT_CONNECTTIMEOUT ] );
 	}
 
 	public function testGetCurlOpt() {
-		 $newCurl = $this->CURL->getCurlOptByKeys();
-		 $this->assertTrue(isset($newCurl['CURLOPT_CONNECTTIMEOUT']));
+		$newCurl = $this->CURL->getCurlOptByKeys();
+		$this->assertTrue( isset( $newCurl['CURLOPT_CONNECTTIMEOUT'] ) );
 	}
 
 	function testUnsetFlag() {
-		$first = $this->CURL->setFlag("CHAIN", true);
-		$this->CURL->unsetFlag("CHAIN");
-		$second = $this->CURL->hasFlag("CHAIN");
-		$this->assertTrue($first && !$second);
+		$first = $this->CURL->setFlag( "CHAIN", true );
+		$this->CURL->unsetFlag( "CHAIN" );
+		$second = $this->CURL->hasFlag( "CHAIN" );
+		$this->assertTrue( $first && ! $second );
 	}
+
 	function testChainGet() {
-		$this->CURL->setFlag("CHAIN");
-		$this->assertTrue(method_exists($this->CURL->doGet( $this->Urls['simplejson'] ), 'getParsedResponse'));
-		$this->CURL->unsetFlag("CHAIN");
+		$this->CURL->setFlag( "CHAIN" );
+		$this->assertTrue( method_exists( $this->CURL->doGet( $this->Urls['simplejson'] ), 'getParsedResponse' ) );
+		$this->CURL->unsetFlag( "CHAIN" );
 	}
+
+	function testFlagEmptyKey() {
+		try {
+			$this->CURL->setFlag();
+		} catch ( \Exception $setFlagException ) {
+			$this->assertTrue( $setFlagException->getCode() > 0 );
+		}
+	}
+
 	function testChainByInit() {
-		$Chainer = new Tornevall_cURL(null, null, null, array("CHAIN"));
-		$this->assertTrue(is_object($Chainer->doGet($this->Urls['simplejson'])->getParsedResponse()));
+		$Chainer = new Tornevall_cURL( null, null, null, array( "CHAIN" ) );
+		$this->assertTrue( is_object( $Chainer->doGet( $this->Urls['simplejson'] )->getParsedResponse() ) );
 	}
+
 	function testChainGetFail() {
 		$this->CURL->unsetFlag( "CHAIN" );
-		$this->assertFalse(method_exists($this->CURL->doGet( $this->Urls['simplejson'] ), 'getParsedResponse'));
+		$this->assertFalse( method_exists( $this->CURL->doGet( $this->Urls['simplejson'] ), 'getParsedResponse' ) );
 	}
+
 	function testDeprecatedIpClass() {
-		$this->assertTrue(TorneLIB_Network_IP::PROTOCOL_IPV6 === 6 && TorneLIB_Network_IP::IPTYPE_V6 && TorneLIB_Network_IP_Protocols::PROTOCOL_IPV6);
+		$this->assertTrue( TorneLIB_Network_IP::PROTOCOL_IPV6 === 6 && TorneLIB_Network_IP::IPTYPE_V6 && TorneLIB_Network_IP_Protocols::PROTOCOL_IPV6 );
 	}
+
 	function testGetGitInfo() {
 		try {
-			$NetCurl = $this->NET->getGitTagsByUrl( "http://userCredentialsBanned@bitbucket.tornevall.net/scm/lib/tornelib-php-netcurl.git" );
-			$GuzzleLIB = $this->NET->getGitTagsByUrl("https://github.com/guzzle/guzzle.git");
-			$GuzzleLIBNonNumerics = $this->NET->getGitTagsByUrl("https://github.com/guzzle/guzzle.git", true, true);
-			$this->assertTrue(count($NetCurl) >= 0 && count($Guzzle) >= 0);
-		} catch (\Exception $e) {
+			$NetCurl              = $this->NET->getGitTagsByUrl( "http://userCredentialsBanned@bitbucket.tornevall.net/scm/lib/tornelib-php-netcurl.git" );
+			$GuzzleLIB            = $this->NET->getGitTagsByUrl( "https://github.com/guzzle/guzzle.git" );
+			$GuzzleLIBNonNumerics = $this->NET->getGitTagsByUrl( "https://github.com/guzzle/guzzle.git", true, true );
+			$this->assertTrue( count( $NetCurl ) >= 0 && count( $GuzzleLIB ) >= 0 );
+		} catch ( \Exception $e ) {
 
 		}
 	}
+
 	function testGetMyVersionByGit() {
 		try {
-			$curlVersion = $this->CURL->getVersion();
-			$remoteVersions = $this->NET->getMyVersionByGitTag($curlVersion, "http://bitbucket.tornevall.net/scm/lib/tornelib-php-netcurl.git");
+			$curlVersion    = $this->CURL->getVersion();
+			$remoteVersions = $this->NET->getMyVersionByGitTag( $curlVersion, "http://bitbucket.tornevall.net/scm/lib/tornelib-php-netcurl.git" );
 			// curl module for netcurl will probably always be lower than the netcurl-version, so this is a good way of testing
-			$this->assertTrue(count($remoteVersions) > 0);
-		} catch (\Exception $e) {
+			$this->assertTrue( count( $remoteVersions ) > 0 );
+		} catch ( \Exception $e ) {
 
 		}
 	}
+
 	function testGetIsTooOld() {
 		try {
 			$curlVersion = $this->CURL->getVersion();
 			// curl module for netcurl will probably always be lower than the netcurl-version, so this is a good way of testing
-			$this->assertTrue($this->NET->getVersionTooOld($curlVersion, "http://bitbucket.tornevall.net/scm/lib/tornelib-php-netcurl.git"));
-		} catch (\Exception $e) {
+			$this->assertTrue( $this->NET->getVersionTooOld( $curlVersion, "http://bitbucket.tornevall.net/scm/lib/tornelib-php-netcurl.git" ) );
+		} catch ( \Exception $e ) {
 
 		}
+	}
+
+	function testTimeouts() {
+		$def = $this->CURL->getTimeout();
+		$this->CURL->setTimeout( 6 );
+		$new = $this->CURL->getTimeout();
+		$this->assertTrue( $def['connecttimeout'] == 300 && $def['requesttimeout'] == 0 && $new['connecttimeout'] == 3 && $new['requesttimeout'] == 6 );
+	}
+
+	function testInternalException() {
+		$this->assertTrue( $this->NET->getExceptionCode( 'NETCURL_EXCEPTION_IT_WORKS' ) == 1 );
+	}
+
+	function testInternalExceptionNoExists() {
+		$this->assertTrue( $this->NET->getExceptionCode( 'NETCURL_EXCEPTION_IT_DOESNT_WORK' ) == 500 );
 	}
 }

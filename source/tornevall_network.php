@@ -27,6 +27,10 @@ if (!defined('TORNELIB_NETCURL_RELEASE')) {
 	define( 'TORNELIB_NETCURL_RELEASE', '6.0.12' );
 }
 
+if (file_exists('../vendor/autoload.php')) {
+	require_once('../vendor/autoload.php');
+}
+
 if ( ! class_exists( 'TorneLIB_Network' ) && ! class_exists( 'TorneLIB\TorneLIB_Network' ) ) {
 	/**
 	 * Library for handling network related things (currently not sockets). A conversion of a legacy PHP library called "TorneEngine" and family.
@@ -68,11 +72,45 @@ if ( ! class_exists( 'TorneLIB_Network' ) && ! class_exists( 'TorneLIB\TorneLIB_
 
 		/** @var TorneLIB_NetBits BitMask handler with 8 bits as default */
 		public $BIT;
+		/** @var TorneLIB_NETCURL_EXCEPTIONS */
+		private $EXCEPTIONS;
 
+		/**
+		 * TorneLIB_Network constructor.
+		 */
 		function __construct() {
 			// Initiate and get client headers.
 			$this->renderProxyHeaders();
 			$this->BIT = new TorneLIB_NetBits();
+		}
+
+		/**
+		 * Get an exception code from internal abstract
+		 *
+		 * If the exception constant name does not exist, or the abstract class is not included in this package, a generic unknown error, based on internal server error, will be returned (500)
+		 *
+		 * @param string $exceptionConstantName Constant name (make sure it exists before use)
+		 *
+		 * @return int
+		 */
+		public function getExceptionCode($exceptionConstantName = 'NETCURL_NO_ERROR') {
+			if (empty($exceptionConstantName)) {
+				$exceptionConstantName = 'NETCURL_NO_ERROR';
+			}
+			if (!class_exists('TorneLIB\TORNELIB_NETCURL_EXCEPTIONS')) {
+				if ( $exceptionConstantName == 'NETCURL_NO_ERROR') {
+					return 0;
+				} else {
+					return 500;
+				}
+			} else {
+				$exceptionCode = @constant( 'TorneLIB\TORNELIB_NETCURL_EXCEPTIONS::' . $exceptionConstantName );
+				if (empty($exceptionCode) || !is_numeric($exceptionCode)) {
+					return 500;
+				} else {
+					return (int)$exceptionCode;
+				}
+			}
 		}
 
 		/**
@@ -92,7 +130,11 @@ if ( ! class_exists( 'TorneLIB_Network' ) && ! class_exists( 'TorneLIB\TorneLIB_
 			$gitUrl    .= "/info/refs?service=git-upload-pack";
 			// Clean up all user auth data in URL if exists
 			$gitUrl = preg_replace( "/\/\/(.*?)@/", '//', $gitUrl );
+			/** @var $CURL Tornevall_cURL */
 			$CURL   = new Tornevall_cURL();
+
+			$code = 0;
+			$exceptionMessage = "";
 			try {
 				$gitGet = $CURL->doGet( $gitUrl );
 				$code   = intval( $CURL->getResponseCode() );
@@ -124,14 +166,18 @@ if ( ! class_exists( 'TorneLIB_Network' ) && ! class_exists( 'TorneLIB\TorneLIB_
 							}
 						}
 					}
+				} else {
+					$exceptionMessage = "Request failure, got $code from URL";
 				}
 				if ( count( $tagArray ) ) {
 					sort( $tagArray );
 				}
 			} catch ( \Exception $gitGetException ) {
+				$exceptionMessage = $gitGetException->getMessage();
+				$code = $gitGetException->getCode();
 			}
-			if ( $fetchFail ) {
-				throw new \Exception( "Request failure, not 200 from URL", $code );
+			if ( $fetchFail || $code > 0 ) {
+				throw new \Exception( $exceptionMessage, $code );
 			}
 
 			return $tagArray;
@@ -579,7 +625,7 @@ if ( ! class_exists( 'Tornevall_cURL' ) && ! class_exists( 'TorneLIB\Tornevall_c
 		 * @var array
 		 */
 		private $curlopt = array(
-			CURLOPT_CONNECTTIMEOUT => 5,
+			CURLOPT_CONNECTTIMEOUT => 6,
 			CURLOPT_RETURNTRANSFER => true,
 			CURLOPT_SSL_VERIFYPEER => 1,
 			CURLOPT_SSL_VERIFYHOST => 2,
@@ -628,6 +674,10 @@ if ( ! class_exists( 'Tornevall_cURL' ) && ! class_exists( 'TorneLIB\Tornevall_c
 		 * @var TorneLIB_Network
 		 */
 		private $NETWORK;
+
+		/** @var TorneLIB_NETCURL_EXCEPTIONS */
+		private $EXCEPTIONS;
+
 		/**
 		 * Target environment (if target is production some debugging values will be skipped)
 		 *
@@ -761,7 +811,7 @@ if ( ! class_exists( 'Tornevall_cURL' ) && ! class_exists( 'TorneLIB\Tornevall_c
 		 */
 		public $CurlResolve;
 		/** @var string Sets another timeout in seconds when curl_exec should finish the current operation. Sets both TIMEOUT and CONNECTTIMEOUT */
-		public $CurlTimeout;
+		private $CurlTimeout;
 		private $CurlResolveForced = false;
 
 		//// EXCEPTION HANDLING
@@ -797,9 +847,12 @@ if ( ! class_exists( 'Tornevall_cURL' ) && ! class_exists( 'TorneLIB\Tornevall_c
 		 */
 		public function __construct( $PreferredURL = '', $PreparedPostData = array(), $PreferredMethod = CURL_METHODS::METHOD_POST, $flags = array() ) {
 			register_shutdown_function( array( $this, 'tornecurl_terminate' ) );
+
 			if (is_array($flags) && count($flags)) {
 				$this->setFlags( $flags );
 			}
+			$this->NETWORK     = new TorneLIB_Network();
+
 			// Store constants of curl errors and curlOptions
 			try {
 				$constants = @get_defined_constants();
@@ -814,7 +867,7 @@ if ( ! class_exists( 'Tornevall_cURL' ) && ! class_exists( 'TorneLIB\Tornevall_c
 			} catch (\Exception $constantException) {}
 			unset($constants);
 			if ( ! function_exists( 'curl_init' ) ) {
-				throw new \Exception( $this->ModuleName . " curl init exception: curl library not found" );
+				throw new \Exception( $this->ModuleName . " curl init exception: curl library not found", $this->NETWORK->getExceptionCode('NETCURL_CURL_MISSING') );
 			}
 			// Common ssl checkers (if they fail, there is a sslDriverError to recall
 			if ( ! in_array( 'https', @stream_get_wrappers() ) ) {
@@ -848,7 +901,6 @@ if ( ! class_exists( 'Tornevall_cURL' ) && ! class_exists( 'TorneLIB\Tornevall_c
 				$this->sslCurlDriver = false;
 			}
 			$this->CurlResolve = CURL_RESOLVER::RESOLVER_DEFAULT;
-			$this->NETWORK     = new TorneLIB_Network();
 			$this->openssl_guess();
 			$this->throwableHttpCodes = array();
 
@@ -885,6 +937,11 @@ if ( ! class_exists( 'Tornevall_cURL' ) && ! class_exists( 'TorneLIB\Tornevall_c
 			}
 		}
 
+		/**
+		 * @param array $arrayData
+		 *
+		 * @return bool
+		 */
 		function isAssoc(array $arrayData)
 		{
 			if (array() === $arrayData) return false;
@@ -925,12 +982,46 @@ if ( ! class_exists( 'Tornevall_cURL' ) && ! class_exists( 'TorneLIB\Tornevall_c
 		 * cUrl initializer, if needed faster
 		 *
 		 * @return resource
+		 * @since 5.0.0
 		 */
 		public function init() {
 			$this->initCookiePath();
 			$this->CurlSession = curl_init( $this->CurlURL );
 
 			return $this->CurlSession;
+		}
+
+		/**
+		 * Set timeout for CURL, normally we'd like a quite short timeout here. Default: CURL default
+		 *
+		 * Affects connect and response timeout by below values:
+		 *   CURLOPT_CONNECTTIMEOUT = ceil($timeout/2)    - How long a request is allowed to wait for conneciton, curl default = 300
+		 *   CURLOPT_TIMEOUT = ceil($timeout)             - How long a request is allowed to take, curl default = never timeout (0)
+		 *
+		 * @param int $timeout
+		 * @since 6.0.13
+		 */
+		public function setTimeout($timeout = 6) {
+			$this->CurlTimeout = $timeout;
+		}
+
+		/**
+		 * Get current timeout setting
+		 * @return string
+		 * @since 6.0.13
+		 */
+		public function getTimeout() {
+			$returnTimeouts = array(
+				'connecttimeout' => ceil($this->CurlTimeout/2),
+				'requesttimeout' => ceil($this->CurlTimeout)
+			);
+			if (empty($this->CurlTimeout)) {
+				$returnTimeouts = array(
+					'connecttimeout' => 300,
+					'requesttimeout' => 0
+				);
+			}
+			return $returnTimeouts;
 		}
 
 		/**
@@ -973,7 +1064,7 @@ if ( ! class_exists( 'Tornevall_cURL' ) && ! class_exists( 'TorneLIB\Tornevall_c
 						$this->CookiePath = realpath( __DIR__ . "/../cookies" );
 					}
 					if ( $this->UseCookieExceptions && ( empty( $this->CookiePath ) || ! is_dir( $this->CookiePath ) ) ) {
-						throw new \Exception( $this->ModuleName . " " . __FUNCTION__ . " exception: Could not set up a proper cookiepath [To override this, use AllowTempAsCookiePath (not recommended)]", 1002 );
+						throw new \Exception( $this->ModuleName . " " . __FUNCTION__ . " exception: Could not set up a proper cookiepath [To override this, use AllowTempAsCookiePath (not recommended)]", $this->NETWORK->getExceptionCode('NETCURL_COOKIEPATH_SETUP_FAIL') );
 					}
 				}
 			}
@@ -996,18 +1087,7 @@ if ( ! class_exists( 'Tornevall_cURL' ) && ! class_exists( 'TorneLIB\Tornevall_c
 				$this->internalFlags[ $flagKey ] = $flagValue;
 				return true;
 			}
-			throw new \Exception("Flags can not be empty", 500);
-		}
-
-		/**
-		 * Get internal exceptions or return generic error code when throwing exceptions
-		 * @param string $errorMessageCode
-		 *
-		 * @return int
-		 * @since 6.0.13
-		 */
-		private function getInternalErrorCode($errorMessageCode = '') {
-			return 500;
+			throw new \Exception("Flags can not be empty", $this->NETWORK->getExceptionCode('NETCURL_SETFLAG_KEY_EMPTY'));
 		}
 
 		/**
@@ -1547,6 +1627,7 @@ if ( ! class_exists( 'Tornevall_cURL' ) && ! class_exists( 'TorneLIB\Tornevall_c
 		 *
 		 * @return string
 		 * @throws \Exception
+		 * @deprecated Use tag control
 		 */
 		public function getInternalRelease() {
 			if ( defined( 'TORNELIB_ALLOW_VERSION_REQUESTS' ) && TORNELIB_ALLOW_VERSION_REQUESTS === true ) {
@@ -1868,7 +1949,7 @@ if ( ! class_exists( 'Tornevall_cURL' ) && ! class_exists( 'TorneLIB\Tornevall_c
 			} else {
 				// If the enabledFlag is false and the allowance is not set, we will not be allowed to disabled SSL verification either
 				if (!$enabledFlag) {
-					throw new \Exception( $this->ModuleName . " setSslVerify exception: setSslUnverified(true) has not been set", 500 );
+					throw new \Exception( $this->ModuleName . " setSslVerify exception: setSslUnverified(true) has not been set", $this->NETWORK->getExceptionCode('NETCURL_SETSSLVERIFY_UNVERIFIED_NOT_SET') );
 				} else {
 					// However, if we force the verify flag to be on, we won't care about the allowance override, as the security
 					// will be enhanced anyway.
@@ -2044,7 +2125,7 @@ if ( ! class_exists( 'Tornevall_cURL' ) && ! class_exists( 'TorneLIB\Tornevall_c
 			if ( $ipType == "0" ) {
 				// If the ip type is 0 and it shows up there is something defined here, throw an exception.
 				if ( ! empty( $UseIp ) ) {
-					throw new \Exception( $this->ModuleName . " " . __FUNCTION__ . " exception: " . $UseIp . " is not a valid ip-address", 1003 );
+					throw new \Exception( $this->ModuleName . " " . __FUNCTION__ . " exception: " . $UseIp . " is not a valid ip-address", $this->NETWORK->getExceptionCode('NETCURL_IPCONFIG_NOT_VALID') );
 				}
 			} else {
 				$this->CurlIp = $UseIp;
@@ -2205,7 +2286,7 @@ if ( ! class_exists( 'Tornevall_cURL' ) && ! class_exists( 'TorneLIB\Tornevall_c
 						}
 					}
 				} else {
-					throw new \Exception( $this->ModuleName . " HtmlParse exception: Can not parse DOMDocuments without the DOMDocuments class" );
+					throw new \Exception( $this->ModuleName . " HtmlParse exception: Can not parse DOMDocuments without the DOMDocuments class", $this->NETWORK->getExceptionCode("NETCURL_DOMDOCUMENT_CLASS_MISSING") );
 				}
 			}
 
@@ -2469,7 +2550,7 @@ if ( ! class_exists( 'Tornevall_cURL' ) && ! class_exists( 'TorneLIB\Tornevall_c
 					if ( $hasRecursion ) {
 						return $Parsed;
 					} else {
-						throw new \Exception( $this->ModuleName . " getParsedValue exception: Requested key was not found in parsed response" );
+						throw new \Exception( $this->ModuleName . " getParsedValue exception: Requested key was not found in parsed response", $this->NETWORK->getExceptionCode('NETCURL_GETPARSEDVALUE_KEY_NOT_FOUND') );
 					}
 				}
 			}
@@ -2907,7 +2988,7 @@ if ( ! class_exists( 'Tornevall_cURL' ) && ! class_exists( 'TorneLIB\Tornevall_c
 			// Override with SoapClient just before the real curl_exec is the most proper way to handle inheritages
 			if ( preg_match( "/\?wsdl$|\&wsdl$/i", $this->CurlURL ) || $postAs == CURL_POST_AS::POST_AS_SOAP ) {
 				if ( ! $this->hasSoap() ) {
-					throw new \Exception( $this->ModuleName . " " . __FUNCTION__ . " exception: SoapClient is not available in this system", 500 );
+					throw new \Exception( $this->ModuleName . " " . __FUNCTION__ . " exception: SoapClient is not available in this system", $this->NETWORK->getExceptionCode('NETCURL_SOAPCLIENT_CLASS_MISSING') );
 				}
 				$Soap = new Tornevall_SimpleSoap( $this->CurlURL, $this );
 				$Soap->setCustomUserAgent( $this->CustomUserAgent );
@@ -3345,7 +3426,8 @@ if ( ! class_exists( 'Tornevall_SimpleSoap' ) && ! class_exists( 'TorneLIB\Torne
 					}
 				}
 				if (!is_object($this->soapClient)) {
-					throw new \Exception( $this->ModuleName . " exception from SimpleSoap->getSoap(): Could not create SoapClient. Make sure that all settings and URLs are correctly configured.", 500 );
+					// NETCURL_SIMPLESOAP_GETSOAP_CREATE_FAIL
+					throw new \Exception( $this->ModuleName . " exception from SimpleSoap->getSoap(): Could not create SoapClient. Make sure that all settings and URLs are correctly configured.", 1008 );
 				}
 			}
 

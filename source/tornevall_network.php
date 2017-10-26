@@ -72,8 +72,6 @@ if ( ! class_exists( 'TorneLIB_Network' ) && ! class_exists( 'TorneLIB\TorneLIB_
 
 		/** @var TorneLIB_NetBits BitMask handler with 8 bits as default */
 		public $BIT;
-		/** @var TorneLIB_NETCURL_EXCEPTIONS */
-		private $EXCEPTIONS;
 
 		/**
 		 * TorneLIB_Network constructor.

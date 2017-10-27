@@ -24,7 +24,7 @@
 namespace TorneLIB;
 
 if ( ! defined( 'TORNELIB_NETCURL_RELEASE' ) ) {
-	define( 'TORNELIB_NETCURL_RELEASE', '6.0.12' );
+	define( 'TORNELIB_NETCURL_RELEASE', '6.0.14' );
 }
 
 if ( file_exists( '../vendor/autoload.php' ) ) {

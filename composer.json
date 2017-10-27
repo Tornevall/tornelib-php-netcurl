@@ -23,8 +23,7 @@
       "source/tornevall_netcurl_exceptions.php"
     ],
     "psr-4": {
-      "\\TorneLIB\\": "source/tornevall_network.php",
-      "\\TorneLIB\\": "source/tornevall_netcurl_exceptions.php"
+      "\\TorneLIB\\": "source/tornevall_network.php"
     }
   }
 }

@@ -5,9 +5,9 @@ namespace TorneLIB;
 if ( file_exists( '../vendor/autoload.php' ) ) {
 	require_once( '../vendor/autoload.php' );
 }
-if (file_exists("../tornelib.php")) {
+if ( file_exists( "../tornelib.php" ) ) {
 	// Work with TorneLIBv5
-	require_once('../tornelib.php');
+	require_once( '../tornelib.php' );
 }
 
 use PHPUnit\Framework\TestCase;
@@ -989,24 +989,28 @@ class Tornevall_cURLTest extends TestCase {
 	}
 
 	function testGetMyVersionByGit() {
-		try {
-			$curlVersion    = $this->CURL->getVersion();
-			$remoteVersions = $this->NET->getMyVersionByGitTag( $curlVersion, "http://bitbucket.tornevall.net/scm/lib/tornelib-php-netcurl.git" );
-			// curl module for netcurl will probably always be lower than the netcurl-version, so this is a good way of testing
-			$this->assertTrue( count( $remoteVersions ) > 0 );
-		} catch ( \Exception $e ) {
-
-		}
+		$curlVersion    = $this->CURL->getVersion();
+		$remoteVersions = $this->NET->getMyVersionByGitTag( $curlVersion, "http://bitbucket.tornevall.net/scm/lib/tornelib-php-netcurl.git" );
+		// curl module for netcurl will probably always be lower than the netcurl-version, so this is a good way of testing
+		$this->assertTrue( count( $remoteVersions ) > 0 );
 	}
 
 	function testGetIsTooOld() {
-		try {
-			$curlVersion = $this->CURL->getVersion();
-			// curl module for netcurl will probably always be lower than the netcurl-version, so this is a good way of testing
-			$this->assertTrue( $this->NET->getVersionTooOld( $curlVersion, "http://bitbucket.tornevall.net/scm/lib/tornelib-php-netcurl.git" ) );
-		} catch ( \Exception $e ) {
+		// curl module for netcurl will probably always be lower than the netcurl-version, so this is a good way of testing
+		$this->assertTrue( $this->NET->getVersionTooOld( "1.0.0", "http://bitbucket.tornevall.net/scm/lib/tornelib-php-netcurl.git" ) );
+	}
 
-		}
+	function testGetCurrentOrNewer() {
+		// curl module for netcurl will probably always be lower than the netcurl-version, so this is a good way of testing
+		$tags           = $this->NET->getGitTagsByUrl( "http://bitbucket.tornevall.net/scm/lib/tornelib-php-netcurl.git" );
+		$lastTag        = array_pop( $tags );
+		$lastBeforeLast = array_pop( $tags );
+		// This should return false, since the current is not too old
+		$isCurrent = $this->NET->getVersionTooOld( $lastTag, "http://bitbucket.tornevall.net/scm/lib/tornelib-php-netcurl.git" );
+		// This should return true, since the last version after the current is too old
+		$isLastBeforeCurrent = $this->NET->getVersionTooOld( $lastBeforeLast, "http://bitbucket.tornevall.net/scm/lib/tornelib-php-netcurl.git" );
+
+		$this->assertTrue( $isCurrent === false && $isLastBeforeCurrent === true );
 	}
 
 	function testTimeouts() {

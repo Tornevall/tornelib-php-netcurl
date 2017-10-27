@@ -154,7 +154,7 @@ if ( ! class_exists( 'TorneLIB_Network' ) && ! class_exists( 'TorneLIB\TorneLIB_
 									$tagArrayUncombined = array();
 									foreach ( $exTag as $val ) {
 										if ( is_numeric( $val ) ) {
-											$tagArrayUncombined[ $val ] = $val;
+											$tagArrayUncombined[] = $val;
 										} else {
 											if ( $sanitizeNumerics ) {
 												$vNum                 = preg_replace( "/[^0-9$]/is", '', $val );
@@ -208,6 +208,7 @@ if ( ! class_exists( 'TorneLIB_Network' ) && ! class_exists( 'TorneLIB\TorneLIB_
 					$versionsHigher[] = $tagVersion;
 				}
 			}
+
 			return $versionsHigher;
 		}
 

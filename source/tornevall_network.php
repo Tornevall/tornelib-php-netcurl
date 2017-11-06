@@ -18,13 +18,13 @@
  * Tornevall Networks netCurl library - Yet another http- and network communicator library
  * Each class in this library has its own version numbering to keep track of where the changes are. However, there is a major version too.
  * @package TorneLIB
- * @version 6.0.14
+ * @version 6.0.15
  */
 
 namespace TorneLIB;
 
 if ( ! defined( 'TORNELIB_NETCURL_RELEASE' ) ) {
-	define( 'TORNELIB_NETCURL_RELEASE', '6.0.14' );
+	define( 'TORNELIB_NETCURL_RELEASE', '6.0.15' );
 }
 
 if ( file_exists( '../vendor/autoload.php' ) ) {
@@ -617,7 +617,7 @@ if ( ! class_exists( 'Tornevall_cURL' ) && ! class_exists( 'TorneLIB\Tornevall_c
 	 * Class Tornevall_cURL
 	 *
 	 * @package TorneLIB
-	 * @version 6.0.13
+	 * @version 6.0.14
 	 * @link https://docs.tornevall.net/x/KQCy TorneLIBv5
 	 * @link https://bitbucket.tornevall.net/projects/LIB/repos/tornelib-php-netcurl/browse Sources of TorneLIB
 	 * @link https://docs.tornevall.net/x/KwCy Network & Curl v5 and v6 Library usage
@@ -660,6 +660,8 @@ if ( ! class_exists( 'Tornevall_cURL' ) && ! class_exists( 'TorneLIB\Tornevall_c
 		/** @var null Sets a HTTP_REFERER to the http call */
 		private $CurlReferer;
 
+		private $Drivers;
+
 		/**
 		 * Die on use of proxy/tunnel on first try (Incomplete).
 		 *
@@ -673,11 +675,11 @@ if ( ! class_exists( 'Tornevall_cURL' ) && ! class_exists( 'TorneLIB\Tornevall_c
 		/** @var string This modules name (inherited to some exceptions amongst others) */
 		protected $ModuleName = "NetCurl";
 		/** @var string Internal version that is being used to find out if we are running the latest version of this library */
-		private $TorneCurlVersion = "6.0.11";
+		private $TorneCurlVersion = "6.0.14";
 		/** @var null Curl Version */
 		private $CurlVersion = null;
 		/** @var string Internal release snapshot that is being used to find out if we are running the latest version of this library */
-		private $TorneCurlReleaseDate = "20171013";
+		private $TorneCurlReleaseDate = "20171106";
 		/**
 		 * Prepare TorneLIB_Network class if it exists (as of the november 2016 it does).
 		 *
@@ -1003,6 +1005,35 @@ if ( ! class_exists( 'Tornevall_cURL' ) && ! class_exists( 'TorneLIB\Tornevall_c
 		}
 
 		/**
+		 * Set up another driver for HTTP-requests
+		 *
+		 * Note: Soap calls are currently not supported through the WordPress driver, so using that one, will fall back to the SimpleSoap class.
+		 *
+		 * @param int $driverId
+		 * @since 6.0.14
+		 */
+		public function setDriver($driverId = TORNELIB_CURL_DRIVERS::DRIVER_NOT_SET) {
+			if ($driverId !== TORNELIB_CURL_DRIVERS::DRIVER_NOT_SET) {
+				$this->setFlag("CHAIN");
+			}
+			if ($driverId == TORNELIB_CURL_DRIVERS::DRIVER_WORDPRESS) {
+				if (in_array("WP_Http", get_declared_classes())) {
+					$this->Drivers[TORNELIB_CURL_DRIVERS::DRIVER_WORDPRESS] = new \WP_Http();
+				}
+			}
+		}
+
+		/**
+		 * Get current configured http-driver
+		 *
+		 * @return mixed
+		 * @since 6.0.14
+		 */
+		public function getDrivers() {
+			return $this->Drivers;
+		}
+
+		/**
 		 * Set timeout for CURL, normally we'd like a quite short timeout here. Default: CURL default
 		 *
 		 * Affects connect and response timeout by below values:
@@ -1194,6 +1225,10 @@ if ( ! class_exists( 'Tornevall_cURL' ) && ! class_exists( 'TorneLIB\Tornevall_c
 			}
 
 			return false;
+		}
+
+		public function getIsChained() {
+			return $this->isFlag("CHAIN");
 		}
 
 		//// EXCEPTION HANDLING
@@ -3030,93 +3065,186 @@ if ( ! class_exists( 'Tornevall_cURL' ) && ! class_exists( 'TorneLIB\Tornevall_c
 				if ( ! $this->hasSoap() ) {
 					throw new \Exception( $this->ModuleName . " " . __FUNCTION__ . " exception: SoapClient is not available in this system", $this->NETWORK->getExceptionCode( 'NETCURL_SOAPCLIENT_CLASS_MISSING' ) );
 				}
-				$Soap = new Tornevall_SimpleSoap( $this->CurlURL, $this );
-				$Soap->setCustomUserAgent( $this->CustomUserAgent );
-				$Soap->setThrowableState( $this->canThrow );
-				$Soap->setSoapAuthentication( $this->AuthData );
-				$Soap->setSoapTryOnce( $this->SoapTryOnce );
-				try {
-					$getSoapResponse                      = $Soap->getSoap();
-					$this->debugData['soapdata']['url'][] = array(
+				return $this->executeHttpSoap($url, $postData, $CurlMethod, $postAs);
+			}
+
+			$externalExecute = $this->executeHttpExternal($url, $postData, $CurlMethod, $postAs);
+
+			if ($externalExecute !== true) {
+				$returnContent = curl_exec( $this->CurlSession );
+				if ( curl_errno( $this->CurlSession ) ) {
+
+					$this->debugData['data']['url'][] = array(
+						'url'       => $this->CurlURL,
+						'opt'       => $this->getCurlOptByKeys(),
+						'success'   => false,
+						'exception' => curl_error( $this->CurlSession )
+					);
+
+					if ( $this->canStoreSessionException ) {
+						$this->sessionsExceptions[] = array(
+							'Content'     => $returnContent,
+							'SessionInfo' => curl_getinfo( $this->CurlSession )
+						);
+					}
+					$errorCode    = curl_errno( $this->CurlSession );
+					$errorMessage = curl_error( $this->CurlSession );
+					if ( $this->CurlResolveForced && $this->CurlRetryTypes['resolve'] >= 2 ) {
+						throw new \Exception( $this->ModuleName . " exception in " . __FUNCTION__ . ": The maximum tries of curl_exec() for " . $this->CurlURL . " has been reached without any successful response. Normally, this happens after " . $this->CurlRetryTypes['resolve'] . " CurlResolveRetries and might be connected with a bad URL or similar that can not resolve properly.\nCurl error message follows: " . $errorMessage, $errorCode );
+					}
+					if ( $errorCode == CURLE_SSL_CACERT || $errorCode === 60 && $this->allowSslUnverified ) {
+						if ( $this->CurlRetryTypes['sslunverified'] >= 2 ) {
+							throw new \Exception( $this->ModuleName . " exception in " . __FUNCTION__ . ": The maximum tries of curl_exec() for " . $this->CurlURL . ", during a try to make a SSL connection to work, has been reached without any successful response. This normally happens when allowSslUnverified is activated in the library and " . $this->CurlRetryTypes['resolve'] . " tries to fix the problem has been made, but failed.\nCurl error message follows: " . $errorMessage, $errorCode );
+						} else {
+							$this->hasErrorsStore[] = array( 'code' => $errorCode, 'message' => $errorMessage );
+							$this->setSslVerify( false );
+							$this->setSslUnverified( true );
+							$this->unsafeSslCall = true;
+							$this->CurlRetryTypes['sslunverified'] ++;
+
+							return $this->executeCurl( $this->CurlURL, $postData, $CurlMethod );
+						}
+					}
+					if ( $errorCode == CURLE_COULDNT_RESOLVE_HOST || $errorCode === 45 ) {
+						$this->hasErrorsStore[] = array( 'code' => $errorCode, 'message' => $errorMessage );
+						$this->CurlRetryTypes['resolve'] ++;
+						unset( $this->CurlIp );
+						$this->CurlResolveForced = true;
+						if ( $this->CurlIpType == 6 ) {
+							$this->CurlResolve = CURL_RESOLVER::RESOLVER_IPV4;
+						}
+						if ( $this->CurlIpType == 4 ) {
+							$this->CurlResolve = CURL_RESOLVER::RESOLVER_IPV6;
+						}
+
+						return $this->executeCurl( $this->CurlURL, $postData, $CurlMethod );
+					}
+					throw new \Exception( $this->ModuleName . " exception from PHP/CURL at " . __FUNCTION__ . ": " . curl_error( $this->CurlSession ), curl_errno( $this->CurlSession ) );
+				} else {
+					$this->debugData['data']['url'][] = array(
 						'url'       => $this->CurlURL,
 						'opt'       => $this->getCurlOptByKeys(),
 						'success'   => true,
 						'exception' => null
 					);
-				} catch ( \Exception $getSoapResponseException ) {
-					$this->debugData['soapdata']['url'][] = array(
-						'url'       => $this->CurlURL,
-						'opt'       => $this->getCurlOptByKeys(),
-						'success'   => false,
-						'exception' => $getSoapResponseException
-					);
-					throw new \Exception( $this->ModuleName . " exception from soapClient: " . $getSoapResponseException->getMessage(), $getSoapResponseException->getCode() );
 				}
-
-				return $getSoapResponse;
 			}
 
-			$returnContent = curl_exec( $this->CurlSession );
+			return $returnContent;
+		}
 
-			if ( curl_errno( $this->CurlSession ) ) {
-
-				$this->debugData['data']['url'][] = array(
-					'url'       => $this->CurlURL,
-					'opt'       => $this->getCurlOptByKeys(),
-					'success'   => false,
-					'exception' => curl_error( $this->CurlSession )
-				);
-
-				if ( $this->canStoreSessionException ) {
-					$this->sessionsExceptions[] = array(
-						'Content'     => $returnContent,
-						'SessionInfo' => curl_getinfo( $this->CurlSession )
-					);
-				}
-				$errorCode    = curl_errno( $this->CurlSession );
-				$errorMessage = curl_error( $this->CurlSession );
-				if ( $this->CurlResolveForced && $this->CurlRetryTypes['resolve'] >= 2 ) {
-					throw new \Exception( $this->ModuleName . " exception in " . __FUNCTION__ . ": The maximum tries of curl_exec() for " . $this->CurlURL . " has been reached without any successful response. Normally, this happens after " . $this->CurlRetryTypes['resolve'] . " CurlResolveRetries and might be connected with a bad URL or similar that can not resolve properly.\nCurl error message follows: " . $errorMessage, $errorCode );
-				}
-				if ( $errorCode == CURLE_SSL_CACERT || $errorCode === 60 && $this->allowSslUnverified ) {
-					if ( $this->CurlRetryTypes['sslunverified'] >= 2 ) {
-						throw new \Exception( $this->ModuleName . " exception in " . __FUNCTION__ . ": The maximum tries of curl_exec() for " . $this->CurlURL . ", during a try to make a SSL connection to work, has been reached without any successful response. This normally happens when allowSslUnverified is activated in the library and " . $this->CurlRetryTypes['resolve'] . " tries to fix the problem has been made, but failed.\nCurl error message follows: " . $errorMessage, $errorCode );
-					} else {
-						$this->hasErrorsStore[] = array( 'code' => $errorCode, 'message' => $errorMessage );
-						$this->setSslVerify( false );
-						$this->setSslUnverified( true );
-						$this->unsafeSslCall = true;
-						$this->CurlRetryTypes['sslunverified'] ++;
-
-						return $this->executeCurl( $this->CurlURL, $postData, $CurlMethod );
-					}
-				}
-				if ( $errorCode == CURLE_COULDNT_RESOLVE_HOST || $errorCode === 45 ) {
-					$this->hasErrorsStore[] = array( 'code' => $errorCode, 'message' => $errorMessage );
-					$this->CurlRetryTypes['resolve'] ++;
-					unset( $this->CurlIp );
-					$this->CurlResolveForced = true;
-					if ( $this->CurlIpType == 6 ) {
-						$this->CurlResolve = CURL_RESOLVER::RESOLVER_IPV4;
-					}
-					if ( $this->CurlIpType == 4 ) {
-						$this->CurlResolve = CURL_RESOLVER::RESOLVER_IPV6;
-					}
-
-					return $this->executeCurl( $this->CurlURL, $postData, $CurlMethod );
-				}
-				throw new \Exception( $this->ModuleName . " exception from PHP/CURL at " . __FUNCTION__ . ": " . curl_error( $this->CurlSession ), curl_errno( $this->CurlSession ) );
-			} else {
-				$this->debugData['data']['url'][] = array(
+		/**
+		 * SOAPClient detection method (moved from primary curl executor to make it possible to detect soapcalls from other drivers)
+		 *
+		 * @param string $url
+		 * @param array $postData
+		 * @param int $CurlMethod
+		 * @param int $postAs
+		 *
+		 * @return Tornevall_SimpleSoap
+		 * @throws \Exception
+		 * @since 6.0.14
+		 */
+		private function executeHttpSoap( $url = '', $postData = array(), $CurlMethod = CURL_METHODS::METHOD_GET, $postAs = CURL_POST_AS::POST_AS_NORMAL ) {
+			$this->unsetFlag("CHAIN");
+			$Soap = new Tornevall_SimpleSoap( $this->CurlURL, $this );
+			$Soap->setCustomUserAgent( $this->CustomUserAgent );
+			$Soap->setThrowableState( $this->canThrow );
+			$Soap->setSoapAuthentication( $this->AuthData );
+			$Soap->setSoapTryOnce( $this->SoapTryOnce );
+			try {
+				$getSoapResponse                      = $Soap->getSoap();
+				$this->debugData['soapdata']['url'][] = array(
 					'url'       => $this->CurlURL,
 					'opt'       => $this->getCurlOptByKeys(),
 					'success'   => true,
 					'exception' => null
 				);
+			} catch ( \Exception $getSoapResponseException ) {
+				$this->debugData['soapdata']['url'][] = array(
+					'url'       => $this->CurlURL,
+					'opt'       => $this->getCurlOptByKeys(),
+					'success'   => false,
+					'exception' => $getSoapResponseException
+				);
+				throw new \Exception( $this->ModuleName . " exception from soapClient: " . $getSoapResponseException->getMessage(), $getSoapResponseException->getCode() );
 			}
 
-			return $returnContent;
+			return $getSoapResponse;
+
 		}
+
+		/**
+		 * Execution of http-calls via external drivers
+		 *
+		 * @param string $url
+		 * @param array $postData
+		 * @param int $CurlMethod
+		 *
+		 * @return Tornevall_cURL|Tornevall_SimpleSoap
+		 * @throws \Exception
+		 * @since 6.0.14
+		 */
+		private function executeHttpExternal($url = '', $postData = array(), $CurlMethod = CURL_METHODS::METHOD_GET) {
+
+			if ( preg_match( "/\?wsdl$|\&wsdl$/i", $this->CurlURL ) || $CurlMethod == CURL_POST_AS::POST_AS_SOAP ) {
+				if ( ! $this->hasSoap() ) {
+					throw new \Exception( $this->ModuleName . " " . __FUNCTION__ . " exception: SoapClient is not available in this system", $this->NETWORK->getExceptionCode( 'NETCURL_SOAPCLIENT_CLASS_MISSING' ) );
+				}
+				return $this->executeHttpSoap($url, $postData, $CurlMethod, $postAs);
+			}
+
+			if (is_object($this->Drivers[TORNELIB_CURL_DRIVERS::DRIVER_WORDPRESS])) {
+				return $this->executeWpHttp($url, $postData, $CurlMethod);;
+			}
+		}
+
+		/**
+		 * Using WordPress curl driver to make webcalls
+		 *
+		 * SOAPClient is currently not supported through this interface, so this library will fall back to SimpleSoap before reaching this point if wsdl links are used
+		 *
+		 * @param string $url
+		 * @param array $postData
+		 * @param int $CurlMethod
+		 *
+		 * @return $this
+		 * @throws \Exception
+		 * @since 6.0.14
+		 */
+		private function executeWpHttp( $url = '', $postData = array(), $CurlMethod = CURL_METHODS::METHOD_GET ) {
+			$parsedResponse = null;
+			/** @var $worker \WP_Http */
+			$worker        = $this->Drivers[ TORNELIB_CURL_DRIVERS::DRIVER_WORDPRESS ];
+
+			$transportInfo = $worker->_get_first_available_transport( array() );
+			print_r($transportInfo);
+			if ( empty( $transportInfo ) ) {
+				throw new \Exception( $this->NETWORK->getExceptionCode( "Could not find any available transport for WordPress Driver", 'NETCURL_WP_TRANSPORT_ERROR' ) );
+			}
+
+			$wpResponse = null;
+			if ( $CurlMethod == CURL_METHODS::METHOD_GET ) {
+				$wpResponse = $worker->get( $url, $postData );
+			} else if ( $CurlMethod == CURL_METHODS::METHOD_POST ) {
+				$wpResponse = $worker->post( $url, $postData );
+			} else if ( $CurlMethod == CURL_METHODS::METHOD_REQUEST ) {
+				$wpResponse = $worker->request( $url, $postData );
+			}
+			if ( $CurlMethod == CURL_METHODS::METHOD_HEAD ) {
+				$wpResponse = $worker->head( $url, $postData );
+			}
+
+			/** @var $httpResponse \WP_HTTP_Requests_Response */
+			$httpResponse = $wpResponse['http_response'];
+			/** @var $httpReponseObject \Requests_Response */
+			$httpResponseObject = $httpResponse->get_response_object();
+			$rawResponse        = $httpResponseObject->raw;
+			$this->ParseResponse( $rawResponse );
+
+			return $this;
+		}
+
 	}
 }
 if ( ! class_exists( 'TorneLIB_NetBits' ) && ! class_exists( 'TorneLIB\TorneLIB_NetBits' ) ) {
@@ -3599,6 +3727,8 @@ if ( ! class_exists( 'CURL_METHODS' ) && ! class_exists( 'TorneLIB\CURL_METHODS'
 		const METHOD_POST = 1;
 		const METHOD_PUT = 2;
 		const METHOD_DELETE = 3;
+		const METHOD_HEAD = 4;
+		const METHOD_REQUEST = 5;
 	}
 }
 if ( ! class_exists( 'CURL_RESOLVER' ) && ! class_exists( 'TorneLIB\CURL_RESOLVER' ) ) {
@@ -3649,6 +3779,19 @@ if ( ! class_exists( 'TORNELIB_CURL_ENVIRONMENT' ) && ! class_exists( 'TorneLIB\
 	abstract class TORNELIB_CURL_ENVIRONMENT {
 		const ENVIRONMENT_PRODUCTION = 0;
 		const ENVIRONMENT_TEST = 1;
+	}
+}
+if ( ! class_exists( 'TORNELIB_CURL_DRIVERS' ) && ! class_exists( 'TorneLIB\TORNELIB_CURL_DRIVERS' ) ) {
+	/**
+	 * Class TORNELIB_CURL_ENVIRONMENT
+	 *
+	 * The unit testing helper. To not collide with production environments, somet settings should only be available while unit testing.
+	 *
+	 * @package TorneLIB
+	 */
+	abstract class TORNELIB_CURL_DRIVERS {
+		const DRIVER_NOT_SET = 0;
+		const DRIVER_WORDPRESS = 1000;
 	}
 }
 if ( ! class_exists( 'TORNELIB_CURL_RESPONSETYPE' ) && ! class_exists( 'TorneLIB\TORNELIB_CURL_RESPONSETYPE' ) ) {

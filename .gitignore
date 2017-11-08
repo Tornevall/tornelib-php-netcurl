@@ -4,3 +4,4 @@ composer.lock
 Makefile
 .composer.json.swp
 /vendor
+/runit

@@ -1,6 +1,6 @@
 composer.phar
 composer.lock
-/vendor/
 .idea
 Makefile
 .composer.json.swp
+/vendor

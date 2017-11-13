@@ -3174,7 +3174,7 @@ if ( ! class_exists( 'Tornevall_cURL' ) && ! class_exists( 'TorneLIB\Tornevall_c
 				return $this->executeHttpSoap($url, $postData, $CurlMethod, $postAs);
 			}
 
-			$externalExecute = $this->executeHttpExternal($url, $postData, $CurlMethod, $postAs);
+			$externalExecute = $this->executeHttpExternal($url, $postData, $CurlMethod);
 
 			if ($externalExecute !== true) {
 				$returnContent = curl_exec( $this->CurlSession );
@@ -3245,13 +3245,12 @@ if ( ! class_exists( 'Tornevall_cURL' ) && ! class_exists( 'TorneLIB\Tornevall_c
 		 * @param string $url
 		 * @param array $postData
 		 * @param int $CurlMethod
-		 * @param int $postAs
 		 *
 		 * @return Tornevall_SimpleSoap
 		 * @throws \Exception
 		 * @since 6.0.14
 		 */
-		private function executeHttpSoap( $url = '', $postData = array(), $CurlMethod = CURL_METHODS::METHOD_GET, $postAs = CURL_POST_AS::POST_AS_NORMAL ) {
+		private function executeHttpSoap( $url = '', $postData = array(), $CurlMethod = CURL_METHODS::METHOD_GET ) {
 			$this->unsetFlag("CHAIN");
 			$Soap = new Tornevall_SimpleSoap( $this->CurlURL, $this );
 			$Soap->setCustomUserAgent( $this->CustomUserAgent );
@@ -3297,12 +3296,12 @@ if ( ! class_exists( 'Tornevall_cURL' ) && ! class_exists( 'TorneLIB\Tornevall_c
 				if ( ! $this->hasSoap() ) {
 					throw new \Exception( $this->ModuleName . " " . __FUNCTION__ . " exception: SoapClient is not available in this system", $this->NETWORK->getExceptionCode( 'NETCURL_SOAPCLIENT_CLASS_MISSING' ) );
 				}
-				return $this->executeHttpSoap($url, $postData, $CurlMethod, $CurlMethod);
+				return $this->executeHttpSoap($url, $postData, $CurlMethod);
 			}
 			if ($this->getIsDriver(TORNELIB_CURL_DRIVERS::DRIVER_WORDPRESS)) {
-				return $this->executeWpHttp($url, $postData, $CurlMethod);
+				return $this->executeWpHttp($url, $postData, $CurlMethod, $postAs);
 			} else if ($this->getIsDriver(TORNELIB_CURL_DRIVERS::DRIVER_GUZZLEHTTP)) {
-				return $this->executeGuzzleHttp($url, $postData, $CurlMethod);
+				return $this->executeGuzzleHttp($url, $postData, $CurlMethod, $postAs);
 			} else {
 				return false;
 			}
@@ -3360,10 +3359,11 @@ if ( ! class_exists( 'Tornevall_cURL' ) && ! class_exists( 'TorneLIB\Tornevall_c
 		 * @param string $url
 		 * @param array $postData
 		 * @param int $CurlMethod
+		 * @param int $postAs
 		 *
 		 * @return $this
 		 */
-		private function executeGuzzleHttp( $url = '', $postData = array(), $CurlMethod = CURL_METHODS::METHOD_GET ) {
+		private function executeGuzzleHttp( $url = '', $postData = array(), $CurlMethod = CURL_METHODS::METHOD_GET, $postAs = CURL_POST_AS::POST_AS_NORMAL) {
 			/** @var $gResponse \GuzzleHttp\Psr7\Response */
 			$gResponse   = null;
 			$rawResponse = null;

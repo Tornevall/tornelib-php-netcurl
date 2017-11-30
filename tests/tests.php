@@ -1032,14 +1032,28 @@ class Tornevall_cURLTest extends TestCase {
 		$this->assertTrue( $this->NET->getExceptionCode( 'NETCURL_EXCEPTION_IT_DOESNT_WORK' ) == 500 );
 	}
 
-	private function hasGuzzle() {
-		return $this->CURL->setDriver(TORNELIB_CURL_DRIVERS::DRIVER_GUZZLEHTTP);
+	private function hasGuzzle($useStream = false) {
+		if (!$useStream) {
+			return $this->CURL->setDriver( TORNELIB_CURL_DRIVERS::DRIVER_GUZZLEHTTP );
+		} else {
+			return $this->CURL->setDriver( TORNELIB_CURL_DRIVERS::DRIVER_GUZZLEHTTP_STREAM );
+		}
 	}
 
 	function testEnableGuzzle() {
 		if ($this->hasGuzzle()) {
-			$info = $this->CURL->doPost($this->Urls['tests'] . "?o=json&getjson=true", array('var1'=>'HasVar1'));
-			$externalDriver = $this->CURL->getExternalDriverResponse();
+			$info = $this->CURL->doPost("https://" . $this->Urls['tests'] . "?o=json&getjson=true&var1=HasVar1", array('var2'=>'HasPostVar1'));
+			$this->CURL->getExternalDriverResponse();
+			$parsed = $this->CURL->getParsedResponse($info);
+			$this->assertTrue($parsed->methods->_REQUEST->var1 === "HasVar1");
+		} else {
+			$this->markTestSkipped("Can not test guzzle driver without guzzle");
+		}
+	}
+	function testEnableGuzzleStream() {
+		if ($this->hasGuzzle(true)) {
+			$info = $this->CURL->doPost("https://" . $this->Urls['tests'] . "?o=json&getjson=true", array('var1'=>'HasVar1'));
+			$this->CURL->getExternalDriverResponse();
 			$parsed = $this->CURL->getParsedResponse($info);
 			$this->assertTrue($parsed->methods->_REQUEST->var1 === "HasVar1");
 		} else {
@@ -1084,5 +1098,19 @@ class Tornevall_cURLTest extends TestCase {
 			echo $e->getMessage() . "\n";
 		}
 		$this->assertTrue($driverList);
+	}
+
+	public function testGetProtocol() {
+		$oneOfThenm = TorneLIB_Network::getCurrentServerProtocol(true);
+		$this->assertTrue($oneOfThenm == "http" || $oneOfThenm == "https");
+	}
+
+	function testGetSupportedDrivers() {
+		$this->assertTrue(count($this->CURL->getSupportedDrivers()) > 0);
+	}
+
+	function testSetAutoDriver() {
+		$driverset = $this->CURL->setDriverAuto();
+		$this->assertTrue($driverset > 0);
 	}
 }

@@ -21,6 +21,7 @@ if ( ! class_exists( 'TorneLIB_NETCURL_EXCEPTIONS' ) && ! class_exists( 'TorneLI
 		const NETCURL_SIMPLESOAP_GETSOAP_CREATE_FAIL = 1008;
 		const NETCURL_WP_TRANSPORT_ERROR = 1009;
 		const NETCURL_CURL_DISABLED = 1010;
+		const NETCURL_NOCOMM_DRIVER = 1011;
 	}
 
 }

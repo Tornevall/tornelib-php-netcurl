@@ -34,4 +34,3 @@ Observe that you still need curl if you are running SOAP-calls.
 Using this call before running calls will try to prepare for a proper communications driver. If curl is available, the internal functions will be prioritized before others as this used to be best practice. However, if curl is missing, this might help you find a proper driver automatically.
 
     $LIB->setDriverAuto();
-    

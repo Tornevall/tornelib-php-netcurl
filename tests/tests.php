@@ -1052,7 +1052,17 @@ class Tornevall_cURLTest extends TestCase {
 	}
 	function testEnableGuzzleStream() {
 		if ($this->hasGuzzle(true)) {
-			$info = $this->CURL->doPost("https://" . $this->Urls['tests'] . "?o=json&getjson=true", array('var1'=>'HasVar1'));
+			$info = $this->CURL->doPost("https://" . $this->Urls['tests'] . "?o=json&getjson=true&getVar=true", array('var1'=>'HasVar1', 'postVar'=>"true"));
+			$this->CURL->getExternalDriverResponse();
+			$parsed = $this->CURL->getParsedResponse($info);
+			$this->assertTrue($parsed->methods->_REQUEST->var1 === "HasVar1");
+		} else {
+			$this->markTestSkipped("Can not test guzzle driver without guzzle");
+		}
+	}
+	function testEnableGuzzleStreamJson() {
+		if ($this->hasGuzzle(true)) {
+			$info = $this->CURL->doPost("https://" . $this->Urls['tests'] . "?o=json&getjson=true&getVar=true", array('var1'=>'HasVar1', 'postVar'=>"true", 'asJson'=>'true'), CURL_POST_AS::POST_AS_JSON);
 			$this->CURL->getExternalDriverResponse();
 			$parsed = $this->CURL->getParsedResponse($info);
 			$this->assertTrue($parsed->methods->_REQUEST->var1 === "HasVar1");

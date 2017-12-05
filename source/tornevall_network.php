@@ -3487,7 +3487,7 @@ if ( ! class_exists( 'Tornevall_cURL' ) && ! class_exists( 'TorneLIB\Tornevall_c
 				return $this->executeHttpSoap($url, $this->PostData, $CurlMethod);
 			}
 			$guzDrivers = array(TORNELIB_CURL_DRIVERS::DRIVER_GUZZLEHTTP, TORNELIB_CURL_DRIVERS::DRIVER_GUZZLEHTTP_STREAM);
-			if ($this->getIsDriver(TORNELIB_CURL_DRIVERS::DRIVER_WORDPRESS)) {
+			if ($this->getDriver() == TORNELIB_CURL_DRIVERS::DRIVER_WORDPRESS) {
 				return $this->executeWpHttp($url, $this->PostData, $CurlMethod, $postAs);
 			} else if (in_array($this->getDriver(), $guzDrivers)) {
 				return $this->executeGuzzleHttp($url, $this->PostData, $CurlMethod, $postAs);
@@ -3512,24 +3512,36 @@ if ( ! class_exists( 'Tornevall_cURL' ) && ! class_exists( 'TorneLIB\Tornevall_c
 		 */
 		private function executeWpHttp( $url = '', $postData = array(), $CurlMethod = CURL_METHODS::METHOD_GET, $postAs = CURL_POST_AS::POST_AS_NORMAL ) {
 			$parsedResponse = null;
-			/** @var $worker \WP_Http */
-			$worker = $this->Drivers[ TORNELIB_CURL_DRIVERS::DRIVER_WORDPRESS ];
+			if ( isset( $this->Drivers[ TORNELIB_CURL_DRIVERS::DRIVER_WORDPRESS ] ) ) {
+				/** @var $worker \WP_Http */
+				$worker = $this->Drivers[ TORNELIB_CURL_DRIVERS::DRIVER_WORDPRESS ];
+			} else {
+				throw new \Exception( $this->ModuleName . " " . __FUNCTION__ . " exception: Could not find any available transport for WordPress Driver", $this->NETWORK->getExceptionCode( 'NETCURL_WP_TRANSPORT_ERROR' ) );
+			}
 
-			$transportInfo = $worker->_get_first_available_transport( array() );
+			if ( ! is_null( $worker ) ) {
+				$transportInfo = $worker->_get_first_available_transport( array() );
+			}
 			if ( empty( $transportInfo ) ) {
 				throw new \Exception( $this->ModuleName . " " . __FUNCTION__ . " exception: Could not find any available transport for WordPress Driver", $this->NETWORK->getExceptionCode( 'NETCURL_WP_TRANSPORT_ERROR' ) );
 			}
 
+			$postThis = array('body' => $this->PostDataReal);
+			if ($postAs == CURL_POST_AS::POST_AS_JSON) {
+				$postThis['headers'] = array("content-type" => "application-json");
+				$postThis['body'] = $this->PostData;
+			}
+
 			$wpResponse = null;
 			if ( $CurlMethod == CURL_METHODS::METHOD_GET ) {
-				$wpResponse = $worker->get( $url, $postData );
+				$wpResponse = $worker->get( $url, $postThis );
 			} else if ( $CurlMethod == CURL_METHODS::METHOD_POST ) {
-				$wpResponse = $worker->post( $url, $postData );
+				$wpResponse = $worker->post( $url, $postThis );
 			} else if ( $CurlMethod == CURL_METHODS::METHOD_REQUEST ) {
-				$wpResponse = $worker->request( $url, $postData );
+				$wpResponse = $worker->request( $url, $postThis );
 			}
 			if ( $CurlMethod == CURL_METHODS::METHOD_HEAD ) {
-				$wpResponse = $worker->head( $url, $postData );
+				$wpResponse = $worker->head( $url, $postThis );
 			}
 
 			/** @var $httpResponse \WP_HTTP_Requests_Response */

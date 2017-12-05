@@ -1468,6 +1468,20 @@ if ( ! class_exists( 'Tornevall_cURL' ) && ! class_exists( 'TorneLIB\Tornevall_c
 			return false;
 		}
 
+		/**
+		 * Enable chained mode ($Module->doGet(URL)->getParsedResponse()"
+		 *
+		 * @param bool $enable
+		 * @since 6.0.14
+		 */
+		public function setChain($enable = true) {
+			if ($enable) {
+				$this->setFlag( "CHAIN" );
+			} else {
+				$this->unsetFlag("CHAIN");
+			}
+		}
+
 		public function getIsChained() {
 			return $this->isFlag("CHAIN");
 		}

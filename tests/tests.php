@@ -776,6 +776,74 @@ class Tornevall_cURLTest extends TestCase {
 			$this->assertTrue( isset( $previousException->faultstring ) && ! empty( $previousException->faultstring ) && preg_match( "/unauthorized/i", $e->getMessage() ) );
 		}
 	}
+	function testSoapAuthErrorInitialSoapFaultsWsdl() {
+		$skipThis = true;
+		if ( $skipThis ) {
+			$this->markTestSkipped( "testSoapError is a special exceptions test. Normally we do not want to run this" );
+			return;
+		}
+		$localCurl = new Tornevall_cURL();
+		$localCurl->setAuthentication("fail", "fail");
+		$localCurl->setFlag('SOAPWARNINGS');
+		try {
+			$wsdl      = $localCurl->doGet( 'https://test.resurs.com/ecommerce-test/ws/V4/SimplifiedShopFlowService?wsdl' );
+			$wsdl->getPaymentMethods();
+		} catch ( \Exception $e ) {
+			$errorMessage = $e->getMessage();
+			$this->assertTrue( preg_match( "/401 unauthorized/i", $errorMessage ) == 1 );
+		}
+	}
+	function testSoapAuthErrorInitialSoapFaultsNoWsdl() {
+		$skipThis = true;
+		if ( $skipThis ) {
+			$this->markTestSkipped( "testSoapError is a special exceptions test. Normally we do not want to run this" );
+			return;
+		}
+		$localCurl = new Tornevall_cURL();
+		$localCurl->setSoapTryOnce(false);
+		$localCurl->setAuthentication("fail", "fail");
+		$localCurl->setFlag('SOAPWARNINGS');
+		try {
+			$wsdl      = $localCurl->doGet( 'https://test.resurs.com/ecommerce-test/ws/V4/SimplifiedShopFlowService', CURL_POST_AS::POST_AS_SOAP );
+			$wsdl->getPaymentMethods();
+		} catch ( \Exception $e ) {
+			$errorMessage = $e->getMessage();
+			$this->assertTrue( preg_match( "/401 unauthorized/i", $errorMessage ) == 1 );
+		}
+	}
+	function testSoapAuthErrorNoInitialSoapFaultsWsdl() {
+		$skipThis = true;
+		if ( $skipThis ) {
+			$this->markTestSkipped( "testSoapError is a special exceptions test. Normally we do not want to run this" );
+			return;
+		}
+		$localCurl = new Tornevall_cURL();
+		$localCurl->setAuthentication("fail", "fail");
+		try {
+			$wsdl      = $localCurl->doGet( 'https://test.resurs.com/ecommerce-test/ws/V4/SimplifiedShopFlowService?wsdl' );
+			$wsdl->getPaymentMethods();
+		} catch ( \Exception $e ) {
+			$errorMessage = $e->getMessage();
+			$this->assertTrue( !preg_match( "/401 unauthorized/i", $errorMessage ) );
+		}
+	}
+	function testSoapAuthErrorNoInitialSoapFaultsNoWsdl() {
+		$skipThis = true;
+		if ( $skipThis ) {
+			$this->markTestSkipped( "testSoapError is a special exceptions test. Normally we do not want to run this" );
+			return;
+		}
+		$localCurl = new Tornevall_cURL();
+		$localCurl->setSoapTryOnce(false);
+		$localCurl->setAuthentication("fail", "fail");
+		try {
+			$wsdl      = $localCurl->doGet( 'https://test.resurs.com/ecommerce-test/ws/V4/SimplifiedShopFlowService', CURL_POST_AS::POST_AS_SOAP );
+			$wsdl->getPaymentMethods();
+		} catch ( \Exception $e ) {
+			$errorMessage = $e->getMessage();
+			$this->assertTrue( !preg_match( "/401 unauthorized/i", $errorMessage ) );
+		}
+	}
 
 	function testHostResolveValidationSuccess() {
 		$localNetwork = new TorneLIB_Network();

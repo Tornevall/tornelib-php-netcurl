@@ -3334,10 +3334,13 @@ if ( ! class_exists( 'Tornevall_cURL' ) && ! class_exists( 'TorneLIB\Tornevall_c
 				$this->SaveCookies = false;
 			}
 
-			if ( ! empty( $this->AuthData['Username'] ) && $this->AuthData['Type'] != CURL_AUTH_TYPES::AUTHTYPE_NONE ) {
-				$useAuth = CURLAUTH_ANY;
-				if (  $this->AuthData['Type'] == CURL_AUTH_TYPES::AUTHTYPE_BASIC ) {
-					$useAuth = CURLAUTH_BASIC;
+			if ( ! empty( $this->AuthData['Username'] ) ) {
+				$useAuth = $this->AuthData['Type'];
+				if ($this->AuthData['Type'] != CURL_AUTH_TYPES::AUTHTYPE_NONE) {
+					$useAuth = CURLAUTH_ANY;
+					if ( $this->AuthData['Type'] == CURL_AUTH_TYPES::AUTHTYPE_BASIC ) {
+						$useAuth = CURLAUTH_BASIC;
+					}
 				}
 				$this->setCurlOptInternal( CURLOPT_HTTPAUTH, $useAuth );
 				$this->setCurlOptInternal( CURLOPT_USERPWD, $this->AuthData['Username'] . ':' . $this->AuthData['Password'] );
@@ -3971,7 +3974,7 @@ if ( ! class_exists( 'Tornevall_SimpleSoap' ) && ! class_exists( 'TorneLIB\Torne
 						if ( empty( $this->soapInitException['code'] ) ) {
 							$this->soapInitException['code'] = $throwErrorCode;
 						}
-					}, E_WARNING );
+					}, E_ALL );
 					try {
 						$this->soapClient = @new \SoapClient( $this->soapUrl, $this->soapOptions );
 					} catch ( \Exception $e ) {
@@ -4006,11 +4009,6 @@ if ( ! class_exists( 'Tornevall_SimpleSoap' ) && ! class_exists( 'TorneLIB\Torne
 							}
 							$this->SoapTryOnce = true;
 							$this->getSoap();
-/*							try {
-								$this->soapClient = @new \SoapClient( $this->soapUrl, $this->soapOptions );
-							} catch ( \Exception $soapException ) {
-								throw new \Exception( $this->ModuleName . " exception from soapClient: " . $soapException->getMessage(), $soapException->getCode(), $soapException );
-							}*/
 						}
 					}
 				}

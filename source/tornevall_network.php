@@ -18,7 +18,7 @@
  * Tornevall Networks netCurl library - Yet another http- and network communicator library
  * Each class in this library has its own version numbering to keep track of where the changes are. However, there is a major version too.
  * @package TorneLIB
- * @version 6.0.15
+ * @version 6.0.16
  */
 
 
@@ -40,7 +40,7 @@
 namespace TorneLIB;
 
 if ( ! defined( 'TORNELIB_NETCURL_RELEASE' ) ) {
-	define( 'TORNELIB_NETCURL_RELEASE', '6.0.15' );
+	define( 'TORNELIB_NETCURL_RELEASE', '6.0.16' );
 }
 if ( file_exists( __DIR__ . '/../vendor/autoload.php' ) ) {
 	require_once( __DIR__ . '/../vendor/autoload.php' );
@@ -728,11 +728,11 @@ if ( ! class_exists( 'Tornevall_cURL' ) && ! class_exists( 'TorneLIB\Tornevall_c
 		/** @var string This modules name (inherited to some exceptions amongst others) */
 		protected $ModuleName = "NetCurl";
 		/** @var string Internal version that is being used to find out if we are running the latest version of this library */
-		private $TorneCurlVersion = "6.0.14";
+		private $TorneNetCurlVersion = "6.0.15";
 		/** @var null Curl Version */
 		private $CurlVersion = null;
 		/** @var string Internal release snapshot that is being used to find out if we are running the latest version of this library */
-		private $TorneCurlReleaseDate = "20171106";
+		private $TorneCurlReleaseDate = "20171214";
 		/**
 		 * Prepare TorneLIB_Network class if it exists (as of the november 2016 it does).
 		 *
@@ -940,7 +940,7 @@ if ( ! class_exists( 'Tornevall_cURL' ) && ! class_exists( 'TorneLIB\Tornevall_c
 				$this->sslDriverError[] = "SSL Failure: HTTPS extension can not be found";
 			}
 			// Initial setup
-			$this->CurlUserAgent = 'Mozilla/4.0 (compatible; MSIE 7.0; Windows NT 5.1; .NET CLR 1.0.3705; .NET CLR 1.1.4322; Media Center PC 4.0; +TorneLIB-NetCurl-' . TORNELIB_NETCURL_RELEASE . " +TorneLIB+cUrl-" . $this->TorneCurlVersion . ')';
+			$this->CurlUserAgent = 'Mozilla/4.0 (compatible; MSIE 7.0; Windows NT 5.1; .NET CLR 1.0.3705; .NET CLR 1.1.4322; Media Center PC 4.0; +TorneLIB-NetCurl-' . TORNELIB_NETCURL_RELEASE . " +TorneLIB+cUrl-" . $this->TorneNetCurlVersion . ')';
 			if ( function_exists( 'curl_version' ) ) {
 				$CurlVersionRequest = curl_version();
 				$this->CurlVersion  = $CurlVersionRequest['version'];
@@ -1769,9 +1769,9 @@ if ( ! class_exists( 'Tornevall_cURL' ) && ! class_exists( 'TorneLIB\Tornevall_c
 		public function setUserAgent( $CustomUserAgent = "" ) {
 			if ( ! empty( $CustomUserAgent ) ) {
 				$this->CustomUserAgent .= preg_replace( "/\s+$/", '', $CustomUserAgent );
-				$this->CurlUserAgent   = $this->CustomUserAgent . " +TorneLIB-NetCurl-" . TORNELIB_NETCURL_RELEASE . " +TorneLIB+cUrl-" . $this->TorneCurlVersion;
+				$this->CurlUserAgent   = $this->CustomUserAgent . " +TorneLIB-NetCurl-" . TORNELIB_NETCURL_RELEASE . " +TorneLIB+cUrl-" . $this->TorneNetCurlVersion;
 			} else {
-				$this->CurlUserAgent = 'Mozilla/4.0 (compatible; MSIE 7.0; Windows NT 5.1; .NET CLR 1.0.3705; .NET CLR 1.1.4322; Media Center PC 4.0; +TorneLIB-NetCurl-' . TORNELIB_NETCURL_RELEASE . " +TorneLIB+cUrl-" . $this->TorneCurlVersion . ')';
+				$this->CurlUserAgent = 'Mozilla/4.0 (compatible; MSIE 7.0; Windows NT 5.1; .NET CLR 1.0.3705; .NET CLR 1.1.4322; Media Center PC 4.0; +TorneLIB-NetCurl-' . TORNELIB_NETCURL_RELEASE . " +TorneLIB+cUrl-" . $this->TorneNetCurlVersion . ')';
 			}
 		}
 
@@ -1940,9 +1940,9 @@ if ( ! class_exists( 'Tornevall_cURL' ) && ! class_exists( 'TorneLIB\Tornevall_c
 		 */
 		public function getVersion( $fullRelease = false ) {
 			if ( ! $fullRelease ) {
-				return $this->TorneCurlVersion;
+				return $this->TorneNetCurlVersion;
 			} else {
-				return $this->TorneCurlVersion . "-" . $this->TorneCurlReleaseDate;
+				return $this->TorneNetCurlVersion . "-" . $this->TorneCurlReleaseDate;
 			}
 		}
 
@@ -1957,7 +1957,7 @@ if ( ! class_exists( 'Tornevall_cURL' ) && ! class_exists( 'TorneLIB\Tornevall_c
 		 */
 		public function getInternalRelease() {
 			if ( defined( 'TORNELIB_ALLOW_VERSION_REQUESTS' ) && TORNELIB_ALLOW_VERSION_REQUESTS === true ) {
-				return $this->TorneCurlVersion . "," . $this->TorneCurlReleaseDate;
+				return $this->TorneNetCurlVersion . "," . $this->TorneCurlReleaseDate;
 			}
 			throw new \Exception( $this->ModuleName . " internalReleaseException [" . __CLASS__ . "]: Version requests are not allowed in current state (permissions required)", 403 );
 		}
@@ -3068,6 +3068,10 @@ if ( ! class_exists( 'Tornevall_cURL' ) && ! class_exists( 'TorneLIB\Tornevall_c
 			$this->AuthData['Username'] = $Username;
 			$this->AuthData['Password'] = $Password;
 			$this->AuthData['Type']     = $AuthType;
+			if ($AuthType !== CURL_AUTH_TYPES::AUTHTYPE_NONE) {
+				// Default behaviour on authentications via SOAP should be to catch authfail warnings
+				$this->setFlag("SOAPWARNINGS", true);
+			}
 		}
 
 		/**
@@ -3842,7 +3846,7 @@ if ( ! class_exists( 'Tornevall_SimpleSoap' ) && ! class_exists( 'TorneLIB\Torne
 			'trace'      => true,
 			'cache_wsdl' => 0       // Replacing WSDL_CACHE_NONE (WSDL_CACHE_BOTH = 3)
 		);
-		private $simpleSoapVersion = "6.0.4";
+		private $simpleSoapVersion = "6.0.5";
 		private $soapUrl;
 		private $AuthData;
 		private $soapRequest;
@@ -3993,6 +3997,19 @@ if ( ! class_exists( 'Tornevall_SimpleSoap' ) && ! class_exists( 'TorneLIB\Torne
 						if ($this->soapInitException['faultstring'] !== $e->getMessage()) {
 							$throwErrorMessage = $this->soapInitException['faultstring'] . "\n" . $e->getMessage();
 							$throwErrorCode = $this->soapInitException['code'];
+							if (preg_match("/http request failed/i", $throwErrorMessage) && preg_match("/http\/(.*?) \d+ (.*?)/i", $throwErrorMessage)) {
+								preg_match_all("/! (http\/\d+\.\d+ \d+ (.*?))\n/is", $throwErrorMessage, $outInfo);
+								if (isset($outInfo[1]) && isset($outInfo[1][0]) && preg_match("/^HTTP\//", $outInfo[1][0])) {
+									$httpError = $outInfo[1][0];
+									$httpSplitError = explode(" ", $httpError);
+									if (isset($httpSplitError[1]) && intval($httpSplitError[1]) > 0) {
+										$throwErrorCode = $httpSplitError[1];
+										if (isset($httpSplitError[2]) && is_string($httpSplitError[2]) && !empty($httpSplitError[2])) {
+											$throwErrorMessage = "HTTP-Request-Exception: " . $httpSplitError[1] . " " . trim( $httpSplitError[2] ) . "\n" . $throwErrorMessage;
+										}
+									}
+								}
+							}
 						}
 					}
 					restore_error_handler();

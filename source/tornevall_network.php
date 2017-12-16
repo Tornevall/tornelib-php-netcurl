@@ -152,6 +152,7 @@ if ( ! class_exists( 'TorneLIB_Network' ) && ! class_exists( 'TorneLIB\TorneLIB_
 			/** @var $CURL Tornevall_cURL */
 			$CURL = new Tornevall_cURL();
 
+			/** @noinspection PhpUnusedLocalVariableInspection */
 			$code             = 0;
 			$exceptionMessage = "";
 			try {
@@ -291,6 +292,7 @@ if ( ! class_exists( 'TorneLIB_Network' ) && ! class_exists( 'TorneLIB\TorneLIB_
 		 */
 		public function getUrlsFromHtml( $stringWithUrls, $offset = - 1, $urlLimit = - 1, $protocols = array( "http" ) ) {
 			$returnArray = array();
+			$urls = array();
 			// Pick up all urls
 			foreach ( $protocols as $protocol ) {
 				preg_match_all( "/src=\"$protocol(.*?)\"|src='$protocol(.*?)'/is", $stringWithUrls, $matches );
@@ -461,6 +463,7 @@ if ( ! class_exists( 'TorneLIB_Network' ) && ! class_exists( 'TorneLIB\TorneLIB_
 		 * @since 6.0.15
 		 */
 		public static function getCurrentServerProtocol( $returnProtocol = false ) {
+			/** @noinspection PhpDynamicAsStaticMethodCallInspection */
 			return self::getProtocol( $returnProtocol );
 		}
 
@@ -706,14 +709,14 @@ if ( ! class_exists( 'Tornevall_cURL' ) && ! class_exists( 'TorneLIB\Tornevall_c
 			'GuzzleHttp\Client' => TORNELIB_CURL_DRIVERS::DRIVER_GUZZLEHTTP,
 			'WP_Http'           => TORNELIB_CURL_DRIVERS::DRIVER_WORDPRESS
 		);
-		/** @var $currentDriver Current set driver */
+		/** @var TORNELIB_CURL_DRIVERS $currentDriver Current set driver */
 		private $currentDriver;
 
 		/** @var $PostData */
 		private $PostData;
 		/** @var $PostDataContainer */
 		private $PostDataContainer;
-		/** @var $PostDataReal Post data as received from client */
+		/** @var string $PostDataReal Post data as received from client */
 		private $PostDataReal;
 
 		/**
@@ -730,6 +733,7 @@ if ( ! class_exists( 'Tornevall_cURL' ) && ! class_exists( 'TorneLIB\Tornevall_c
 		protected $ModuleName = "NetCurl";
 		/** @var string Internal version that is being used to find out if we are running the latest version of this library */
 		private $TorneNetCurlVersion = "6.0.15";
+		const TORNELIB_NETCURL_VERSION = "6.0.15";
 		/** @var null Curl Version */
 		private $CurlVersion = null;
 		/** @var string Internal release snapshot that is being used to find out if we are running the latest version of this library */
@@ -827,7 +831,7 @@ if ( ! class_exists( 'Tornevall_cURL' ) && ! class_exists( 'TorneLIB\Tornevall_c
 		private $TemporaryResponse = null;
 		/** @var null Temporary response from external driver */
 		private $TemporaryExternalResponse = null;
-		/** @var What post type to use when using POST (Enforced) */
+		/** @var CURL_POST_AS $forcePostType What post type to use when using POST (Enforced) */
 		private $forcePostType = null;
 		/** @var string Sets an encoding to the http call */
 		public $CurlEncoding = null;
@@ -880,7 +884,7 @@ if ( ! class_exists( 'Tornevall_cURL' ) && ! class_exists( 'TorneLIB\Tornevall_c
 		private $CurlResolveForced = false;
 
 		//// EXCEPTION HANDLING
-		/** @var Throwable http codes */
+		/** @var array Throwable http codes */
 		private $throwableHttpCodes;
 		/** @var bool By default, this library does not store any curl_getinfo during exceptions */
 		private $canStoreSessionException = false;
@@ -1077,6 +1081,7 @@ if ( ! class_exists( 'Tornevall_cURL' ) && ! class_exists( 'TorneLIB\Tornevall_c
 		 * @since 6.0.14
 		 */
 		public function setDriverAuto() {
+			$firstAvailableDriver = TORNELIB_CURL_DRIVERS::DRIVER_NOT_SET;
 			if ( ! $this->hasCurl() ) {
 				$supportedDriverList  = $this->getSupportedDrivers();
 				$supportedDriverCount = count( $supportedDriverList );
@@ -1193,6 +1198,7 @@ if ( ! class_exists( 'Tornevall_cURL' ) && ! class_exists( 'TorneLIB\Tornevall_c
 			);
 			if ( $driverId == TORNELIB_CURL_DRIVERS::DRIVER_WORDPRESS ) {
 				if ( in_array( "WP_Http", get_declared_classes() ) ) {
+					/** @noinspection PhpUndefinedClassInspection */
 					$this->Drivers[ TORNELIB_CURL_DRIVERS::DRIVER_WORDPRESS ] = new \WP_Http();
 					$isDriverSet                                              = true;
 				}
@@ -1203,7 +1209,9 @@ if ( ! class_exists( 'Tornevall_cURL' ) && ! class_exists( 'TorneLIB\Tornevall_c
 					$isDriverSet = $this->setDriverByClass( $driverId, 'GuzzleHttp\Client' );
 				} else {
 					if ( class_exists( 'GuzzleHttp\Handler\StreamHandler' ) ) {
-						$streamHandler = new \GuzzleHttp\Handler\StreamHandler();
+						/** @noinspection PhpUndefinedNamespaceInspection */
+						/** @noinspection PhpUndefinedClassInspection */
+						$streamHandler = new GuzzleHttp\Handler\StreamHandler();
 						$isDriverSet   = $this->setDriverByClass( $driverId, 'GuzzleHttp\Client', array( 'handler' => $streamHandler ) );
 					}
 				}
@@ -1600,7 +1608,7 @@ if ( ! class_exists( 'Tornevall_cURL' ) && ! class_exists( 'TorneLIB\Tornevall_c
 		/**
 		 * Return the list of throwable http error codes (if set)
 		 *
-		 * @return array|Throwable
+		 * @return array
 		 * @since 6.0.6
 		 */
 		public function getThrowableHttpCodes() {
@@ -2025,7 +2033,8 @@ if ( ! class_exists( 'Tornevall_cURL' ) && ! class_exists( 'TorneLIB\Tornevall_c
 		 */
 		private function getHasUpdateState( $libName = 'tornelib_curl' ) {
 			// Currently only supporting this internal module (through $myRelease).
-			$myRelease  = $this->getInternalRelease();
+			//$myRelease  = $this->getInternalRelease();
+			$myRelease = TORNELIB_NETCURL_RELEASE;
 			$libRequest = ( ! empty( $libName ) ? "lib/" . $libName : "" );
 			$getInfo    = $this->doGet( "https://api.tornevall.net/2.0/libs/getLibs/" . $libRequest . "/me/" . $myRelease );
 			if ( isset( $getInfo['parsed']->response->getLibsResponse->you ) ) {
@@ -2575,6 +2584,7 @@ if ( ! class_exists( 'Tornevall_cURL' ) && ! class_exists( 'TorneLIB\Tornevall_c
 					$serializerPath = stream_resolve_include_path( 'XML/Unserializer.php' );
 					if ( ! empty( $serializerPath ) ) {
 						$overrideXmlSerializer = true;
+						/** @noinspection PhpIncludeInspection */
 						require_once( 'XML/Unserializer.php' );
 					}
 				}
@@ -2595,9 +2605,12 @@ if ( ! class_exists( 'Tornevall_cURL' ) && ! class_exists( 'TorneLIB\Tornevall_c
 				} else {
 					// Returns empty class if the SimpleXMLElement is missing.
 					if ( $overrideXmlSerializer ) {
+						/** @noinspection PhpUndefinedClassInspection */
 						$xmlSerializer = new \XML_Unserializer();
+						/** @noinspection PhpUndefinedMethodInspection */
 						$xmlSerializer->unserialize( $content );
 
+						/** @noinspection PhpUndefinedMethodInspection */
 						return $xmlSerializer->getUnserializedData();
 					}
 
@@ -2674,9 +2687,9 @@ if ( ! class_exists( 'Tornevall_cURL' ) && ! class_exists( 'TorneLIB\Tornevall_c
 					'body'   => $body,
 					'code'   => $code
 				);
-				if ( $this->isFlag( 'FOLLOWLOCATION_INTERNAL' ) ) {
+				//if ( $this->isFlag( 'FOLLOWLOCATION_INTERNAL' ) ) {
 					// For future coding only: Add internal follow function, eventually.
-				}
+				//}
 			}
 			$headerInfo     = $this->GetHeaderKeyArray( $rows );
 			$returnResponse = array(
@@ -3379,7 +3392,7 @@ if ( ! class_exists( 'Tornevall_cURL' ) && ! class_exists( 'TorneLIB\Tornevall_c
 					throw new \Exception( $this->ModuleName . " " . __FUNCTION__ . " exception: SoapClient is not available in this system", $this->NETWORK->getExceptionCode( 'NETCURL_SOAPCLIENT_CLASS_MISSING' ) );
 				}
 
-				return $this->executeHttpSoap( $url, $postData, $CurlMethod, $postAs );
+				return $this->executeHttpSoap( $url, $postData, $CurlMethod );
 			}
 
 			$externalExecute = $this->executeHttpExternal( $url, $postData, $CurlMethod, $postAs );
@@ -3543,6 +3556,7 @@ if ( ! class_exists( 'Tornevall_cURL' ) && ! class_exists( 'TorneLIB\Tornevall_c
 		private function executeWpHttp( $url = '', $postData = array(), $CurlMethod = CURL_METHODS::METHOD_GET, $postAs = CURL_POST_AS::POST_AS_NORMAL ) {
 			$parsedResponse = null;
 			if ( isset( $this->Drivers[ TORNELIB_CURL_DRIVERS::DRIVER_WORDPRESS ] ) ) {
+				/** @noinspection PhpUndefinedClassInspection */
 				/** @var $worker \WP_Http */
 				$worker = $this->Drivers[ TORNELIB_CURL_DRIVERS::DRIVER_WORDPRESS ];
 			} else {
@@ -3550,6 +3564,7 @@ if ( ! class_exists( 'Tornevall_cURL' ) && ! class_exists( 'TorneLIB\Tornevall_c
 			}
 
 			if ( ! is_null( $worker ) ) {
+				/** @noinspection PhpUndefinedMethodInspection */
 				$transportInfo = $worker->_get_first_available_transport( array() );
 			}
 			if ( empty( $transportInfo ) ) {
@@ -3564,19 +3579,26 @@ if ( ! class_exists( 'Tornevall_cURL' ) && ! class_exists( 'TorneLIB\Tornevall_c
 
 			$wpResponse = null;
 			if ( $CurlMethod == CURL_METHODS::METHOD_GET ) {
+				/** @noinspection PhpUndefinedMethodInspection */
 				$wpResponse = $worker->get( $url, $postThis );
 			} else if ( $CurlMethod == CURL_METHODS::METHOD_POST ) {
+				/** @noinspection PhpUndefinedMethodInspection */
 				$wpResponse = $worker->post( $url, $postThis );
 			} else if ( $CurlMethod == CURL_METHODS::METHOD_REQUEST ) {
+				/** @noinspection PhpUndefinedMethodInspection */
 				$wpResponse = $worker->request( $url, $postThis );
 			}
 			if ( $CurlMethod == CURL_METHODS::METHOD_HEAD ) {
+				/** @noinspection PhpUndefinedMethodInspection */
 				$wpResponse = $worker->head( $url, $postThis );
 			}
 
+			/** @noinspection PhpUndefinedClassInspection */
 			/** @var $httpResponse \WP_HTTP_Requests_Response */
 			$httpResponse = $wpResponse['http_response'];
+			/** @noinspection PhpUndefinedClassInspection */
 			/** @var $httpReponseObject \Requests_Response */
+			/** @noinspection PhpUndefinedMethodInspection */
 			$httpResponseObject              = $httpResponse->get_response_object();
 			$rawResponse                     = $httpResponseObject->raw;
 			$this->TemporaryExternalResponse = array( 'worker' => $worker, 'request' => $wpResponse );
@@ -3596,12 +3618,16 @@ if ( ! class_exists( 'Tornevall_cURL' ) && ! class_exists( 'TorneLIB\Tornevall_c
 		 * @return $this
 		 */
 		private function executeGuzzleHttp( $url = '', $postData = array(), $CurlMethod = CURL_METHODS::METHOD_GET, $postAs = CURL_POST_AS::POST_AS_NORMAL ) {
+			/** @noinspection PhpUndefinedClassInspection */
+			/** @noinspection PhpUndefinedNamespaceInspection */
 			/** @var $gResponse \GuzzleHttp\Psr7\Response */
 			$gResponse   = null;
 			$rawResponse = null;
 			$gBody       = null;
 
 			$myChosenGuzzleDriver = $this->getDriver();
+			/** @noinspection PhpUndefinedClassInspection */
+			/** @noinspection PhpUndefinedNamespaceInspection */
 			/** @var $worker \GuzzleHttp\Client */
 			$worker      = $this->Drivers[ $myChosenGuzzleDriver ];
 			$postOptions = array();
@@ -3621,19 +3647,28 @@ if ( ! class_exists( 'Tornevall_cURL' ) && ! class_exists( 'TorneLIB\Tornevall_c
 			}
 
 			if ( $CurlMethod == CURL_METHODS::METHOD_GET ) {
+				/** @noinspection PhpUndefinedMethodInspection */
 				$gRequest = $worker->request( 'GET', $url, $postOptions );
 			} else if ( $CurlMethod == CURL_METHODS::METHOD_POST ) {
+				/** @noinspection PhpUndefinedMethodInspection */
 				$gRequest = $worker->request( 'POST', $url, $postOptions );
 			} else if ( $CurlMethod == CURL_METHODS::METHOD_PUT ) {
+				/** @noinspection PhpUndefinedMethodInspection */
 				$gRequest = $worker->request( 'PUT', $url, $postOptions );
 			} else if ( $CurlMethod == CURL_METHODS::METHOD_DELETE ) {
+				/** @noinspection PhpUndefinedMethodInspection */
 				$gRequest = $worker->request( 'DELETE', $url, $postOptions );
 			} else if ( $CurlMethod == CURL_METHODS::METHOD_HEAD ) {
+				/** @noinspection PhpUndefinedMethodInspection */
 				$gRequest = $worker->request( 'HEAD', $url, $postOptions );
 			}
+			/** @noinspection PhpUndefinedVariableInspection */
 			$this->TemporaryExternalResponse = array( 'worker' => $worker, 'request' => $gRequest );
+			/** @noinspection PhpUndefinedMethodInspection */
 			$gHeaders                        = $gRequest->getHeaders();
+			/** @noinspection PhpUndefinedMethodInspection */
 			$gBody                           = $gRequest->getBody()->getContents();
+			/** @noinspection PhpUndefinedMethodInspection */
 			$rawResponse                     .= "HTTP/" . $gRequest->getProtocolVersion() . " " . $gRequest->getStatusCode() . " " . $gRequest->getReasonPhrase() . "\r\n";
 			$rawResponse                     .= "X-NetCurl-ClientDriver: " . $this->getDriver() . "\r\n";
 			if ( is_array( $gHeaders ) ) {
@@ -3978,7 +4013,7 @@ if ( ! class_exists( 'Tornevall_SimpleSoap' ) && ! class_exists( 'TorneLIB\Torne
 			$throwErrorMessage = null;
 			$throwErrorCode    = null;
 			$throwBackCurrent  = null;
-			$throwPrevious     = null;
+			//$throwPrevious     = null;
 			$soapFaultOnInit   = false;
 
 			$parentFlags = $this->PARENT->getFlags();
@@ -3994,7 +4029,7 @@ if ( ! class_exists( 'Tornevall_SimpleSoap' ) && ! class_exists( 'TorneLIB\Torne
 					$throwErrorMessage = $this->ModuleName . " exception from soapClient: " . $soapException->getMessage();
 					$throwErrorCode    = $soapCode;
 					$throwBackCurrent  = $soapException;
-					$throwPrevious     = $soapException->getPrevious();
+					//$throwPrevious     = $soapException->getPrevious();
 					if ( isset( $parentFlags['SOAPWARNINGS'] ) && $parentFlags['SOAPWARNINGS'] === true ) {
 						$soapFaultOnInit = true;
 					}

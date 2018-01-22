@@ -18,7 +18,7 @@
  * Tornevall Networks netCurl library - Yet another http- and network communicator library
  * Each class in this library has its own version numbering to keep track of where the changes are. However, there is a major version too.
  * @package TorneLIB
- * @version 6.0.16
+ * @version 6.0.17
  */
 
 
@@ -729,11 +729,11 @@ if ( ! class_exists( 'Tornevall_cURL' ) && ! class_exists( 'TorneLIB\Tornevall_c
 		/** @var string This modules name (inherited to some exceptions amongst others) */
 		protected $ModuleName = "NetCurl";
 		/** @var string Internal version that is being used to find out if we are running the latest version of this library */
-		private $TorneNetCurlVersion = "6.0.15";
+		private $TorneNetCurlVersion = "6.0.16";
 		/** @var null Curl Version */
 		private $CurlVersion = null;
 		/** @var string Internal release snapshot that is being used to find out if we are running the latest version of this library */
-		private $TorneCurlReleaseDate = "20171214";
+		private $TorneCurlReleaseDate = "20180122";
 		/**
 		 * Prepare TorneLIB_Network class if it exists (as of the november 2016 it does).
 		 *
@@ -753,7 +753,7 @@ if ( ! class_exists( 'Tornevall_cURL' ) && ! class_exists( 'TorneLIB\Tornevall_c
 		/** @var null URL that was set to communicate with */
 		private $CurlURL = null;
 		/** @var array Flags controller to change behaviour on internal function */
-		private $internalFlags = array();
+		private $internalFlags = array('CHAIN'=>true);
 		private $debugData = array(
 			'data'     => array(
 				'info' => array()
@@ -913,6 +913,10 @@ if ( ! class_exists( 'Tornevall_cURL' ) && ! class_exists( 'TorneLIB\Tornevall_c
 		public function __construct( $PreferredURL = '', $PreparedPostData = array(), $PreferredMethod = CURL_METHODS::METHOD_POST, $flags = array() ) {
 			register_shutdown_function( array( $this, 'tornecurl_terminate' ) );
 
+			// PHP versions not supported to chaining gets the chaining parameter disabled by default.
+			if ( version_compare( PHP_VERSION, "5.4.0", "<" ) ) {
+				$this->setFlag('NOCHAIN', true);
+			}
 			if ( is_array( $flags ) && count( $flags ) ) {
 				$this->setFlags( $flags );
 			}

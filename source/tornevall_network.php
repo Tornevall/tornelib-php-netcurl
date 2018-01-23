@@ -762,9 +762,9 @@ if ( ! class_exists( 'Tornevall_cURL' ) && ! class_exists( 'TorneLIB\Tornevall_c
 		/** @var null URL that was set to communicate with */
 		private $CurlURL = null;
 		/** @var array Flags controller to change behaviour on internal function */
-		//private $internalFlags = array();
+		private $internalFlags = array();
 		// Change to this flagSet when compatibility has been fixed
-		private $internalFlags = array('CHAIN'=>true);
+		//private $internalFlags = array('CHAIN'=>true);
 		private $debugData = array(
 			'data'     => array(
 				'info' => array()

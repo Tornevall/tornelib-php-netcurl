@@ -2850,6 +2850,15 @@ if ( ! class_exists( 'Tornevall_cURL' ) && ! class_exists( 'TorneLIB\Tornevall_c
 			return null;
 		}
 
+		/**
+		 * @return array
+		 *
+		 * @since 6.0.16
+		 */
+		public function getTemporaryResponse() {
+			return $this->TemporaryResponse;
+		}
+
 
 		/**
 		 * @param null $ResponseContent
@@ -4171,9 +4180,14 @@ if ( ! class_exists( 'Tornevall_SimpleSoap' ) && ! class_exists( 'TorneLIB\Torne
 				/** @noinspection PhpUndefinedMethodInspection */
 				$this->soapResponseHeaders = $this->soapClient->__getLastResponseHeaders();
 				$parsedHeader              = $this->getHeader( $this->soapResponseHeaders );
-				$returnResponse['header']  = $parsedHeader['header'];
-				$returnResponse['code']    = isset( $parsedHeader['code'] ) ? $parsedHeader['code'] : 0;
-				$returnResponse['body']    = $this->soapResponse;
+				if (!is_object($parsedHeader)) {
+					$returnResponse['header']  = $parsedHeader['header'];
+					$returnResponse['code']    = isset( $parsedHeader['code'] ) ? $parsedHeader['code'] : 0;
+					$returnResponse['body']    = $this->soapResponse;
+					$returnResponse['parsed']  = $SoapClientResponse;
+				} else {
+					$returnResponse = $parsedHeader->getTemporaryResponse();
+				}
 				// Collect the response received internally, before throwing
 				$this->libResponse              = $returnResponse;
 				$this->soapFaultExceptionObject = $e;

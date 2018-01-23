@@ -4207,10 +4207,14 @@ if ( ! class_exists( 'Tornevall_SimpleSoap' ) && ! class_exists( 'TorneLIB\Torne
 			/** @noinspection PhpUndefinedMethodInspection */
 			$this->soapResponseHeaders = $this->soapClient->__getLastResponseHeaders();
 			$parsedHeader              = $this->getHeader( $this->soapResponseHeaders );
-			$returnResponse['header']  = $parsedHeader['header'];
-			$returnResponse['code']    = isset( $parsedHeader['code'] ) ? $parsedHeader['code'] : 0;
-			$returnResponse['body']    = $this->soapResponse;
-			$returnResponse['parsed']  = $SoapClientResponse;
+			if (!is_object($parsedHeader)) {
+				$returnResponse['header']  = $parsedHeader['header'];
+				$returnResponse['code']    = isset( $parsedHeader['code'] ) ? $parsedHeader['code'] : 0;
+				$returnResponse['body']    = $this->soapResponse;
+				$returnResponse['parsed']  = $SoapClientResponse;
+			} else {
+				$returnResponse = $parsedHeader->getTemporaryResponse();
+			}
 			if ( isset( $SoapClientResponse->return ) ) {
 				$returnResponse['parsed'] = $SoapClientResponse->return;
 			}

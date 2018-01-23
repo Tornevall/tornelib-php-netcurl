@@ -762,9 +762,9 @@ if ( ! class_exists( 'Tornevall_cURL' ) && ! class_exists( 'TorneLIB\Tornevall_c
 		/** @var null URL that was set to communicate with */
 		private $CurlURL = null;
 		/** @var array Flags controller to change behaviour on internal function */
-		private $internalFlags = array();
+		//private $internalFlags = array();
 		// Change to this flagSet when compatibility has been fixed
-		//private $internalFlags = array('CHAIN'=>true);
+		private $internalFlags = array('CHAIN'=>true);
 		private $debugData = array(
 			'data'     => array(
 				'info' => array()
@@ -2738,7 +2738,7 @@ if ( ! class_exists( 'Tornevall_cURL' ) && ! class_exists( 'TorneLIB\Tornevall_c
 				return $returnResponseObject;
 			}
 			$this->TemporaryResponse = $returnResponse;
-			if ( $this->isFlag( "CHAIN" ) ) {
+			if ( $this->isFlag( "CHAIN" ) && !$this->isFlag('IS_SOAP') ) {
 				return $this;
 			}
 
@@ -3512,8 +3512,10 @@ if ( ! class_exists( 'Tornevall_cURL' ) && ! class_exists( 'TorneLIB\Tornevall_c
 		 * @since 6.0.14
 		 */
 		private function executeHttpSoap( $url = '', $postData = array(), $CurlMethod = CURL_METHODS::METHOD_GET ) {
-			$this->unsetFlag( "CHAIN" );
+			$this->setChain(false);
 			$Soap = new Tornevall_SimpleSoap( $this->CurlURL, $this );
+			$Soap->setFlag('IS_SOAP');
+			$Soap->setChain(false);
 			$Soap->setCustomUserAgent( $this->CustomUserAgent );
 			$Soap->setThrowableState( $this->canThrow );
 			$Soap->setSoapAuthentication( $this->AuthData );

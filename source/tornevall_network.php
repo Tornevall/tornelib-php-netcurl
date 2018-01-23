@@ -158,9 +158,10 @@ if ( ! class_exists( 'TorneLIB_Network' ) && ! class_exists( 'TorneLIB\TorneLIB_
 			try {
 				$gitGet = $CURL->doGet( $gitUrl );
 				$code   = intval( $CURL->getResponseCode() );
-				if ( $code >= 200 && $code <= 299 && ! empty( $gitGet['body'] ) ) {
+				$gitBody = $CURL->getResponseBody($gitGet);
+				if ( $code >= 200 && $code <= 299 && ! empty( $gitBody ) ) {
 					$fetchFail = false;
-					preg_match_all( "/refs\/tags\/(.*?)\n/s", $gitGet['body'], $tagMatches );
+					preg_match_all( "/refs\/tags\/(.*?)\n/s", $gitBody, $tagMatches );
 					if ( isset( $tagMatches[1] ) && is_array( $tagMatches[1] ) ) {
 						$tagList = $tagMatches[1];
 						foreach ( $tagList as $tag ) {
@@ -761,9 +762,9 @@ if ( ! class_exists( 'Tornevall_cURL' ) && ! class_exists( 'TorneLIB\Tornevall_c
 		/** @var null URL that was set to communicate with */
 		private $CurlURL = null;
 		/** @var array Flags controller to change behaviour on internal function */
-		private $internalFlags = array();
+		//private $internalFlags = array();
 		// Change to this flagSet when compatibility has been fixed
-		//private $internalFlags = array('CHAIN'=>true);
+		private $internalFlags = array('CHAIN'=>true);
 		private $debugData = array(
 			'data'     => array(
 				'info' => array()
@@ -2687,8 +2688,13 @@ if ( ! class_exists( 'Tornevall_cURL' ) && ! class_exists( 'TorneLIB\Tornevall_c
 			// If the first row of the body contains a HTTP/-string, we'll try to reparse it
 			if ( preg_match( "/^HTTP\//", $body ) ) {
 				$newBody = $this->ParseResponse( $body );
-				$header  = $newBody['header'];
-				$body    = $newBody['body'];
+				if (is_object($newBody)) {
+					$header = $newBody->TemporaryResponse['header'];
+					$body = $newBody->TemporaryResponse['body'];
+				} else {
+					$header = $newBody['header'];
+					$body   = $newBody['body'];
+				}
 			}
 
 			// If response code starts with 3xx, this is probably a redirect
@@ -2826,6 +2832,7 @@ if ( ! class_exists( 'Tornevall_cURL' ) && ! class_exists( 'TorneLIB\Tornevall_c
 					throw new \Exception( $this->ModuleName . " parseResponse exception - Unexpected response code from server: " . $ResponseContent['code'], $ResponseContent['code'] );
 				}
 			}
+
 			// When curl is disabled or missing, this might be returned chained
 			if ( is_object( $ResponseContent ) ) {
 				if ( method_exists( $ResponseContent, "getParsedResponse" ) && isset( $ResponseContent->TemporaryResponse ) && ! empty( $ResponseContent->TemporaryResponse ) ) {
@@ -2850,6 +2857,10 @@ if ( ! class_exists( 'Tornevall_cURL' ) && ! class_exists( 'TorneLIB\Tornevall_c
 		 * @return int
 		 */
 		public function getResponseCode( $ResponseContent = null ) {
+			if (method_exists($ResponseContent, "getResponseCode")) {
+				return $ResponseContent->getResponseCode();
+			}
+
 			if ( is_null( $ResponseContent ) && ! empty( $this->TemporaryResponse ) && isset( $this->TemporaryResponse['code'] ) ) {
 				return (int) $this->TemporaryResponse['code'];
 			} else if ( isset( $ResponseContent['code'] ) ) {
@@ -2865,6 +2876,10 @@ if ( ! class_exists( 'Tornevall_cURL' ) && ! class_exists( 'TorneLIB\Tornevall_c
 		 * @return null
 		 */
 		public function getResponseBody( $ResponseContent = null ) {
+			if (method_exists($ResponseContent, "getResponseBody")) {
+				return $ResponseContent->getResponseBody();
+			}
+
 			if ( is_null( $ResponseContent ) && ! empty( $this->TemporaryResponse ) && isset( $this->TemporaryResponse['body'] ) ) {
 				return $this->TemporaryResponse['body'];
 			} else if ( isset( $ResponseContent['body'] ) ) {

@@ -292,7 +292,7 @@ if ( ! class_exists( 'TorneLIB_Network' ) && ! class_exists( 'TorneLIB\TorneLIB_
 		 */
 		public function getUrlsFromHtml( $stringWithUrls, $offset = - 1, $urlLimit = - 1, $protocols = array( "http" ) ) {
 			$returnArray = array();
-			$urls = array();
+			$urls        = array();
 			// Pick up all urls
 			foreach ( $protocols as $protocol ) {
 				preg_match_all( "/src=\"$protocol(.*?)\"|src='$protocol(.*?)'/is", $stringWithUrls, $matches );
@@ -386,9 +386,9 @@ if ( ! class_exists( 'TorneLIB_Network' ) && ! class_exists( 'TorneLIB\TorneLIB_
 			}
 		}
 
-
 		/**
 		 * Render a list of client ip addresses (if exists). This requires that the server exposes the REMOTE_ADDR
+		 * @return bool If successful, this is true
 		 */
 		private function renderProxyHeaders() {
 			if ( isset( $_SERVER['REMOTE_ADDR'] ) ) {
@@ -398,7 +398,11 @@ if ( ! class_exists( 'TorneLIB_Network' ) && ! class_exists( 'TorneLIB\TorneLIB_
 						$this->clientAddressList[ $proxyVar ] = $_SERVER[ $proxyVar ];
 					}
 				}
+
+				return true;
 			}
+
+			return false;
 		}
 
 		/**
@@ -1155,6 +1159,8 @@ if ( ! class_exists( 'Tornevall_cURL' ) && ! class_exists( 'TorneLIB\Tornevall_c
 		 * Return all flags
 		 *
 		 * @return array
+		 *
+		 * @since 6.0.10
 		 */
 		public function getFlags() {
 			return $this->internalFlags;
@@ -2034,7 +2040,7 @@ if ( ! class_exists( 'Tornevall_cURL' ) && ! class_exists( 'TorneLIB\Tornevall_c
 		private function getHasUpdateState( $libName = 'tornelib_curl' ) {
 			// Currently only supporting this internal module (through $myRelease).
 			//$myRelease  = $this->getInternalRelease();
-			$myRelease = TORNELIB_NETCURL_RELEASE;
+			$myRelease  = TORNELIB_NETCURL_RELEASE;
 			$libRequest = ( ! empty( $libName ) ? "lib/" . $libName : "" );
 			$getInfo    = $this->doGet( "https://api.tornevall.net/2.0/libs/getLibs/" . $libRequest . "/me/" . $myRelease );
 			if ( isset( $getInfo['parsed']->response->getLibsResponse->you ) ) {
@@ -2688,7 +2694,7 @@ if ( ! class_exists( 'Tornevall_cURL' ) && ! class_exists( 'TorneLIB\Tornevall_c
 					'code'   => $code
 				);
 				//if ( $this->isFlag( 'FOLLOWLOCATION_INTERNAL' ) ) {
-					// For future coding only: Add internal follow function, eventually.
+				// For future coding only: Add internal follow function, eventually.
 				//}
 			}
 			$headerInfo     = $this->GetHeaderKeyArray( $rows );
@@ -3665,12 +3671,12 @@ if ( ! class_exists( 'Tornevall_cURL' ) && ! class_exists( 'TorneLIB\Tornevall_c
 			/** @noinspection PhpUndefinedVariableInspection */
 			$this->TemporaryExternalResponse = array( 'worker' => $worker, 'request' => $gRequest );
 			/** @noinspection PhpUndefinedMethodInspection */
-			$gHeaders                        = $gRequest->getHeaders();
+			$gHeaders = $gRequest->getHeaders();
 			/** @noinspection PhpUndefinedMethodInspection */
-			$gBody                           = $gRequest->getBody()->getContents();
+			$gBody = $gRequest->getBody()->getContents();
 			/** @noinspection PhpUndefinedMethodInspection */
-			$rawResponse                     .= "HTTP/" . $gRequest->getProtocolVersion() . " " . $gRequest->getStatusCode() . " " . $gRequest->getReasonPhrase() . "\r\n";
-			$rawResponse                     .= "X-NetCurl-ClientDriver: " . $this->getDriver() . "\r\n";
+			$rawResponse .= "HTTP/" . $gRequest->getProtocolVersion() . " " . $gRequest->getStatusCode() . " " . $gRequest->getReasonPhrase() . "\r\n";
+			$rawResponse .= "X-NetCurl-ClientDriver: " . $this->getDriver() . "\r\n";
 			if ( is_array( $gHeaders ) ) {
 				foreach ( $gHeaders as $hParm => $hValues ) {
 					$rawResponse .= $hParm . ": " . implode( "\r\n", $hValues ) . "\r\n";
@@ -4014,7 +4020,7 @@ if ( ! class_exists( 'Tornevall_SimpleSoap' ) && ! class_exists( 'TorneLIB\Torne
 			$throwErrorCode    = null;
 			$throwBackCurrent  = null;
 			//$throwPrevious     = null;
-			$soapFaultOnInit   = false;
+			$soapFaultOnInit = false;
 
 			$parentFlags = $this->PARENT->getFlags();
 

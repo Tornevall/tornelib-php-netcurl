@@ -156,9 +156,9 @@ if ( ! class_exists( 'TorneLIB_Network' ) && ! class_exists( 'TorneLIB\TorneLIB_
 			$code             = 0;
 			$exceptionMessage = "";
 			try {
-				$gitGet = $CURL->doGet( $gitUrl );
-				$code   = intval( $CURL->getResponseCode() );
-				$gitBody = $CURL->getResponseBody($gitGet);
+				$gitGet  = $CURL->doGet( $gitUrl );
+				$code    = intval( $CURL->getResponseCode() );
+				$gitBody = $CURL->getResponseBody( $gitGet );
 				if ( $code >= 200 && $code <= 299 && ! empty( $gitBody ) ) {
 					$fetchFail = false;
 					preg_match_all( "/refs\/tags\/(.*?)\n/s", $gitBody, $tagMatches );
@@ -764,7 +764,7 @@ if ( ! class_exists( 'Tornevall_cURL' ) && ! class_exists( 'TorneLIB\Tornevall_c
 		/** @var array Flags controller to change behaviour on internal function */
 		//private $internalFlags = array();
 		// Change to this flagSet when compatibility has been fixed
-		private $internalFlags = array('CHAIN'=>true);
+		private $internalFlags = array( 'CHAIN' => true );
 		private $debugData = array(
 			'data'     => array(
 				'info' => array()
@@ -926,7 +926,7 @@ if ( ! class_exists( 'Tornevall_cURL' ) && ! class_exists( 'TorneLIB\Tornevall_c
 
 			// PHP versions not supported to chaining gets the chaining parameter disabled by default.
 			if ( version_compare( PHP_VERSION, "5.4.0", "<" ) ) {
-				$this->setFlag('NOCHAIN', true);
+				$this->setFlag( 'NOCHAIN', true );
 			}
 			if ( is_array( $flags ) && count( $flags ) ) {
 				$this->setFlags( $flags );
@@ -2688,9 +2688,9 @@ if ( ! class_exists( 'Tornevall_cURL' ) && ! class_exists( 'TorneLIB\Tornevall_c
 			// If the first row of the body contains a HTTP/-string, we'll try to reparse it
 			if ( preg_match( "/^HTTP\//", $body ) ) {
 				$newBody = $this->ParseResponse( $body );
-				if (is_object($newBody)) {
+				if ( is_object( $newBody ) ) {
 					$header = $newBody->TemporaryResponse['header'];
-					$body = $newBody->TemporaryResponse['body'];
+					$body   = $newBody->TemporaryResponse['body'];
 				} else {
 					$header = $newBody['header'];
 					$body   = $newBody['body'];
@@ -2738,7 +2738,7 @@ if ( ! class_exists( 'Tornevall_cURL' ) && ! class_exists( 'TorneLIB\Tornevall_c
 				return $returnResponseObject;
 			}
 			$this->TemporaryResponse = $returnResponse;
-			if ( $this->isFlag( "CHAIN" ) && !$this->isFlag('IS_SOAP') ) {
+			if ( $this->isFlag( "CHAIN" ) && ! $this->isFlag( 'IS_SOAP' ) ) {
 				return $this;
 			}
 
@@ -2866,7 +2866,7 @@ if ( ! class_exists( 'Tornevall_cURL' ) && ! class_exists( 'TorneLIB\Tornevall_c
 		 * @return int
 		 */
 		public function getResponseCode( $ResponseContent = null ) {
-			if (method_exists($ResponseContent, "getResponseCode")) {
+			if ( method_exists( $ResponseContent, "getResponseCode" ) ) {
 				return $ResponseContent->getResponseCode();
 			}
 
@@ -2885,7 +2885,7 @@ if ( ! class_exists( 'Tornevall_cURL' ) && ! class_exists( 'TorneLIB\Tornevall_c
 		 * @return null
 		 */
 		public function getResponseBody( $ResponseContent = null ) {
-			if (method_exists($ResponseContent, "getResponseBody")) {
+			if ( method_exists( $ResponseContent, "getResponseBody" ) ) {
 				return $ResponseContent->getResponseBody();
 			}
 
@@ -2904,8 +2904,8 @@ if ( ! class_exists( 'Tornevall_cURL' ) && ! class_exists( 'TorneLIB\Tornevall_c
 		 * @return mixed
 		 * @since 6.0.16
 		 */
-		public function getResponseUrl($ResponseContent = null) {
-			if (method_exists($ResponseContent, "getResponseUrl")) {
+		public function getResponseUrl( $ResponseContent = null ) {
+			if ( method_exists( $ResponseContent, "getResponseUrl" ) ) {
 				return $ResponseContent->getResponseUrl();
 			}
 
@@ -3530,10 +3530,10 @@ if ( ! class_exists( 'Tornevall_cURL' ) && ! class_exists( 'TorneLIB\Tornevall_c
 		 * @since 6.0.14
 		 */
 		private function executeHttpSoap( $url = '', $postData = array(), $CurlMethod = CURL_METHODS::METHOD_GET ) {
-			$this->setChain(false);
+			$this->setChain( false );
 			$Soap = new Tornevall_SimpleSoap( $this->CurlURL, $this );
-			$Soap->setFlag('IS_SOAP');
-			$Soap->setChain(false);
+			$Soap->setFlag( 'IS_SOAP' );
+			$Soap->setChain( false );
 			$Soap->setCustomUserAgent( $this->CustomUserAgent );
 			$Soap->setThrowableState( $this->canThrow );
 			$Soap->setSoapAuthentication( $this->AuthData );
@@ -4200,11 +4200,11 @@ if ( ! class_exists( 'Tornevall_SimpleSoap' ) && ! class_exists( 'TorneLIB\Torne
 				/** @noinspection PhpUndefinedMethodInspection */
 				$this->soapResponseHeaders = $this->soapClient->__getLastResponseHeaders();
 				$parsedHeader              = $this->getHeader( $this->soapResponseHeaders );
-				if (!is_object($parsedHeader)) {
-					$returnResponse['header']  = $parsedHeader['header'];
-					$returnResponse['code']    = isset( $parsedHeader['code'] ) ? $parsedHeader['code'] : 0;
-					$returnResponse['body']    = $this->soapResponse;
-					$returnResponse['parsed']  = $SoapClientResponse;
+				if ( ! is_object( $parsedHeader ) ) {
+					$returnResponse['header'] = $parsedHeader['header'];
+					$returnResponse['code']   = isset( $parsedHeader['code'] ) ? $parsedHeader['code'] : 0;
+					$returnResponse['body']   = $this->soapResponse;
+					$returnResponse['parsed'] = $SoapClientResponse;
 				} else {
 					$returnResponse = $parsedHeader->getTemporaryResponse();
 				}
@@ -4228,10 +4228,10 @@ if ( ! class_exists( 'Tornevall_SimpleSoap' ) && ! class_exists( 'TorneLIB\Torne
 			$this->soapResponseHeaders = $this->soapClient->__getLastResponseHeaders();
 			$parsedHeader              = $this->getHeader( $this->soapResponseHeaders );
 			$returnResponse['parsed']  = $SoapClientResponse;
-			if (!is_object($parsedHeader)) {
-				$returnResponse['header']  = $parsedHeader['header'];
-				$returnResponse['code']    = isset( $parsedHeader['code'] ) ? $parsedHeader['code'] : 0;
-				$returnResponse['body']    = $this->soapResponse;
+			if ( ! is_object( $parsedHeader ) ) {
+				$returnResponse['header'] = $parsedHeader['header'];
+				$returnResponse['code']   = isset( $parsedHeader['code'] ) ? $parsedHeader['code'] : 0;
+				$returnResponse['body']   = $this->soapResponse;
 			} else {
 				$returnResponse = $parsedHeader->getTemporaryResponse();
 			}

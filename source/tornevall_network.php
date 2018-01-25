@@ -40,7 +40,7 @@
 namespace TorneLIB;
 
 if ( ! defined( 'TORNELIB_NETCURL_RELEASE' ) ) {
-	define( 'TORNELIB_NETCURL_RELEASE', '6.0.16' );
+	define( 'TORNELIB_NETCURL_RELEASE', '6.0.17' );
 }
 if ( file_exists( __DIR__ . '/../vendor/autoload.php' ) ) {
 	require_once( __DIR__ . '/../vendor/autoload.php' );
@@ -665,7 +665,7 @@ if ( ! class_exists( 'Tornevall_cURL' ) && ! class_exists( 'TorneLIB\Tornevall_c
 	 * Class Tornevall_cURL
 	 *
 	 * @package TorneLIB
-	 * @version 6.0.14
+	 * @version 6.0.16
 	 * @link https://docs.tornevall.net/x/KQCy TorneLIBv5
 	 * @link https://bitbucket.tornevall.net/projects/LIB/repos/tornelib-php-netcurl/browse Sources of TorneLIB
 	 * @link https://docs.tornevall.net/x/KwCy Network & Curl v5 and v6 Library usage
@@ -2896,6 +2896,24 @@ if ( ! class_exists( 'Tornevall_cURL' ) && ! class_exists( 'TorneLIB\Tornevall_c
 			}
 
 			return null;
+		}
+
+		/**
+		 * @param null $ResponseContent
+		 *
+		 * @return mixed
+		 * @since 6.0.16
+		 */
+		public function getResponseUrl($ResponseContent = null) {
+			if (method_exists($ResponseContent, "getResponseUrl")) {
+				return $ResponseContent->getResponseUrl();
+			}
+
+			if ( is_null( $ResponseContent ) && ! empty( $this->TemporaryResponse ) && isset( $this->TemporaryResponse['body'] ) ) {
+				return $this->TemporaryResponse['URL'];
+			} else if ( isset( $ResponseContent['URL'] ) ) {
+				return $ResponseContent['URL'];
+			}
 		}
 
 		/**

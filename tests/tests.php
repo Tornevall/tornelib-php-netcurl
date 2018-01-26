@@ -1246,7 +1246,8 @@ class Tornevall_cURLTest extends TestCase {
 		try {
 			$this->CURL->setThrowableHttpCodes();
 			$this->CURL->setAuthentication("username", "password");
-			$this->CURL->setContentType();
+	        // Do not set a default content-type at this point, let the service itself ask for it
+			// $this->CURL->setContentType();
 			$this->CURL->doGet( "https://omnitest.resurs.com/checkout/payments/987" );
 			$this->assertTrue(is_object($this->CURL->getParsedResponse()));
 		} catch (\Exception $e) {

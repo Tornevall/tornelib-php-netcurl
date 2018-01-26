@@ -3773,7 +3773,13 @@ if ( ! class_exists( 'Tornevall_cURL' ) && ! class_exists( 'TorneLIB\Tornevall_c
 
 			// Prevent problems during authorization. Unsupported media type checks defaults to application/json
 			if ($hasAuth && $statusCode == 415) {
-				$this->setContentType();
+				// Ask service for content types at first. If nothing found, run self set application/json.
+				$contentTypeRequest = $gRequest->getHeader('content-type');
+				if (empty($contentTypeRequest)) {
+					$this->setContentType();
+				} else {
+					$this->setContentType($contentTypeRequest);
+				}
 				return $this->executeGuzzleHttp( $url, $postData, $CurlMethod, $postAs );
 			}
 

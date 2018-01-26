@@ -18,7 +18,7 @@
  * Tornevall Networks netCurl library - Yet another http- and network communicator library
  * Each class in this library has its own version numbering to keep track of where the changes are. However, there is a major version too.
  * @package TorneLIB
- * @version 6.0.17
+ * @version 6.0.18
  */
 
 
@@ -665,7 +665,7 @@ if ( ! class_exists( 'Tornevall_cURL' ) && ! class_exists( 'TorneLIB\Tornevall_c
 	 * Class Tornevall_cURL
 	 *
 	 * @package TorneLIB
-	 * @version 6.0.16
+	 * @version 6.0.17
 	 * @link https://docs.tornevall.net/x/KQCy TorneLIBv5
 	 * @link https://bitbucket.tornevall.net/projects/LIB/repos/tornelib-php-netcurl/browse Sources of TorneLIB
 	 * @link https://docs.tornevall.net/x/KwCy Network & Curl v5 and v6 Library usage
@@ -737,8 +737,8 @@ if ( ! class_exists( 'Tornevall_cURL' ) && ! class_exists( 'TorneLIB\Tornevall_c
 		/** @var string This modules name (inherited to some exceptions amongst others) */
 		protected $ModuleName = "NetCurl";
 		/** @var string Internal version that is being used to find out if we are running the latest version of this library */
-		private $TorneNetCurlVersion = "6.0.16";
-		const TORNELIB_NETCURL_VERSION = "6.0.16";
+		private $TorneNetCurlVersion = "6.0.17";
+		const TORNELIB_NETCURL_VERSION = "6.0.17";
 		/** @var null Curl Version */
 		private $CurlVersion = null;
 		/** @var string Internal release snapshot that is being used to find out if we are running the latest version of this library */
@@ -765,6 +765,7 @@ if ( ! class_exists( 'Tornevall_cURL' ) && ! class_exists( 'TorneLIB\Tornevall_c
 		//private $internalFlags = array();
 		// Change to this flagSet when compatibility has been fixed
 		private $internalFlags = array( 'CHAIN' => true );
+		private $contentType;
 		private $debugData = array(
 			'data'     => array(
 				'info' => array()
@@ -1174,6 +1175,20 @@ if ( ! class_exists( 'Tornevall_cURL' ) && ! class_exists( 'TorneLIB\Tornevall_c
 		}
 
 		/**
+		 * @since 6.0.17
+		 */
+		public function setContentType($setContentTypeString = 'application/json; charset=utf-8') {
+			$this->contentType = $setContentTypeString;
+		}
+
+		/**
+		 * @since 6.0.17
+		 */
+		public function getContentType() {
+			return $this->contentType;
+		}
+
+		/**
 		 * cUrl initializer, if needed faster
 		 *
 		 * @return resource
@@ -1224,7 +1239,7 @@ if ( ! class_exists( 'Tornevall_cURL' ) && ! class_exists( 'TorneLIB\Tornevall_c
 					if ( class_exists( 'GuzzleHttp\Handler\StreamHandler' ) ) {
 						/** @noinspection PhpUndefinedNamespaceInspection */
 						/** @noinspection PhpUndefinedClassInspection */
-						$streamHandler = new GuzzleHttp\Handler\StreamHandler();
+						$streamHandler = new \GuzzleHttp\Handler\StreamHandler();
 						$isDriverSet   = $this->setDriverByClass( $driverId, 'GuzzleHttp\Client', array( 'handler' => $streamHandler ) );
 					}
 				}
@@ -3357,7 +3372,7 @@ if ( ! class_exists( 'Tornevall_cURL' ) && ! class_exists( 'TorneLIB\Tornevall_c
 				if ( $postAs == CURL_POST_AS::POST_AS_JSON ) {
 					// Using $jsonRealData to validate the string
 					//$jsonRealData = $this->executePostData($postData, $postAs);
-					$this->CurlHeadersSystem['Content-Type']   = "application/json";
+					$this->CurlHeadersSystem['Content-Type']   = "application/json; charset=utf-8";
 					$this->CurlHeadersSystem['Content-Length'] = strlen( $this->PostData );
 					$this->setCurlOpt( CURLOPT_POSTFIELDS, $this->PostData );  // overwrite old
 				}
@@ -3687,8 +3702,11 @@ if ( ! class_exists( 'Tornevall_cURL' ) && ! class_exists( 'TorneLIB\Tornevall_c
 			/** @var $worker \GuzzleHttp\Client */
 			$worker      = $this->Drivers[ $myChosenGuzzleDriver ];
 			$postOptions = array();
+			$postOptions['headers'] = array();
+			$contentType = $this->getContentType();
 
 			if ( $postAs === CURL_POST_AS::POST_AS_JSON ) {
+				$postOptions['headers']['Content-Type'] = 'application/json; charset=utf-8';
 				if ( is_string( $postData ) ) {
 					$jsonPostData = @json_decode( $postData );
 					if ( is_object( $jsonPostData ) ) {
@@ -3699,6 +3717,21 @@ if ( ! class_exists( 'Tornevall_cURL' ) && ! class_exists( 'TorneLIB\Tornevall_c
 			} else {
 				if ( is_array( $postData ) ) {
 					$postOptions['form_params'] = $postData;
+				}
+			}
+
+			$hasAuth = false;
+			if (isset($this->AuthData['Username'])) {
+				$hasAuth = true;
+				if ($this->AuthData['Type'] == CURL_AUTH_TYPES::AUTHTYPE_BASIC) {
+					$postOptions['headers']['Accept'] = '*/*';
+					if ( ! empty( $contentType ) ) {
+						$postOptions['headers']['Content-Type'] = $contentType;
+					}
+					$postOptions['auth'] = array(
+						$this->AuthData['Username'], $this->AuthData['Password']
+					);
+					//$postOptions['headers']['Authorization'] = 'Basic ' . base64_encode($this->AuthData['Username'] . ":" . $this->AuthData['Password']);
 				}
 			}
 
@@ -3725,6 +3758,10 @@ if ( ! class_exists( 'Tornevall_cURL' ) && ! class_exists( 'TorneLIB\Tornevall_c
 			/** @noinspection PhpUndefinedMethodInspection */
 			$gBody = $gRequest->getBody()->getContents();
 			/** @noinspection PhpUndefinedMethodInspection */
+			$statusCode = $gRequest->getStatusCode();
+			/** @noinspection PhpUndefinedMethodInspection */
+			$statusReason = $gRequest->getReasonPhrase();
+			/** @noinspection PhpUndefinedMethodInspection */
 			$rawResponse .= "HTTP/" . $gRequest->getProtocolVersion() . " " . $gRequest->getStatusCode() . " " . $gRequest->getReasonPhrase() . "\r\n";
 			$rawResponse .= "X-NetCurl-ClientDriver: " . $this->getDriver() . "\r\n";
 			if ( is_array( $gHeaders ) ) {
@@ -3733,7 +3770,15 @@ if ( ! class_exists( 'Tornevall_cURL' ) && ! class_exists( 'TorneLIB\Tornevall_c
 				}
 			}
 			$rawResponse .= "\r\n" . $gBody;
+
+			// Prevent problems during authorization. Unsupported media type checks defaults to application/json
+			if ($hasAuth && $statusCode == 415) {
+				$this->setContentType();
+				return $this->executeGuzzleHttp( $url, $postData, $CurlMethod, $postAs );
+			}
+
 			$this->ParseResponse( $rawResponse );
+			$this->throwCodeException($statusCode, $statusReason);
 
 			return $this;
 		}

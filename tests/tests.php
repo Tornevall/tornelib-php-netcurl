@@ -1239,4 +1239,18 @@ class Tornevall_cURLTest extends TestCase {
 		$driverset = $this->CURL->setDriverAuto();
 		$this->assertTrue( $driverset > 0 );
 	}
+
+	// Special testing
+	/*function testGuzzleStreamAuth() {
+		$this->CURL->setDriver( TORNELIB_CURL_DRIVERS::DRIVER_GUZZLEHTTP_STREAM );
+		try {
+			$this->CURL->setThrowableHttpCodes();
+			$this->CURL->setAuthentication("username", "password");
+			$this->CURL->setContentType();
+			$this->CURL->doGet( "https://omnitest.resurs.com/checkout/payments/987" );
+			$this->assertTrue(is_object($this->CURL->getParsedResponse()));
+		} catch (\Exception $e) {
+			$this->markTestIncomplete($e->getCode() . ": " . $e->getMessage());
+		}
+	}*/
 }

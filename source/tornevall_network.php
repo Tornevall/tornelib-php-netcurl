@@ -948,6 +948,10 @@ if ( ! class_exists( 'Tornevall_cURL' ) && ! class_exists( 'TorneLIB\Tornevall_c
 			} catch ( \Exception $constantException ) {
 			}
 			unset( $constants );
+			$authFlags = $this->getFlag('auth');
+			if (isset($authFlags['username']) && isset($authFlags['password'])) {
+				$this->setAuthentication($authFlags['username'], $authFlags['password'], isset($authFlags['type']) ? $authFlags['type'] : CURL_AUTH_TYPES::AUTHTYPE_BASIC);
+			}
 
 			// Common ssl checkers (if they fail, there is a sslDriverError to recall
 			if ( ! in_array( 'https', @stream_get_wrappers() ) ) {

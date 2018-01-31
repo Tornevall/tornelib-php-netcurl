@@ -1240,7 +1240,18 @@ class Tornevall_cURLTest extends TestCase {
 		$this->assertTrue( $driverset > 0 );
 	}
 
+	function testByConstructor() {
+		$identifierByJson = (new Tornevall_cURL($this->Urls['simplejson']))->getParsedResponse();
+		$this->assertTrue(isset($identifierByJson->ip));
+	}
+
 	// Special testing
+
+	/*	function testAuthByConstructor() {
+		$constructorAuth = (new Tornevall_cURL("https://omnitest.resurs.com/checkout/payments/661", array(), CURL_METHODS::METHOD_GET, array('auth'=>array('username'=>'username', 'password'=>'password'))))->getParsedResponse();
+		$this->assertTrue(is_object($constructorAuth));
+	}*/
+
 	/*function testGuzzleStreamAuth() {
 		$this->CURL->setDriver( TORNELIB_CURL_DRIVERS::DRIVER_GUZZLEHTTP_STREAM );
 		try {

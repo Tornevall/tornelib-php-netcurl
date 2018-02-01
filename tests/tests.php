@@ -125,8 +125,8 @@ class Tornevall_cURLTest extends TestCase {
 		if ( is_array( $container ) && isset( $container['body'] ) ) {
 			return true;
 		}
-		if (is_object($container)) {
-			if (is_string($container->getResponseBody())) {
+		if ( is_object( $container ) ) {
+			if ( is_string( $container->getResponseBody() ) ) {
 				return true;
 			}
 		}
@@ -135,19 +135,21 @@ class Tornevall_cURLTest extends TestCase {
 	}
 
 	private function getBody( $container ) {
-		if (is_object($container)) {
+		if ( is_object( $container ) ) {
 			return $container->getResponseBody();
 		} else {
 			return $this->CURL->getResponseBody();
 		}
+
 		return "";
 	}
 
 	private function getParsed( $container ) {
 		if ( $this->hasBody( $container ) ) {
-			if (is_object($container)) {
+			if ( is_object( $container ) ) {
 				return $container->getParsedResponse();
 			}
+
 			return $container['parsed'];
 		}
 
@@ -187,7 +189,7 @@ class Tornevall_cURLTest extends TestCase {
 		if ( $serviceFound ) {
 			$this->CURL->setProxy( "127.0.0.1:9050", CURLPROXY_SOCKS5 );
 			$container = $this->simpleGet();
-			$ipType    = $this->NET->getArpaFromAddr( $this->CURL->getResponseBody($container), true );
+			$ipType    = $this->NET->getArpaFromAddr( $this->CURL->getResponseBody( $container ), true );
 			$this->assertTrue( $ipType > 0 );
 
 			return;
@@ -709,7 +711,7 @@ class Tornevall_cURLTest extends TestCase {
 		$this->pemDefault();
 		$redirectResponse = $this->CURL->doGet( "http://developer.tornevall.net/tests/tornevall_network/redirect.php?run" );
 		$redirectedUrls   = $this->CURL->getRedirectedUrls();
-		$this->assertTrue( intval( $this->CURL->getResponseCode($redirectResponse) ) >= 300 && intval( $this->CURL->getResponseCode($redirectResponse) ) <= 350 && count( $redirectedUrls ) );
+		$this->assertTrue( intval( $this->CURL->getResponseCode( $redirectResponse ) ) >= 300 && intval( $this->CURL->getResponseCode( $redirectResponse ) ) <= 350 && count( $redirectedUrls ) );
 	}
 
 	/**
@@ -720,7 +722,7 @@ class Tornevall_cURLTest extends TestCase {
 		$this->CURL->setEnforceFollowLocation( false );
 		$redirectResponse = $this->CURL->doGet( "http://developer.tornevall.net/tests/tornevall_network/redirect.php?run" );
 		$redirectedUrls   = $this->CURL->getRedirectedUrls();
-		$this->assertTrue( $this->CURL->getResponseCode($redirectResponse) >= 300 && $this->CURL->getResponseCode($redirectResponse) <= 350 && ! preg_match( "/rerun/i", $this->CURL->getResponseBody($redirectResponse) ) && count( $redirectedUrls ) );
+		$this->assertTrue( $this->CURL->getResponseCode( $redirectResponse ) >= 300 && $this->CURL->getResponseCode( $redirectResponse ) <= 350 && ! preg_match( "/rerun/i", $this->CURL->getResponseBody( $redirectResponse ) ) && count( $redirectedUrls ) );
 	}
 
 	function testFollowRedirectManualDisable() {
@@ -728,7 +730,7 @@ class Tornevall_cURLTest extends TestCase {
 		$this->CURL->setEnforceFollowLocation( false );
 		$redirectResponse = $this->CURL->doGet( "http://developer.tornevall.net/tests/tornevall_network/redirect.php?run" );
 		$redirectedUrls   = $this->CURL->getRedirectedUrls();
-		$this->assertTrue( $this->CURL->getResponseCode($redirectResponse) >= 300 && $this->CURL->getResponseCode($redirectResponse) <= 350 && ! preg_match( "/rerun/i", $this->CURL->getResponseBody($redirectResponse) ) && count( $redirectedUrls ) );
+		$this->assertTrue( $this->CURL->getResponseCode( $redirectResponse ) >= 300 && $this->CURL->getResponseCode( $redirectResponse ) <= 350 && ! preg_match( "/rerun/i", $this->CURL->getResponseBody( $redirectResponse ) ) && count( $redirectedUrls ) );
 	}
 
 	/**
@@ -741,7 +743,7 @@ class Tornevall_cURLTest extends TestCase {
 		$this->CURL->setCurlOpt( CURLOPT_FOLLOWLOCATION, false );  // This is the doer since there are internal protection against the above enforcer
 		$redirectResponse = $this->CURL->doGet( "http://developer.tornevall.net/tests/tornevall_network/redirect.php?run" );
 		$redirectedUrls   = $this->CURL->getRedirectedUrls();
-		$this->assertTrue( $this->CURL->getResponseCode($redirectResponse) >= 300 && $this->CURL->getResponseCode($redirectResponse) <= 350 && preg_match( "/rerun/i", $this->CURL->getResponseBody($redirectResponse) ) && count( $redirectedUrls ) );
+		$this->assertTrue( $this->CURL->getResponseCode( $redirectResponse ) >= 300 && $this->CURL->getResponseCode( $redirectResponse ) <= 350 && preg_match( "/rerun/i", $this->CURL->getResponseBody( $redirectResponse ) ) && count( $redirectedUrls ) );
 	}
 
 	/**
@@ -758,7 +760,7 @@ class Tornevall_cURLTest extends TestCase {
 			$this->pemDefault();
 			$redirectResponse = $this->CURL->doGet( "http://developer.tornevall.net/tests/tornevall_network/redirect.php?run" );
 			$redirectedUrls   = $this->CURL->getRedirectedUrls();
-			$this->assertTrue( $this->CURL->getResponseCode($redirectResponse) >= 300 && $this->CURL->getResponseCode($redirectResponse) <= 350 && ! preg_match( "/rerun/i", $this->CURL->getResponseBody($redirectResponse) ) && count( $redirectedUrls ) );
+			$this->assertTrue( $this->CURL->getResponseCode( $redirectResponse ) >= 300 && $this->CURL->getResponseCode( $redirectResponse ) <= 350 && ! preg_match( "/rerun/i", $this->CURL->getResponseBody( $redirectResponse ) ) && count( $redirectedUrls ) );
 
 			return;
 		}
@@ -785,12 +787,6 @@ class Tornevall_cURLTest extends TestCase {
 	}
 
 	function testSoapError() {
-		$skipThis = $this->skipSpecials;
-		if ( $skipThis ) {
-			$this->markTestSkipped( __FUNCTION__ . " is a special exceptions test. Normally we do not want to run this" );
-
-			return;
-		}
 		$localCurl = new Tornevall_cURL();
 		$wsdl      = $localCurl->doGet( 'https://test.resurs.com/ecommerce-test/ws/V4/SimplifiedShopFlowService?wsdl' );
 		try {
@@ -1159,8 +1155,9 @@ class Tornevall_cURLTest extends TestCase {
 
 	function testEnableGuzzleStream() {
 		if ( $this->hasGuzzle( true ) ) {
-			$info = $this->CURL->doPost( "https://" . $this->Urls['tests'] . "?o=json&getjson=true&getVar=true", array( 'var1'    => 'HasVar1',
-			                                                                                                            'postVar' => "true"
+			$info = $this->CURL->doPost( "https://" . $this->Urls['tests'] . "?o=json&getjson=true&getVar=true", array(
+				'var1'    => 'HasVar1',
+				'postVar' => "true"
 			) );
 			$this->CURL->getExternalDriverResponse();
 			$parsed = $this->CURL->getParsedResponse( $info );
@@ -1172,9 +1169,10 @@ class Tornevall_cURLTest extends TestCase {
 
 	function testEnableGuzzleStreamJson() {
 		if ( $this->hasGuzzle( true ) ) {
-			$info = $this->CURL->doPost( "https://" . $this->Urls['tests'] . "?o=json&getjson=true&getVar=true", array( 'var1'    => 'HasVar1',
-			                                                                                                            'postVar' => "true",
-			                                                                                                            'asJson'  => 'true'
+			$info = $this->CURL->doPost( "https://" . $this->Urls['tests'] . "?o=json&getjson=true&getVar=true", array(
+				'var1'    => 'HasVar1',
+				'postVar' => "true",
+				'asJson'  => 'true'
 			), CURL_POST_AS::POST_AS_JSON );
 			$this->CURL->getExternalDriverResponse();
 			$parsed = $this->CURL->getParsedResponse( $info );
@@ -1241,28 +1239,22 @@ class Tornevall_cURLTest extends TestCase {
 	}
 
 	function testByConstructor() {
-		$identifierByJson = (new Tornevall_cURL($this->Urls['simplejson']))->getParsedResponse();
-		$this->assertTrue(isset($identifierByJson->ip));
+		$identifierByJson = ( new Tornevall_cURL( $this->Urls['simplejson'] ) )->getParsedResponse();
+		$this->assertTrue( isset( $identifierByJson->ip ) );
 	}
 
-	// Special testing
-
-	/*	function testAuthByConstructor() {
-		$constructorAuth = (new Tornevall_cURL("https://omnitest.resurs.com/checkout/payments/661", array(), CURL_METHODS::METHOD_GET, array('auth'=>array('username'=>'username', 'password'=>'password'))))->getParsedResponse();
-		$this->assertTrue(is_object($constructorAuth));
-	}*/
-
-	/*function testGuzzleStreamAuth() {
-		$this->CURL->setDriver( TORNELIB_CURL_DRIVERS::DRIVER_GUZZLEHTTP_STREAM );
+	function testRbSoapChain() {
+		$localCurl = new Tornevall_cURL();
+		$localCurl->setAuthentication( "atest", "atest" );
 		try {
-			$this->CURL->setThrowableHttpCodes();
-			$this->CURL->setAuthentication("username", "password");
-	        // Do not set a default content-type at this point, let the service itself ask for it
-			// $this->CURL->setContentType();
-			$this->CURL->doGet( "https://omnitest.resurs.com/checkout/payments/987" );
-			$this->assertTrue(is_object($this->CURL->getParsedResponse()));
-		} catch (\Exception $e) {
-			$this->markTestIncomplete($e->getCode() . ": " . $e->getMessage());
+			$wsdlResponse = $localCurl->doGet( 'https://test.resurs.com/ecommerce-test/ws/V4/SimplifiedShopFlowService?wsdl' )->getPaymentMethods();
+			$this->assertTrue( is_array( $localCurl->getParsedResponse( $wsdlResponse ) ) );
+		} catch ( \Exception $e ) {
+			echo $e->getMessage();
 		}
-	}*/
+	}
+
+	function testExceptionString() {
+		echo $this->NET->getExceptionString(1004);
+	}
 }

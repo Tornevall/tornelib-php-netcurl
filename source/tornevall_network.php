@@ -1235,7 +1235,6 @@ if ( ! class_exists( 'Tornevall_cURL' ) && ! class_exists( 'TorneLIB\Tornevall_c
 					$isDriverSet                                              = true;
 				}
 			} else if ( in_array( $driverId, $guzDrivers ) ) {
-
 				if ( $this->hasCurl() && $driverId === TORNELIB_CURL_DRIVERS::DRIVER_GUZZLEHTTP ) {
 					// GuzzleHttp does not show up on get_declared_classes  in our tests, so we'll set the class in another way instead
 					$isDriverSet = $this->setDriverByClass( $driverId, 'GuzzleHttp\Client' );
@@ -1245,6 +1244,8 @@ if ( ! class_exists( 'Tornevall_cURL' ) && ! class_exists( 'TorneLIB\Tornevall_c
 						/** @noinspection PhpUndefinedClassInspection */
 						$streamHandler = new \GuzzleHttp\Handler\StreamHandler();
 						$isDriverSet   = $this->setDriverByClass( $driverId, 'GuzzleHttp\Client', array( 'handler' => $streamHandler ) );
+					} else {
+						throw new \Exception( $this->ModuleName . " setDriverException: GuzzleStream does not exists", $this->NETWORK->getExceptionCode( 'NETCURL_EXTERNAL_DRIVER_MISSING' ) );
 					}
 				}
 			}

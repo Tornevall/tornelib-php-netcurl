@@ -3691,7 +3691,8 @@ if ( ! class_exists( 'Tornevall_cURL' ) && ! class_exists( 'TorneLIB\Tornevall_c
 		 * @param int $CurlMethod
 		 * @param int $postAs
 		 *
-		 * @return $this
+		 * @return $this|Tornevall_cURL
+		 * @throws \Exception
 		 */
 		private function executeGuzzleHttp( $url = '', $postData = array(), $CurlMethod = CURL_METHODS::METHOD_GET, $postAs = CURL_POST_AS::POST_AS_NORMAL ) {
 			/** @noinspection PhpUndefinedClassInspection */
@@ -3740,21 +3741,25 @@ if ( ! class_exists( 'Tornevall_cURL' ) && ! class_exists( 'TorneLIB\Tornevall_c
 				}
 			}
 
-			if ( $CurlMethod == CURL_METHODS::METHOD_GET ) {
-				/** @noinspection PhpUndefinedMethodInspection */
-				$gRequest = $worker->request( 'GET', $url, $postOptions );
-			} else if ( $CurlMethod == CURL_METHODS::METHOD_POST ) {
-				/** @noinspection PhpUndefinedMethodInspection */
-				$gRequest = $worker->request( 'POST', $url, $postOptions );
-			} else if ( $CurlMethod == CURL_METHODS::METHOD_PUT ) {
-				/** @noinspection PhpUndefinedMethodInspection */
-				$gRequest = $worker->request( 'PUT', $url, $postOptions );
-			} else if ( $CurlMethod == CURL_METHODS::METHOD_DELETE ) {
-				/** @noinspection PhpUndefinedMethodInspection */
-				$gRequest = $worker->request( 'DELETE', $url, $postOptions );
-			} else if ( $CurlMethod == CURL_METHODS::METHOD_HEAD ) {
-				/** @noinspection PhpUndefinedMethodInspection */
-				$gRequest = $worker->request( 'HEAD', $url, $postOptions );
+			if (method_exists($worker, 'request')) {
+				if ( $CurlMethod == CURL_METHODS::METHOD_GET ) {
+					/** @noinspection PhpUndefinedMethodInspection */
+					$gRequest = $worker->request( 'GET', $url, $postOptions );
+				} else if ( $CurlMethod == CURL_METHODS::METHOD_POST ) {
+					/** @noinspection PhpUndefinedMethodInspection */
+					$gRequest = $worker->request( 'POST', $url, $postOptions );
+				} else if ( $CurlMethod == CURL_METHODS::METHOD_PUT ) {
+					/** @noinspection PhpUndefinedMethodInspection */
+					$gRequest = $worker->request( 'PUT', $url, $postOptions );
+				} else if ( $CurlMethod == CURL_METHODS::METHOD_DELETE ) {
+					/** @noinspection PhpUndefinedMethodInspection */
+					$gRequest = $worker->request( 'DELETE', $url, $postOptions );
+				} else if ( $CurlMethod == CURL_METHODS::METHOD_HEAD ) {
+					/** @noinspection PhpUndefinedMethodInspection */
+					$gRequest = $worker->request( 'HEAD', $url, $postOptions );
+				}
+			} else {
+				throw new \Exception( $this->ModuleName . " streams for guzzle is probably missing as I can't find the request method in the current class", $this->NETWORK->getExceptionCode( 'NETCURL_GUZZLESTREAM_MISSING' ) );
 			}
 			/** @noinspection PhpUndefinedVariableInspection */
 			$this->TemporaryExternalResponse = array( 'worker' => $worker, 'request' => $gRequest );

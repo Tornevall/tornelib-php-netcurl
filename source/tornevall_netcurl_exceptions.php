@@ -23,6 +23,7 @@ if ( ! class_exists( 'TorneLIB_NETCURL_EXCEPTIONS' ) && ! class_exists( 'TorneLI
 		const NETCURL_CURL_DISABLED = 1010;
 		const NETCURL_NOCOMM_DRIVER = 1011;
 		const NETCURL_EXTERNAL_DRIVER_MISSING = 1012;
+		const NETCURL_GUZZLESTREAM_MISSING = 1013;
 	}
 
 }

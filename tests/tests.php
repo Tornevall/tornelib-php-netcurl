@@ -1023,10 +1023,14 @@ class Tornevall_cURLTest extends TestCase {
 	}
 
 	private function hasGuzzle( $useStream = false ) {
-		if ( ! $useStream ) {
-			return $this->CURL->setDriver( TORNELIB_CURL_DRIVERS::DRIVER_GUZZLEHTTP );
-		} else {
-			return $this->CURL->setDriver( TORNELIB_CURL_DRIVERS::DRIVER_GUZZLEHTTP_STREAM );
+		try {
+			if ( ! $useStream ) {
+				return $this->CURL->setDriver( TORNELIB_CURL_DRIVERS::DRIVER_GUZZLEHTTP );
+			} else {
+				return $this->CURL->setDriver( TORNELIB_CURL_DRIVERS::DRIVER_GUZZLEHTTP_STREAM );
+			}
+		} catch (\Exception $e) {
+			$this->markTestSkipped( "Can not test guzzle driver without guzzle (".$e->getMessage().")" );
 		}
 	}
 

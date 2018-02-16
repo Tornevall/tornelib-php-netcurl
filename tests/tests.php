@@ -368,7 +368,7 @@ class Tornevall_cURLTest extends TestCase {
 				$this->assertTrue( isset( $container->methods ) );
 			}
 		} catch ( \Exception $e ) {
-			$this->markTestIncomplete( "Got exception " . $e->getCode() . ": " . $e->getMessage() );
+			$this->markTestSkipped( "Got exception " . $e->getCode() . ": " . $e->getMessage() );
 		}
 	}
 
@@ -386,7 +386,7 @@ class Tornevall_cURLTest extends TestCase {
 				$this->assertTrue( isset( $container->methods ) );
 			}
 		} catch ( \Exception $e ) {
-			$this->markTestIncomplete( "Got exception " . $e->getCode() . ": " . $e->getMessage() );
+			$this->markTestSkipped( "Got exception " . $e->getCode() . ": " . $e->getMessage() );
 		}
 	}
 

@@ -40,7 +40,7 @@
 namespace TorneLIB;
 
 if ( ! defined( 'TORNELIB_NETCURL_RELEASE' ) ) {
-	define( 'TORNELIB_NETCURL_RELEASE', '6.0.17' );
+	define( 'TORNELIB_NETCURL_RELEASE', '6.0.18' );
 }
 if ( file_exists( __DIR__ . '/../vendor/autoload.php' ) ) {
 	require_once( __DIR__ . '/../vendor/autoload.php' );
@@ -268,9 +268,11 @@ if ( ! class_exists( 'TorneLIB_Network' ) && ! class_exists( 'TorneLIB\TorneLIB_
 			}
 			if ( $validateHost || $this->alwaysResolveHostvalidation === true ) {
 				// Make sure that the host is not invalid
-				$hostRecord = dns_get_record( $urlParsed['host'], DNS_ANY );
-				if ( ! count( $hostRecord ) ) {
-					return array( null, null, null );
+				if (filter_var($urlIn, FILTER_VALIDATE_URL)) {
+					$hostRecord = @dns_get_record( $urlParsed['host'], DNS_ANY );
+					if ( ! count( $hostRecord ) ) {
+						return array( null, null, null );
+					}
 				}
 			}
 

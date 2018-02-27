@@ -5,4 +5,4 @@ Makefile
 .composer.json.swp
 /vendor
 /runit
-tests/tests_resursbank.php
+coverage

@@ -176,7 +176,7 @@ class Tornevall_cURLTest extends TestCase {
 		$this->assertTrue( $this->hasBody( $container ) );
 	}
 
-	function testSimpleGetProxy() {
+	/*function testSimpleGetProxy() {
 		$this->pemDefault();
 		exec( "service tor status", $ubuntuService );
 		$serviceFound = false;
@@ -195,8 +195,7 @@ class Tornevall_cURLTest extends TestCase {
 			return;
 		}
 		$this->markTestSkipped( "I can't test this simpleGetProxy since there are no tor service installed" );
-	}
-	// Currently failing
+	}*/
 
 	/*	function testSimpleGetWsdlProxy() {
 			$this->pemDefault();

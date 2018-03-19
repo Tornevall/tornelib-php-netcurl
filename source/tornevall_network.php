@@ -1021,6 +1021,10 @@ if ( ! class_exists( 'Tornevall_cURL' ) && ! class_exists( 'TorneLIB\Tornevall_c
 		 */
 		public function getAvailableDrivers( $getAsList = false, $ignoreException = false ) {
 			$hasExternalDrivers = false;
+			// If this is not an array, we won't be able to count it.
+			if (!is_array($this->Drivers)) {
+				$this->Drivers = array();
+			}
 			if ( count( $this->Drivers ) ) {
 				$hasExternalDrivers = true;
 			}

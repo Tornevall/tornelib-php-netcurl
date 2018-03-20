@@ -10,7 +10,6 @@ if ( file_exists( __DIR__ . "/../tornelib.php" ) ) {
 	require_once( __DIR__ . '/../tornelib.php' );
 }
 
-use Nette\Neon\Exception;
 use PHPUnit\Framework\TestCase;
 
 ini_set( 'memory_limit', - 1 );    // Free memory limit, some tests requires more memory (like ip-range handling)

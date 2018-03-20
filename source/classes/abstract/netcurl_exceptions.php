@@ -1,0 +1,47 @@
+<?php
+
+/**
+ * Copyright 2018 Tomas Tornevall & Tornevall Networks
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ * Tornevall Networks netCurl library - Yet another http- and network communicator library
+ * Each class in this library has its own version numbering to keep track of where the changes are. However, there is a major version too.
+ * @package TorneLIB
+ */
+
+namespace TorneLIB;
+
+if ( ! class_exists( 'TorneLIB_NETCURL_EXCEPTIONS' ) && ! class_exists( 'TorneLIB\TorneLIB_NETCURL_EXCEPTIONS' ) ) {
+	abstract class TORNELIB_NETCURL_EXCEPTIONS {
+		/** No error */
+		const NETCURL_NO_ERROR = 0;
+		/** Test */
+		const NETCURL_EXCEPTION_IT_WORKS = 1;
+
+		const NETCURL_CURL_MISSING = 1000;
+		const NETCURL_SETFLAG_KEY_EMPTY = 1001;
+		const NETCURL_COOKIEPATH_SETUP_FAIL = 1002;
+		const NETCURL_IPCONFIG_NOT_VALID = 1003;
+		const NETCURL_SETSSLVERIFY_UNVERIFIED_NOT_SET = 1004;
+		const NETCURL_DOMDOCUMENT_CLASS_MISSING = 1005;
+		const NETCURL_GETPARSEDVALUE_KEY_NOT_FOUND = 1006;
+		const NETCURL_SOAPCLIENT_CLASS_MISSING = 1007;
+		const NETCURL_SIMPLESOAP_GETSOAP_CREATE_FAIL = 1008;
+		const NETCURL_WP_TRANSPORT_ERROR = 1009;
+		const NETCURL_CURL_DISABLED = 1010;
+		const NETCURL_NOCOMM_DRIVER = 1011;
+		const NETCURL_EXTERNAL_DRIVER_MISSING = 1012;
+		const NETCURL_GUZZLESTREAM_MISSING = 1013;
+	}
+}

@@ -6,8 +6,7 @@
   "require": {
     "php": ">=5.3",
     "ext-soap": "*",
-    "ext-curl": "*",
-    "tornevall/tornelib-php-crypto": "^6.0"
+    "ext-curl": "*"
   },
   "authors": [
     {
@@ -19,11 +18,22 @@
   ],
   "autoload": {
     "files": [
-      "source/tornevall_network.php",
-      "source/tornevall_netcurl_exceptions.php"
-    ],
-    "psr-4": {
-      "\\TorneLIB\\": "source/tornevall_network.php"
-    }
+      "source/module_netcurl.php",
+      "source/classes/abstract/netcurl_exceptions.php",
+      "source/classes/abstract/netcurl_type_authtypes.php",
+      "source/classes/abstract/netcurl_type_curlobject.php",
+      "source/classes/abstract/netcurl_type_datatypes.php",
+      "source/classes/abstract/netcurl_type_drivers.php",
+      "source/classes/abstract/netcurl_type_environment.php",
+      "source/classes/abstract/netcurl_type_ip_protocols.php",
+      "source/classes/abstract/netcurl_type_postmethods.php",
+      "source/classes/abstract/netcurl_type_resolvers.php",
+      "source/classes/abstract/netcurl_type_responses.php",
+      "source/classes/module_netbits_independent.php",
+      "source/module_network.php",
+      "source/module_curl.php",
+      "source/module_simplesoap.php",
+      "source/classes/module_netbits_independent.php"
+    ]
   }
 }

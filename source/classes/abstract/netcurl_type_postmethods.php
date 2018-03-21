@@ -24,9 +24,10 @@ namespace TorneLIB;
 
 if ( ! class_exists( 'NETCURL_POST_METHODS' ) && ! class_exists( 'TorneLIB\NETCURL_POST_METHODS' ) ) {
 	/**
-	 * Class CURL_METHODS List of methods available in this library
+	 * Class NETCURL_POST_METHODS List of methods available in this library
 	 *
 	 * @package TorneLIB
+	 * @since 6.0.20
 	 */
 	abstract class NETCURL_POST_METHODS {
 		const METHOD_GET = 0;
@@ -40,10 +41,9 @@ if ( ! class_exists( 'NETCURL_POST_METHODS' ) && ! class_exists( 'TorneLIB\NETCU
 
 if ( ! class_exists( 'CURL_METHODS' ) && ! class_exists( 'TorneLIB\CURL_METHODS' ) ) {
 	/**
-	 * Class CURL_METHODS List of methods available in this library
-	 *
 	 * @package TorneLIB
 	 * @deprecated Use NETCURL_POST_METHODS
+	 * @since 6.0.20
 	 */
 	abstract class CURL_METHODS extends NETCURL_POST_METHODS {
 	}

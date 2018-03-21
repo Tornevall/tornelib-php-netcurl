@@ -24,13 +24,11 @@ namespace TorneLIB;
 
 if ( ! class_exists( 'NETCURL_DRIVERS' ) && ! class_exists( 'TorneLIB\NETCURL_DRIVERS' ) ) {
 	/**
-	 * Class TORNELIB_CURL_ENVIRONMENT
-	 *
-	 * The unit testing helper. To not collide with production environments, somet settings should only be available while unit testing.
-	 *
+	 * Class NETCURL_NETWORK_DRIVERS Supported network drivers
 	 * @package TorneLIB
+	 * @since 6.0.20
 	 */
-	abstract class NETCURL_DRIVERS {
+	abstract class NETCURL_NETWORK_DRIVERS {
 		const DRIVER_NOT_SET = 0;
 		const DRIVER_INTERNAL = 1;
 		const DRIVER_WORDPRESS = 1000;
@@ -40,13 +38,11 @@ if ( ! class_exists( 'NETCURL_DRIVERS' ) && ! class_exists( 'TorneLIB\NETCURL_DR
 }
 if ( ! class_exists( 'TORNELIB_CURL_DRIVERS' ) && ! class_exists( 'TorneLIB\TORNELIB_CURL_DRIVERS' ) ) {
 	/**
-	 * Class TORNELIB_CURL_ENVIRONMENT
-	 *
-	 * The unit testing helper. To not collide with production environments, somet settings should only be available while unit testing.
-	 *
+	 * Class TORNELIB_CURL_DRIVERS
 	 * @package TorneLIB
-	 * @deprecated Use NETCURL_DRIVERS
+	 * @deprecated use NETCURL_NETWORK_DRIVERS
+	 * @since 6.0.20
 	 */
-	abstract class TORNELIB_CURL_DRIVERS extends NETCURL_DRIVERS {
+	abstract class TORNELIB_CURL_DRIVERS extends NETCURL_NETWORK_DRIVERS {
 	}
 }

@@ -24,9 +24,10 @@ namespace TorneLIB;
 
 if ( ! class_exists( 'NETCURL_RESOLVER' ) && ! class_exists( 'TorneLIB\NETCURL_RESOLVER' ) ) {
 	/**
-	 * Class CURL_RESOLVER Resolver methods that is available when trying to connect
+	 * Class NETCURL_RESOLVER Class definitions on how to resolve things on lookups
 	 *
 	 * @package TorneLIB
+	 * @since 6.0.20
 	 */
 	abstract class NETCURL_RESOLVER {
 		const RESOLVER_DEFAULT = 0;
@@ -37,10 +38,9 @@ if ( ! class_exists( 'NETCURL_RESOLVER' ) && ! class_exists( 'TorneLIB\NETCURL_R
 
 if ( ! class_exists( 'CURL_RESOLVER' ) && ! class_exists( 'TorneLIB\CURL_RESOLVER' ) ) {
 	/**
-	 * Class CURL_RESOLVER Resolver methods that is available when trying to connect
-	 *
 	 * @package TorneLIB
 	 * @deprecated Use NETCURL_RESOLVER
+	 * @since 6.0.20
 	 */
 	abstract class CURL_RESOLVER extends NETCURL_RESOLVER {
 	}

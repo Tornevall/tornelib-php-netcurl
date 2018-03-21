@@ -23,7 +23,11 @@
 namespace TorneLIB;
 
 if ( ! class_exists( 'TorneLIB_NETCURL_EXCEPTIONS' ) && ! class_exists( 'TorneLIB\TorneLIB_NETCURL_EXCEPTIONS' ) ) {
-	abstract class TORNELIB_NETCURL_EXCEPTIONS {
+	/**
+	 * Class NETCURL_EXCEPTIONS
+	 * @package TorneLIB
+	 */
+	abstract class NETCURL_EXCEPTIONS {
 		/** No error */
 		const NETCURL_NO_ERROR = 0;
 		/** Test */
@@ -43,5 +47,15 @@ if ( ! class_exists( 'TorneLIB_NETCURL_EXCEPTIONS' ) && ! class_exists( 'TorneLI
 		const NETCURL_NOCOMM_DRIVER = 1011;
 		const NETCURL_EXTERNAL_DRIVER_MISSING = 1012;
 		const NETCURL_GUZZLESTREAM_MISSING = 1013;
+	}
+}
+
+if ( ! class_exists( 'TorneLIB_NETCURL_EXCEPTIONS' ) && ! class_exists( 'TorneLIB\TorneLIB_NETCURL_EXCEPTIONS' ) ) {
+	/**
+	 * Class TORNELIB_NETCURL_EXCEPTIONS
+	 * @package TorneLIB
+	 * @deprecated Use NETCURL_EXCEPTIONS
+	 */
+	abstract class TORNELIB_NETCURL_EXCEPTIONS extends NETCURL_EXCEPTIONS {
 	}
 }

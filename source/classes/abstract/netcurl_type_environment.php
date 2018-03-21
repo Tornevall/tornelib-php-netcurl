@@ -24,9 +24,10 @@ namespace TorneLIB;
 
 if ( ! class_exists( 'NETCURL_ENVIRONMENT' ) && ! class_exists( 'TorneLIB\NETCURL_ENVIRONMENT' ) ) {
 	/**
-	 * Class TORNELIB_CURL_ENVIRONMENT Unittest helping class
+	 * Class NETCURL_ENVIRONMENT Unittest helping class
 	 *
 	 * @package TorneLIB
+	 * @since 6.0.20
 	 */
 	abstract class NETCURL_ENVIRONMENT {
 		const ENVIRONMENT_PRODUCTION = 0;
@@ -39,6 +40,7 @@ if ( ! class_exists( 'TORNELIB_CURL_ENVIRONMENT' ) && ! class_exists( 'TorneLIB\
 	 * Class TORNELIB_CURL_ENVIRONMENT
 	 * @package TorneLIB
 	 * @deprecated Use NETCURL_ENVIRONMENT
+	 * @since 6.0.20
 	 */
 	abstract class TORNELIB_CURL_ENVIRONMENT extends NETCURL_ENVIRONMENT {
 	}

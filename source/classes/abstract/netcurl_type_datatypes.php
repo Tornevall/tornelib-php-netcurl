@@ -24,10 +24,12 @@ namespace TorneLIB;
 
 if ( ! class_exists( 'NETCURL_POST_AS' ) && ! class_exists( 'TorneLIB\NETCURL_POST_AS' ) ) {
 	/**
-	 * Class CURL_POST_AS Prepared formatting for POST-content in this library (Also available from for example PUT)
+	 * Class NETCURL_POST_AS Prepared formatting for POST-content in this library (Also available from for example PUT)
 	 *
 	 * @package TorneLIB
+	 * @since 6.0.20
 	 */
+
 	abstract class NETCURL_POST_AS {
 		const POST_AS_NORMAL = 0;
 		const POST_AS_JSON = 1;
@@ -36,10 +38,9 @@ if ( ! class_exists( 'NETCURL_POST_AS' ) && ! class_exists( 'TorneLIB\NETCURL_PO
 }
 if ( ! class_exists( 'CURL_POST_AS' ) && ! class_exists( 'TorneLIB\CURL_POST_AS' ) ) {
 	/**
-	 * Class CURL_POST_AS Prepared formatting for POST-content in this library (Also available from for example PUT)
-	 *
 	 * @package TorneLIB
 	 * @deprecated Use NETCURL_POST_AS
+	 * @since 6.0.20
 	 */
 	abstract class CURL_POST_AS extends NETCURL_POST_AS {
 	}

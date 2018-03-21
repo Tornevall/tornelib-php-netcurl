@@ -24,8 +24,9 @@ namespace TorneLIB;
 
 if ( ! class_exists( 'NETCURL_RESPONSETYPE' ) && ! class_exists( 'TorneLIB\NETCURL_RESPONSETYPE' ) ) {
 	/**
-	 * Class TORNELIB_CURL_RESPONSETYPE
+	 * Class NETCURL_RESPONSETYPE Assoc or object?
 	 * @package TorneLIB
+	 * @since 6.0.20
 	 */
 	abstract class NETCURL_RESPONSETYPE {
 		const RESPONSETYPE_ARRAY = 0;
@@ -38,6 +39,7 @@ if ( ! class_exists( 'NETCURL_RESPONSETYPE' ) && ! class_exists( 'TorneLIB\NETCU
 		 * Class TORNELIB_CURL_RESPONSETYPE
 		 * @package TorneLIB
 		 * @deprecated Use NETCURL_RESPONSETYPE
+		 * @since 6.0.20
 		 */
 		abstract class TORNELIB_CURL_RESPONSETYPE extends NETCURL_RESPONSETYPE {
 		}

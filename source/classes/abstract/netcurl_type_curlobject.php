@@ -24,8 +24,9 @@ namespace TorneLIB;
 
 if ( ! class_exists( 'NETCURL_CURLOBJECT' ) && ! class_exists( 'TorneLIB\NETCURL_CURLOBJECT' ) ) {
 	/**
-	 * Class TORNELIB_CURLOBJECT
+	 * Class NETCURL_CURLOBJECT
 	 * @package TorneLIB
+	 * @since 6.0.20
 	 * @todo Getters and setters
 	 */
 	class NETCURL_CURLOBJECT {

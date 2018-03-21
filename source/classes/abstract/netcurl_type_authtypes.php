@@ -26,9 +26,10 @@ if ( ! class_exists( 'NETCURL_AUTH_TYPES' ) && ! class_exists( 'TorneLIB\NETCURL
 	/**
 	 * Class CURL_AUTH_TYPES Available authentication types for use with password protected sites
 	 *
-	 * Normally, this should not be necessary, since you can use the internal constants directly (for example basic authentication is reachable as CURLAUTH_BASIC). This is just a stupid helper.
+	 * The authentication types listed in this section defines what is fully supported by the module. In other cases you might be on your own.
 	 *
 	 * @package TorneLIB
+	 * @since 6.0.20
 	 */
 	abstract class NETCURL_AUTH_TYPES {
 		const AUTHTYPE_NONE = 0;
@@ -37,10 +38,6 @@ if ( ! class_exists( 'NETCURL_AUTH_TYPES' ) && ! class_exists( 'TorneLIB\NETCURL
 }
 if ( ! class_exists( 'CURL_AUTH_TYPES' ) && ! class_exists( 'TorneLIB\CURL_AUTH_TYPES' ) ) {
 	/**
-	 * Class CURL_AUTH_TYPES Available authentication types for use with password protected sites
-	 *
-	 * Normally, this should not be necessary, since you can use the internal constants directly (for example basic authentication is reachable as CURLAUTH_BASIC). This is just a stupid helper.
-	 *
 	 * @package TorneLIB
 	 * @deprecated Use NETCURL_AUTH_TYPES
 	 */

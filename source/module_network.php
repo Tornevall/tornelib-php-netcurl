@@ -195,6 +195,7 @@ if ( ! class_exists( 'MODULE_NETWORK' ) && ! class_exists( 'TorneLIB\MODULE_NETW
 		 * @param string $gitUrl
 		 *
 		 * @return array
+		 * @throws \Exception
 		 * @since 6.0.4
 		 */
 		public function getMyVersionByGitTag( $myVersion = '', $gitUrl = '' ) {
@@ -216,6 +217,7 @@ if ( ! class_exists( 'MODULE_NETWORK' ) && ! class_exists( 'TorneLIB\MODULE_NETW
 		 * @param string $gitUrl
 		 *
 		 * @return bool
+		 * @throws \Exception
 		 * @since 6.0.4
 		 */
 		public function getVersionTooOld( $myVersion = '', $gitUrl = '' ) {
@@ -519,22 +521,22 @@ if ( ! class_exists( 'MODULE_NETWORK' ) && ! class_exists( 'TorneLIB\MODULE_NETW
 				if ( $returnIpType === true ) {
 					$vArpaTest = $this->getArpaFromIpv6( $ipAddr );    // PHP 5.3
 					if ( ! empty( $vArpaTest ) ) {
-						return TorneLIB_Network_IP_Protocols::PROTOCOL_IPV6;
+						return NETCURL_IP_PROTOCOLS::PROTOCOL_IPV6;
 					} else {
-						return TorneLIB_Network_IP_Protocols::PROTOCOL_NONE;
+						return NETCURL_IP_PROTOCOLS::PROTOCOL_NONE;
 					}
 				} else {
 					return $this->getArpaFromIpv6( $ipAddr );
 				}
 			} else if ( filter_var( $ipAddr, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4 ) !== false ) {
 				if ( $returnIpType ) {
-					return TorneLIB_Network_IP_Protocols::PROTOCOL_IPV4;
+					return NETCURL_IP_PROTOCOLS::PROTOCOL_IPV4;
 				} else {
 					return $this->getArpaFromIpv4( $ipAddr );
 				}
 			} else {
 				if ( $returnIpType ) {
-					return TorneLIB_Network_IP_Protocols::PROTOCOL_NONE;
+					return NETCURL_IP_PROTOCOLS::PROTOCOL_NONE;
 				}
 			}
 

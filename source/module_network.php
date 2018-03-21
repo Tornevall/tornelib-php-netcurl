@@ -232,23 +232,23 @@ if ( ! class_exists( 'MODULE_NETWORK' ) && ! class_exists( 'TorneLIB\MODULE_NETW
 		 * To make a long story short: This is a very unclever function from the birth of the developer (in a era when documentation was not "necessary" to read and stupidity ruled the world).
 		 * As some functions still uses this, we chose to keep it, but do it "right".
 		 *
-		 * @param string $urlIn
+		 * @param string $requestedUrlHost
 		 * @param bool $validateHost Validate that the hostname do exist
 		 *
 		 * @return array
 		 */
-		public function getUrlDomain( $urlIn = '', $validateHost = false ) {
+		public function getUrlDomain( $requestedUrlHost = '', $validateHost = false ) {
 			// If the scheme is forgotten, add it to keep normal hosts validatable too.
-			if ( ! preg_match( "/\:\/\//", $urlIn ) ) {
-				$urlIn = "http://" . $urlIn;
+			if ( ! preg_match( "/\:\/\//", $requestedUrlHost ) ) {
+				$requestedUrlHost = "http://" . $requestedUrlHost;
 			}
-			$urlParsed = parse_url( $urlIn );
+			$urlParsed = parse_url( $requestedUrlHost );
 			if ( ! isset( $urlParsed['host'] ) || ! $urlParsed['scheme'] ) {
 				return array( null, null, null );
 			}
 			if ( $validateHost || $this->alwaysResolveHostvalidation === true ) {
 				// Make sure that the host is not invalid
-				if ( filter_var( $urlIn, FILTER_VALIDATE_URL ) ) {
+				if ( filter_var( $requestedUrlHost, FILTER_VALIDATE_URL ) ) {
 					$hostRecord = @dns_get_record( $urlParsed['host'], DNS_ANY );
 					if ( ! count( $hostRecord ) ) {
 						return array( null, null, null );

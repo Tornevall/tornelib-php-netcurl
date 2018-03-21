@@ -27,8 +27,8 @@ class ResursBank_cURLTest extends TestCase {
 
 	function testMemberNull() {
 		$localCurl = new Tornevall_cURL();
-		$username  = "atest";
-		$password  = "atest";
+		$username  = "ecomphpPipelineTest";
+		$password  = "4Em4r5ZQ98x3891D6C19L96TQ72HsisD";
 		$localCurl->setAuthentication( $username, $password, CURL_AUTH_TYPES::AUTHTYPE_BASIC );
 		$specUrl = "https://omnitest.resurs.com/checkout/payments/null/updatePaymentReference";
 		try {

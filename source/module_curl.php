@@ -81,10 +81,10 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 		/** @var $Drivers */
 		private $Drivers = array();
 		private $SupportedDrivers = array(
-			'GuzzleHttp\Client' => TORNELIB_CURL_DRIVERS::DRIVER_GUZZLEHTTP,
-			'WP_Http'           => TORNELIB_CURL_DRIVERS::DRIVER_WORDPRESS
+			'GuzzleHttp\Client' => NETCURL_NETWORK_DRIVERS::DRIVER_GUZZLEHTTP,
+			'WP_Http'           => NETCURL_NETWORK_DRIVERS::DRIVER_WORDPRESS
 		);
-		/** @var TORNELIB_CURL_DRIVERS $currentDriver Current set driver */
+		/** @var NETCURL_NETWORK_DRIVERS $currentDriver Current set driver */
 		private $currentDriver;
 
 		/** @var $PostData */
@@ -126,7 +126,7 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 		 * @since 5.0.0
 		 * @var int
 		 */
-		private $TargetEnvironment = TORNELIB_CURL_ENVIRONMENT::ENVIRONMENT_PRODUCTION;
+		private $TargetEnvironment = NETCURL_ENVIRONMENT::ENVIRONMENT_PRODUCTION;
 		/** @var null Our communication channel */
 		private $CurlSession = null;
 		/** @var null URL that was set to communicate with */
@@ -209,7 +209,7 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 		private $TemporaryResponse = null;
 		/** @var null Temporary response from external driver */
 		private $TemporaryExternalResponse = null;
-		/** @var CURL_POST_AS $forcePostType What post type to use when using POST (Enforced) */
+		/** @var NETCURL_POST_DATATYPES $forcePostType What post type to use when using POST (Enforced) */
 		private $forcePostType = null;
 		/** @var string Sets an encoding to the http call */
 		public $CurlEncoding = null;
@@ -223,9 +223,9 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 		public $CurlAutoParse = true;
 		/** @var bool Allow parsing of content bodies (tags) */
 		private $allowParseHtml = false;
-		private $ResponseType = TORNELIB_CURL_RESPONSETYPE::RESPONSETYPE_ARRAY;
+		private $ResponseType = NETCURL_RESPONSETYPE::RESPONSETYPE_ARRAY;
 		/** @var array Authentication */
-		private $AuthData = array( 'Username' => null, 'Password' => null, 'Type' => CURL_AUTH_TYPES::AUTHTYPE_NONE );
+		private $AuthData = array( 'Username' => null, 'Password' => null, 'Type' => NETCURL_AUTH_TYPES::AUTHTYPE_NONE );
 		/** @var array Adding own headers to the HTTP-request here */
 		private $CurlHeaders = array();
 		private $CurlHeadersSystem = array();
@@ -292,12 +292,16 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 		 *
 		 * @throws \Exception
 		 */
-		public function __construct( $PreferredURL = '', $PreparedPostData = array(), $PreferredMethod = CURL_METHODS::METHOD_POST, $flags = array() ) {
+		public function __construct( $PreferredURL = '', $PreparedPostData = array(), $PreferredMethod = NETCURL_POST_METHODS::METHOD_POST, $flags = array() ) {
 			register_shutdown_function( array( $this, 'tornecurl_terminate' ) );
 
 			// PHP versions not supported to chaining gets the chaining parameter disabled by default.
 			if ( version_compare( PHP_VERSION, "5.4.0", "<" ) ) {
-				$this->setFlag( 'NOCHAIN', true );
+				try {
+					$this->setFlag( 'NOCHAIN', true );
+				} catch (\Exception $ignoreEmptyException) {
+					// This will never occur
+				}
 			}
 			if ( is_array( $flags ) && count( $flags ) ) {
 				$this->setFlags( $flags );
@@ -320,7 +324,7 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 			unset( $constants );
 			$authFlags = $this->getFlag( 'auth' );
 			if ( isset( $authFlags['username'] ) && isset( $authFlags['password'] ) ) {
-				$this->setAuthentication( $authFlags['username'], $authFlags['password'], isset( $authFlags['type'] ) ? $authFlags['type'] : CURL_AUTH_TYPES::AUTHTYPE_BASIC );
+				$this->setAuthentication( $authFlags['username'], $authFlags['password'], isset( $authFlags['type'] ) ? $authFlags['type'] : NETCURL_AUTH_TYPES::AUTHTYPE_BASIC );
 			}
 
 			// Common ssl checkers (if they fail, there is a sslDriverError to recall
@@ -354,20 +358,20 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 			if ( count( $this->sslDriverError ) ) {
 				$this->sslCurlDriver = false;
 			}
-			$this->CurlResolve = CURL_RESOLVER::RESOLVER_DEFAULT;
+			$this->CurlResolve = NETCURL_RESOLVER::RESOLVER_DEFAULT;
 			$this->openssl_guess();
 			$this->throwableHttpCodes = array();
 
 			if ( ! empty( $PreferredURL ) ) {
 				$this->CurlURL   = $PreferredURL;
 				$InstantResponse = null;
-				if ( $PreferredMethod == CURL_METHODS::METHOD_GET ) {
+				if ( $PreferredMethod == NETCURL_POST_METHODS::METHOD_GET ) {
 					$InstantResponse = $this->doGet( $PreferredURL );
-				} else if ( $PreferredMethod == CURL_METHODS::METHOD_POST ) {
+				} else if ( $PreferredMethod == NETCURL_POST_METHODS::METHOD_POST ) {
 					$InstantResponse = $this->doPost( $PreferredURL, $PreparedPostData );
-				} else if ( $PreferredMethod == CURL_METHODS::METHOD_PUT ) {
+				} else if ( $PreferredMethod == NETCURL_POST_METHODS::METHOD_PUT ) {
 					$InstantResponse = $this->doPut( $PreferredURL, $PreparedPostData );
-				} else if ( $PreferredMethod == CURL_METHODS::METHOD_DELETE ) {
+				} else if ( $PreferredMethod == NETCURL_POST_METHODS::METHOD_DELETE ) {
 					$InstantResponse = $this->doDelete( $PreferredURL, $PreparedPostData );
 				}
 
@@ -399,9 +403,9 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 			$functionsDisabled = array_map( "trim", explode( ",", $this->getDisabledFunctions() ) );
 
 			if ( function_exists( 'curl_init' ) && function_exists( 'curl_exec' ) ) {
-				$this->Drivers[ TORNELIB_CURL_DRIVERS::DRIVER_INTERNAL ] = true;
+				$this->Drivers[ NETCURL_NETWORK_DRIVERS::DRIVER_INTERNAL ] = true;
 			}
-			if ( ! $hasExternalDrivers && ! isset( $this->Drivers[ TORNELIB_CURL_DRIVERS::DRIVER_INTERNAL ] ) ) {
+			if ( ! $hasExternalDrivers && ! isset( $this->Drivers[ NETCURL_NETWORK_DRIVERS::DRIVER_INTERNAL ] ) ) {
 				if ( $getAsList ) {
 					return $this->Drivers;
 				}
@@ -427,6 +431,7 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 		 * Get a list of all available and supported drivers for the module
 		 *
 		 * @return array
+		 * @throws \Exception
 		 * @since 6.0.14
 		 */
 		public function getSupportedDrivers() {
@@ -438,11 +443,11 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 				if ( class_exists( $driverClass ) ) {
 					$supportedDrivers[ $driverClassId ] = true;
 					// Guzzle supports both curl and stream so include it here
-					if ( $driverClassId == TORNELIB_CURL_DRIVERS::DRIVER_GUZZLEHTTP ) {
+					if ( $driverClassId == NETCURL_NETWORK_DRIVERS::DRIVER_GUZZLEHTTP ) {
 						if ( ! $this->hasCurl() ) {
-							unset( $supportedDrivers[ TORNELIB_CURL_DRIVERS::DRIVER_GUZZLEHTTP ] );
+							unset( $supportedDrivers[ NETCURL_NETWORK_DRIVERS::DRIVER_GUZZLEHTTP ] );
 						}
-						$supportedDrivers[ TORNELIB_CURL_DRIVERS::DRIVER_GUZZLEHTTP_STREAM ] = true;
+						$supportedDrivers[ NETCURL_NETWORK_DRIVERS::DRIVER_GUZZLEHTTP_STREAM ] = true;
 					}
 				}
 			}
@@ -452,11 +457,13 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 
 		/**
 		 * If the internal driver is available, we also consider curl available
+		 *
 		 * @return bool
+		 * @throws \Exception
 		 */
 		private function hasCurl() {
 			$driversList = $this->getAvailableDrivers( true );
-			if ( isset( $driversList[ TORNELIB_CURL_DRIVERS::DRIVER_INTERNAL ] ) ) {
+			if ( isset( $driversList[ NETCURL_NETWORK_DRIVERS::DRIVER_INTERNAL ] ) ) {
 				return true;
 			}
 
@@ -471,7 +478,7 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 		 * @since 6.0.14
 		 */
 		public function setDriverAuto() {
-			$firstAvailableDriver = TORNELIB_CURL_DRIVERS::DRIVER_NOT_SET;
+			$firstAvailableDriver = NETCURL_NETWORK_DRIVERS::DRIVER_NOT_SET;
 			if ( ! $this->hasCurl() ) {
 				$supportedDriverList  = $this->getSupportedDrivers();
 				$supportedDriverCount = count( $supportedDriverList );
@@ -480,7 +487,7 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 					$this->setDriver( $firstAvailableDriver );
 				}
 			} else {
-				return TORNELIB_CURL_DRIVERS::DRIVER_INTERNAL;
+				return NETCURL_NETWORK_DRIVERS::DRIVER_INTERNAL;
 			}
 			if ( ! $supportedDriverCount ) {
 				throw new \Exception( $this->ModuleName . " " . __FUNCTION__ . " exception: Could not set up a proper communications driver since none exist", $this->NETWORK->getExceptionCode( 'NETCURL_NOCOMM_DRIVER' ) );
@@ -524,6 +531,7 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 		 *
 		 * @param array $flags
 		 *
+		 * @throws \Exception
 		 * @since 6.0.10
 		 */
 		private function setFlags( $flags = array() ) {
@@ -553,6 +561,7 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 		}
 
 		/**
+		 * @param string $setContentTypeString
 		 * @since 6.0.17
 		 */
 		public function setContentType( $setContentTypeString = 'application/json; charset=utf-8' ) {
@@ -570,6 +579,7 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 		 * cUrl initializer, if needed faster
 		 *
 		 * @return resource
+		 * @throws \Exception
 		 * @since 5.0.0
 		 */
 		public function init() {
@@ -589,27 +599,28 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 		 * @param int $driverId
 		 *
 		 * @return bool
+		 * @throws \Exception
 		 * @since 6.0.14
 		 */
-		public function setDriver( $driverId = TORNELIB_CURL_DRIVERS::DRIVER_NOT_SET ) {
+		public function setDriver( $driverId = NETCURL_NETWORK_DRIVERS::DRIVER_NOT_SET ) {
 			$isDriverSet = false;
 			// Enforcing chaining will leave old clients incompatible
-			//if ($driverId !== TORNELIB_CURL_DRIVERS::DRIVER_NOT_SET) {
+			//if ($driverId !== NETCURL_NETWORK_DRIVERS::DRIVER_NOT_SET) {
 			//	$this->setFlag("CHAIN");
 			//}
 
 			$guzDrivers = array(
-				TORNELIB_CURL_DRIVERS::DRIVER_GUZZLEHTTP,
-				TORNELIB_CURL_DRIVERS::DRIVER_GUZZLEHTTP_STREAM
+				NETCURL_NETWORK_DRIVERS::DRIVER_GUZZLEHTTP,
+				NETCURL_NETWORK_DRIVERS::DRIVER_GUZZLEHTTP_STREAM
 			);
-			if ( $driverId == TORNELIB_CURL_DRIVERS::DRIVER_WORDPRESS ) {
+			if ( $driverId == NETCURL_NETWORK_DRIVERS::DRIVER_WORDPRESS ) {
 				if ( in_array( "WP_Http", get_declared_classes() ) ) {
 					/** @noinspection PhpUndefinedClassInspection */
-					$this->Drivers[ TORNELIB_CURL_DRIVERS::DRIVER_WORDPRESS ] = new \WP_Http();
+					$this->Drivers[ NETCURL_NETWORK_DRIVERS::DRIVER_WORDPRESS ] = new \WP_Http();
 					$isDriverSet                                              = true;
 				}
 			} else if ( in_array( $driverId, $guzDrivers ) ) {
-				if ( $this->hasCurl() && $driverId === TORNELIB_CURL_DRIVERS::DRIVER_GUZZLEHTTP ) {
+				if ( $this->hasCurl() && $driverId === NETCURL_NETWORK_DRIVERS::DRIVER_GUZZLEHTTP ) {
 					// GuzzleHttp does not show up on get_declared_classes  in our tests, so we'll set the class in another way instead
 					$isDriverSet = $this->setDriverByClass( $driverId, 'GuzzleHttp\Client' );
 				} else {
@@ -636,7 +647,7 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 		 */
 		public function getDriver() {
 			if ( is_null( $this->currentDriver ) && $this->hasCurl() ) {
-				$this->currentDriver = TORNELIB_CURL_DRIVERS::DRIVER_INTERNAL;
+				$this->currentDriver = NETCURL_NETWORK_DRIVERS::DRIVER_INTERNAL;
 			}
 
 			return $this->currentDriver;
@@ -646,6 +657,7 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 		 * Get current configured http-driver
 		 *
 		 * @return mixed
+		 * @throws \Exception
 		 * @since 6.0.14
 		 */
 		public function getDrivers() {
@@ -670,7 +682,7 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 		 * @return bool
 		 * @since 6.0.14
 		 */
-		private function setDriverByClass( $driverId = TORNELIB_CURL_DRIVERS::DRIVER_NOT_SET, $className = '', $parameters = null ) {
+		private function setDriverByClass( $driverId = NETCURL_NETWORK_DRIVERS::DRIVER_NOT_SET, $className = '', $parameters = null ) {
 			if ( class_exists( $className ) ) {
 				if ( is_null( $parameters ) ) {
 					$this->Drivers[ $driverId ] = new $className();
@@ -692,7 +704,7 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 		 * @return bool
 		 * @since 6.0.14
 		 */
-		private function getIsDriver( $driverId = TORNELIB_CURL_DRIVERS::DRIVER_NOT_SET ) {
+		private function getIsDriver( $driverId = NETCURL_NETWORK_DRIVERS::DRIVER_NOT_SET ) {
 			if ( isset( $this->Drivers[ $driverId ] ) && is_object( $this->Drivers[ $driverId ] ) ) {
 				return true;
 			}
@@ -900,6 +912,7 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 		 *
 		 * @param bool $enable
 		 *
+		 * @throws \Exception
 		 * @since 6.0.14
 		 */
 		public function setChain( $enable = true ) {
@@ -955,7 +968,7 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 		 *
 		 * Defines whether, when there is a SOAP-call, we should try to make the SOAP initialization twice.
 		 * This is a kind of fallback when users forget to add ?wsdl or &wsdl in urls that requires this to call for SOAP.
-		 * It may happen when setting CURL_POST_AS to a SOAP-call but, the URL is not defined as one.
+		 * It may happen when setting NETCURL_POST_DATATYPES to a SOAP-call but, the URL is not defined as one.
 		 * Setting this to false, may suppress important errors, since this will suppress fatal errors at first try.
 		 *
 		 * @param bool $enabledMode
@@ -978,11 +991,12 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 
 
 		/**
-		 * Set the curl libraray to die, if no proxy has been successfully set up (TODO: not implemented)
+		 * Set the curl libraray to die, if no proxy has been successfully set up
 		 *
 		 * @param bool $dieEnabled
 		 *
 		 * @since 6.0.9
+		 * @TODO Not implemented yet
 		 */
 		public function setDieOnNoProxy( $dieEnabled = true ) {
 			$this->CurlProxyDeath = $dieEnabled;
@@ -1072,7 +1086,7 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 		 *
 		 * @since 5.0.0
 		 */
-		public function setResponseType( $ResponseType = TORNELIB_CURL_RESPONSETYPE::RESPONSETYPE_ARRAY ) {
+		public function setResponseType( $ResponseType = NETCURL_RESPONSETYPE::RESPONSETYPE_ARRAY ) {
 			$this->ResponseType = $ResponseType;
 		}
 
@@ -1090,19 +1104,19 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 		 * Enforce a specific type of post method
 		 *
 		 * To always send PostData, even if it is not set in the doXXX-method, you can use this setting to enforce - for example - JSON posts
-		 * $myLib->setPostTypeDefault(CURL_POST_AS::POST_AS_JSON)
+		 * $myLib->setPostTypeDefault(NETCURL_POST_DATATYPES::DATATYPE_JSON)
 		 *
 		 * @param int $postType
 		 *
 		 * @since 6.0.6
 		 */
-		public function setPostTypeDefault( $postType = CURL_POST_AS::POST_AS_NORMAL ) {
+		public function setPostTypeDefault( $postType = NETCURL_POST_DATATYPES::DATATYPE_NOT_SET ) {
 			$this->forcePostType = $postType;
 		}
 
 		/**
-		 * Returns what to use as post method (CURL_POST_AS) on default. Returns null if none are set (= no overrides will be made)
-		 * @return CURL_POST_AS
+		 * Returns what to use as post method (NETCURL_POST_DATATYPES) on default. Returns null if none are set (= no overrides will be made)
+		 * @return NETCURL_POST_DATATYPES
 		 * @since 6.0.6
 		 */
 		public function getPostTypeDefault() {
@@ -1138,7 +1152,7 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 		 * @since 5.0.0
 		 */
 		public function setTestEnabled() {
-			$this->TargetEnvironment = TORNELIB_CURL_ENVIRONMENT::ENVIRONMENT_TEST;
+			$this->TargetEnvironment = NETCURL_ENVIRONMENT::ENVIRONMENT_TEST;
 		}
 
 		/**
@@ -1263,6 +1277,8 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 		 *
 		 * @param array|string $curlOptArrayOrKey If arrayed, there will be multiple options at once
 		 * @param null $curlOptValue If not null, and the first parameter is not an array, this is taken as a single update value
+		 *
+		 * @throws \Exception
 		 */
 		public function setCurlOpt( $curlOptArrayOrKey = array(), $curlOptValue = null ) {
 			if ( $this->hasCurl() ) {
@@ -1287,6 +1303,8 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 		 *
 		 * @param array|string $curlOptArrayOrKey
 		 * @param null $curlOptValue
+		 *
+		 * @throws \Exception
 		 */
 		private function setCurlOptInternal( $curlOptArrayOrKey = array(), $curlOptValue = null ) {
 			if ( $this->hasCurl() ) {
@@ -1424,6 +1442,7 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 		 * @param string $libName
 		 *
 		 * @return string
+		 * @throws \Exception
 		 */
 		public function hasUpdate( $libName = 'tornelib_curl' ) {
 			if ( ! defined( 'TORNELIB_ALLOW_VERSION_REQUESTS' ) ) {
@@ -1437,6 +1456,7 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 		 * @param string $libName
 		 *
 		 * @return string
+		 * @throws \Exception
 		 */
 		private function getHasUpdateState( $libName = 'tornelib_curl' ) {
 			// Currently only supporting this internal module (through $myRelease).
@@ -1479,6 +1499,7 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 		 * Recommendation of Usage: Do not copy only those functions, use the full version of tornevall_network.php since there may be dependencies in it.
 		 *
 		 * @return array
+		 * @throws \Exception
 		 * @link https://phpdoc.tornevall.net/TorneLIBv5/source-class-TorneLIB.Tornevall_cURL.html sslStreamContextCorrection() is a part of TorneLIB 5.0, described here
 		 */
 		public function sslStreamContextCorrection() {
@@ -1515,6 +1536,7 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 		 * @param array $selfContext
 		 *
 		 * @return array
+		 * @throws \Exception
 		 * @link http://developer.tornevall.net/apigen/TorneLIB-5.0/class-TorneLIB.Tornevall_cURL.html sslGetOptionsStream() is a part of TorneLIB 5.0, described here
 		 */
 		public function sslGetOptionsStream( $optionsArray = array(), $selfContext = array() ) {
@@ -1599,8 +1621,9 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 		 *
 		 * @param bool $forceTesting Force testing even if $testssl is disabled
 		 *
-		 * @link https://docs.tornevall.net/x/KwCy#TheNetworkandcURLclass(tornevall_network.php)-SSLCertificatesandverification
 		 * @return bool
+		 * @throws \Exception
+		 * @link https://docs.tornevall.net/x/KwCy#TheNetworkandcURLclass(tornevall_network.php)-SSLCertificatesandverification
 		 */
 		private function openssl_guess( $forceTesting = false ) {
 			// The certificate location here will be set up for the curl engine later on, during preparation of the connection.
@@ -1623,7 +1646,7 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 								}
 								// For unit testing
 								if ( $this->hasFlag( '_DEBUG_TCURL_UNSET_LOCAL_PEM_LOCATION' ) && $this->isFlag( '_DEBUG_TCURL_UNSET_LOCAL_PEM_LOCATION' ) ) {
-									if ( $this->TargetEnvironment == TORNELIB_CURL_ENVIRONMENT::ENVIRONMENT_TEST ) {
+									if ( $this->TargetEnvironment == NETCURL_ENVIRONMENT::ENVIRONMENT_TEST ) {
 										// Enforce wrong certificate location
 										$this->hasCertFile = false;
 										$this->useCertFile = null;
@@ -1657,7 +1680,7 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 									}
 								}
 								// For unit testing
-								if ( $this->TargetEnvironment == TORNELIB_CURL_ENVIRONMENT::ENVIRONMENT_TEST && $this->hasFlag( '_DEBUG_TCURL_UNSET_LOCAL_PEM_LOCATION' ) && $this->isFlag( '_DEBUG_TCURL_UNSET_LOCAL_PEM_LOCATION' ) ) {
+								if ( $this->TargetEnvironment == NETCURL_ENVIRONMENT::ENVIRONMENT_TEST && $this->hasFlag( '_DEBUG_TCURL_UNSET_LOCAL_PEM_LOCATION' ) && $this->isFlag( '_DEBUG_TCURL_UNSET_LOCAL_PEM_LOCATION' ) ) {
 									// Enforce wrong certificate location
 									$this->hasCertFile = false;
 									$this->useCertFile = null;
@@ -1760,6 +1783,7 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 		 * Note: This function also forces full ssl certificate checking.
 		 *
 		 * @return bool
+		 * @throws \Exception
 		 */
 		public function TestCerts() {
 			return $this->openssl_guess( true );
@@ -1797,6 +1821,7 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 		 * @param string $url
 		 *
 		 * @return array
+		 * @deprecated Use MODULE_NETWORK::getUrlDomain
 		 */
 		private function ExtractDomain( $url = '' ) {
 			$urex   = explode( "/", preg_replace( "[^(.*?)//(.*?)/(.*)]", '$2', $url . "/" ) );
@@ -1805,57 +1830,8 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 			return array( $urex[0], $urtype );
 		}
 
-		/**
-		 * Translate ipv4 to reverse octets
-		 *
-		 * @param string $ip
-		 *
-		 * @return string
-		 */
-		private function v4arpa( $ip = '' ) {
-			return $this->NETWORK->getArpaFromIpv4( $ip );
-		}
-
-		/**
-		 * ipv6-to-arpa-format-conversion
-		 *
-		 * @param string $ip
-		 *
-		 * @return string
-		 */
-		private function v6arpa( $ip = '::' ) {
-			return $this->NETWORK->getArpaFromAddr( $ip );
-		}
-
-		/** @noinspection PhpUnusedPrivateMethodInspection */
-		/**
-		 * Translate ipv6-octets to ipv6-address
-		 *
-		 * @param string $arpaOctets
-		 *
-		 * @return string
-		 */
-		private function fromv6arpa( $arpaOctets = '' ) {
-			return $this->NETWORK->getIpv6FromOctets( $arpaOctets );
-		}
-
-		/** @noinspection PhpUnusedPrivateMethodInspection */
-		/**
-		 * Get reverse octets from ip address
-		 *
-		 * @param string $ip
-		 * @param bool $getiptype
-		 *
-		 * @return int|string
-		 */
-		private function toarpa( $ip = '', $getiptype = false ) {
-			return $this->NETWORK->getArpaFromAddr( $ip, $getiptype );
-		}
-
-
 
 		//// IP SETUP
-
 		/**
 		 * Making sure the $IpAddr contains valid address list
 		 *
@@ -1904,6 +1880,8 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 		 *
 		 * @param $ProxyAddr
 		 * @param int $ProxyType
+		 *
+		 * @throws \Exception
 		 */
 		public function setProxy( $ProxyAddr, $ProxyType = CURLPROXY_HTTP ) {
 			$this->CurlProxy     = $ProxyAddr;
@@ -1933,6 +1911,7 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 		 *
 		 * @param bool $curlTunnelEnable
 		 *
+		 * @throws \Exception
 		 * @since 6.0.11
 		 */
 		public function setTunnel( $curlTunnelEnable = true ) {
@@ -2063,6 +2042,7 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 		 * @param string $content
 		 *
 		 * @return array|string|TORNELIB_CURLOBJECT
+		 * @throws \Exception
 		 */
 		private function ParseResponse( $content = '' ) {
 			// Kill the chaining (for future releases, when we eventually raise chaining mode as default)
@@ -2119,9 +2099,9 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 			$returnResponse['URL'] = $this->CurlURL;
 			$returnResponse['ip']  = isset( $this->CurlIp ) ? $this->CurlIp : null;  // Will only be filled if there is custom address set.
 
-			if ( $this->ResponseType == TORNELIB_CURL_RESPONSETYPE::RESPONSETYPE_OBJECT ) {
+			if ( $this->ResponseType == NETCURL_RESPONSETYPE::RESPONSETYPE_OBJECT ) {
 				// This is probably not necessary and will not be the default setup after all.
-				$returnResponseObject         = new TORNELIB_CURLOBJECT();
+				$returnResponseObject         = new NETCURL_CURLOBJECT();
 				$returnResponseObject->header = $returnResponse['header'];
 				$returnResponseObject->body   = $returnResponse['body'];
 				$returnResponseObject->code   = $returnResponse['code'];
@@ -2207,6 +2187,7 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 		 * @param string $content
 		 *
 		 * @return array
+		 * @throws \Exception
 		 */
 		public function getHeader( $content = "" ) {
 			return $this->ParseResponse( $content . "\r\n\r\n" );
@@ -2295,7 +2276,7 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 		/**
 		 * @param null $ResponseContent
 		 *
-		 * @return mixed
+		 * @return string
 		 * @since 6.0.16
 		 */
 		public function getResponseUrl( $ResponseContent = null ) {
@@ -2308,6 +2289,7 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 			} else if ( isset( $ResponseContent['URL'] ) ) {
 				return $ResponseContent['URL'];
 			}
+			return '';
 		}
 
 		/**
@@ -2469,11 +2451,12 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 		 * @param int $postAs
 		 *
 		 * @return array
+		 * @throws \Exception
 		 */
-		public function doPost( $url = '', $postData = array(), $postAs = CURL_POST_AS::POST_AS_NORMAL ) {
+		public function doPost( $url = '', $postData = array(), $postAs = NETCURL_POST_DATATYPES::DATATYPE_NOT_SET ) {
 			$response = null;
 			if ( ! empty( $url ) ) {
-				$content  = $this->executeCurl( $url, $postData, CURL_METHODS::METHOD_POST, $postAs );
+				$content  = $this->executeCurl( $url, $postData, NETCURL_POST_METHODS::METHOD_POST, $postAs );
 				$response = $this->ParseResponse( $content );
 			}
 
@@ -2486,11 +2469,12 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 		 * @param int $postAs
 		 *
 		 * @return array
+		 * @throws \Exception
 		 */
-		public function doPut( $url = '', $postData = array(), $postAs = CURL_POST_AS::POST_AS_NORMAL ) {
+		public function doPut( $url = '', $postData = array(), $postAs = NETCURL_POST_DATATYPES::DATATYPE_NOT_SET ) {
 			$response = null;
 			if ( ! empty( $url ) ) {
-				$content  = $this->executeCurl( $url, $postData, CURL_METHODS::METHOD_PUT, $postAs );
+				$content  = $this->executeCurl( $url, $postData, NETCURL_POST_METHODS::METHOD_PUT, $postAs );
 				$response = $this->ParseResponse( $content );
 			}
 
@@ -2503,11 +2487,12 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 		 * @param int $postAs
 		 *
 		 * @return array
+		 * @throws \Exception
 		 */
-		public function doDelete( $url = '', $postData = array(), $postAs = CURL_POST_AS::POST_AS_NORMAL ) {
+		public function doDelete( $url = '', $postData = array(), $postAs = NETCURL_POST_DATATYPES::DATATYPE_NOT_SET ) {
 			$response = null;
 			if ( ! empty( $url ) ) {
-				$content  = $this->executeCurl( $url, $postData, CURL_METHODS::METHOD_DELETE, $postAs );
+				$content  = $this->executeCurl( $url, $postData, NETCURL_POST_METHODS::METHOD_DELETE, $postAs );
 				$response = $this->ParseResponse( $content );
 			}
 
@@ -2520,13 +2505,13 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 		 * @param string $url
 		 * @param int $postAs
 		 *
-		 * @return array|null|string|TORNELIB_CURLOBJECT
+		 * @return array|null|string|NETCURL_CURLOBJECT
 		 * @throws \Exception
 		 */
-		public function doGet( $url = '', $postAs = CURL_POST_AS::POST_AS_NORMAL ) {
+		public function doGet( $url = '', $postAs = NETCURL_POST_DATATYPES::DATATYPE_NOT_SET ) {
 			$response = null;
 			if ( ! empty( $url ) ) {
-				$content  = $this->executeCurl( $url, array(), CURL_METHODS::METHOD_GET, $postAs );
+				$content  = $this->executeCurl( $url, array(), NETCURL_POST_METHODS::METHOD_GET, $postAs );
 				$response = $this->ParseResponse( $content );
 			}
 
@@ -2538,15 +2523,15 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 		 *
 		 * @param null $Username
 		 * @param null $Password
-		 * @param int $AuthType Falls back on CURLAUTH_ANY if none are given. CURL_AUTH_TYPES are minimalistic since it follows the standards of CURLAUTH_
+		 * @param int $AuthType Falls back on CURLAUTH_ANY if none are given. NETCURL_AUTH_TYPES are minimalistic since it follows the standards of CURLAUTH_
 		 *
 		 * @throws \Exception
 		 */
-		public function setAuthentication( $Username = null, $Password = null, $AuthType = CURL_AUTH_TYPES::AUTHTYPE_BASIC ) {
+		public function setAuthentication( $Username = null, $Password = null, $AuthType = NETCURL_AUTH_TYPES::AUTHTYPE_BASIC ) {
 			$this->AuthData['Username'] = $Username;
 			$this->AuthData['Password'] = $Password;
 			$this->AuthData['Type']     = $AuthType;
-			if ( $AuthType !== CURL_AUTH_TYPES::AUTHTYPE_NONE ) {
+			if ( $AuthType !== NETCURL_AUTH_TYPES::AUTHTYPE_NONE ) {
 				// Default behaviour on authentications via SOAP should be to catch authfail warnings
 				$this->setFlag( "SOAPWARNINGS", true );
 			}
@@ -2603,11 +2588,11 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 		 * @return string
 		 * @since 6.0.15
 		 */
-		private function executePostData( $postData = array(), $postAs = CURL_POST_AS::POST_AS_NORMAL ) {
+		private function executePostData( $postData = array(), $postAs = NETCURL_POST_DATATYPES::DATATYPE_NOT_SET ) {
 			$this->PostDataReal = $postData;
 			$postDataContainer  = $postData;
 
-			// Enforce postAs: If you'd like to force everything to use json you can for example use: $myLib->setPostTypeDefault(CURL_POST_AS::POST_AS_JSON)
+			// Enforce postAs: If you'd like to force everything to use json you can for example use: $myLib->setPostTypeDefault(NETCURL_POST_DATATYPES::DATATYPE_JSON)
 			if ( ! is_null( $this->forcePostType ) ) {
 				$postAs = $this->forcePostType;
 			}
@@ -2617,7 +2602,7 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 			}
 			$this->PostDataContainer = $postDataContainer;
 
-			if ( $postAs == CURL_POST_AS::POST_AS_JSON ) {
+			if ( $postAs == NETCURL_POST_DATATYPES::DATATYPE_JSON ) {
 				// Using $jsonRealData to validate the string
 				$jsonRealData = null;
 				if ( ! is_string( $postData ) ) {
@@ -2647,7 +2632,7 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 		 * @return mixed
 		 * @throws \Exception
 		 */
-		private function executeCurl( $url = '', $postData = array(), $CurlMethod = CURL_METHODS::METHOD_GET, $postAs = CURL_POST_AS::POST_AS_NORMAL ) {
+		private function executeCurl( $url = '', $postData = array(), $CurlMethod = NETCURL_POST_METHODS::METHOD_GET, $postAs = NETCURL_POST_DATATYPES::DATATYPE_NOT_SET ) {
 			if ( ! empty( $url ) ) {
 				$this->CurlURL = $url;
 			}
@@ -2742,16 +2727,16 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 			if ( ! empty( $postDataContainer ) ) {
 				$this->setCurlOpt( CURLOPT_POSTFIELDS, $postDataContainer );
 			}
-			if ( $CurlMethod == CURL_METHODS::METHOD_POST || $CurlMethod == CURL_METHODS::METHOD_PUT || $CurlMethod == CURL_METHODS::METHOD_DELETE ) {
-				if ( $CurlMethod == CURL_METHODS::METHOD_PUT ) {
+			if ( $CurlMethod == NETCURL_POST_METHODS::METHOD_POST || $CurlMethod == NETCURL_POST_METHODS::METHOD_PUT || $CurlMethod == NETCURL_POST_METHODS::METHOD_DELETE ) {
+				if ( $CurlMethod == NETCURL_POST_METHODS::METHOD_PUT ) {
 					$this->setCurlOpt( CURLOPT_CUSTOMREQUEST, "PUT" );
-				} else if ( $CurlMethod == CURL_METHODS::METHOD_DELETE ) {
+				} else if ( $CurlMethod == NETCURL_POST_METHODS::METHOD_DELETE ) {
 					$this->setCurlOpt( CURLOPT_CUSTOMREQUEST, "DELETE" );
 				} else {
 					$this->setCurlOpt( CURLOPT_POST, true );
 				}
 
-				if ( $postAs == CURL_POST_AS::POST_AS_JSON ) {
+				if ( $postAs == NETCURL_POST_DATATYPES::DATATYPE_JSON ) {
 					// Using $jsonRealData to validate the string
 					//$jsonRealData = $this->executePostData($postData, $postAs);
 					$this->CurlHeadersSystem['Content-Type']   = "application/json; charset=utf-8";
@@ -2765,11 +2750,11 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 				$this->setCurlOptInternal( CURLOPT_CONNECTTIMEOUT, ceil( $this->CurlTimeout / 2 ) );
 				$this->setCurlOptInternal( CURLOPT_TIMEOUT, ceil( $this->CurlTimeout ) );
 			}
-			if ( isset( $this->CurlResolve ) && $this->CurlResolve !== CURL_RESOLVER::RESOLVER_DEFAULT ) {
-				if ( $this->CurlResolve == CURL_RESOLVER::RESOLVER_IPV4 ) {
+			if ( isset( $this->CurlResolve ) && $this->CurlResolve !== NETCURL_RESOLVER::RESOLVER_DEFAULT ) {
+				if ( $this->CurlResolve == NETCURL_RESOLVER::RESOLVER_IPV4 ) {
 					$this->setCurlOptInternal( CURLOPT_IPRESOLVE, CURL_IPRESOLVE_V4 );
 				}
-				if ( $this->CurlResolve == CURL_RESOLVER::RESOLVER_IPV6 ) {
+				if ( $this->CurlResolve == NETCURL_RESOLVER::RESOLVER_IPV6 ) {
 					$this->setCurlOptInternal( CURLOPT_IPRESOLVE, CURL_IPRESOLVE_V6 );
 				}
 			}
@@ -2820,9 +2805,9 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 
 			if ( ! empty( $this->AuthData['Username'] ) ) {
 				$useAuth = $this->AuthData['Type'];
-				if ( $this->AuthData['Type'] != CURL_AUTH_TYPES::AUTHTYPE_NONE ) {
+				if ( $this->AuthData['Type'] != NETCURL_AUTH_TYPES::AUTHTYPE_NONE ) {
 					$useAuth = CURLAUTH_ANY;
-					if ( $this->AuthData['Type'] == CURL_AUTH_TYPES::AUTHTYPE_BASIC ) {
+					if ( $this->AuthData['Type'] == NETCURL_AUTH_TYPES::AUTHTYPE_BASIC ) {
 						$useAuth = CURLAUTH_BASIC;
 					}
 				}
@@ -2838,7 +2823,7 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 			$this->setCurlOpt( CURLINFO_HEADER_OUT, true );
 
 			// Override with SoapClient just before the real curl_exec is the most proper way to handle inheritages
-			if ( preg_match( "/\?wsdl$|\&wsdl$/i", $this->CurlURL ) || $postAs == CURL_POST_AS::POST_AS_SOAP ) {
+			if ( preg_match( "/\?wsdl$|\&wsdl$/i", $this->CurlURL ) || $postAs == NETCURL_POST_DATATYPES::DATATYPE_SOAP ) {
 				if ( ! $this->hasSoap() ) {
 					throw new \Exception( $this->ModuleName . " " . __FUNCTION__ . " exception: SoapClient is not available in this system", $this->NETWORK->getExceptionCode( 'NETCURL_SOAPCLIENT_CLASS_MISSING' ) );
 				}
@@ -2849,7 +2834,7 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 			$externalExecute = $this->executeHttpExternal( $url, $postData, $CurlMethod, $postAs );
 
 			$isExternalDriver = $this->getDriver();
-			if ( ( $externalExecute !== true && $this->hasCurl() ) && $isExternalDriver === TORNELIB_CURL_DRIVERS::DRIVER_INTERNAL ) {
+			if ( ( $externalExecute !== true && $this->hasCurl() ) && $isExternalDriver === NETCURL_NETWORK_DRIVERS::DRIVER_INTERNAL ) {
 				$returnContent = curl_exec( $this->CurlSession );
 				if ( curl_errno( $this->CurlSession ) ) {
 
@@ -2890,10 +2875,10 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 						unset( $this->CurlIp );
 						$this->CurlResolveForced = true;
 						if ( $this->CurlIpType == 6 ) {
-							$this->CurlResolve = CURL_RESOLVER::RESOLVER_IPV4;
+							$this->CurlResolve = NETCURL_RESOLVER::RESOLVER_IPV4;
 						}
 						if ( $this->CurlIpType == 4 ) {
-							$this->CurlResolve = CURL_RESOLVER::RESOLVER_IPV6;
+							$this->CurlResolve = NETCURL_RESOLVER::RESOLVER_IPV6;
 						}
 
 						return $this->executeCurl( $this->CurlURL, $postData, $CurlMethod );
@@ -2922,11 +2907,11 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 		 * @param array $postData
 		 * @param int $CurlMethod
 		 *
-		 * @return Tornevall_SimpleSoap
+		 * @return MODULE_SOAP
 		 * @throws \Exception
 		 * @since 6.0.14
 		 */
-		private function executeHttpSoap( $url = '', $postData = array(), $CurlMethod = CURL_METHODS::METHOD_GET ) {
+		private function executeHttpSoap( $url = '', $postData = array(), $CurlMethod = NETCURL_POST_METHODS::METHOD_GET ) {
 			$this->setChain( false );
 			$Soap = new MODULE_SOAP( $this->CurlURL, $this );
 			$Soap->setFlag( 'IS_SOAP' );
@@ -2971,8 +2956,8 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 		 * @throws \Exception
 		 * @since 6.0.14
 		 */
-		private function executeHttpExternal( $url = '', $postData = array(), $CurlMethod = CURL_METHODS::METHOD_GET, $postAs = CURL_POST_AS::POST_AS_NORMAL ) {
-			if ( preg_match( "/\?wsdl$|\&wsdl$/i", $this->CurlURL ) || $postAs == CURL_POST_AS::POST_AS_SOAP ) {
+		private function executeHttpExternal( $url = '', $postData = array(), $CurlMethod = NETCURL_POST_METHODS::METHOD_GET, $postAs = NETCURL_POST_DATATYPES::DATATYPE_NOT_SET ) {
+			if ( preg_match( "/\?wsdl$|\&wsdl$/i", $this->CurlURL ) || $postAs == NETCURL_POST_DATATYPES::DATATYPE_SOAP ) {
 				if ( ! $this->hasSoap() ) {
 					throw new \Exception( $this->ModuleName . " " . __FUNCTION__ . " exception: SoapClient is not available in this system", $this->NETWORK->getExceptionCode( 'NETCURL_SOAPCLIENT_CLASS_MISSING' ) );
 				}
@@ -2980,10 +2965,10 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 				return $this->executeHttpSoap( $url, $this->PostData, $CurlMethod );
 			}
 			$guzDrivers = array(
-				TORNELIB_CURL_DRIVERS::DRIVER_GUZZLEHTTP,
-				TORNELIB_CURL_DRIVERS::DRIVER_GUZZLEHTTP_STREAM
+				NETCURL_NETWORK_DRIVERS::DRIVER_GUZZLEHTTP,
+				NETCURL_NETWORK_DRIVERS::DRIVER_GUZZLEHTTP_STREAM
 			);
-			if ( $this->getDriver() == TORNELIB_CURL_DRIVERS::DRIVER_WORDPRESS ) {
+			if ( $this->getDriver() == NETCURL_NETWORK_DRIVERS::DRIVER_WORDPRESS ) {
 				return $this->executeWpHttp( $url, $this->PostData, $CurlMethod, $postAs );
 			} else if ( in_array( $this->getDriver(), $guzDrivers ) ) {
 				return $this->executeGuzzleHttp( $url, $this->PostData, $CurlMethod, $postAs );
@@ -3006,12 +2991,12 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 		 * @throws \Exception
 		 * @since 6.0.14
 		 */
-		private function executeWpHttp( $url = '', $postData = array(), $CurlMethod = CURL_METHODS::METHOD_GET, $postAs = CURL_POST_AS::POST_AS_NORMAL ) {
+		private function executeWpHttp( $url = '', $postData = array(), $CurlMethod = NETCURL_POST_METHODS::METHOD_GET, $postAs = NETCURL_POST_DATATYPES::DATATYPE_NOT_SET ) {
 			$parsedResponse = null;
-			if ( isset( $this->Drivers[ TORNELIB_CURL_DRIVERS::DRIVER_WORDPRESS ] ) ) {
+			if ( isset( $this->Drivers[ NETCURL_NETWORK_DRIVERS::DRIVER_WORDPRESS ] ) ) {
 				/** @noinspection PhpUndefinedClassInspection */
 				/** @var $worker \WP_Http */
-				$worker = $this->Drivers[ TORNELIB_CURL_DRIVERS::DRIVER_WORDPRESS ];
+				$worker = $this->Drivers[ NETCURL_NETWORK_DRIVERS::DRIVER_WORDPRESS ];
 			} else {
 				throw new \Exception( $this->ModuleName . " " . __FUNCTION__ . " exception: Could not find any available transport for WordPress Driver", $this->NETWORK->getExceptionCode( 'NETCURL_WP_TRANSPORT_ERROR' ) );
 			}
@@ -3025,23 +3010,23 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 			}
 
 			$postThis = array( 'body' => $this->PostDataReal );
-			if ( $postAs == CURL_POST_AS::POST_AS_JSON ) {
+			if ( $postAs == NETCURL_POST_DATATYPES::DATATYPE_JSON ) {
 				$postThis['headers'] = array( "content-type" => "application-json" );
 				$postThis['body']    = $this->PostData;
 			}
 
 			$wpResponse = null;
-			if ( $CurlMethod == CURL_METHODS::METHOD_GET ) {
+			if ( $CurlMethod == NETCURL_POST_METHODS::METHOD_GET ) {
 				/** @noinspection PhpUndefinedMethodInspection */
 				$wpResponse = $worker->get( $url, $postThis );
-			} else if ( $CurlMethod == CURL_METHODS::METHOD_POST ) {
+			} else if ( $CurlMethod == NETCURL_POST_METHODS::METHOD_POST ) {
 				/** @noinspection PhpUndefinedMethodInspection */
 				$wpResponse = $worker->post( $url, $postThis );
-			} else if ( $CurlMethod == CURL_METHODS::METHOD_REQUEST ) {
+			} else if ( $CurlMethod == NETCURL_POST_METHODS::METHOD_REQUEST ) {
 				/** @noinspection PhpUndefinedMethodInspection */
 				$wpResponse = $worker->request( $url, $postThis );
 			}
-			if ( $CurlMethod == CURL_METHODS::METHOD_HEAD ) {
+			if ( $CurlMethod == NETCURL_POST_METHODS::METHOD_HEAD ) {
 				/** @noinspection PhpUndefinedMethodInspection */
 				$wpResponse = $worker->head( $url, $postThis );
 			}
@@ -3071,7 +3056,7 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 		 * @return $this|Tornevall_cURL
 		 * @throws \Exception
 		 */
-		private function executeGuzzleHttp( $url = '', $postData = array(), $CurlMethod = CURL_METHODS::METHOD_GET, $postAs = CURL_POST_AS::POST_AS_NORMAL ) {
+		private function executeGuzzleHttp( $url = '', $postData = array(), $CurlMethod = NETCURL_POST_METHODS::METHOD_GET, $postAs = NETCURL_POST_DATATYPES::DATATYPE_NOT_SET ) {
 			/** @noinspection PhpUndefinedClassInspection */
 			/** @noinspection PhpUndefinedNamespaceInspection */
 			/** @var $gResponse \GuzzleHttp\Psr7\Response */
@@ -3088,7 +3073,7 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 			$postOptions['headers'] = array();
 			$contentType            = $this->getContentType();
 
-			if ( $postAs === CURL_POST_AS::POST_AS_JSON ) {
+			if ( $postAs === NETCURL_POST_DATATYPES::DATATYPE_JSON ) {
 				$postOptions['headers']['Content-Type'] = 'application/json; charset=utf-8';
 				if ( is_string( $postData ) ) {
 					$jsonPostData = @json_decode( $postData );
@@ -3106,7 +3091,7 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 			$hasAuth = false;
 			if ( isset( $this->AuthData['Username'] ) ) {
 				$hasAuth = true;
-				if ( $this->AuthData['Type'] == CURL_AUTH_TYPES::AUTHTYPE_BASIC ) {
+				if ( $this->AuthData['Type'] == NETCURL_AUTH_TYPES::AUTHTYPE_BASIC ) {
 					$postOptions['headers']['Accept'] = '*/*';
 					if ( ! empty( $contentType ) ) {
 						$postOptions['headers']['Content-Type'] = $contentType;
@@ -3120,19 +3105,19 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 			}
 
 			if ( method_exists( $worker, 'request' ) ) {
-				if ( $CurlMethod == CURL_METHODS::METHOD_GET ) {
+				if ( $CurlMethod == NETCURL_POST_METHODS::METHOD_GET ) {
 					/** @noinspection PhpUndefinedMethodInspection */
 					$gRequest = $worker->request( 'GET', $url, $postOptions );
-				} else if ( $CurlMethod == CURL_METHODS::METHOD_POST ) {
+				} else if ( $CurlMethod == NETCURL_POST_METHODS::METHOD_POST ) {
 					/** @noinspection PhpUndefinedMethodInspection */
 					$gRequest = $worker->request( 'POST', $url, $postOptions );
-				} else if ( $CurlMethod == CURL_METHODS::METHOD_PUT ) {
+				} else if ( $CurlMethod == NETCURL_POST_METHODS::METHOD_PUT ) {
 					/** @noinspection PhpUndefinedMethodInspection */
 					$gRequest = $worker->request( 'PUT', $url, $postOptions );
-				} else if ( $CurlMethod == CURL_METHODS::METHOD_DELETE ) {
+				} else if ( $CurlMethod == NETCURL_POST_METHODS::METHOD_DELETE ) {
 					/** @noinspection PhpUndefinedMethodInspection */
 					$gRequest = $worker->request( 'DELETE', $url, $postOptions );
-				} else if ( $CurlMethod == CURL_METHODS::METHOD_HEAD ) {
+				} else if ( $CurlMethod == NETCURL_POST_METHODS::METHOD_HEAD ) {
 					/** @noinspection PhpUndefinedMethodInspection */
 					$gRequest = $worker->request( 'HEAD', $url, $postOptions );
 				}
@@ -3193,9 +3178,10 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 		/**
 		 * Class MODULE_CURL
 		 * @package TorneLIB
+		 * @throws \Exception
 		 */
 		class Tornevall_cURL extends MODULE_CURL {
-			function __construct( $PreferredURL = '', $PreparedPostData = array(), $PreferredMethod = CURL_METHODS::METHOD_POST, $flags = array() ) {
+			function __construct( $PreferredURL = '', $PreparedPostData = array(), $PreferredMethod = NETCURL_POST_METHODS::METHOD_POST, $flags = array() ) {
 				return parent::__construct($PreferredURL, $PreparedPostData, $PreferredMethod);
 			}
 		}

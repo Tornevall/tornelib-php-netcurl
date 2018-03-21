@@ -22,26 +22,38 @@
 
 namespace TorneLIB;
 
-if ( ! class_exists( 'NETCURL_POST_AS' ) && ! class_exists( 'TorneLIB\NETCURL_POST_AS' ) ) {
+if ( ! class_exists( 'NETCURL_POST_DATATYPES' ) && ! class_exists( 'TorneLIB\NETCURL_POST_DATATYPES' ) ) {
 	/**
-	 * Class NETCURL_POST_AS Prepared formatting for POST-content in this library (Also available from for example PUT)
+	 * Class NETCURL_POST_DATATYPES Prepared formatting for POST-content in this library (Also available from for example PUT)
 	 *
 	 * @package TorneLIB
 	 * @since 6.0.20
 	 */
 
-	abstract class NETCURL_POST_AS {
-		const POST_AS_NORMAL = 0;
-		const POST_AS_JSON = 1;
-		const POST_AS_SOAP = 2;
+	abstract class NETCURL_POST_DATATYPES {
+		const DATATYPE_NOT_SET = 0;
+		const DATATYPE_JSON = 1;
+		const DATATYPE_SOAP = 2;
 	}
 }
 if ( ! class_exists( 'CURL_POST_AS' ) && ! class_exists( 'TorneLIB\CURL_POST_AS' ) ) {
 	/**
 	 * @package TorneLIB
-	 * @deprecated Use NETCURL_POST_AS
+	 * @deprecated Use NETCURL_POST_DATATYPES
 	 * @since 6.0.20
 	 */
-	abstract class CURL_POST_AS extends NETCURL_POST_AS {
+	abstract class CURL_POST_AS extends NETCURL_POST_DATATYPES {
+		/**
+		 * @deprecated Use NETCURL_POST_DATATYPES::DATATYPE_DEFAULT
+		 */
+		const POST_AS_NORMAL = 0;
+		/**
+		 * @deprecated Use NETCURL_POST_DATATYPES::DATATYPE_JSON
+		 */
+		const POST_AS_JSON = 1;
+		/**
+		 * @deprecated Use NETCURL_POST_DATATYPES::DATATYPE_SOAP
+		 */
+		const POST_AS_SOAP = 2;
 	}
 }

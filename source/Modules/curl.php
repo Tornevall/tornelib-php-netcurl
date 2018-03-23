@@ -428,7 +428,7 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 		}
 
 		/**
-		 * Get a list of all available and supported drivers for the module
+		 * Get a list of all available and supported Addons for the module
 		 *
 		 * @return array
 		 * @throws \Exception
@@ -2901,7 +2901,7 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 		}
 
 		/**
-		 * SOAPClient detection method (moved from primary curl executor to make it possible to detect soapcalls from other drivers)
+		 * SOAPClient detection method (moved from primary curl executor to make it possible to detect soapcalls from other Addons)
 		 *
 		 * @param string $url
 		 * @param array $postData
@@ -2945,7 +2945,7 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 		}
 
 		/**
-		 * Execution of http-calls via external drivers
+		 * Execution of http-calls via external Addons
 		 *
 		 * @param string $url
 		 * @param array $postData

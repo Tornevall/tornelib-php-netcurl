@@ -22,13 +22,27 @@
 
 namespace TorneLIB;
 
-/**
- * Class NETCURL_DRIVERS Network communications driver detection
- *
- * @package TorneLIB
- * @since 6.0.20
- */
-class NETCURL_DRIVERS {
-	public function __construct() {
+if ( ! class_exists( 'NETCURL_NETWORK_DRIVERS' ) && ! class_exists( 'TorneLIB\NETCURL_NETWORK_DRIVERS' ) ) {
+	/**
+	 * Class NETCURL_NETWORK_DRIVERS Supported network Addons
+	 * @package TorneLIB
+	 * @since 6.0.20
+	 */
+	abstract class NETCURL_NETWORK_DRIVERS {
+		const DRIVER_NOT_SET = 0;
+		const DRIVER_INTERNAL = 1;
+		const DRIVER_WORDPRESS = 1000;
+		const DRIVER_GUZZLEHTTP = 1001;
+		const DRIVER_GUZZLEHTTP_STREAM = 1002;
+	}
+}
+if ( ! class_exists( 'TORNELIB_CURL_DRIVERS' ) && ! class_exists( 'TorneLIB\TORNELIB_CURL_DRIVERS' ) ) {
+	/**
+	 * Class TORNELIB_CURL_DRIVERS
+	 * @package TorneLIB
+	 * @deprecated use NETCURL_NETWORK_DRIVERS
+	 * @since 6.0.20
+	 */
+	abstract class TORNELIB_CURL_DRIVERS extends NETCURL_NETWORK_DRIVERS {
 	}
 }

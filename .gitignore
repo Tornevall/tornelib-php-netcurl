@@ -1,9 +1,9 @@
 composer.phar
 composer.lock
-.idea
-Makefile
 .composer.json.swp
+.idea/*
+Makefile
 /vendor
-/runit
+/runit.sh
 coverage
-source/netcurl.php
+source/build/netcurl.php

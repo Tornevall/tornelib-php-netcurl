@@ -31,8 +31,8 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 	if ( ! defined( 'NETCURL_CURL_MODIFIY' ) ) {
 		define( 'NETCURL_CURL_MODIFIY', '20180320' );
 	}
-	if ( ! defined( 'NETCURL_CURL_CLIENT' ) ) {
-		define( 'NETCURL_CURL_CLIENT', 'NetCurl' );
+	if ( ! defined( 'NETCURL_CURL_CLIENTNAME' ) ) {
+		define( 'NETCURL_CURL_CLIENTNAME', 'NetCurl' );
 	}
 
 	/**
@@ -421,12 +421,12 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 					if ( $ignoreException ) {
 						return false;
 					}
-					throw new \Exception( $this->ModuleName . " curl init exception: curl library has been disabled system wide", $this->NETWORK->getExceptionCode( 'NETCURL_CURL_DISABLED' ) );
+					throw new \Exception( NETCURL_CURL_CLIENTNAME . " curl init exception: curl library has been disabled system wide", $this->NETWORK->getExceptionCode( 'NETCURL_CURL_DISABLED' ) );
 				}
 				if ( $ignoreException ) {
 					return false;
 				}
-				throw new \Exception( $this->ModuleName . " curl init exception: curl library not found", $this->NETWORK->getExceptionCode( 'NETCURL_CURL_MISSING' ) );
+				throw new \Exception( NETCURL_CURL_CLIENTNAME . " curl init exception: curl library not found", $this->NETWORK->getExceptionCode( 'NETCURL_CURL_MISSING' ) );
 			}
 			if ( $getAsList ) {
 				return $this->Drivers;
@@ -498,7 +498,7 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 				return NETCURL_NETWORK_DRIVERS::DRIVER_INTERNAL;
 			}
 			if ( ! $supportedDriverCount ) {
-				throw new \Exception( $this->ModuleName . " " . __FUNCTION__ . " exception: Could not set up a proper communications driver since none exist", $this->NETWORK->getExceptionCode( 'NETCURL_NOCOMM_DRIVER' ) );
+				throw new \Exception( NETCURL_CURL_CLIENTNAME . " " . __FUNCTION__ . " exception: Could not set up a proper communications driver since none exist", $this->NETWORK->getExceptionCode( 'NETCURL_NOCOMM_DRIVER' ) );
 			}
 
 			return $firstAvailableDriver;
@@ -639,7 +639,7 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 						$streamHandler = new \GuzzleHttp\Handler\StreamHandler();
 						$isDriverSet   = $this->setDriverByClass( $driverId, 'GuzzleHttp\Client', array( 'handler' => $streamHandler ) );
 					} else {
-						throw new \Exception( $this->ModuleName . " setDriverException: GuzzleStream does not exists", $this->NETWORK->getExceptionCode( 'NETCURL_EXTERNAL_DRIVER_MISSING' ) );
+						throw new \Exception( NETCURL_CURL_CLIENTNAME . " setDriverException: GuzzleStream does not exists", $this->NETWORK->getExceptionCode( 'NETCURL_EXTERNAL_DRIVER_MISSING' ) );
 					}
 				}
 			}
@@ -797,7 +797,7 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 						$this->CookiePath = realpath( __DIR__ . "/../cookies" );
 					}
 					if ( $this->UseCookieExceptions && ( empty( $this->CookiePath ) || ! is_dir( $this->CookiePath ) ) ) {
-						throw new \Exception( $this->ModuleName . " " . __FUNCTION__ . " exception: Could not set up a proper cookiepath [To override this, use AllowTempAsCookiePath (not recommended)]", $this->NETWORK->getExceptionCode( 'NETCURL_COOKIEPATH_SETUP_FAIL' ) );
+						throw new \Exception( NETCURL_CURL_CLIENTNAME . " " . __FUNCTION__ . " exception: Could not set up a proper cookiepath [To override this, use AllowTempAsCookiePath (not recommended)]", $this->NETWORK->getExceptionCode( 'NETCURL_COOKIEPATH_SETUP_FAIL' ) );
 					}
 				}
 			}
@@ -953,7 +953,7 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 			}
 			foreach ( $this->throwableHttpCodes as $codeListArray => $codeArray ) {
 				if ( isset( $codeArray[1] ) && $code >= intval( $codeArray[0] ) && $code <= intval( $codeArray[1] ) ) {
-					throw new \Exception( $this->ModuleName . " HTTP Response Exception: " . $message, $code );
+					throw new \Exception( NETCURL_CURL_CLIENTNAME . " HTTP Response Exception: " . $message, $code );
 				}
 			}
 		}
@@ -1414,7 +1414,7 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 			if ( defined( 'TORNELIB_ALLOW_VERSION_REQUESTS' ) && TORNELIB_ALLOW_VERSION_REQUESTS === true ) {
 				return $this->TorneNetCurlVersion . "," . $this->TorneCurlReleaseDate;
 			}
-			throw new \Exception( $this->ModuleName . " internalReleaseException [" . __CLASS__ . "]: Version requests are not allowed in current state (permissions required)", 403 );
+			throw new \Exception( NETCURL_CURL_CLIENTNAME . " internalReleaseException [" . __CLASS__ . "]: Version requests are not allowed in current state (permissions required)", 403 );
 		}
 
 		/**
@@ -1741,7 +1741,7 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 			} else {
 				// If the enabledFlag is false and the allowance is not set, we will not be allowed to disabled SSL verification either
 				if ( ! $enabledFlag ) {
-					throw new \Exception( $this->ModuleName . " setSslVerify exception: setSslUnverified(true) has not been set", $this->NETWORK->getExceptionCode( 'NETCURL_SETSSLVERIFY_UNVERIFIED_NOT_SET' ) );
+					throw new \Exception( NETCURL_CURL_CLIENTNAME . " setSslVerify exception: setSslUnverified(true) has not been set", $this->NETWORK->getExceptionCode( 'NETCURL_SETSSLVERIFY_UNVERIFIED_NOT_SET' ) );
 				} else {
 					// However, if we force the verify flag to be on, we won't care about the allowance override, as the security
 					// will be enhanced anyway.
@@ -1870,7 +1870,7 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 			if ( $ipType == "0" ) {
 				// If the ip type is 0 and it shows up there is something defined here, throw an exception.
 				if ( ! empty( $UseIp ) ) {
-					throw new \Exception( $this->ModuleName . " " . __FUNCTION__ . " exception: " . $UseIp . " is not a valid ip-address", $this->NETWORK->getExceptionCode( 'NETCURL_IPCONFIG_NOT_VALID' ) );
+					throw new \Exception( NETCURL_CURL_CLIENTNAME . " " . __FUNCTION__ . " exception: " . $UseIp . " is not a valid ip-address", $this->NETWORK->getExceptionCode( 'NETCURL_IPCONFIG_NOT_VALID' ) );
 				}
 			} else {
 				$this->CurlIp = $UseIp;
@@ -2039,7 +2039,7 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 						}
 					}
 				} else {
-					throw new \Exception( $this->ModuleName . " HtmlParse exception: Can not parse DOMDocuments without the DOMDocuments class", $this->NETWORK->getExceptionCode( "NETCURL_DOMDOCUMENT_CLASS_MISSING" ) );
+					throw new \Exception( NETCURL_CURL_CLIENTNAME . " HtmlParse exception: Can not parse DOMDocuments without the DOMDocuments class", $this->NETWORK->getExceptionCode( "NETCURL_DOMDOCUMENT_CLASS_MISSING" ) );
 				}
 			}
 
@@ -2214,7 +2214,7 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 		public function getParsedResponse( $ResponseContent = null ) {
 			if ( is_array( $ResponseContent ) ) {
 				if ( isset( $ResponseContent['code'] ) && $ResponseContent['code'] >= 400 ) {
-					throw new \Exception( $this->ModuleName . " parseResponse exception - Unexpected response code from server: " . $ResponseContent['code'], $ResponseContent['code'] );
+					throw new \Exception( NETCURL_CURL_CLIENTNAME . " parseResponse exception - Unexpected response code from server: " . $ResponseContent['code'], $ResponseContent['code'] );
 				}
 			}
 
@@ -2359,7 +2359,7 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 					if ( $hasRecursion ) {
 						return $Parsed;
 					} else {
-						throw new \Exception( $this->ModuleName . " getParsedValue exception: Requested key was not found in parsed response", $this->NETWORK->getExceptionCode( 'NETCURL_GETPARSEDVALUE_KEY_NOT_FOUND' ) );
+						throw new \Exception( NETCURL_CURL_CLIENTNAME . " getParsedValue exception: Requested key was not found in parsed response", $this->NETWORK->getExceptionCode( 'NETCURL_GETPARSEDVALUE_KEY_NOT_FOUND' ) );
 					}
 				}
 			}
@@ -2836,7 +2836,7 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 			// Override with SoapClient just before the real curl_exec is the most proper way to handle inheritages
 			if ( preg_match( "/\?wsdl$|\&wsdl$/i", $this->CurlURL ) || $postAs == NETCURL_POST_DATATYPES::DATATYPE_SOAP ) {
 				if ( ! $this->hasSoap() ) {
-					throw new \Exception( $this->ModuleName . " " . __FUNCTION__ . " exception: SoapClient is not available in this system", $this->NETWORK->getExceptionCode( 'NETCURL_SOAPCLIENT_CLASS_MISSING' ) );
+					throw new \Exception( NETCURL_CURL_CLIENTNAME . " " . __FUNCTION__ . " exception: SoapClient is not available in this system", $this->NETWORK->getExceptionCode( 'NETCURL_SOAPCLIENT_CLASS_MISSING' ) );
 				}
 
 				return $this->executeHttpSoap( $url, $postData, $CurlMethod );
@@ -2865,11 +2865,11 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 					$errorCode    = curl_errno( $this->CurlSession );
 					$errorMessage = curl_error( $this->CurlSession );
 					if ( $this->CurlResolveForced && $this->CurlRetryTypes['resolve'] >= 2 ) {
-						throw new \Exception( $this->ModuleName . " exception in " . __FUNCTION__ . ": The maximum tries of curl_exec() for " . $this->CurlURL . " has been reached without any successful response. Normally, this happens after " . $this->CurlRetryTypes['resolve'] . " CurlResolveRetries and might be connected with a bad URL or similar that can not resolve properly.\nCurl error message follows: " . $errorMessage, $errorCode );
+						throw new \Exception( NETCURL_CURL_CLIENTNAME . " exception in " . __FUNCTION__ . ": The maximum tries of curl_exec() for " . $this->CurlURL . " has been reached without any successful response. Normally, this happens after " . $this->CurlRetryTypes['resolve'] . " CurlResolveRetries and might be connected with a bad URL or similar that can not resolve properly.\nCurl error message follows: " . $errorMessage, $errorCode );
 					}
 					if ( $errorCode == CURLE_SSL_CACERT || $errorCode === 60 && $this->allowSslUnverified ) {
 						if ( $this->CurlRetryTypes['sslunverified'] >= 2 ) {
-							throw new \Exception( $this->ModuleName . " exception in " . __FUNCTION__ . ": The maximum tries of curl_exec() for " . $this->CurlURL . ", during a try to make a SSL connection to work, has been reached without any successful response. This normally happens when allowSslUnverified is activated in the library and " . $this->CurlRetryTypes['resolve'] . " tries to fix the problem has been made, but failed.\nCurl error message follows: " . $errorMessage, $errorCode );
+							throw new \Exception( NETCURL_CURL_CLIENTNAME . " exception in " . __FUNCTION__ . ": The maximum tries of curl_exec() for " . $this->CurlURL . ", during a try to make a SSL connection to work, has been reached without any successful response. This normally happens when allowSslUnverified is activated in the library and " . $this->CurlRetryTypes['resolve'] . " tries to fix the problem has been made, but failed.\nCurl error message follows: " . $errorMessage, $errorCode );
 						} else {
 							$this->hasErrorsStore[] = array( 'code' => $errorCode, 'message' => $errorMessage );
 							$this->setSslVerify( false );
@@ -2894,7 +2894,7 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 
 						return $this->executeCurl( $this->CurlURL, $postData, $CurlMethod );
 					}
-					throw new \Exception( $this->ModuleName . " exception from PHP/CURL at " . __FUNCTION__ . ": " . curl_error( $this->CurlSession ), curl_errno( $this->CurlSession ) );
+					throw new \Exception( NETCURL_CURL_CLIENTNAME . " exception from PHP/CURL at " . __FUNCTION__ . ": " . curl_error( $this->CurlSession ), curl_errno( $this->CurlSession ) );
 				} else {
 					$this->debugData['data']['url'][] = array(
 						'url'       => $this->CurlURL,
@@ -2948,7 +2948,7 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 					'exception' => $getSoapResponseException,
 					'previous'  => $getSoapResponseException->getPrevious()
 				);
-				throw new \Exception( $this->ModuleName . " exception from soapClient: " . $getSoapResponseException->getMessage(), $getSoapResponseException->getCode() );
+				throw new \Exception( NETCURL_CURL_CLIENTNAME . " exception from soapClient: " . $getSoapResponseException->getMessage(), $getSoapResponseException->getCode() );
 			}
 
 			return $getSoapResponse;
@@ -2970,7 +2970,7 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 		private function executeHttpExternal( $url = '', $postData = array(), $CurlMethod = NETCURL_POST_METHODS::METHOD_GET, $postAs = NETCURL_POST_DATATYPES::DATATYPE_NOT_SET ) {
 			if ( preg_match( "/\?wsdl$|\&wsdl$/i", $this->CurlURL ) || $postAs == NETCURL_POST_DATATYPES::DATATYPE_SOAP ) {
 				if ( ! $this->hasSoap() ) {
-					throw new \Exception( $this->ModuleName . " " . __FUNCTION__ . " exception: SoapClient is not available in this system", $this->NETWORK->getExceptionCode( 'NETCURL_SOAPCLIENT_CLASS_MISSING' ) );
+					throw new \Exception( NETCURL_CURL_CLIENTNAME . " " . __FUNCTION__ . " exception: SoapClient is not available in this system", $this->NETWORK->getExceptionCode( 'NETCURL_SOAPCLIENT_CLASS_MISSING' ) );
 				}
 
 				return $this->executeHttpSoap( $url, $this->PostData, $CurlMethod );
@@ -3009,7 +3009,7 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 				/** @var $worker \WP_Http */
 				$worker = $this->Drivers[ NETCURL_NETWORK_DRIVERS::DRIVER_WORDPRESS ];
 			} else {
-				throw new \Exception( $this->ModuleName . " " . __FUNCTION__ . " exception: Could not find any available transport for WordPress Driver", $this->NETWORK->getExceptionCode( 'NETCURL_WP_TRANSPORT_ERROR' ) );
+				throw new \Exception( NETCURL_CURL_CLIENTNAME . " " . __FUNCTION__ . " exception: Could not find any available transport for WordPress Driver", $this->NETWORK->getExceptionCode( 'NETCURL_WP_TRANSPORT_ERROR' ) );
 			}
 
 			if ( ! is_null( $worker ) ) {
@@ -3017,7 +3017,7 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 				$transportInfo = $worker->_get_first_available_transport( array() );
 			}
 			if ( empty( $transportInfo ) ) {
-				throw new \Exception( $this->ModuleName . " " . __FUNCTION__ . " exception: Could not find any available transport for WordPress Driver", $this->NETWORK->getExceptionCode( 'NETCURL_WP_TRANSPORT_ERROR' ) );
+				throw new \Exception( NETCURL_CURL_CLIENTNAME . " " . __FUNCTION__ . " exception: Could not find any available transport for WordPress Driver", $this->NETWORK->getExceptionCode( 'NETCURL_WP_TRANSPORT_ERROR' ) );
 			}
 
 			$postThis = array( 'body' => $this->PostDataReal );
@@ -3133,7 +3133,7 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 					$gRequest = $worker->request( 'HEAD', $url, $postOptions );
 				}
 			} else {
-				throw new \Exception( $this->ModuleName . " streams for guzzle is probably missing as I can't find the request method in the current class", $this->NETWORK->getExceptionCode( 'NETCURL_GUZZLESTREAM_MISSING' ) );
+				throw new \Exception( NETCURL_CURL_CLIENTNAME . " streams for guzzle is probably missing as I can't find the request method in the current class", $this->NETWORK->getExceptionCode( 'NETCURL_GUZZLESTREAM_MISSING' ) );
 			}
 			/** @noinspection PhpUndefinedVariableInspection */
 			$this->TemporaryExternalResponse = array( 'worker' => $worker, 'request' => $gRequest );

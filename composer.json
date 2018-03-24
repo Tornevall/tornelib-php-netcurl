@@ -18,22 +18,25 @@
   ],
   "autoload": {
     "files": [
-      "source/module_netcurl.php",
-      "source/classes/abstract/netcurl_exceptions.php",
-      "source/classes/abstract/netcurl_type_authtypes.php",
-      "source/classes/abstract/netcurl_type_curlobject.php",
-      "source/classes/abstract/netcurl_type_datatypes.php",
-      "source/classes/abstract/netcurl_type_drivers.php",
-      "source/classes/abstract/netcurl_type_environment.php",
-      "source/classes/abstract/netcurl_type_ip_protocols.php",
-      "source/classes/abstract/netcurl_type_postmethods.php",
-      "source/classes/abstract/netcurl_type_resolvers.php",
-      "source/classes/abstract/netcurl_type_responses.php",
-      "source/classes/module_netbits_independent.php",
-      "source/module_network.php",
-      "source/module_curl.php",
-      "source/module_simplesoap.php",
-      "source/classes/module_netbits_independent.php"
-    ]
+      "source/Modules/netcurl_init.php",
+      "source/Modules/drivers.php",
+      "source/Addons/netbits.php",
+      "source/Exception/Exception.php",
+      "source/Model/Type/authtypes.php",
+      "source/Model/Type/curlobject.php",
+      "source/Model/Type/datatypes.php",
+      "source/Model/Type/drivers.php",
+      "source/Model/Type/environment.php",
+      "source/Model/Type/ip_protocols.php",
+      "source/Model/Type/postmethods.php",
+      "source/Model/Type/resolvers.php",
+      "source/Model/Type/responses.php",
+      "source/Modules/network.php",
+      "source/Modules/curl.php",
+      "source/Modules/soap.php"
+    ],
+    "psr-4": {
+      "TorneLIB\\": "source"
+    }
   }
 }

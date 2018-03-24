@@ -15,7 +15,7 @@ use \TorneLIB\Tornevall_cURL;
 
 ini_set( 'memory_limit', - 1 );    // Free memory limit, some tests requires more memory (like ip-range handling)
 
-class ResursBank_cURLTest extends TestCase {
+class extendedTest extends TestCase {
 
 	/**
 	 * @var Tornevall_cURL $CURL
@@ -106,42 +106,6 @@ class ResursBank_cURLTest extends TestCase {
 			$this->assertTrue( $errorCode == 401 && preg_match( "/401 unauthorized/is", $errorMessage ) ? true : false );
 		}
 	}
-
-	/*function testAuthByConstructor() {
-		if (version_compare(PHP_VERSION, '5.4.0', '>=')) {
-			$constructorAuth = ( new Tornevall_cURL( "https://omnitest.resurs.com/checkout/payments/661", array(), CURL_METHODS::METHOD_GET, array(
-				'auth' => array(
-					'username' => 'username',
-					'password' => 'password'
-				)
-			) ) )->getParsedResponse();
-			$this->assertTrue( is_object( $constructorAuth ) );
-			return;
-		}
-		// Fails in lower than PHP 5.4
-		$this->assertFalse(false);
-	}
-
-	function testAuthByNoConstructor() {
-		$regularRequest = new Tornevall_cURL();
-		$regularRequest->setAuthentication( "atest", "atest" );
-		$chainRequest = $regularRequest->doGet( "https://omnitest.resurs.com/checkout/payments/661" )->getParsedResponse();
-		$this->assertTrue( is_object( $chainRequest ) );
-	}*/
-
-	/*function testGuzzleStreamAuth() {
-		try {
-			$this->CURL->setDriver( TORNELIB_CURL_DRIVERS::DRIVER_GUZZLEHTTP_STREAM );
-			$this->CURL->setThrowableHttpCodes();
-			$this->CURL->setAuthentication( "atest", "atest" );
-			// Do not set a default content-type at this point, let the service itself ask for it
-			// $this->CURL->setContentType();
-			$this->CURL->doGet( "https://omnitest.resurs.com/checkout/payments/987" );
-			$this->assertTrue( is_object( $this->CURL->getParsedResponse() ) );
-		} catch ( \Exception $e ) {
-			$this->markTestIncomplete( $e->getCode() . ": " . $e->getMessage() );
-		}
-	}*/
 
 	function testRbSoapChain() {
 		$localCurl = new Tornevall_cURL();

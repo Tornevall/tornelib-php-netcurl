@@ -25,8 +25,12 @@ namespace TorneLIB;
 
 if ( ! class_exists( 'MODULE_NETWORK' ) && ! class_exists( 'TorneLIB\MODULE_NETWORK' ) ) {
 
-	define( 'NETCURL_NETWORK_RELEASE', '6.0.6' );
-	define( 'NETCURL_NETWORK_MODIFIY', '20180320' );
+	if (!defined('NETCURL_NETWORK_RELEASE')) {
+		define( 'NETCURL_NETWORK_RELEASE', '6.0.6' );
+	}
+	if (!defined('NETCURL_NETWORK_MODIFIY')) {
+		define( 'NETCURL_NETWORK_MODIFIY', '20180320' );
+	}
 
 	/**
 	 * Library for handling network related things (currently not sockets). A conversion of a legacy PHP library called "TorneEngine" and family.

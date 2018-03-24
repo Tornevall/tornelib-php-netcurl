@@ -31,9 +31,12 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 	if ( ! defined( 'NETCURL_CURL_MODIFIY' ) ) {
 		define( 'NETCURL_CURL_MODIFIY', '20180320' );
 	}
+	if ( ! defined( 'NETCURL_CURL_CLIENT' ) ) {
+		define( 'NETCURL_CURL_CLIENT', 'NetCurl' );
+	}
 
 	/**
-	 * Class Tornevall_cURL
+	 * Class MOBILE_CURL
 	 *
 	 * @package TorneLIB
 	 * @link https://docs.tornevall.net/x/KQCy TorneLIBv5
@@ -94,6 +97,10 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 		/** @var string $PostDataReal Post data as received from client */
 		private $PostDataReal;
 
+		private $userAgents = array(
+			'Mozilla' => 'Mozilla/4.0 (compatible; MSIE 7.0; Windows NT 5.1; .NET CLR 1.0.3705; .NET CLR 1.1.4322; Media Center PC 4.0;'
+		);
+
 		/**
 		 * Die on use of proxy/tunnel on first try (Incomplete).
 		 *
@@ -101,22 +108,13 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 		 *
 		 * @var bool
 		 */
-		private $CurlProxyDeath = true;
+		private $DIE_ON_LOST_PROXY = true;
 
 		//// PRIVATE AND PROTECTED VARIABLES VARIABLES
-		/** @var string This modules name (inherited to some exceptions amongst others) */
-		protected $ModuleName = "NetCurl";
-		/** @var string Internal version that is being used to find out if we are running the latest version of this library */
-		private $TorneNetCurlVersion = NETCURL_CURL_RELEASE;
-		const TORNELIB_NETCURL_VERSION = NETCURL_CURL_RELEASE;
-		/** @var null Curl Version */
-		private $CurlVersion = null;
-		/** @var string Internal release snapshot that is being used to find out if we are running the latest version of this library */
-		private $TorneCurlReleaseDate = NETCURL_CURL_MODIFIY;
 		/**
-		 * Prepare TorneLIB_Network class if it exists (as of the november 2016 it does).
+		 * Prepare MODULE_NETWORK class if it exists (as of the november 2016 it does).
 		 *
-		 * @var TorneLIB_Network
+		 * @var MODULE_NETWORK
 		 */
 		private $NETWORK;
 
@@ -126,7 +124,7 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 		 * @since 5.0.0
 		 * @var int
 		 */
-		private $TargetEnvironment = NETCURL_ENVIRONMENT::ENVIRONMENT_PRODUCTION;
+		private $TARGET_ENVIRONMENT = NETCURL_ENVIRONMENT::ENVIRONMENT_PRODUCTION;
 		/** @var null Our communication channel */
 		private $CurlSession = null;
 		/** @var null URL that was set to communicate with */
@@ -225,7 +223,11 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 		private $allowParseHtml = false;
 		private $ResponseType = NETCURL_RESPONSETYPE::RESPONSETYPE_ARRAY;
 		/** @var array Authentication */
-		private $AuthData = array( 'Username' => null, 'Password' => null, 'Type' => NETCURL_AUTH_TYPES::AUTHTYPE_NONE );
+		private $AuthData = array(
+			'Username' => null,
+			'Password' => null,
+			'Type'     => NETCURL_AUTH_TYPES::AUTHTYPE_NONE
+		);
 		/** @var array Adding own headers to the HTTP-request here */
 		private $CurlHeaders = array();
 		private $CurlHeadersSystem = array();
@@ -283,7 +285,7 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 		public $canThrow = true;
 
 		/**
-		 * Tornevall_cURL constructor.
+		 * MODULE_CURL constructor.
 		 *
 		 * @param string $PreferredURL
 		 * @param array $PreparedPostData
@@ -299,29 +301,16 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 			if ( version_compare( PHP_VERSION, "5.4.0", "<" ) ) {
 				try {
 					$this->setFlag( 'NOCHAIN', true );
-				} catch (\Exception $ignoreEmptyException) {
+				} catch ( \Exception $ignoreEmptyException ) {
 					// This will never occur
 				}
 			}
 			if ( is_array( $flags ) && count( $flags ) ) {
 				$this->setFlags( $flags );
 			}
-			$this->NETWORK = new TorneLIB_Network();
+			$this->NETWORK = new MODULE_NETWORK();
+			$this->extractConstants();
 
-			// Store constants of curl errors and curlOptions
-			try {
-				$constants = @get_defined_constants();
-				foreach ( $constants as $constKey => $constInt ) {
-					if ( preg_match( "/^curlopt/i", $constKey ) ) {
-						$this->curlConstantsOpt[ $constInt ] = $constKey;
-					}
-					if ( preg_match( "/^curle/i", $constKey ) ) {
-						$this->curlConstantsErr[ $constInt ] = $constKey;
-					}
-				}
-			} catch ( \Exception $constantException ) {
-			}
-			unset( $constants );
 			$authFlags = $this->getFlag( 'auth' );
 			if ( isset( $authFlags['username'] ) && isset( $authFlags['password'] ) ) {
 				$this->setAuthentication( $authFlags['username'], $authFlags['password'], isset( $authFlags['type'] ) ? $authFlags['type'] : NETCURL_AUTH_TYPES::AUTHTYPE_BASIC );
@@ -335,7 +324,7 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 				$this->sslDriverError[] = "SSL Failure: HTTPS extension can not be found";
 			}
 			// Initial setup
-			$this->CurlUserAgent = 'Mozilla/4.0 (compatible; MSIE 7.0; Windows NT 5.1; .NET CLR 1.0.3705; .NET CLR 1.1.4322; Media Center PC 4.0; +TorneLIB-NetCurl-' . TORNELIB_NETCURL_RELEASE . " +TorneLIB+cUrl-" . $this->TorneNetCurlVersion . ')';
+			$this->CurlUserAgent = $this->userAgents['Mozilla'] . ' +NetCurl-' . NETCURL_RELEASE . " +Curl-" . NETCURL_CURL_RELEASE . ')';
 			if ( function_exists( 'curl_version' ) ) {
 				$CurlVersionRequest = curl_version();
 				$this->CurlVersion  = $CurlVersionRequest['version'];
@@ -379,6 +368,25 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 			}
 
 			return null;
+		}
+
+		/**
+		 * Store constants of curl errors and curlOptions
+		 */
+		private function extractConstants() {
+			try {
+				$constants = @get_defined_constants();
+				foreach ( $constants as $constKey => $constInt ) {
+					if ( preg_match( "/^curlopt/i", $constKey ) ) {
+						$this->curlConstantsOpt[ $constInt ] = $constKey;
+					}
+					if ( preg_match( "/^curle/i", $constKey ) ) {
+						$this->curlConstantsErr[ $constInt ] = $constKey;
+					}
+				}
+			} catch ( \Exception $constantException ) {
+			}
+			unset( $constants );
 		}
 
 		/**
@@ -562,6 +570,7 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 
 		/**
 		 * @param string $setContentTypeString
+		 *
 		 * @since 6.0.17
 		 */
 		public function setContentType( $setContentTypeString = 'application/json; charset=utf-8' ) {
@@ -617,7 +626,7 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 				if ( in_array( "WP_Http", get_declared_classes() ) ) {
 					/** @noinspection PhpUndefinedClassInspection */
 					$this->Drivers[ NETCURL_NETWORK_DRIVERS::DRIVER_WORDPRESS ] = new \WP_Http();
-					$isDriverSet                                              = true;
+					$isDriverSet                                                = true;
 				}
 			} else if ( in_array( $driverId, $guzDrivers ) ) {
 				if ( $this->hasCurl() && $driverId === NETCURL_NETWORK_DRIVERS::DRIVER_GUZZLEHTTP ) {
@@ -780,7 +789,7 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 					$realCookiePath = realpath( __DIR__ . "/../cookies" );
 					if ( empty( $realCookiePath ) ) {
 						// Try to create a directory before bailing out
-						$getCookiePath = realpath( __DIR__ . "/../" );
+						$getCookiePath = realpath( __DIR__ . "/tornelib-php-netcurl/" );
 						@mkdir( $getCookiePath . "/cookies/" );
 						$this->CookiePathCreated = true;
 						$this->CookiePath        = realpath( $getCookiePath . "/cookies/" );
@@ -999,7 +1008,7 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 		 * @TODO Not implemented yet
 		 */
 		public function setDieOnNoProxy( $dieEnabled = true ) {
-			$this->CurlProxyDeath = $dieEnabled;
+			$this->DIE_ON_LOST_PROXY = $dieEnabled;
 		}
 
 		/**
@@ -1009,7 +1018,7 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 		 * @since 6.0.9
 		 */
 		public function getDieOnNoProxy() {
-			return $this->CurlProxyDeath;
+			return $this->DIE_ON_LOST_PROXY;
 		}
 
 		/**
@@ -1152,7 +1161,7 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 		 * @since 5.0.0
 		 */
 		public function setTestEnabled() {
-			$this->TargetEnvironment = NETCURL_ENVIRONMENT::ENVIRONMENT_TEST;
+			$this->TARGET_ENVIRONMENT = NETCURL_ENVIRONMENT::ENVIRONMENT_TEST;
 		}
 
 		/**
@@ -1161,7 +1170,7 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 		 * @since 6.0.6
 		 */
 		public function getTestEnabled() {
-			return $this->TargetEnvironment;
+			return $this->TARGET_ENVIRONMENT;
 		}
 
 		/**
@@ -1211,9 +1220,9 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 		public function setUserAgent( $CustomUserAgent = "" ) {
 			if ( ! empty( $CustomUserAgent ) ) {
 				$this->CustomUserAgent .= preg_replace( "/\s+$/", '', $CustomUserAgent );
-				$this->CurlUserAgent   = $this->CustomUserAgent . " +TorneLIB-NetCurl-" . TORNELIB_NETCURL_RELEASE . " +TorneLIB+cUrl-" . $this->TorneNetCurlVersion;
+				$this->CurlUserAgent   = $this->CustomUserAgent . " +NetCurl-" . NETCURL_RELEASE . " +TorneLIB+cUrl-" . NETCURL_CURL_RELEASE;
 			} else {
-				$this->CurlUserAgent = 'Mozilla/4.0 (compatible; MSIE 7.0; Windows NT 5.1; .NET CLR 1.0.3705; .NET CLR 1.1.4322; Media Center PC 4.0; +TorneLIB-NetCurl-' . TORNELIB_NETCURL_RELEASE . " +TorneLIB+cUrl-" . $this->TorneNetCurlVersion . ')';
+				$this->CurlUserAgent = $this->userAgents['Mozilla'] . ' +TorneLIB-NetCurl-' . NETCURL_RELEASE . " +TorneLIB+cUrl-" . NETCURL_CURL_RELEASE . ')';
 			}
 		}
 
@@ -1646,7 +1655,7 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 								}
 								// For unit testing
 								if ( $this->hasFlag( '_DEBUG_TCURL_UNSET_LOCAL_PEM_LOCATION' ) && $this->isFlag( '_DEBUG_TCURL_UNSET_LOCAL_PEM_LOCATION' ) ) {
-									if ( $this->TargetEnvironment == NETCURL_ENVIRONMENT::ENVIRONMENT_TEST ) {
+									if ( $this->TARGET_ENVIRONMENT == NETCURL_ENVIRONMENT::ENVIRONMENT_TEST ) {
 										// Enforce wrong certificate location
 										$this->hasCertFile = false;
 										$this->useCertFile = null;
@@ -1680,7 +1689,7 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 									}
 								}
 								// For unit testing
-								if ( $this->TargetEnvironment == NETCURL_ENVIRONMENT::ENVIRONMENT_TEST && $this->hasFlag( '_DEBUG_TCURL_UNSET_LOCAL_PEM_LOCATION' ) && $this->isFlag( '_DEBUG_TCURL_UNSET_LOCAL_PEM_LOCATION' ) ) {
+								if ( $this->TARGET_ENVIRONMENT == NETCURL_ENVIRONMENT::ENVIRONMENT_TEST && $this->hasFlag( '_DEBUG_TCURL_UNSET_LOCAL_PEM_LOCATION' ) && $this->isFlag( '_DEBUG_TCURL_UNSET_LOCAL_PEM_LOCATION' ) ) {
 									// Enforce wrong certificate location
 									$this->hasCertFile = false;
 									$this->useCertFile = null;
@@ -1832,6 +1841,7 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 
 
 		//// IP SETUP
+
 		/**
 		 * Making sure the $IpAddr contains valid address list
 		 *
@@ -2289,6 +2299,7 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 			} else if ( isset( $ResponseContent['URL'] ) ) {
 				return $ResponseContent['URL'];
 			}
+
 			return '';
 		}
 
@@ -2952,7 +2963,7 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 		 * @param int $CurlMethod
 		 * @param int $postAs
 		 *
-		 * @return bool|Tornevall_cURL|Tornevall_SimpleSoap
+		 * @return bool|MODULE_CURL|MODULE_SOAP
 		 * @throws \Exception
 		 * @since 6.0.14
 		 */
@@ -3053,7 +3064,7 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 		 * @param int $CurlMethod
 		 * @param int $postAs
 		 *
-		 * @return $this|Tornevall_cURL
+		 * @return $this|MODULE_CURL
 		 * @throws \Exception
 		 */
 		private function executeGuzzleHttp( $url = '', $postData = array(), $CurlMethod = NETCURL_POST_METHODS::METHOD_GET, $postAs = NETCURL_POST_DATATYPES::DATATYPE_NOT_SET ) {
@@ -3182,7 +3193,7 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 		 */
 		class Tornevall_cURL extends MODULE_CURL {
 			function __construct( $PreferredURL = '', $PreparedPostData = array(), $PreferredMethod = NETCURL_POST_METHODS::METHOD_POST, $flags = array() ) {
-				return parent::__construct($PreferredURL, $PreparedPostData, $PreferredMethod);
+				return parent::__construct( $PreferredURL, $PreparedPostData, $PreferredMethod );
 			}
 		}
 	}

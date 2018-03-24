@@ -4,8 +4,8 @@
 # Remove content after namespace.
 # sed -e '1,/namespace/d' module_*.php >network.php
 
-src=`grep source composer.json | sed 's/[\"|,$]//g'`
-mergeTo="source/netcurl.php"
+src=`grep source\/ composer.json | sed 's/[\"|,$]//g'`
+mergeTo="source/build/netcurl.php"
 
 for mergeFile in $src
 do
@@ -14,7 +14,9 @@ do
         echo "Initializing merge with ${mergeFile}"
         cat $mergeFile >${mergeTo}
     else
-        echo "Merging ${mergeFile} into ${mergeTo}"
-        sed -e '1,/namespace/d' $mergeFile >>${mergeTo}
+        if [ ! -d $mergeFile ] ; then
+            echo "Merging ${mergeFile} into ${mergeTo}"
+            sed -e '1,/namespace/d' $mergeFile >>${mergeTo}
+        fi
     fi
 done

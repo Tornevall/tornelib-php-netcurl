@@ -42,12 +42,8 @@ if ( file_exists( __DIR__ . '/../vendor/autoload.php' ) ) {
 }
 // Library Release Information
 if ( ! defined( 'NETCURL_RELEASE' ) ) {
-	define( 'NETCURL_CURL_RELEASE', '6.0.20' );
+	define( 'NETCURL_RELEASE', '6.0.20' );
 }
-if ( ! defined( 'NETCURL_CURL_MODIFIY' ) ) {
-	define( 'NETCURL_CURL_MODIFIY', '20180320' );
-}
-// Legacy
-if ( ! defined( 'TORNELIB_NETCURL_RELEASE' ) ) {
-	define( 'TORNELIB_NETCURL_RELEASE', NETCURL_CURL_RELEASE );
+if ( ! defined( 'NETCURL_MODIFIY' ) ) {
+	define( 'NETCURL_MODIFIY', '20180320' );
 }

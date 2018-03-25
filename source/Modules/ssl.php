@@ -111,6 +111,17 @@ if ( ! class_exists( 'MODULE_SSL' ) && ! class_exists( 'TorneLIB\MODULE_SSL' ) )
 		}
 
 		/**
+		 * Returns true if no errors occured in the control
+		 * @return bool
+		 */
+		public static function hasSsl() {
+			if (!count(self::getCurlSslAvailable())) {
+				return true;
+			}
+			return false;
+		}
+
+		/**
 		 * Make sure that we are allowed to do things
 		 *
 		 * @param bool $checkSafeMode If true, we will also check if safe_mode is active

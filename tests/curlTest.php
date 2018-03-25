@@ -902,4 +902,12 @@ class curlTest extends TestCase {
 		$this->assertTrue( $this->CURL->getIsSecure( true, true ) );
 	}
 
+	/**
+	 * @test
+	 * @testdox LIB-212
+	 */
+	function hasSsl() {
+		$this->assertTrue($this->CURL->hasSsl());
+	}
+
 }

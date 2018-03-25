@@ -372,6 +372,7 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 		 */
 		private function getSslDriver() {
 			$curlSslDriver = MODULE_SSL::getCurlSslAvailable();
+			// If no errors occurs here, we'll say that SSL is available on the system
 			if ( ! count( $curlSslDriver ) ) {
 				$this->CURL_SSL_AVAILABLE = true;
 			}
@@ -1674,7 +1675,7 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 		 * @return bool
 		 */
 		public function hasSsl() {
-			return $this->CURL_SSL_AVAILABLE;
+			return MODULE_SSL::hasSsl();
 		}
 
 		//// IP SETUP

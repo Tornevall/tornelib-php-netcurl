@@ -51,12 +51,14 @@ class MODULE_SSL {
 	/** @var bool Strict verification of the connection (sslVerify) */
 	private $SSL_STRICT_VERIFICATION = true;
 	/** @var null|bool Allow self signed certificates */
-	private $SSL_STRICT_SELF = null;
-	/** @var bool Allowing fallback to unstict verification */
-	private $SSL_UNSTRICT_FALLBACK = false;
+	private $SSL_STRICT_SELF_SIGNED = true;
+	/** @var bool Allowing fallback/failover to unstict verification */
+	private $SSL_STRICT_FAILOVER = false;
 
 	/** @var MODULE_CURL $PARENT */
 	private $PARENT;
+	/** @var MODULE_NETWORK $NETWORK */
+	private $NETWORK;
 
 	/**
 	 * MODULE_SSL constructor.
@@ -67,6 +69,7 @@ class MODULE_SSL {
 		if ( is_object( $MODULE_CURL ) ) {
 			$this->PARENT = $MODULE_CURL;
 		}
+		$this->NETWORK = new MODULE_NETWORK();
 	}
 
 	/**
@@ -103,6 +106,54 @@ class MODULE_SSL {
 	}
 
 	/**
+	 * Make sure that we are allowed to do things
+	 *
+	 * @param bool $checkSafeMode If true, we will also check if safe_mode is active
+	 * @param bool $mockSafeMode If true, NetCurl will pretend safe_mode is true (for testing)
+	 *
+	 * @return bool
+	 * @since 6.0.20
+	 */
+	public function getIsSecure( $checkSafeMode = true, $mockSafeMode = false ) {
+		$currentBaseDir = trim( ini_get( 'open_basedir' ) );
+		if ( $checkSafeMode ) {
+			if ( $currentBaseDir == '' && ! $this->getSafeMode( $mockSafeMode ) ) {
+				return false;
+			}
+
+			return true;
+		} else {
+			if ( $currentBaseDir == '' ) {
+				return false;
+			}
+
+			return true;
+		}
+
+		return false;
+	}
+
+	/**
+	 * Get safe_mode status (mockable)
+	 *
+	 * @param bool $mockedSafeMode When active, this always returns true
+	 *
+	 * @return bool
+	 */
+	private function getSafeMode( $mockedSafeMode = false ) {
+		if ( $mockedSafeMode ) {
+			return true;
+		}
+
+		// There is no safe mode in PHP 5.4.0 and above
+		if (version_compare(PHP_VERSION, '5.4.0', '>=')) {
+			return false;
+		}
+
+		return ( filter_var( ini_get( 'safe_mode' ), FILTER_VALIDATE_BOOLEAN ) );
+	}
+
+	/**
 	 * openssl_guess rewrite
 	 *
 	 * @return string
@@ -110,8 +161,8 @@ class MODULE_SSL {
 	 */
 	public function getSslCertificateBundle() {
 		// Assume that sysadmins can handle this, if open_basedir is set as things will fail if we proceed here
-		if ( ini_get( 'open_basedir' ) != '' ) {
-			return '';
+		if ( $this->getIsSecure(false) ) {
+			return;
 		}
 
 		foreach ( $this->sslPemLocations as $filePath ) {
@@ -150,10 +201,32 @@ class MODULE_SSL {
 	/**
 	 * @param array $pemLocationData
 	 *
+	 * @return bool
+	 * @throws \Exception
 	 * @since 6.0.20
 	 */
 	public function setPemLocation( $pemLocationData = array() ) {
-
+		$failAdd = false;
+		if (is_string($pemLocationData)) {
+			$pemLocationData = array($pemLocationData);
+		}
+		if (is_array($pemLocationData) && is_array($pemLocationData)) {
+			foreach ($pemLocationData as $pemDataRow) {
+				$pemDataRow = trim(preg_replace("/\/$/", '', $pemDataRow));
+				$pemFile = $pemDataRow;
+				$pemDir = dirname($pemDataRow);
+				if ($pemFile != $pemDir && is_file($pemFile)) {
+					$this->sslPemFiles[] = $pemFile;
+					$this->sslPemLocations[] = $pemDir;
+				} else {
+					$failAdd = true;
+				}
+			}
+		}
+		if ($failAdd) {
+			throw new \Exception( NETCURL_CURL_CLIENTNAME . " " . __FUNCTION__ . " exception: The format of pemLocationData is not properly set", $this->NETWORK->getExceptionCode( 'NETCURL_PEMLOCATIONDATA_FORMAT_ERROR' ) );
+		}
+		return true;
 	}
 
 	public function getPemLocations() {
@@ -161,14 +234,16 @@ class MODULE_SSL {
 	}
 
 	/**
-	 * @param bool $strictifyAllVerifications
-	 * @param bool $strictifySelfSigned
+	 * Set the rules of how to verify SSL certificates
+	 *
+	 * @param bool $strictCertificateVerification
+	 * @param bool $prohibitSelfSigned This only covers streams
 	 *
 	 * @since 6.0.0
 	 */
-	public function setStrictVerification( $strictifyAllVerifications = true, $strictifySelfSigned = true ) {
-		$this->SSL_STRICT_VERIFICATION = $strictifyAllVerifications;
-		$this->SSL_STRICT_SELF         = $strictifySelfSigned;
+	public function setStrictVerification( $strictCertificateVerification = true, $prohibitSelfSigned = true ) {
+		$this->SSL_STRICT_VERIFICATION = $strictCertificateVerification;
+		$this->SSL_STRICT_SELF_SIGNED  = $prohibitSelfSigned;
 	}
 
 	/**
@@ -182,22 +257,33 @@ class MODULE_SSL {
 	}
 
 	/**
+	 *
+	 * @return bool|null
+	 */
+	public function getStrictSelfSignedVerification() {
+		// If this is not set, assume we want the value hardened
+		return $this->SSL_STRICT_SELF_SIGNED;
+	}
+
+	/**
+	 * Allow NetCurl to make failover (fallback) to unstrict SSL verification after a strict call has been made
+	 *
 	 * Replacement for allowSslUnverified setup
 	 *
-	 * @param bool $unstrictifyVerification *
+	 * @param bool $sslFailoverEnabled *
 	 *
 	 * @since 6.0.0
 	 */
-	public function setSslUnstrictFallback( $unstrictifyVerification = false ) {
-		$this->SSL_UNSTRICT_FALLBACK = $unstrictifyVerification;
+	public function setStrictFallback( $sslFailoverEnabled = false ) {
+		$this->SSL_STRICT_FAILOVER = $sslFailoverEnabled;
 	}
 
 	/**
 	 * @return bool
 	 * @since 6.0.0
 	 */
-	public function getSslUnstrictFallback() {
-		return $this->SSL_UNSTRICT_FALLBACK;
+	public function getStrictFallback() {
+		return $this->SSL_STRICT_FAILOVER;
 	}
 
 	/**
@@ -213,7 +299,7 @@ class MODULE_SSL {
 			'verify_peer'       => $this->SSL_STRICT_VERIFICATION,
 			'verify_peer_name'  => $this->SSL_STRICT_VERIFICATION,
 			'verify_host'       => $this->SSL_STRICT_VERIFICATION,
-			'allow_self_signed' => $this->SSL_STRICT_SELF
+			'allow_self_signed' => $this->SSL_STRICT_SELF_SIGNED
 		);
 	}
 

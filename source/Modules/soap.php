@@ -150,7 +150,7 @@ if ( ! class_exists( 'MODULE_SOAP' ) && ! class_exists( 'TorneLIB\MODULE_SOAP' )
 		public function getSoap() {
 			$this->soapClient = null;
 			$sslOpt           = $this->getSslOpt();
-			if ( gettype( $sslOpt['stream_context'] ) == "resource" ) {
+			if ( isset($sslOpt['stream_context']) && gettype( $sslOpt['stream_context'] ) == "resource" ) {
 				$this->soapOptions['stream_context'] = $sslOpt['stream_context'];
 			}
 			$this->soapOptions['exceptions'] = true;

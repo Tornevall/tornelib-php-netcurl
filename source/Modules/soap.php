@@ -31,6 +31,9 @@ if ( ! class_exists( 'MODULE_SOAP' ) && ! class_exists( 'TorneLIB\MODULE_SOAP' )
 	if ( ! defined( 'NETCURL_SIMPLESOAP_MODIFIY' ) ) {
 		define( 'NETCURL_SIMPLESOAP_MODIFIY', '20180320' );
 	}
+	if ( ! defined( 'NETCURL_CURL_CLIENTNAME' ) ) {
+		define( 'NETCURL_CURL_CLIENTNAME', 'NetCurl-SimpleSOAP' );
+	}
 
 	/**
 	 * Class TorneLIB_SimpleSoap Simple SOAP client.
@@ -172,7 +175,7 @@ if ( ! class_exists( 'MODULE_SOAP' ) && ! class_exists( 'TorneLIB\MODULE_SOAP' )
 					if ( ! $soapCode ) {
 						$soapCode = 500;
 					}
-					$throwErrorMessage = $this->ModuleName . " exception from soapClient: " . $soapException->getMessage();
+					$throwErrorMessage = NETCURL_CURL_CLIENTNAME . " exception from soapClient: " . $soapException->getMessage();
 					$throwErrorCode    = $soapCode;
 					$throwBackCurrent  = $soapException;
 					//$throwPrevious     = $soapException->getPrevious();
@@ -218,7 +221,7 @@ if ( ! class_exists( 'MODULE_SOAP' ) && ! class_exists( 'TorneLIB\MODULE_SOAP' )
 				}
 
 				if ( ! is_object( $this->soapClient ) && is_null( $throwErrorCode ) ) {
-					$throwErrorMessage = $this->ModuleName . " exception from SimpleSoap->getSoap(): Could not create SoapClient. Make sure that all settings and URLs are correctly configured.";
+					$throwErrorMessage = NETCURL_CURL_CLIENTNAME . " exception from SimpleSoap->getSoap(): Could not create SoapClient. Make sure that all settings and URLs are correctly configured.";
 					$throwErrorCode    = 500;
 				}
 				if ( ! is_null( $throwErrorMessage ) || ! is_null( $throwErrorCode ) ) {
@@ -245,7 +248,7 @@ if ( ! class_exists( 'MODULE_SOAP' ) && ! class_exists( 'TorneLIB\MODULE_SOAP' )
 				}
 				if ( ! is_object( $this->soapClient ) ) {
 					// NETCURL_SIMPLESOAP_GETSOAP_CREATE_FAIL
-					throw new \Exception( $this->ModuleName . " exception from SimpleSoap->getSoap(): Could not create SoapClient. Make sure that all settings and URLs are correctly configured.", 1008 );
+					throw new \Exception( NETCURL_CURL_CLIENTNAME . " exception from SimpleSoap->getSoap(): Could not create SoapClient. Make sure that all settings and URLs are correctly configured.", 1008 );
 				}
 			}
 
@@ -302,7 +305,7 @@ if ( ! class_exists( 'MODULE_SOAP' ) && ! class_exists( 'TorneLIB\MODULE_SOAP' )
 				$this->libResponse              = $returnResponse;
 				$this->soapFaultExceptionObject = $e;
 				if ( $this->canThrowSoapFaults ) {
-					throw new \Exception( $this->ModuleName . " exception from soapClient: " . $e->getMessage(), $e->getCode(), $e );
+					throw new \Exception( NETCURL_CURL_CLIENTNAME . " exception from soapClient: " . $e->getMessage(), $e->getCode(), $e );
 				}
 				$this->SoapFaultString = $e->getMessage();
 				$this->SoapFaultCode   = $e->getCode();

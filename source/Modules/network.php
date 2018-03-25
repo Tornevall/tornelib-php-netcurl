@@ -242,6 +242,7 @@ if ( ! class_exists( 'MODULE_NETWORK' ) && ! class_exists( 'TorneLIB\MODULE_NETW
 		 * @param bool $validateHost Validate that the hostname do exist
 		 *
 		 * @return array
+		 * @throws \Exception
 		 */
 		public function getUrlDomain( $requestedUrlHost = '', $validateHost = false ) {
 			// If the scheme is forgotten, add it to keep normal hosts validatable too.
@@ -257,7 +258,8 @@ if ( ! class_exists( 'MODULE_NETWORK' ) && ! class_exists( 'TorneLIB\MODULE_NETW
 				if ( filter_var( $requestedUrlHost, FILTER_VALIDATE_URL ) ) {
 					$hostRecord = @dns_get_record( $urlParsed['host'], DNS_ANY );
 					if ( ! count( $hostRecord ) ) {
-						return array( null, null, null );
+						//return array( null, null, null );
+						throw new \Exception( NETCURL_CURL_CLIENTNAME . " " . __FUNCTION__ . " exception: Host validation failed", $this->getExceptionCode( 'NETCURL_HOSTVALIDATION_FAIL' ) );
 					}
 				}
 			}
@@ -466,6 +468,7 @@ if ( ! class_exists( 'MODULE_NETWORK' ) && ! class_exists( 'TorneLIB\MODULE_NETW
 		 * @param string $useHost Alternative hostname than the HTTP_HOST
 		 *
 		 * @return string
+		 * @throws \Exception
 		 * @since 5.0.0
 		 */
 		public function getDomainName( $useHost = "" ) {

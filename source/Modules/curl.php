@@ -72,8 +72,6 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 		private $sslopt = array();
 
 		//// PUBLIC CONFIG THAT SHOULD GO PRIVATE
-		/** @var array Default paths to the certificates we are looking for */
-		private $sslPemLocations = array( '/etc/ssl/certs/cacert.pem', '/etc/ssl/certs/ca-certificates.crt' );
 		/** @var array Interfaces to use */
 		public $IpAddr = array();
 		/** @var bool If more than one ip is set in the interfaces to use, this will make the interface go random */
@@ -118,11 +116,16 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 		 */
 		private $NETWORK;
 
+		/** @var MODULE_SSL */
+		private $SSL;
+		private $TRUST_SSL_BUNDLES = false;
+
 		/**
 		 * Target environment (if target is production some debugging values will be skipped)
 		 *
 		 * @since 5.0.0
 		 * @var int
+		 * @deprecated 6.0.20 Not in use
 		 */
 		private $TARGET_ENVIRONMENT = NETCURL_ENVIRONMENT::ENVIRONMENT_PRODUCTION;
 		/** @var null Our communication channel */
@@ -143,7 +146,8 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 			),
 			'calls'    => 0
 		);
-
+		/** @var array Storage of invisible errors */
+		private $errorContainer = array();
 
 		//// SSL AUTODETECTION CAPABILITIES
 		/// DEFAULT: Most of the settings are set to be disabled, so that the system handles this automatically with defaults
@@ -162,12 +166,8 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 		private $testssldeprecated = false;
 		/** @var bool If there are problems with certificates bound to a host/peer, set this to false if necessary. Default is to always try to verify them */
 		private $sslVerify = true;
-		/** @var array Error messages from SSL loading */
-		private $sslDriverError = array();
 		/** @var bool If SSL has been compiled in CURL, this will transform to true */
-		private $sslCurlDriver = false;
-		/** @var array Storage of invisible errors */
-		private $hasErrorsStore = array();
+		private $CURL_SSL_AVAILABLE = false;
 		/**
 		 * Allow https calls to unverified peers/hosts
 		 *
@@ -175,16 +175,12 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 		 * @var bool
 		 */
 		private $allowSslUnverified = false;
-		/** @var bool During tests this will be set to true if certificate files is found */
-		private $hasCertFile = false;
 		/** @var string Defines what file to use as a certificate bundle */
 		private $useCertFile = "";
 		/** @var bool Shows if the certificate file found has been found internally or if it was set by user */
 		private $hasDefaultCertFile = false;
 		/** @var bool Shows if the certificate check has been runned */
 		private $openSslGuessed = false;
-		/** @var bool During tests this will be set to true if certificate directory is found */
-		private $hasCertDir = false;
 
 		//// IP AND PROXY CONFIG
 		private $CurlIp = null;
@@ -308,49 +304,15 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 			if ( is_array( $flags ) && count( $flags ) ) {
 				$this->setFlags( $flags );
 			}
+
 			$this->NETWORK = new MODULE_NETWORK();
-			$this->extractConstants();
-
-			$authFlags = $this->getFlag( 'auth' );
-			if ( isset( $authFlags['username'] ) && isset( $authFlags['password'] ) ) {
-				$this->setAuthentication( $authFlags['username'], $authFlags['password'], isset( $authFlags['type'] ) ? $authFlags['type'] : NETCURL_AUTH_TYPES::AUTHTYPE_BASIC );
-			}
-
-			// Common ssl checkers (if they fail, there is a sslDriverError to recall
-			if ( ! in_array( 'https', @stream_get_wrappers() ) ) {
-				$this->sslDriverError[] = "SSL Failure: HTTPS wrapper can not be found";
-			}
-			if ( ! extension_loaded( 'openssl' ) ) {
-				$this->sslDriverError[] = "SSL Failure: HTTPS extension can not be found";
-			}
-			// Initial setup
-			$this->CurlUserAgent = $this->userAgents['Mozilla'] . ' +NetCurl-' . NETCURL_RELEASE . " +Curl-" . NETCURL_CURL_RELEASE . ')';
-			if ( function_exists( 'curl_version' ) ) {
-				$CurlVersionRequest = curl_version();
-				$this->CurlVersion  = $CurlVersionRequest['version'];
-				if ( defined( 'CURL_VERSION_SSL' ) ) {
-					if ( isset( $CurlVersionRequest['features'] ) ) {
-						$this->sslCurlDriver = ( $CurlVersionRequest['features'] & CURL_VERSION_SSL ? true : false );
-						if ( ! $this->sslCurlDriver ) {
-							$this->sslDriverError[] = 'SSL Failure: Protocol "https" not supported or disabled in libcurl';
-						}
-					} else {
-						$this->sslDriverError[] = "SSL Failure: CurlVersionFeaturesList does not return any feature (this should not be happen)";
-					}
-				}
-			}
-			// If any of the above triggered an error, set curlDriver to false, as there may be problems during the
-			// urlCall anyway. This library does not throw any error itself in those erros, since most of this kind of problems
-			// are handled by curl itself. However, this opens for self checking in an early state through the hasSsl() function
-			// and could be triggered long before the url calls are sent (and by means warn the developer that implements this solution
-			// that there are an upcoming problem with the SSL support).
-			if ( count( $this->sslDriverError ) ) {
-				$this->sslCurlDriver = false;
-			}
-			$this->CurlResolve = NETCURL_RESOLVER::RESOLVER_DEFAULT;
-			$this->openssl_guess();
+			$this->setConstantsContainer();
+			$this->setPreparedAuthentication();
+			$this->CurlResolve        = NETCURL_RESOLVER::RESOLVER_DEFAULT;
 			$this->throwableHttpCodes = array();
+			$this->getSslDriver();
 
+			$this->CurlUserAgent = $this->userAgents['Mozilla'] . ' +NetCurl-' . NETCURL_RELEASE . " +Curl-" . NETCURL_CURL_RELEASE . ')';
 			if ( ! empty( $PreferredURL ) ) {
 				$this->CurlURL   = $PreferredURL;
 				$InstantResponse = null;
@@ -372,8 +334,9 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 
 		/**
 		 * Store constants of curl errors and curlOptions
+		 * @since 6.0.20
 		 */
-		private function extractConstants() {
+		private function setConstantsContainer() {
 			try {
 				$constants = @get_defined_constants();
 				foreach ( $constants as $constKey => $constInt ) {
@@ -387,6 +350,30 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 			} catch ( \Exception $constantException ) {
 			}
 			unset( $constants );
+		}
+
+		/**
+		 * @since 6.0.20
+		 */
+		private function setPreparedAuthentication() {
+			$authFlags = $this->getFlag( 'auth' );
+			if ( isset( $authFlags['username'] ) && isset( $authFlags['password'] ) ) {
+				$this->setAuthentication( $authFlags['username'], $authFlags['password'], isset( $authFlags['type'] ) ? $authFlags['type'] : NETCURL_AUTH_TYPES::AUTHTYPE_BASIC );
+			}
+		}
+
+		/**
+		 * Initialize SSL driver and prepare
+		 *
+		 * @throws \Exception
+		 * @since 6.0.20
+		 */
+		private function getSslDriver() {
+			$curlSslDriver = MODULE_SSL::getCurlSslAvailable();
+			if ( ! count( $curlSslDriver ) ) {
+				$this->CURL_SSL_AVAILABLE = true;
+			}
+			$this->SSL = new MODULE_SSL();
 		}
 
 		/**
@@ -1159,6 +1146,7 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 		 * to use those variables.
 		 *
 		 * @since 5.0.0
+		 * @deprecated 6.0.20 Not in use
 		 */
 		public function setTestEnabled() {
 			$this->TARGET_ENVIRONMENT = NETCURL_ENVIRONMENT::ENVIRONMENT_TEST;
@@ -1168,6 +1156,7 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 		 * Returns current target environment
 		 * @return int
 		 * @since 6.0.6
+		 * @deprecated 6.0.20 Not in use
 		 */
 		public function getTestEnabled() {
 			return $this->TARGET_ENVIRONMENT;
@@ -1408,7 +1397,7 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 		 *
 		 * @return string
 		 * @throws \Exception
-		 * @deprecated Use tag control
+		 * @deprecated 6.0.0 Use tag control
 		 */
 		public function getInternalRelease() {
 			if ( defined( 'TORNELIB_ALLOW_VERSION_REQUESTS' ) && TORNELIB_ALLOW_VERSION_REQUESTS === true ) {
@@ -1431,7 +1420,7 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 		 * @return bool
 		 */
 		public function hasErrors() {
-			if ( ! count( $this->hasErrorsStore ) ) {
+			if ( is_array( $this->errorContainer ) && ! count( $this->errorContainer ) ) {
 				return false;
 			}
 
@@ -1442,7 +1431,7 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 		 * @return array
 		 */
 		public function getErrors() {
-			return $this->hasErrorsStore;
+			return $this->errorContainer;
 		}
 
 		/**
@@ -1470,7 +1459,7 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 		private function getHasUpdateState( $libName = 'tornelib_curl' ) {
 			// Currently only supporting this internal module (through $myRelease).
 			//$myRelease  = $this->getInternalRelease();
-			$myRelease  = TORNELIB_NETCURL_RELEASE;
+			$myRelease  = NETCURL_RELEASE;
 			$libRequest = ( ! empty( $libName ) ? "lib/" . $libName : "" );
 			$getInfo    = $this->doGet( "https://api.tornevall.net/2.0/libs/getLibs/" . $libRequest . "/me/" . $myRelease );
 			if ( isset( $getInfo['parsed']->response->getLibsResponse->you ) ) {
@@ -1501,215 +1490,53 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 		/// CONFIGURATORS
 
 		/**
-		 * Generate a correctified stream context depending on what happened in openssl_guess(), which also is running in this operation.
+		 * Generate a corrected stream context
 		 *
-		 * Function created for moments when ini_set() fails in openssl_guess() and you don't want to "recalculate" the location of a valid certificates.
-		 * This normally occurs in improper configured environments (where this bulk of functions actually also has been tested in).
-		 * Recommendation of Usage: Do not copy only those functions, use the full version of tornevall_network.php since there may be dependencies in it.
-		 *
-		 * @return array
-		 * @throws \Exception
+		 * @return void
 		 * @link https://phpdoc.tornevall.net/TorneLIBv5/source-class-TorneLIB.Tornevall_cURL.html sslStreamContextCorrection() is a part of TorneLIB 5.0, described here
 		 */
 		public function sslStreamContextCorrection() {
-			if ( ! $this->openSslGuessed ) {
-				$this->openssl_guess( true );
-			}
-			$caCert    = $this->getCertFile();
-			$sslVerify = true;
-			$sslSetup  = array();
-			if ( isset( $this->sslVerify ) ) {
-				$sslVerify = $this->sslVerify;
-			}
-			if ( ! empty( $caCert ) ) {
-				$sslSetup = array(
-					'cafile'            => $caCert,
-					'verify_peer'       => $sslVerify,
-					'verify_peer_name'  => $sslVerify,
-					'verify_host'       => $sslVerify,
-					'allow_self_signed' => true
-				);
-			}
-
-			return $sslSetup;
+			$this->SSL->getSslStreamContext();
 		}
 
 		/**
 		 * Automatically generates stream_context and appends it to whatever you need it for.
 		 *
 		 * Example:
-		 *  $appendArray = array('http' => array("user_agent" => "MyUserAgent"));
-		 *  $this->soapOptions = sslGetDefaultStreamContext($this->soapOptions, $appendArray);
+		 *  $addonContextData = array('http' => array("user_agent" => "MyUserAgent"));
+		 *  $this->soapOptions = sslGetDefaultStreamContext($this->soapOptions, $addonContextData);
 		 *
 		 * @param array $optionsArray
-		 * @param array $selfContext
+		 * @param array $addonContextData
 		 *
 		 * @return array
 		 * @throws \Exception
 		 * @link http://developer.tornevall.net/apigen/TorneLIB-5.0/class-TorneLIB.Tornevall_cURL.html sslGetOptionsStream() is a part of TorneLIB 5.0, described here
 		 */
-		public function sslGetOptionsStream( $optionsArray = array(), $selfContext = array() ) {
-			$streamContextOptions = array();
-			if ( empty( $this->CurlUserAgent ) ) {
-				$this->setUserAgent();
-			}
-			$streamContextOptions['http'] = array(
-				"user_agent" => $this->CurlUserAgent
-			);
-			$sslCorrection                = $this->sslStreamContextCorrection();
-			if ( count( $sslCorrection ) ) {
-				$streamContextOptions['ssl'] = $this->sslStreamContextCorrection();
-			}
-			foreach ( $selfContext as $contextKey => $contextValue ) {
-				$streamContextOptions[ $contextKey ] = $contextValue;
-			}
-			$optionsArray['stream_context'] = stream_context_create( $streamContextOptions );
-			$this->sslopt                   = $optionsArray;
-
-			return $optionsArray;
+		public function sslGetOptionsStream( $optionsArray = array(), $addonContextData = array() ) {
+			return $this->SSL->getSslStream( $optionsArray, $addonContextData );
 		}
 
 		/**
 		 * Set and/or append certificate bundle locations to current configuration
 		 *
-		 * @param array $locationArray
-		 * @param bool $resetArray Make the location array go reset on customized list
-		 *
+		 * @param array $locationArrayOrString
+		 * @return bool
+		 * @throws \Exception
 		 */
-		public function setSslPemLocations(
-			$locationArray = array(
-				'/etc/ssl/certs/cacert.pem',
-				'/etc/ssl/certs/ca-certificates.crt'
-			), $resetArray = false
-		) {
-			$newPem = array();
-			if ( count( $this->sslPemLocations ) ) {
-				foreach ( $this->sslPemLocations as $filePathAndName ) {
-					if ( ! in_array( $filePathAndName, $newPem ) ) {
-						$newPem[] = $filePathAndName;
-					}
-				}
-			}
-			if ( count( $locationArray ) ) {
-				if ( $resetArray ) {
-					$newPem = array();
-				}
-				foreach ( $locationArray as $filePathAndName ) {
-					if ( ! in_array( $filePathAndName, $newPem ) ) {
-						$newPem[] = $filePathAndName;
-					}
-				}
-			}
-			$this->sslPemLocations = $newPem;
+		public function setSslPemLocations( $locationArrayOrString = array() ) {
+			$this->setTrustedSslBundles(true);
+			return $this->SSL->setPemLocation( $locationArrayOrString );
 		}
 
 		/**
 		 * Get current certificate bundle locations
 		 *
 		 * @return array
+		 * @deprecated 6.0.20 Use MODULE_SSL
 		 */
 		public function getSslPemLocations() {
-			return $this->sslPemLocations;
-		}
-
-		/**
-		 * SSL Cerificate Handler
-		 *
-		 * This method tries to handle SSL Certification locations where PHP can't handle that part itself. In some environments (normally customized), PHP sometimes have
-		 * problems with finding certificates, in case for example where they are not placed in standard locations. When running the testing, we will also try to set up
-		 * a correct location for the certificates, if any are found somewhere else.
-		 *
-		 * The default configuration of this method is to run tests, but only for PHP 5.6.0 or higher.
-		 * If you know that you're running something older you may want to consider enabling testssldeprecated.
-		 *
-		 * At first, the variable $testssl is used to automatically try to find out if there is valid certificate bundle installed on the running system. In PHP 5.6.0 and higher
-		 * this procedure is simplified with the help of openssl_get_cert_locations(), which gives us a default path to installed certificates. In this case we will first look there
-		 * for the certificate bundle. If we do fail there, or if your system is running something older, the testing are running in guessing mode.
-		 *
-		 * The method is untested in Windows server environments when using OpenSSL.
-		 *
-		 * @param bool $forceTesting Force testing even if $testssl is disabled
-		 *
-		 * @return bool
-		 * @throws \Exception
-		 * @link https://docs.tornevall.net/x/KwCy#TheNetworkandcURLclass(tornevall_network.php)-SSLCertificatesandverification
-		 */
-		private function openssl_guess( $forceTesting = false ) {
-			// The certificate location here will be set up for the curl engine later on, during preparation of the connection.
-			// NOTE: ini_set() does not work for setting up the cafile, this has to be done through php.ini, .htaccess, httpd.conf or .user.ini
-			if ( ini_get( 'open_basedir' ) == '' ) {
-				if ( $this->testssl || $forceTesting ) {
-					$this->openSslGuessed = true;
-					if ( version_compare( PHP_VERSION, "5.6.0", ">=" ) && function_exists( "openssl_get_cert_locations" ) ) {
-						$locations = openssl_get_cert_locations();
-						if ( is_array( $locations ) ) {
-							if ( isset( $locations['default_cert_file'] ) ) {
-								// If it exists, we don't have to bother anymore
-								if ( file_exists( $locations['default_cert_file'] ) ) {
-									$this->hasCertFile        = true;
-									$this->useCertFile        = $locations['default_cert_file'];
-									$this->hasDefaultCertFile = true;
-								}
-								if ( file_exists( $locations['default_cert_dir'] ) ) {
-									$this->hasCertDir = true;
-								}
-								// For unit testing
-								if ( $this->hasFlag( '_DEBUG_TCURL_UNSET_LOCAL_PEM_LOCATION' ) && $this->isFlag( '_DEBUG_TCURL_UNSET_LOCAL_PEM_LOCATION' ) ) {
-									if ( $this->TARGET_ENVIRONMENT == NETCURL_ENVIRONMENT::ENVIRONMENT_TEST ) {
-										// Enforce wrong certificate location
-										$this->hasCertFile = false;
-										$this->useCertFile = null;
-									}
-								}
-							}
-							// Check if the above control was successful - switch over to pemlocations if not.
-							if ( ! $this->hasCertFile && is_array( $this->sslPemLocations ) && count( $this->sslPemLocations ) ) {
-								// Loop through suggested locations and set the cafile in a variable if it's found.
-								foreach ( $this->sslPemLocations as $pemLocation ) {
-									if ( file_exists( $pemLocation ) ) {
-										$this->useCertFile = $pemLocation;
-										$this->hasCertFile = true;
-									}
-								}
-							}
-						}
-						// On guess, disable verification if failed (if allowed)
-						if ( ! $this->hasCertFile && $this->allowSslUnverified ) {
-							$this->setSslVerify( false );
-						}
-					} else {
-						// If we run on other PHP versions than 5.6.0 or higher, try to fall back into a known directory
-						if ( $this->testssldeprecated ) {
-							if ( ! $this->hasCertFile && is_array( $this->sslPemLocations ) && count( $this->sslPemLocations ) ) {
-								// Loop through suggested locations and set the cafile in a variable if it's found.
-								foreach ( $this->sslPemLocations as $pemLocation ) {
-									if ( file_exists( $pemLocation ) ) {
-										$this->useCertFile = $pemLocation;
-										$this->hasCertFile = true;
-									}
-								}
-								// For unit testing
-								if ( $this->TARGET_ENVIRONMENT == NETCURL_ENVIRONMENT::ENVIRONMENT_TEST && $this->hasFlag( '_DEBUG_TCURL_UNSET_LOCAL_PEM_LOCATION' ) && $this->isFlag( '_DEBUG_TCURL_UNSET_LOCAL_PEM_LOCATION' ) ) {
-									// Enforce wrong certificate location
-									$this->hasCertFile = false;
-									$this->useCertFile = null;
-								}
-							}
-							// Check if the above control was successful - switch over to pemlocations if not.
-							if ( ! $this->hasCertFile && $this->allowSslUnverified ) {
-								$this->setSslVerify( false );
-							}
-						}
-					}
-				}
-			} else {
-				// Assume there is a valid certificate if jailed by open_basedir
-				$this->hasCertFile = true;
-
-				return true;
-			}
-
-			return $this->hasCertFile;
+			return $this->SSL->getPemLocations();
 		}
 
 		/**
@@ -1719,37 +1546,23 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 		 *
 		 * @param bool $enabledFlag
 		 * @param bool $hostVerification
+		 *
+		 * @deprecated 6.0.20 Use setSslVerify
 		 */
 		public function setCertAuto( $enabledFlag = true, $hostVerification = true ) {
-			$this->testssl           = $enabledFlag;
-			$this->testssldeprecated = $enabledFlag;
-			$this->sslVerify         = $hostVerification;
+			$this->SSL->setStrictVerification( $enabledFlag );
 		}
 
 		/**
-		 * Enable/disable SSL Peer/Host verification, if problems occur with certificates. If setCertAuto is enabled, this function will use best practice.
+		 * Allow fallbacks of SSL verification if Peer/Host checking fails. This is actually kind of another way to disable strict checking of certificates. THe difference, however, is that NetCurl will first try to make a proper call, before fallback.
 		 *
-		 * @param bool $enabledFlag
+		 * @param bool $strictCertificateVerification
+		 * @param bool $prohibitSelfSigned
 		 *
-		 * @return bool
-		 * @throws \Exception
+		 * @return void
 		 */
-		public function setSslVerify( $enabledFlag = true ) {
-			// allowSslUnverified is set to true, the enabledFlag is also allowed to be set to false
-			if ( $this->allowSslUnverified ) {
-				$this->sslVerify = $enabledFlag;
-			} else {
-				// If the enabledFlag is false and the allowance is not set, we will not be allowed to disabled SSL verification either
-				if ( ! $enabledFlag ) {
-					throw new \Exception( NETCURL_CURL_CLIENTNAME . " setSslVerify exception: setSslUnverified(true) has not been set", $this->NETWORK->getExceptionCode( 'NETCURL_SETSSLVERIFY_UNVERIFIED_NOT_SET' ) );
-				} else {
-					// However, if we force the verify flag to be on, we won't care about the allowance override, as the security
-					// will be enhanced anyway.
-					$this->sslVerify = $enabledFlag;
-				}
-			}
-
-			return true;
+		public function setSslVerify( $strictCertificateVerification = true, $prohibitSelfSigned = true ) {
+			$this->SSL->setStrictVerification( $strictCertificateVerification, $prohibitSelfSigned );
 		}
 
 		/**
@@ -1759,7 +1572,24 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 		 * @since 6.0.6
 		 */
 		public function getSslVerify() {
-			return $this->sslVerify;
+			return $this->SSL->getStrictVerification();
+		}
+
+		/**
+		 * @param bool $sslFailoverEnabled
+		 *
+		 * @since 6.0.20
+		 */
+		public function setStrictFallback( $sslFailoverEnabled = false ) {
+			$this->SSL->setStrictFallback( $sslFailoverEnabled );
+		}
+
+		/**
+		 * @return bool
+		 * @since 6.0.20
+		 */
+		public function getStrictFallback() {
+			return $this->SSL->getStrictFallback();
 		}
 
 		/**
@@ -1767,23 +1597,25 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 		 *
 		 * Normally, we want a valid SSL certificate while doing https-requests, but sometimes the verifications must be disabled. One reason of this is
 		 * in cases, when crt-files are missing and PHP can not under very specific circumstances verify the peer. To allow this behaviour, the client
-		 * MUST use this function.
+		 * must use this function.
+		 *
+		 * @param bool $allowStrictFallback
 		 *
 		 * @since 5.0.0
-		 *
-		 * @param bool $enabledFlag
+		 * @deprecated 6.0.20 Use setStrictFallback
 		 */
-		public function setSslUnverified( $enabledFlag = false ) {
-			$this->allowSslUnverified = $enabledFlag;
+		public function setSslUnverified( $allowStrictFallback = false ) {
+			$this->SSL->setStrictFallback( $allowStrictFallback );
 		}
 
 		/**
 		 * Return the boolean value set from setSslUnverified
 		 * @return bool
 		 * @since 6.0.6
+		 * @deprecated 6.0.20 Use getStrictFallback
 		 */
 		public function getSslUnverified() {
-			return $this->allowSslUnverified;
+			return $this->SSL->getStrictFallback();
 		}
 
 		/**
@@ -1793,52 +1625,38 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 		 *
 		 * @return bool
 		 * @throws \Exception
+		 * @deprecated 6.0.20
 		 */
 		public function TestCerts() {
-			return $this->openssl_guess( true );
+			return ( ! empty( $this->SSL->getSslCertificateBundle() ) ? true : false );
 		}
 
 		/**
 		 * Return the current certificate bundle file, chosen by autodetection
 		 * @return string
+		 * @deprecated 6.0.20
 		 */
 		public function getCertFile() {
-			return $this->useCertFile;
+			return $this->SSL->getSslCertificateBundle();
 		}
 
 		/**
 		 * Returns true if the autodetected certificate bundle was one of the defaults (normally fetched from openssl_get_cert_locations()). Used for testings.
 		 *
 		 * @return bool
+		 * @throws \Exception
+		 * @deprecated 6.0.20
 		 */
 		public function hasCertDefault() {
-			return $this->hasDefaultCertFile;
+			return $this->TestCerts();
 		}
 
 		/**
 		 * @return bool
 		 */
 		public function hasSsl() {
-			return $this->sslCurlDriver;
+			return $this->CURL_SSL_AVAILABLE;
 		}
-
-		//// DEPRECATION (POSSIBLY EXTRACTABLE FROM NETWORK-LIBRARY)
-
-		/**
-		 * Extract domain name from URL
-		 *
-		 * @param string $url
-		 *
-		 * @return array
-		 * @deprecated Use MODULE_NETWORK::getUrlDomain
-		 */
-		private function ExtractDomain( $url = '' ) {
-			$urex   = explode( "/", preg_replace( "[^(.*?)//(.*?)/(.*)]", '$2', $url . "/" ) );
-			$urtype = preg_replace( "[^(.*?)://(.*)]", '$1', $url . "/" );
-
-			return array( $urex[0], $urtype );
-		}
-
 
 		//// IP SETUP
 
@@ -2403,6 +2221,7 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 		 * @param bool $extendedSearch Extend search for SOAP (unsafe method, looking for constants defined as SOAP_*)
 		 *
 		 * @return bool
+		 * @todo Move to drivers
 		 */
 		public function hasSoap( $extendedSearch = false ) {
 			$soapClassBoolean = false;
@@ -2633,6 +2452,115 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 		}
 
 		/**
+		 * Make sure that we are allowed to do things
+		 *
+		 * @param bool $checkSafeMode If true, we will also check if safe_mode is active
+		 * @param bool $mockSafeMode If true, NetCurl will pretend safe_mode is true (for testing)
+		 *
+		 * @return bool
+		 * @since 6.0.20
+		 */
+		public function getIsSecure( $checkSafeMode = true, $mockSafeMode = false ) {
+			$currentBaseDir = trim( ini_get( 'open_basedir' ) );
+			if ( $checkSafeMode ) {
+				if ( $currentBaseDir == '' && ! $this->getSafeMode( $mockSafeMode ) ) {
+					return false;
+				}
+
+				return true;
+			} else {
+				if ( $currentBaseDir == '' ) {
+					return false;
+				}
+
+				return true;
+			}
+
+			return false;
+		}
+
+		/**
+		 * Get safe_mode status (mockable)
+		 *
+		 * @param bool $mockedSafeMode When active, this always returns true
+		 *
+		 * @return bool
+		 */
+		private function getSafeMode( $mockedSafeMode = false ) {
+			if ( $mockedSafeMode ) {
+				return true;
+			}
+
+			// There is no safe mode in PHP 5.4.0 and above
+			if (version_compare(PHP_VERSION, '5.4.0', '>=')) {
+				return false;
+			}
+
+			return ( filter_var( ini_get( 'safe_mode' ), FILTER_VALIDATE_BOOLEAN ) );
+		}
+
+		/**
+		 * Trust the pems defined from SSL_MODULE
+		 *
+		 * @param bool $iTrustBundlesSetBySsl If this is false, NetCurl will trust internals (PHP + Curl) rather than pre-set pem bundles
+		 */
+		public function setTrustedSslBundles( $iTrustBundlesSetBySsl = false ) {
+			$this->TRUST_SSL_BUNDLES = $iTrustBundlesSetBySsl;
+		}
+
+		/**
+		 * The current status of trusted pems
+		 *
+		 * @return bool
+		 */
+		public function getTrustedSslBundles() {
+			return $this->TRUST_SSL_BUNDLES;
+		}
+
+		private function setSslParameters() {
+			$certificateBundle = $this->SSL->getSslCertificateBundle();
+			// Change default behaviour for SSL certificates only if PHP is not in a secure mode (checking open_basedir only).
+			if ( ! $this->getIsSecure( false ) ) {
+				// If strict certificate verification is disabled, we will push some curlopts into unsafe mode.
+				if ( ! $this->SSL->getStrictVerification() ) {
+					$this->setCurlOpt( CURLOPT_SSL_VERIFYHOST, 0 );
+					$this->setCurlOpt( CURLOPT_SSL_VERIFYPEER, 0 );
+					$ignoreBundle        = true;
+					$this->unsafeSslCall = true;
+				} else {
+					// From libcurl 7.28.1 CURLOPT_SSL_VERIFYHOST is deprecated. However, using the value 1 can be used
+					// as of PHP 5.4.11, where the deprecation notices was added. The deprecation has started before libcurl
+					// 7.28.1 (this was discovered on a server that was running PHP 5.5 and libcurl-7.22). In full debug
+					// even libcurl-7.22 was generating this message, so from PHP 5.4.11 we are now enforcing the value 2
+					// for CURLOPT_SSL_VERIFYHOST instead. The reason of why we are using the value 1 before this version
+					// is actually a lazy thing, as we don't want to break anything that might be unsupported before this version.
+
+					// Those settings are probably default in CURL.
+					if ( version_compare( PHP_VERSION, '5.4.11', ">=" ) ) {
+						$this->setCurlOptInternal( CURLOPT_SSL_VERIFYHOST, 2 );
+					} else {
+						$this->setCurlOptInternal( CURLOPT_SSL_VERIFYHOST, 1 );
+					}
+					$this->setCurlOptInternal( CURLOPT_SSL_VERIFYPEER, 1 );
+
+					try {
+						if ( $this->getTrustedSslBundles() ) {
+							if ($this->getFlag('OVERRIDE_CERTIFICATE_BUNDLE')) {
+								$certificateBundle = $this->getFlag('OVERRIDE_CERTIFICATE_BUNDLE');
+							}
+							$this->setCurlOptInternal( CURLOPT_CAINFO, $certificateBundle );
+							$this->setCurlOptInternal( CURLOPT_CAPATH, dirname( $certificateBundle ) );
+						}
+					} catch ( \Exception $e ) {
+						// Silently ignore errors
+					}
+
+				}
+			}
+		}
+
+
+		/**
 		 * cURL data handler, sets up cURL in what it believes is the correct set for you.
 		 *
 		 * @param string $url
@@ -2664,7 +2592,7 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 			// to only set any flags if the security levels of PHP allows it, and only if the follow flag is enabled.
 			//
 			// Refers to http://php.net/manual/en/ini.sect.safe-mode.php
-			if ( ini_get( 'open_basedir' ) == '' && ! filter_var( ini_get( 'safe_mode' ), FILTER_VALIDATE_BOOLEAN ) ) {
+			if ( $this->getIsSecure( true ) ) {
 				// To disable the default behaviour of this function, use setEnforceFollowLocation([bool]).
 				if ( $this->followLocationSet ) {
 					// Since setCurlOptInternal is not an overrider, using the overrider here, will have no effect on the curlopt setting
@@ -2673,48 +2601,8 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 				}
 			}
 
-			// If certificates missing (place above the wsdl, as it has to be inheritaged down to the soapclient
-			if ( ! $this->TestCerts() ) {
-				// And we're allowed to run without them
-				if ( ! $this->sslVerify && $this->allowSslUnverified ) {
-					// Then disable the checking here (overriders should always be enforced)
-					$this->setCurlOpt( CURLOPT_SSL_VERIFYHOST, 0 );
-					$this->setCurlOpt( CURLOPT_SSL_VERIFYPEER, 0 );
-					$this->unsafeSslCall = true;
-				} else {
-					// From libcurl 7.28.1 CURLOPT_SSL_VERIFYHOST is deprecated. However, using the value 1 can be used
-					// as of PHP 5.4.11, where the deprecation notices was added. The deprecation has started before libcurl
-					// 7.28.1 (this was discovered on a server that was running PHP 5.5 and libcurl-7.22). In full debug
-					// even libcurl-7.22 was generating this message, so from PHP 5.4.11 we are now enforcing the value 2
-					// for CURLOPT_SSL_VERIFYHOST instead. The reason of why we are using the value 1 before this version
-					// is actually a lazy thing, as we don't want to break anything that might be unsupported before this version.
-					if ( version_compare( PHP_VERSION, '5.4.11', ">=" ) ) {
-						$this->setCurlOptInternal( CURLOPT_SSL_VERIFYHOST, 2 );
-					} else {
-						$this->setCurlOptInternal( CURLOPT_SSL_VERIFYHOST, 1 );
-					}
-					$this->setCurlOptInternal( CURLOPT_SSL_VERIFYPEER, 1 );
-				}
-			} else {
-				// Silently configure for https-connections, if exists
-				if ( $this->useCertFile != "" && file_exists( $this->useCertFile ) ) {
-					if ( ! $this->sslVerify && $this->allowSslUnverified ) {
-						// Then disable the checking here
-						$this->setCurlOpt( CURLOPT_SSL_VERIFYHOST, 0 );
-						$this->setCurlOpt( CURLOPT_SSL_VERIFYPEER, 0 );
-						$this->unsafeSslCall = true;
-					} else {
-						try {
-							$this->setCurlOptInternal( CURLOPT_CAINFO, $this->useCertFile );
-							$this->setCurlOptInternal( CURLOPT_CAPATH, dirname( $this->useCertFile ) );
-						} catch ( \Exception $e ) {
-						}
-					}
-				}
-			}
-
-			// Picking up externally select outgoing ip if any
-			$this->handleIpList();
+			$this->setSslParameters();
+			$this->handleIpList();      // Pick up externally selected outgoing ip if any requested
 
 			// This curlopt makes it possible to make a call to a specific ip address and still use the HTTP_HOST (Must override)
 			$this->setCurlOpt( CURLOPT_URL, $this->CurlURL );
@@ -2722,7 +2610,7 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 			$this->executePostData( $postData, $postAs );
 			$postDataContainer = $this->PostDataContainer;
 
-			$domainArray = $this->ExtractDomain( $this->CurlURL );
+			$domainArray = $this->NETWORK->getUrlDomain( $this->CurlURL );
 			$domainName  = null;
 			$domainHash  = null;
 			if ( isset( $domainArray[0] ) ) {
@@ -2867,13 +2755,13 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 					if ( $this->CurlResolveForced && $this->CurlRetryTypes['resolve'] >= 2 ) {
 						throw new \Exception( NETCURL_CURL_CLIENTNAME . " exception in " . __FUNCTION__ . ": The maximum tries of curl_exec() for " . $this->CurlURL . " has been reached without any successful response. Normally, this happens after " . $this->CurlRetryTypes['resolve'] . " CurlResolveRetries and might be connected with a bad URL or similar that can not resolve properly.\nCurl error message follows: " . $errorMessage, $errorCode );
 					}
-					if ( $errorCode == CURLE_SSL_CACERT || $errorCode === 60 && $this->allowSslUnverified ) {
+					// CURLE_SSL_CACERT = 60
+					if ( $errorCode == CURLE_SSL_CACERT && $this->SSL->getStrictFallback() ) {
 						if ( $this->CurlRetryTypes['sslunverified'] >= 2 ) {
 							throw new \Exception( NETCURL_CURL_CLIENTNAME . " exception in " . __FUNCTION__ . ": The maximum tries of curl_exec() for " . $this->CurlURL . ", during a try to make a SSL connection to work, has been reached without any successful response. This normally happens when allowSslUnverified is activated in the library and " . $this->CurlRetryTypes['resolve'] . " tries to fix the problem has been made, but failed.\nCurl error message follows: " . $errorMessage, $errorCode );
 						} else {
-							$this->hasErrorsStore[] = array( 'code' => $errorCode, 'message' => $errorMessage );
-							$this->setSslVerify( false );
-							$this->setSslUnverified( true );
+							$this->errorContainer[] = array( 'code' => $errorCode, 'message' => $errorMessage );
+							$this->setSslVerify( false, false );
 							$this->unsafeSslCall = true;
 							$this->CurlRetryTypes['sslunverified'] ++;
 
@@ -2881,7 +2769,7 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 						}
 					}
 					if ( $errorCode == CURLE_COULDNT_RESOLVE_HOST || $errorCode === 45 ) {
-						$this->hasErrorsStore[] = array( 'code' => $errorCode, 'message' => $errorMessage );
+						$this->errorContainer[] = array( 'code' => $errorCode, 'message' => $errorMessage );
 						$this->CurlRetryTypes['resolve'] ++;
 						unset( $this->CurlIp );
 						$this->CurlResolveForced = true;

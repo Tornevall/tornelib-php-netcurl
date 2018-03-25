@@ -179,4 +179,36 @@ class networkTest extends TestCase {
 	function maskRange8() {
 		$this->assertTrue( $this->NET->isIpInRange( "172.213.9.3", "172.0.0.0/8" ) );
 	}
+
+	/**
+	 * @test
+	 */
+	function hostResolveValidationSuccess() {
+		$localNetwork = new MODULE_NETWORK();
+		$localNetwork->setAlwaysResolveHostvalidation( true );
+		$urlData = $localNetwork->getUrlDomain( "http://www.tornevall.net/" );
+		$this->assertTrue( $urlData[0] == "www.tornevall.net" );
+	}
+
+	/**
+	 * @test
+	 */
+	function hostResolveValidationFail() {
+		$localNetwork = new MODULE_NETWORK();
+		$localNetwork->setAlwaysResolveHostvalidation( true );
+		try {
+			$urlData = $localNetwork->getUrlDomain( "http://failing.domain/" );
+		} catch (\Exception $e) {
+			$this->assertTrue($e->getCode() == NETCURL_EXCEPTIONS::NETCURL_HOSTVALIDATION_FAIL);
+		}
+	}
+
+	/**
+	 * @test
+	 */
+	function hostValidationNoResolve() {
+		$localNetwork = new MODULE_NETWORK();
+		$urlData      = $localNetwork->getUrlDomain( "http://failing.domain/" );
+		$this->assertTrue( $urlData[0] == "failing.domain" );
+	}
 }

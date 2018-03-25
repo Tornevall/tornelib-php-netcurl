@@ -159,9 +159,9 @@ class MODULE_SSL {
 	 * @return string
 	 * @since 6.0.0
 	 */
-	public function getSslCertificateBundle() {
+	public function getSslCertificateBundle($forceChecking = false) {
 		// Assume that sysadmins can handle this, if open_basedir is set as things will fail if we proceed here
-		if ( $this->getIsSecure(false) ) {
+		if ( $this->getIsSecure( false ) && ! $forceChecking ) {
 			return;
 		}
 

@@ -2,7 +2,7 @@
 
 namespace TorneLIB;
 
-require_once (__DIR__ . "/../vendor/autoload.php");
+require_once( __DIR__ . "/../vendor/autoload.php" );
 
 use PHPUnit\Framework\TestCase;
 use \TorneLIB\MODULE_SSL;
@@ -18,19 +18,21 @@ class sslTest extends TestCase {
 
 	/**
 	 * @test
-	 * @testdox If SSL is available, this will be a positive test
+	 * @testdox Get a certificate bundle
 	 */
-	public function getCurlSslAvailable() {
-		$sslAvailable = MODULE_SSL::getCurlSslAvailable();
-		$this->assertCount(0, $sslAvailable);
+	public function getSslCertificate() {
+		// Make sure the open_basedir is reset after other tests
+		ini_set( 'open_basedir', "" );
+		$this->assertTrue( strlen( $this->SSL->getSslCertificateBundle( true ) ) > 0 );
 	}
 
 	/**
 	 * @test
-	 * @testdox Get a certificate bundle
+	 * @testdox If SSL is available, this will be a positive test
 	 */
-	public function getSslCertificate() {
-		$this->assertTrue(strlen($this->SSL->getSslCertificateBundle()) > 0);
+	public function getCurlSslAvailable() {
+		$sslAvailable = MODULE_SSL::getCurlSslAvailable();
+		$this->assertCount( 0, $sslAvailable );
 	}
 
 	/**
@@ -39,7 +41,7 @@ class sslTest extends TestCase {
 	 */
 	public function strictStream() {
 		$sslArray = $this->SSL->getSslStreamContext();
-		$this->assertTrue($sslArray['verify_peer'] == 1 && $sslArray['verify_peer_name'] == 1 && $sslArray['verify_host'] == 1 && $sslArray['allow_self_signed'] == 1);
+		$this->assertTrue( $sslArray['verify_peer'] == 1 && $sslArray['verify_peer_name'] == 1 && $sslArray['verify_host'] == 1 && $sslArray['allow_self_signed'] == 1 );
 	}
 
 	/**
@@ -47,9 +49,9 @@ class sslTest extends TestCase {
 	 * @testdox Make SSL validation sloppy, allow anything
 	 */
 	public function unStrictStream() {
-		$this->SSL->setStrictVerification(false, true);
+		$this->SSL->setStrictVerification( false, true );
 		$sslArray = $this->SSL->getSslStreamContext();
-		$this->assertTrue($sslArray['verify_peer'] == false && $sslArray['verify_peer_name'] == false && $sslArray['verify_host'] == false && $sslArray['allow_self_signed'] == true);
+		$this->assertTrue( $sslArray['verify_peer'] == false && $sslArray['verify_peer_name'] == false && $sslArray['verify_host'] == false && $sslArray['allow_self_signed'] == true );
 	}
 
 	/**
@@ -57,9 +59,9 @@ class sslTest extends TestCase {
 	 * @testdox Make SSL validation strict but allow self signed certificates
 	 */
 	public function strictStreamSelfSignedAllowed() {
-		$this->SSL->setStrictVerification(true, true);
+		$this->SSL->setStrictVerification( true, true );
 		$sslArray = $this->SSL->getSslStreamContext();
-		$this->assertTrue($sslArray['verify_peer'] == true && $sslArray['verify_peer_name'] == true && $sslArray['verify_host'] == true && $sslArray['allow_self_signed'] == true);
+		$this->assertTrue( $sslArray['verify_peer'] == true && $sslArray['verify_peer_name'] == true && $sslArray['verify_host'] == true && $sslArray['allow_self_signed'] == true );
 	}
 
 	/**
@@ -68,7 +70,7 @@ class sslTest extends TestCase {
 	 */
 	function sslStream() {
 		$streamContext = $this->SSL->getSslStream();
-		$this->assertTrue(is_resource($streamContext['stream_context']));
+		$this->assertTrue( is_resource( $streamContext['stream_context'] ) );
 	}
 
 }

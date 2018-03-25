@@ -884,15 +884,8 @@ class curlTest extends TestCase {
 	function getSafePermissionFullMocked() {
 		ini_set( 'open_basedir', "/" );
 		$this->assertTrue( $this->CURL->getIsSecure() );
-	}
-
-	/**
-	 * @test
-	 * @testdox open_basedir is unsafe and safe_mode is mocked-active
-	 */
-	function getSafePermissionFullMockedSafeMode() {
+		// Reset the setting as it is affecting other tests
 		ini_set( 'open_basedir', "" );
-		$this->assertTrue( $this->CURL->getIsSecure( true, true ) );
 	}
 
 	/**
@@ -902,6 +895,17 @@ class curlTest extends TestCase {
 	function getSafePermissionFullMockedNoSafeMode() {
 		ini_set( 'open_basedir', "/" );
 		$this->assertTrue( $this->CURL->getIsSecure( false ) );
+		// Reset the setting as it is affecting other tests
+		ini_set( 'open_basedir', "" );
+	}
+
+	/**
+	 * @test
+	 * @testdox open_basedir is unsafe and safe_mode is mocked-active
+	 */
+	function getSafePermissionFullMockedSafeMode() {
+		ini_set( 'open_basedir', "" );
+		$this->assertTrue( $this->CURL->getIsSecure( true, true ) );
 	}
 
 

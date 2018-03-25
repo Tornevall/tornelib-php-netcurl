@@ -331,8 +331,11 @@ if ( ! class_exists( 'MODULE_SOAP' ) && ! class_exists( 'TorneLIB\MODULE_SOAP' )
 			$this->soapResponse = $this->soapClient->__getLastResponse();
 			/** @noinspection PhpUndefinedMethodInspection */
 			$this->soapResponseHeaders = $this->soapClient->__getLastResponseHeaders();
-			$parsedHeader              = $this->getHeader( $this->soapResponseHeaders );
 			$returnResponse['parsed']  = $SoapClientResponse;
+			if ( isset( $SoapClientResponse->return ) ) {
+				$returnResponse['parsed'] = $SoapClientResponse->return;
+			}
+			$parsedHeader = $this->getHeader( $this->soapResponseHeaders );
 			if ( ! is_object( $parsedHeader ) ) {
 				$returnResponse['header'] = $parsedHeader['header'];
 				$returnResponse['code']   = isset( $parsedHeader['code'] ) ? $parsedHeader['code'] : 0;
@@ -340,10 +343,12 @@ if ( ! class_exists( 'MODULE_SOAP' ) && ! class_exists( 'TorneLIB\MODULE_SOAP' )
 			} else {
 				$returnResponse = $parsedHeader->getTemporaryResponse();
 			}
-			if ( isset( $SoapClientResponse->return ) ) {
-				$returnResponse['parsed'] = $SoapClientResponse->return;
-			}
 			$this->libResponse = $returnResponse;
+			if ( $this->isFlag( 'SOAPCHAIN' ) && isset( $returnResponse['parsed'] ) && ! empty( $returnResponse['parsed'] ) ) {
+				// Add backward compatibility
+				//$returnResponse['parsed']['parsed'] = $returnResponse['parsed'];
+				return $returnResponse['parsed'];
+			}
 
 			return $returnResponse;
 		}

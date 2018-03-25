@@ -137,7 +137,7 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 		/** @var array Flags controller to change behaviour on internal function */
 		//private $internalFlags = array();
 		// Change to this flagSet when compatibility has been fixed
-		private $internalFlags = array( 'CHAIN' => true );
+		private $internalFlags = array( 'CHAIN' => true, 'SOAPCHAIN' => false );
 		private $contentType;
 		private $debugData = array(
 			'data'     => array(
@@ -1962,6 +1962,10 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 			if ( $this->isFlag( "CHAIN" ) && ! $this->isFlag( 'IS_SOAP' ) ) {
 				return $this;
 			}
+/*			if ( $this->isFlag( 'IS_SOAP' ) && $this->isFlag( 'SOAPCHAIN' ) ) {
+				$returnParsedResponse = $this->getParsedResponse();
+				return $returnParsedResponse;
+			}*/
 
 			return $returnResponse;
 		}
@@ -2080,7 +2084,6 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 		public function getTemporaryResponse() {
 			return $this->TemporaryResponse;
 		}
-
 
 		/**
 		 * @param null $ResponseContent
@@ -2753,6 +2756,11 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 				if ( ! $this->hasSoap() ) {
 					throw new \Exception( NETCURL_CURL_CLIENTNAME . " " . __FUNCTION__ . " exception: SoapClient is not available in this system", $this->NETWORK->getExceptionCode( 'NETCURL_SOAPCLIENT_CLASS_MISSING' ) );
 				}
+				if ( ! $this->isFlag( 'NOSOAPWARNINGS' ) ) {
+					$this->setFlag( "SOAPWARNINGS", true );
+				} else {
+					$this->unsetFlag( 'SOAPWARNINGS' );
+				}
 
 				return $this->executeHttpSoap( $url, $postData, $CurlMethod );
 			}
@@ -2841,7 +2849,11 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 			$this->setChain( false );
 			$Soap = new MODULE_SOAP( $this->CurlURL, $this );
 			$Soap->setFlag( 'IS_SOAP' );
+			/** @since 6.0.20 */
 			$Soap->setChain( false );
+			if ( $this->isFlag( 'SOAPCHAIN' ) ) {
+				$Soap->setFlag( 'SOAPCHAIN', $this->getFlag( 'SOAPCHAIN' ) );
+			}
 			$Soap->setCustomUserAgent( $this->CustomUserAgent );
 			$Soap->setThrowableState( $this->canThrow );
 			$Soap->setSoapAuthentication( $this->AuthData );

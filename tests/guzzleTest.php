@@ -7,7 +7,7 @@ require_once (__DIR__ . "/../vendor/autoload.php");
 use PHPUnit\Framework\TestCase;
 use \TorneLIB\MODULE_SSL;
 
-class sslTest extends TestCase {
+class guzzleTest extends TestCase {
 	private $CURL;
 
 	function setUp() {

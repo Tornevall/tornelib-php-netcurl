@@ -22,6 +22,7 @@ class skippablePhpTest extends TestCase {
 
 	function setUp() {
 		$this->CURL = new MODULE_CURL();
+		$this->NETWORK = new MODULE_NETWORK();
 	}
 
 	/**

@@ -39,7 +39,7 @@ class sslTest extends TestCase {
 	 */
 	public function strictStream() {
 		$sslArray = $this->SSL->getSslStreamContext();
-		$this->assertTrue($sslArray['verify_peer'] == true && $sslArray['verify_peer_name'] == true && $sslArray['verify_host'] == true && $sslArray['allow_self_signed'] == false);
+		$this->assertTrue($sslArray['verify_peer'] == 1 && $sslArray['verify_peer_name'] == 1 && $sslArray['verify_host'] == 1 && $sslArray['allow_self_signed'] == 1);
 	}
 
 	/**

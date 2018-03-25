@@ -24,12 +24,6 @@ class curlTest extends TestCase {
 	private $CURL;
 	private $CurlVersion = null;
 
-	public $specUrlUsername;
-	public $specUrlPassword;
-	/** @var bool Enables especially special SOAP features to be tested */
-	private $skipSpecials = true;
-	private $skipTor = true;
-
 	/**
 	 * @var string $bitBucketUrl Bitbucket URL without scheme
 	 */
@@ -41,7 +35,7 @@ class curlTest extends TestCase {
 		$this->StartErrorReporting = error_reporting();
 		$this->NETWORK             = new MODULE_NETWORK();
 		$this->CURL                = new MODULE_CURL();
-		$this->CURL->setUserAgent( "TorneLIB/NetCurl-PHPUNIT" );
+		$this->CURL->setUserAgent( "PHPUNIT" );
 
 		if ( function_exists( 'curl_version' ) ) {
 			$CurlVersionRequest = curl_version();
@@ -632,7 +626,7 @@ class curlTest extends TestCase {
 	 * @test
 	 * @testdox Test SoapClient by making a standard doGet()
 	 */
-	function soapClient() {
+	function wsdlSoapClient() {
 		$assertThis = true;
 		try {
 			$this->CURL->setUserAgent( " +UnitSoapAgent" );
@@ -907,6 +901,5 @@ class curlTest extends TestCase {
 		ini_set( 'open_basedir', "" );
 		$this->assertTrue( $this->CURL->getIsSecure( true, true ) );
 	}
-
 
 }

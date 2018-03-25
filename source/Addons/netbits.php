@@ -27,8 +27,8 @@ namespace TorneLIB;
 if ( ! defined( 'NETCURL_NETBITS_RELEASE' ) ) {
 	define( 'NETCURL_NETBITS_RELEASE', '6.0.1' );
 }
-if ( ! defined( 'NETCURL_NETBITS_MODIFIY' ) ) {
-	define( 'NETCURL_NETBITS_MODIFIY', '20180320' );
+if ( ! defined( 'NETCURL_NETBITS_MODIFY' ) ) {
+	define( 'NETCURL_NETBITS_MODIFY', '20180320' );
 }
 
 // Check if there is a packagist release already loaded, since this network standalone release is deprecated as of 20180320.

@@ -44,6 +44,6 @@ if ( file_exists( __DIR__ . '/../vendor/autoload.php' ) ) {
 if ( ! defined( 'NETCURL_RELEASE' ) ) {
 	define( 'NETCURL_RELEASE', '6.0.20' );
 }
-if ( ! defined( 'NETCURL_MODIFIY' ) ) {
-	define( 'NETCURL_MODIFIY', '20180320' );
+if ( ! defined( 'NETCURL_MODIFY' ) ) {
+	define( 'NETCURL_MODIFY', '20180325' );
 }

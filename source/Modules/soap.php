@@ -28,11 +28,11 @@ if ( ! class_exists( 'MODULE_SOAP' ) && ! class_exists( 'TorneLIB\MODULE_SOAP' )
 	if ( ! defined( 'NETCURL_SIMPLESOAP_RELEASE' ) ) {
 		define( 'NETCURL_SIMPLESOAP_RELEASE', '6.0.6' );
 	}
-	if ( ! defined( 'NETCURL_SIMPLESOAP_MODIFIY' ) ) {
-		define( 'NETCURL_SIMPLESOAP_MODIFIY', '20180320' );
+	if ( ! defined( 'NETCURL_SIMPLESOAP_MODIFY' ) ) {
+		define( 'NETCURL_SIMPLESOAP_MODIFY', '20180325' );
 	}
-	if ( ! defined( 'NETCURL_CURL_CLIENTNAME' ) ) {
-		define( 'NETCURL_CURL_CLIENTNAME', 'NetCurl-SimpleSOAP' );
+	if ( ! defined( 'NETCURL_SIMPLESOAP_CLIENTNAME' ) ) {
+		define( 'NETCURL_SIMPLESOAP_CLIENTNAME', 'SimpleSOAP' );
 	}
 
 	/**
@@ -42,7 +42,7 @@ if ( ! class_exists( 'MODULE_SOAP' ) && ! class_exists( 'TorneLIB\MODULE_SOAP' )
 	 *
 	 * @package TorneLIB
 	 */
-	class MODULE_SOAP extends Tornevall_cURL {
+	class MODULE_SOAP extends MODULE_CURL {
 		protected $soapClient;
 		protected $soapOptions = array();
 		protected $addSoapOptions = array(
@@ -61,9 +61,10 @@ if ( ! class_exists( 'MODULE_SOAP' ) && ! class_exists( 'TorneLIB\MODULE_SOAP' )
 		private $canThrowSoapFaults = true;
 		private $CustomUserAgent;
 		private $soapFaultExceptionObject;
-		/** @var Tornevall_cURL */
+		/** @var MODULE_CURL */
 		private $PARENT;
 
+		private $sslopt = array();
 		private $SoapFaultString = null;
 		private $SoapFaultCode = 0;
 		private $SoapTryOnce = true;
@@ -82,10 +83,9 @@ if ( ! class_exists( 'MODULE_SOAP' ) && ! class_exists( 'TorneLIB\MODULE_SOAP' )
 			// Inherit parent
 			parent::__construct();
 
-			/** @var Tornevall_cURL */
-			$this->PARENT  = $that;      // Get the parent instance from parent, when parent gives wrong information
-			$this->soapUrl = $Url;
-			$this->sslGetOptionsStream();
+			/** @var MODULE_CURL */
+			$this->PARENT      = $that;      // Get the parent instance from parent, when parent gives wrong information
+			$this->soapUrl     = $Url;
 			$this->soapOptions = $this->PARENT->getCurlOpt();
 			foreach ( $this->addSoapOptions as $soapKey => $soapValue ) {
 				if ( ! isset( $this->soapOptions[ $soapKey ] ) ) {
@@ -128,10 +128,11 @@ if ( ! class_exists( 'MODULE_SOAP' ) && ! class_exists( 'TorneLIB\MODULE_SOAP' )
 
 		/**
 		 * @param $userAgentString
+		 *
+		 * @throws \Exception
 		 */
 		public function setCustomUserAgent( $userAgentString ) {
-			$this->CustomUserAgent = preg_replace( "/\s+$/", '', $userAgentString );
-			$this->setUserAgent( $userAgentString . " +TorneLIB-SimpleSoap/" . $this->simpleSoapVersion );
+			$this->setUserAgent( NETCURL_SIMPLESOAP_CLIENTNAME . "-" . NETCURL_SIMPLESOAP_RELEASE, $userAgentString );
 			$this->sslGetOptionsStream();
 		}
 
@@ -153,9 +154,20 @@ if ( ! class_exists( 'MODULE_SOAP' ) && ! class_exists( 'TorneLIB\MODULE_SOAP' )
 		public function getSoap() {
 			$this->soapClient = null;
 			$sslOpt           = $this->getSslOpt();
-			if ( isset($sslOpt['stream_context']) && gettype( $sslOpt['stream_context'] ) == "resource" ) {
-				$this->soapOptions['stream_context'] = $sslOpt['stream_context'];
+			$optionsStream    = $this->sslGetOptionsStream();
+
+			if ( is_array( $optionsStream ) && count( $optionsStream ) ) {
+				foreach ( $optionsStream as $optionKey => $optionValue ) {
+					$this->soapOptions[ $optionKey ] = $optionValue;
+				}
 			}
+
+			if ( isset( $sslOpt['stream_context'] ) ) {
+				if ( gettype( $sslOpt['stream_context'] ) == "resource" ) {
+					$this->soapOptions['stream_context'] = $sslOpt['stream_context'];
+				}
+			}
+
 			$this->soapOptions['exceptions'] = true;
 			$this->soapOptions['trace']      = true;
 

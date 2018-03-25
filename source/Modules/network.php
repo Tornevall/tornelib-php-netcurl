@@ -28,8 +28,8 @@ if ( ! class_exists( 'MODULE_NETWORK' ) && ! class_exists( 'TorneLIB\MODULE_NETW
 	if (!defined('NETCURL_NETWORK_RELEASE')) {
 		define( 'NETCURL_NETWORK_RELEASE', '6.0.6' );
 	}
-	if (!defined('NETCURL_NETWORK_MODIFIY')) {
-		define( 'NETCURL_NETWORK_MODIFIY', '20180320' );
+	if (!defined('NETCURL_NETWORK_MODIFY')) {
+		define( 'NETCURL_NETWORK_MODIFY', '20180325' );
 	}
 
 	/**

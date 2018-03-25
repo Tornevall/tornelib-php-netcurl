@@ -28,11 +28,11 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 	if ( ! defined( 'NETCURL_CURL_RELEASE' ) ) {
 		define( 'NETCURL_CURL_RELEASE', '6.0.18' );
 	}
-	if ( ! defined( 'NETCURL_CURL_MODIFIY' ) ) {
-		define( 'NETCURL_CURL_MODIFIY', '20180320' );
+	if ( ! defined( 'NETCURL_CURL_MODIFY' ) ) {
+		define( 'NETCURL_CURL_MODIFY', '20180325' );
 	}
 	if ( ! defined( 'NETCURL_CURL_CLIENTNAME' ) ) {
-		define( 'NETCURL_CURL_CLIENTNAME', 'NetCurl' );
+		define( 'NETCURL_CURL_CLIENTNAME', 'MODULE_CURL' );
 	}
 
 	/**
@@ -71,6 +71,8 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 		/** @var array User set SSL Options */
 		private $sslopt = array();
 
+		private $netCurlUrl = 'http://www.netcurl.org/';
+
 		//// PUBLIC CONFIG THAT SHOULD GO PRIVATE
 		/** @var array Interfaces to use */
 		public $IpAddr = array();
@@ -96,7 +98,7 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 		private $PostDataReal;
 
 		private $userAgents = array(
-			'Mozilla' => 'Mozilla/4.0 (compatible; MSIE 7.0; Windows NT 5.1; .NET CLR 1.0.3705; .NET CLR 1.1.4322; Media Center PC 4.0;'
+			'Mozilla' => 'Mozilla/4.0 (compatible; MSIE 7.0; Windows NT 5.1; .NET CLR 1.0.3705; .NET CLR 1.1.4322; Media Center PC 4.0;)'
 		);
 
 		/**
@@ -212,7 +214,7 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 		/** @var string Custom User-Agent sent in the HTTP-HEADER */
 		private $CurlUserAgent;
 		/** @var string Custom User-Agent Memory */
-		private $CustomUserAgent;
+		private $CustomUserAgent = array();
 		/** @var bool Try to automatically parse the retrieved body content. Supports, amongst others json, serialization, etc */
 		public $CurlAutoParse = true;
 		/** @var bool Allow parsing of content bodies (tags) */
@@ -312,7 +314,7 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 			$this->throwableHttpCodes = array();
 			$this->getSslDriver();
 
-			$this->CurlUserAgent = $this->userAgents['Mozilla'] . ' +NetCurl-' . NETCURL_RELEASE . " +Curl-" . NETCURL_CURL_RELEASE . ')';
+			$this->CurlUserAgent = $this->userAgents['Mozilla'] . ' ' . NETCURL_CURL_CLIENTNAME . '-' . NETCURL_RELEASE . "/" . __CLASS__ . "-" . NETCURL_CURL_RELEASE . ' (' . $this->netCurlUrl . ')';
 			if ( ! empty( $PreferredURL ) ) {
 				$this->CurlURL   = $PreferredURL;
 				$InstantResponse = null;
@@ -373,7 +375,7 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 			if ( ! count( $curlSslDriver ) ) {
 				$this->CURL_SSL_AVAILABLE = true;
 			}
-			$this->SSL = new MODULE_SSL();
+			$this->SSL = new MODULE_SSL( $this );
 		}
 
 		/**
@@ -1205,13 +1207,28 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 		 * To make proper identification of the library we are always appending TorbeLIB+cUrl to the chosen user agent string.
 		 *
 		 * @param string $CustomUserAgent
+		 * @param array $inheritAgents Updates an array that might have lost some data
 		 */
-		public function setUserAgent( $CustomUserAgent = "" ) {
+		public function setUserAgent( $CustomUserAgent = "", $inheritAgents = array() ) {
+
+			if ( is_array( $inheritAgents ) && count( $inheritAgents ) ) {
+				foreach ( $inheritAgents as $inheritedAgentName ) {
+					if ( ! in_array( trim( $inheritedAgentName ), $this->CustomUserAgent ) ) {
+						$this->CustomUserAgent[] = trim( $inheritedAgentName );
+					}
+				}
+			}
+
 			if ( ! empty( $CustomUserAgent ) ) {
-				$this->CustomUserAgent .= preg_replace( "/\s+$/", '', $CustomUserAgent );
-				$this->CurlUserAgent   = $this->CustomUserAgent . " +NetCurl-" . NETCURL_RELEASE . " +TorneLIB+cUrl-" . NETCURL_CURL_RELEASE;
+				$trimmedUserAgent = trim( $CustomUserAgent );
+				if ( ! in_array( $trimmedUserAgent, $this->CustomUserAgent ) ) {
+					$this->CustomUserAgent[] = $trimmedUserAgent;
+				}
+
+				// NETCURL_CURL_CLIENTNAME . '-' . NETCURL_RELEASE . "/" . __CLASS__ . "-" . NETCURL_CURL_RELEASE
+				$this->CurlUserAgent = implode( " ", $this->CustomUserAgent ) . " +TorneLIB-NETCURL-" . NETCURL_RELEASE . " +" . NETCURL_CURL_CLIENTNAME . "-" . NETCURL_CURL_RELEASE . " (" . $this->netCurlUrl . ")";
 			} else {
-				$this->CurlUserAgent = $this->userAgents['Mozilla'] . ' +TorneLIB-NetCurl-' . NETCURL_RELEASE . " +TorneLIB+cUrl-" . NETCURL_CURL_RELEASE . ')';
+				$this->CurlUserAgent = $this->userAgents['Mozilla'] . ' +TorneLIB-NetCURL-' . NETCURL_RELEASE . " +" . NETCURL_CURL_CLIENTNAME . "+-" . NETCURL_CURL_RELEASE . ' (' . $this->netCurlUrl . ')';
 			}
 		}
 
@@ -1521,11 +1538,13 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 		 * Set and/or append certificate bundle locations to current configuration
 		 *
 		 * @param array $locationArrayOrString
+		 *
 		 * @return bool
 		 * @throws \Exception
 		 */
 		public function setSslPemLocations( $locationArrayOrString = array() ) {
-			$this->setTrustedSslBundles(true);
+			$this->setTrustedSslBundles( true );
+
 			return $this->SSL->setPemLocation( $locationArrayOrString );
 		}
 
@@ -2492,7 +2511,7 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 			}
 
 			// There is no safe mode in PHP 5.4.0 and above
-			if (version_compare(PHP_VERSION, '5.4.0', '>=')) {
+			if ( version_compare( PHP_VERSION, '5.4.0', '>=' ) ) {
 				return false;
 			}
 
@@ -2506,6 +2525,13 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 		 */
 		public function setTrustedSslBundles( $iTrustBundlesSetBySsl = false ) {
 			$this->TRUST_SSL_BUNDLES = $iTrustBundlesSetBySsl;
+			if ( $iTrustBundlesSetBySsl ) {
+				$this->setSslUserAgent();
+			}
+		}
+
+		private function setSslUserAgent() {
+			$this->setUserAgent( NETCURL_SSL_CLIENTNAME . "-" . NETCURL_SSL_RELEASE );
 		}
 
 		/**
@@ -2521,6 +2547,7 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 			$certificateBundle = $this->SSL->getSslCertificateBundle();
 			// Change default behaviour for SSL certificates only if PHP is not in a secure mode (checking open_basedir only).
 			if ( ! $this->getIsSecure( false ) ) {
+				$this->setSslUserAgent();
 				// If strict certificate verification is disabled, we will push some curlopts into unsafe mode.
 				if ( ! $this->SSL->getStrictVerification() ) {
 					$this->setCurlOpt( CURLOPT_SSL_VERIFYHOST, 0 );
@@ -2545,8 +2572,8 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 
 					try {
 						if ( $this->getTrustedSslBundles() ) {
-							if ($this->getFlag('OVERRIDE_CERTIFICATE_BUNDLE')) {
-								$certificateBundle = $this->getFlag('OVERRIDE_CERTIFICATE_BUNDLE');
+							if ( $this->getFlag( 'OVERRIDE_CERTIFICATE_BUNDLE' ) ) {
+								$certificateBundle = $this->getFlag( 'OVERRIDE_CERTIFICATE_BUNDLE' );
 							}
 							$this->setCurlOptInternal( CURLOPT_CAINFO, $certificateBundle );
 							$this->setCurlOptInternal( CURLOPT_CAPATH, dirname( $certificateBundle ) );

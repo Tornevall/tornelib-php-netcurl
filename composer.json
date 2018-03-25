@@ -20,6 +20,7 @@
     "files": [
       "source/Modules/netcurl_init.php",
       "source/Modules/drivers.php",
+      "source/Modules/ssl.php",
       "source/Addons/netbits.php",
       "source/Exception/Exception.php",
       "source/Model/Type/authtypes.php",

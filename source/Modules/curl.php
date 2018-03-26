@@ -205,6 +205,8 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 		private $TemporaryResponse = null;
 		/** @var null Temporary response from external driver */
 		private $TemporaryExternalResponse = null;
+		/** @var array $ParseContainer */
+		private $ParseContainer = array();
 		/** @var NETCURL_POST_DATATYPES $forcePostType What post type to use when using POST (Enforced) */
 		private $forcePostType = null;
 		/** @var string Sets an encoding to the http call */
@@ -1851,7 +1853,16 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 					return new \stdClass();
 				}
 			}
-			if ( $this->allowParseHtml && empty( $parsedContent ) ) {
+			if ( ! is_array( $parsedContent ) ) {
+				// If there's still nothing parsed, try HTML too
+				$parsedContent = array();
+				$this->setParseHtml( true );
+			}
+			$parsedContent['ByNodes']      = array();
+			$parsedContent['ByClosestTag'] = array();
+			$parsedContent['ById']         = array();
+
+			if ( $this->getParseHtml() ) {
 				if ( class_exists( 'DOMDocument' ) ) {
 					$DOM = new \DOMDocument();
 					libxml_use_internal_errors( true );
@@ -1861,11 +1872,7 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 						$childNodeArray    = $this->getChildNodes( $elementsByTagName );
 						$childTagArray     = $this->getChildNodes( $elementsByTagName, 'tagnames' );
 						$childIdArray      = $this->getChildNodes( $elementsByTagName, 'id' );
-						$parsedContent     = array(
-							'ByNodes'      => array(),
-							'ByClosestTag' => array(),
-							'ById'         => array()
-						);
+
 						if ( is_array( $childNodeArray ) && count( $childNodeArray ) ) {
 							$parsedContent['ByNodes'] = $childNodeArray;
 						}
@@ -1881,7 +1888,46 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 				}
 			}
 
+			$this->ParseContainer = $parsedContent;
 			return $parsedContent;
+		}
+
+		/**
+		 * @param string $byWhat
+		 *
+		 * @return array
+		 * @since 6.0.20
+		 */
+		private function extractParsedDom($byWhat = 'Id') {
+			$validElements = array('Id', 'ClosestTag', 'Nodes');
+			if (in_array($byWhat, $validElements) && isset($this->ParseContainer['By'. $byWhat])) {
+				return $this->ParseContainer['By' . $byWhat];
+			}
+			return array();
+		}
+
+		/**
+		 * @return array
+		 * @since 6.0.20
+		 */
+		public function getParsedDomByNodes() {
+			return $this->extractParsedDom('Nodes');
+		}
+
+		/**
+		 * @return array
+		 * @since 6.0.20
+		 */
+		public function getParsedDomById() {
+			return $this->extractParsedDom('Id');
+		}
+
+		/**
+		 * @return array
+		 * @since 6.0.20
+		 */
+		public function getParsedDomByClosestTag() {
+			return $this->extractParsedDom('ClosestTag');
 		}
 
 		/**
@@ -1963,10 +2009,11 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 			if ( $this->isFlag( "CHAIN" ) && ! $this->isFlag( 'IS_SOAP' ) ) {
 				return $this;
 			}
-/*			if ( $this->isFlag( 'IS_SOAP' ) && $this->isFlag( 'SOAPCHAIN' ) ) {
-				$returnParsedResponse = $this->getParsedResponse();
-				return $returnParsedResponse;
-			}*/
+
+			/*			if ( $this->isFlag( 'IS_SOAP' ) && $this->isFlag( 'SOAPCHAIN' ) ) {
+							$returnParsedResponse = $this->getParsedResponse();
+							return $returnParsedResponse;
+						}*/
 
 			return $returnResponse;
 		}

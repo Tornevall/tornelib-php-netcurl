@@ -907,7 +907,16 @@ class curlTest extends TestCase {
 	 * @testdox LIB-212
 	 */
 	function hasSsl() {
-		$this->assertTrue($this->CURL->hasSsl());
+		$this->assertTrue( $this->CURL->hasSsl() );
+	}
+
+	/**
+	 * @test
+	 */
+	public function getParsedDom() {
+		/** @var MODULE_CURL $content */
+		$content = $this->urlGet( "ssl&bool&o=xml&method=get&using=SimpleXMLElement", null, "simple.html" )->getParsedDomById();
+		$this->assertTrue(isset($content['divElement']));
 	}
 
 }

@@ -1864,6 +1864,7 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 
 			if ( $this->getParseHtml() ) {
 				if ( class_exists( 'DOMDocument' ) ) {
+					/** @var \DOMDocument $DOM */
 					$DOM = new \DOMDocument();
 					libxml_use_internal_errors( true );
 					$DOM->loadHTML( $content );
@@ -2032,6 +2033,7 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 			$childIdArray        = array();
 			$returnContext       = "";
 			if ( is_object( $childNode ) ) {
+				/** @var \DOMNodeList $nodeItem */
 				foreach ( $childNode as $nodeItem ) {
 					if ( is_object( $nodeItem ) ) {
 						if ( isset( $nodeItem->tagName ) ) {
@@ -2060,6 +2062,14 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 							} else {
 								$childAttributeArray[ $identificationName ][] = $elementData;
 							}
+
+							$idNoName = $nodeItem->tagName;
+							// Forms without id namings will get the tagname. This will open up for reading forms and other elements without id's.
+							// NOTE: If forms are not tagged with an id, the form will not render "properly" and the form fields might pop outside the real form.
+							if (empty( $elementData['id'] )) {
+								$elementData['id'] = $idNoName;
+							}
+
 							if ( ! empty( $elementData['id'] ) ) {
 								if ( ! isset( $childIdArray[ $elementData['id'] ] ) ) {
 									$childIdArray[ $elementData['id'] ] = $elementData;

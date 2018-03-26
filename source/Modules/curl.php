@@ -2042,6 +2042,8 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 							$elementData['id']      = $nodeItem->getAttribute( 'id' );
 							$elementData['name']    = $nodeItem->getAttribute( 'name' );
 							$elementData['context'] = $nodeItem->nodeValue;
+							/** @since 6.0.20 Saving innerhtml */
+							$elementData['innerhtml']   = $nodeItem->ownerDocument->saveHTML( $nodeItem );
 							if ( $nodeItem->hasChildNodes() ) {
 								$elementData['childElement'] = $this->getChildNodes( $nodeItem->childNodes, $getAs );
 							}

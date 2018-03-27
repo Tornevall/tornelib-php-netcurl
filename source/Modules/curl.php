@@ -1797,7 +1797,7 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 		public function ParseContent( $content = '', $isFullRequest = false, $contentType = null ) {
 			if ( $isFullRequest ) {
 				$newContent  = $this->ParseResponse( $content );
-				$content     = $newContent['body'];
+				$content     = trim($newContent['body']);
 				$contentType = isset( $newContent['header']['info']['Content-Type'] ) ? $newContent['header']['info']['Content-Type'] : null;
 			}
 			$parsedContent     = null;
@@ -1862,7 +1862,7 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 			$parsedContent['ByClosestTag'] = array();
 			$parsedContent['ById']         = array();
 
-			if ( $this->getParseHtml() ) {
+			if ( !empty($content) && $this->getParseHtml() ) {
 				if ( class_exists( 'DOMDocument' ) ) {
 					/** @var \DOMDocument $DOM */
 					$DOM = new \DOMDocument();

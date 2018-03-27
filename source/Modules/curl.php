@@ -1854,11 +1854,13 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 				}
 			}
 
-			$parsedContent['ByNodes']      = array();
-			$parsedContent['ByClosestTag'] = array();
-			$parsedContent['ById']         = array();
+			// TODO: Rebuild parser to include HTML rendered data regardless of the parsed content type
+			if ( !empty($content) && empty($parsedContent) && $this->getParseHtml() ) {
+				$parsedContent = array();
+				$parsedContent['ByNodes']      = array();
+				$parsedContent['ByClosestTag'] = array();
+				$parsedContent['ById']         = array();
 
-			if ( !empty($content) && $this->getParseHtml() ) {
 				if ( class_exists( 'DOMDocument' ) ) {
 					/** @var \DOMDocument $DOM */
 					$DOM = new \DOMDocument();

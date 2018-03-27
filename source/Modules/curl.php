@@ -2682,7 +2682,7 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 			// to only set any flags if the security levels of PHP allows it, and only if the follow flag is enabled.
 			//
 			// Refers to http://php.net/manual/en/ini.sect.safe-mode.php
-			if ( $this->getIsSecure( true ) ) {
+			if ( ! $this->getIsSecure( true ) ) {
 				// To disable the default behaviour of this function, use setEnforceFollowLocation([bool]).
 				if ( $this->followLocationSet ) {
 					// Since setCurlOptInternal is not an overrider, using the overrider here, will have no effect on the curlopt setting

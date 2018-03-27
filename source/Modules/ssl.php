@@ -320,7 +320,7 @@ if ( ! class_exists( 'MODULE_SSL' ) && ! class_exists( 'TorneLIB\MODULE_SSL' ) )
 				'allow_self_signed' => $this->SSL_STRICT_SELF_SIGNED,
 			);
 			// During tests, this bundle might disappear depending on what happens in tests. If something fails, that might render
-			// strange false alarms, so we'll just add the file into the array if it's set.
+			// strange false alarms, so we'll just add the file into the array if it's set. Many tests in a row can strangely have this effect.
 			if (!empty($sslCaBundle)) {
 				$contextGenerateArray['cafile'] = $sslCaBundle;
 			}

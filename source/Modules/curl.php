@@ -1853,12 +1853,7 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 					return new \stdClass();
 				}
 			}
-			// If something went wrong in the parsing procedure, initialize the parsedContent variable
-			if ( empty( $parsedContent ) ) {
-				// If there's still nothing parsed, try HTML too
-				$parsedContent = array();
-				$this->setParseHtml( true );
-			}
+
 			$parsedContent['ByNodes']      = array();
 			$parsedContent['ByClosestTag'] = array();
 			$parsedContent['ById']         = array();

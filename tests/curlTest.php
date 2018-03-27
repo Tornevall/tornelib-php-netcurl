@@ -917,7 +917,6 @@ class curlTest extends TestCase {
 		$this->CURL->setParseHtml(true);
 		/** @var MODULE_CURL $content */
 		$content = $this->urlGet( "ssl&bool&o=xml&method=get&using=SimpleXMLElement", null, "simple.html" )->getParsedDomById();
-		print_R($content);
 		static::assertTrue(isset($content['divElement']));
 		$this->CURL->setParseHtml(false);
 	}

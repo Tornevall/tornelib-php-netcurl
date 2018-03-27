@@ -39,7 +39,7 @@ class extendedTest extends TestCase {
 			$wsdl->getPaymentMethods();
 		} catch ( \Exception $e ) {
 			$previousException = $e->getPrevious();
-			$this->assertTrue( isset( $previousException->faultstring ) && ! empty( $previousException->faultstring ) && preg_match( "/unauthorized/i", $e->getMessage() ) );
+			static::assertTrue( isset( $previousException->faultstring ) && ! empty( $previousException->faultstring ) && preg_match( "/unauthorized/i", $e->getMessage() ) );
 		}
 	}
 
@@ -53,7 +53,7 @@ class extendedTest extends TestCase {
 		try {
 			$wsdl->getPaymentMethods();
 		} catch ( \Exception $e ) {
-			$this->assertTrue( preg_match( "/unauthorized/i", $e->getMessage() ) ? true : false );
+			static::assertTrue( preg_match( "/unauthorized/i", $e->getMessage() ) ? true : false );
 		}
 	}
 
@@ -71,7 +71,7 @@ class extendedTest extends TestCase {
 		} catch ( \Exception $e ) {
 			$errorMessage = $e->getMessage();
 			$errorCode    = $e->getCode();
-			$this->assertTrue( $errorCode == 401 && preg_match( "/401 unauthorized/is", $errorMessage ) ? true : false );
+			static::assertTrue( $errorCode == 401 && preg_match( "/401 unauthorized/is", $errorMessage ) ? true : false );
 		}
 	}
 
@@ -89,7 +89,7 @@ class extendedTest extends TestCase {
 		} catch ( \Exception $e ) {
 			$errorMessage = $e->getMessage();
 			$errorCode    = $e->getCode();
-			$this->assertTrue( $errorCode == 401 && preg_match( "/401 unauthorized/is", $errorMessage ) ? true : false );
+			static::assertTrue( $errorCode == 401 && preg_match( "/401 unauthorized/is", $errorMessage ) ? true : false );
 		}
 	}
 
@@ -106,7 +106,7 @@ class extendedTest extends TestCase {
 		} catch ( \Exception $e ) {
 			// As of 6.0.16, SOAPWARNINGS are always enabled. Setting NOSOAPWARNINGS in flags, will render blind errors since the authentication errors are located in uncatchable warnings
 			$errorCode = $e->getCode();
-			$this->assertTrue( $errorCode == 500 ? true : false );
+			static::assertTrue( $errorCode == 500 ? true : false );
 		}
 	}
 
@@ -123,7 +123,37 @@ class extendedTest extends TestCase {
 			// As of 6.0.16, this is the default behaviour even when SOAPWARNINGS are not active by setFlag
 			$errorMessage = $e->getMessage();
 			$errorCode    = $e->getCode();
-			$this->assertTrue( $errorCode == 401 && preg_match( "/401 unauthorized/is", $errorMessage ) ? true : false );
+			static::assertTrue( $errorCode == 401 && preg_match( "/401 unauthorized/is", $errorMessage ) ? true : false );
+		}
+	}
+
+	/**
+	 * @test Go back to basics with NOSOAPCHAIN, since we as of 6.0.20 simplify get wsdl calls
+	 * @throws \Exception
+	 */
+	function rbSoapBackToNoChain() {
+		$this->CURL->setAuthentication( $this->username, $this->password );
+		try {
+			$wsdlResponse = $this->CURL->doGet( 'https://test.resurs.com/ecommerce-test/ws/V4/SimplifiedShopFlowService?wsdl' )->getPaymentMethods();
+			static::assertTrue( is_array( $this->CURL->getParsedResponse( $wsdlResponse ) ) && count( $this->CURL->getParsedResponse( $wsdlResponse ) ) > 1 );
+		} catch ( \Exception $e ) {
+			static::markTestSkipped( __FUNCTION__ . ": " . $e->getMessage() );
+		}
+	}
+
+
+	/**
+	 * @test
+	 * @testdox Test invalid function
+	 * @throws \Exception
+	 */
+	function rbFailSoapChain() {
+		$this->CURL->setFlag( "SOAPCHAIN" );
+		$this->CURL->setAuthentication( $this->username, $this->password );
+		try {
+			$this->CURL->doGet( 'https://test.resurs.com/ecommerce-test/ws/V4/SimplifiedShopFlowService?wsdl' )->getPaymentMethodz();
+		} catch ( \Exception $e ) {
+			static::assertTrue( $e->getMessage() != "" );
 		}
 	}
 
@@ -137,38 +167,10 @@ class extendedTest extends TestCase {
 		$this->CURL->setAuthentication( $this->username, $this->password );
 		try {
 			$wsdlResponse = $this->CURL->doGet( 'https://test.resurs.com/ecommerce-test/ws/V4/SimplifiedShopFlowService?wsdl' )->getPaymentMethods();
-			$this->assertTrue( is_array( $wsdlResponse ) && count( $wsdlResponse ) > 1 );
+			static::assertTrue( is_array( $wsdlResponse ) && count( $wsdlResponse ) > 1 );
 		} catch ( \Exception $e ) {
-			$this->markTestSkipped( __FUNCTION__ . ": " . $e->getMessage() );
+			static::markTestSkipped( __FUNCTION__ . ": " . $e->getMessage() );
 		}
 	}
 
-	/**
-	 * @test
-	 * @testdox Test invalid function
-	 * @throws \Exception
-	 */
-	function rbFailSoapChain() {
-		$this->CURL->setFlag( "SOAPCHAIN" );
-		$this->CURL->setAuthentication( $this->username, $this->password );
-		try {
-			$this->CURL->doGet( 'https://test.resurs.com/ecommerce-test/ws/V4/SimplifiedShopFlowService?wsdl' )->getPaymentMethodz();
-		} catch ( \Exception $e ) {
-			$this->assertTrue( $e->getMessage() != "" );
-		}
-	}
-
-	/**
-	 * @test Go back to basics with NOSOAPCHAIN, since we as of 6.0.20 simplify get wsdl calls
-	 * @throws \Exception
-	 */
-	function rbSoapBackToNoChain() {
-		$this->CURL->setAuthentication( $this->username, $this->password );
-		try {
-			$wsdlResponse = $this->CURL->doGet( 'https://test.resurs.com/ecommerce-test/ws/V4/SimplifiedShopFlowService?wsdl' )->getPaymentMethods();
-			$this->assertTrue( is_array( $this->CURL->getParsedResponse( $wsdlResponse ) ) && count( $this->CURL->getParsedResponse( $wsdlResponse ) ) > 1 );
-		} catch ( \Exception $e ) {
-			$this->markTestSkipped( __FUNCTION__ . ": " . $e->getMessage() );
-		}
-	}
 }

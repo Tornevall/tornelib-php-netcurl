@@ -550,11 +550,16 @@ class curlTest extends TestCase {
 		$returnedExecResponse = $this->getIpListByIpRoute();
 		if ( ! empty( $returnedExecResponse ) && is_array( $returnedExecResponse ) ) {
 			$NETWORK = new MODULE_NETWORK();
+			$lastValidIp = null;
 			foreach ( $returnedExecResponse as $ip ) {
 				// Making sure this test is running safely with non locals only
 				if ( ! in_array( $ip, $ipArray ) && $NETWORK->getArpaFromAddr( $ip, true ) > 0 && ! preg_match( "/^10\./", $ip ) && ! preg_match( "/^172\./", $ip ) && ! preg_match( "/^192\./", $ip ) ) {
 					$ipArray[] = $ip;
+					$lastValidIp = $ip;
 				}
+			}
+			if (count($ipArray) == 1 ) {
+				$ipArray[] = $lastValidIp;
 			}
 			if ( is_array( $ipArray ) && count( $ipArray ) > 1 ) {
 				foreach ( $ipArray as $ip ) {
@@ -658,7 +663,6 @@ class curlTest extends TestCase {
 
 			return;
 		}
-		$this->markTestSkipped( "No throwables was set up" );
 	}
 
 	/**

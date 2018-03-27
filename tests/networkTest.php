@@ -26,63 +26,63 @@ class networkTest extends TestCase {
 	 * @test
 	 */
 	function getArpaLocalhost4() {
-		$this->assertTrue( $this->NET->getArpaFromIpv4( "127.0.0.1" ) === "1.0.0.127" );
+		static::assertTrue( $this->NET->getArpaFromIpv4( "127.0.0.1" ) === "1.0.0.127" );
 	}
 
 	/**
 	 * @test
 	 */
 	function getArpaLocalhost6() {
-		$this->assertTrue( $this->NET->getArpaFromIpv6( "::1" ) === "1.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0" );
+		static::assertTrue( $this->NET->getArpaFromIpv6( "::1" ) === "1.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0" );
 	}
 
 	/**
 	 * @test
 	 */
 	function getArpaLocalhost4Second() {
-		$this->assertTrue( $this->NET->getArpaFromIpv4( "192.168.12.36" ) === "36.12.168.192" );
+		static::assertTrue( $this->NET->getArpaFromIpv4( "192.168.12.36" ) === "36.12.168.192" );
 	}
 
 	/**
 	 * @test
 	 */
 	function getArpaLocalhost6Second() {
-		$this->assertTrue( $this->NET->getArpaFromIpv6( "2a01:299:a0:ff:10:128:255:2" ) === "2.0.0.0.5.5.2.0.8.2.1.0.0.1.0.0.f.f.0.0.0.a.0.0.9.9.2.0.1.0.a.2" );
+		static::assertTrue( $this->NET->getArpaFromIpv6( "2a01:299:a0:ff:10:128:255:2" ) === "2.0.0.0.5.5.2.0.8.2.1.0.0.1.0.0.f.f.0.0.0.a.0.0.9.9.2.0.1.0.a.2" );
 	}
 
 	/**
 	 * @test
 	 */
 	function getArpaLocalhost4Nulled() {
-		$this->assertEmpty( $this->NET->getArpaFromIpv4( null ) );
+		static::assertEmpty( $this->NET->getArpaFromIpv4( null ) );
 	}
 
 	/**
 	 * @test
 	 */
 	function getArpaLocalhost6Nulled() {
-		$this->assertEmpty( $this->NET->getArpaFromIpv6( null ) );
+		static::assertEmpty( $this->NET->getArpaFromIpv6( null ) );
 	}
 
 	/**
 	 * @test
 	 */
 	function getArpaLocalhost4String() {
-		$this->assertEmpty( $this->NET->getArpaFromIpv4( "fail here" ) );
+		static::assertEmpty( $this->NET->getArpaFromIpv4( "fail here" ) );
 	}
 
 	/**
 	 * @test
 	 */
 	function getArpaLocalhost6String() {
-		$this->assertEmpty( $this->NET->getArpaFromIpv6( "fail here" ) );
+		static::assertEmpty( $this->NET->getArpaFromIpv6( "fail here" ) );
 	}
 
 	/**
 	 * @test
 	 */
 	function getArpaLocalhost6CorruptString1() {
-		$this->assertEmpty( $this->NET->getArpaFromIpv6( "a : b \\" ) );
+		static::assertEmpty( $this->NET->getArpaFromIpv6( "a : b \\" ) );
 	}
 
 	/**
@@ -93,91 +93,91 @@ class networkTest extends TestCase {
 		for ( $i = 0; $i < 255; $i ++ ) {
 			$badString .= chr( $i );
 		}
-		$this->assertEmpty( $this->NET->getArpaFromIpv6( $badString ) );
+		static::assertEmpty( $this->NET->getArpaFromIpv6( $badString ) );
 	}
 
 	/**
 	 * @test
 	 */
 	function octetV6() {
-		$this->assertTrue( $this->NET->getIpv6FromOctets( "2.0.0.0.5.5.2.0.8.2.1.0.0.1.0.0.f.f.0.0.0.a.0.0.9.9.2.0.1.0.a.2" ) === "2a01:299:a0:ff:10:128:255:2" );
+		static::assertTrue( $this->NET->getIpv6FromOctets( "2.0.0.0.5.5.2.0.8.2.1.0.0.1.0.0.f.f.0.0.0.a.0.0.9.9.2.0.1.0.a.2" ) === "2a01:299:a0:ff:10:128:255:2" );
 	}
 
 	/**
 	 * @test
 	 */
 	function getArpaAuto4() {
-		$this->assertTrue( $this->NET->getArpaFromAddr( "172.16.12.3" ) === "3.12.16.172" );
+		static::assertTrue( $this->NET->getArpaFromAddr( "172.16.12.3" ) === "3.12.16.172" );
 	}
 
 	/**
 	 * @test
 	 */
 	function getArpaAuto6() {
-		$this->assertTrue( $this->NET->getArpaFromAddr( "2a00:1450:400f:802::200e" ) === "e.0.0.2.0.0.0.0.0.0.0.0.0.0.0.0.2.0.8.0.f.0.0.4.0.5.4.1.0.0.a.2" );
+		static::assertTrue( $this->NET->getArpaFromAddr( "2a00:1450:400f:802::200e" ) === "e.0.0.2.0.0.0.0.0.0.0.0.0.0.0.0.2.0.8.0.f.0.0.4.0.5.4.1.0.0.a.2" );
 	}
 
 	/**
 	 * @test
 	 */
 	function getIpType4() {
-		$this->assertTrue( $this->NET->getArpaFromAddr( "172.22.1.83", true ) === TorneLIB_Network_IP_Protocols::PROTOCOL_IPV4 );
+		static::assertTrue( $this->NET->getArpaFromAddr( "172.22.1.83", true ) === TorneLIB_Network_IP_Protocols::PROTOCOL_IPV4 );
 	}
 
 	/**
 	 * @test
 	 */
 	function getIpType6() {
-		$this->assertTrue( $this->NET->getArpaFromAddr( "2a03:2880:f113:83:face:b00c:0:25de", true ) === TorneLIB_Network_IP_Protocols::PROTOCOL_IPV6 );
+		static::assertTrue( $this->NET->getArpaFromAddr( "2a03:2880:f113:83:face:b00c:0:25de", true ) === TorneLIB_Network_IP_Protocols::PROTOCOL_IPV6 );
 	}
 
 	/**
 	 * @test
 	 */
 	function getIpTypeFail() {
-		$this->assertTrue( $this->NET->getArpaFromAddr( "This.Aint.An.Address", true ) === TorneLIB_Network_IP_Protocols::PROTOCOL_NONE );
+		static::assertTrue( $this->NET->getArpaFromAddr( "This.Aint.An.Address", true ) === TorneLIB_Network_IP_Protocols::PROTOCOL_NONE );
 	}
 
 	/**
 	 * @test
 	 */
 	function maskRangeArray24() {
-		$this->assertCount( 255, $this->NET->getRangeFromMask( "192.168.1.0/24" ) );
+		static::assertCount( 255, $this->NET->getRangeFromMask( "192.168.1.0/24" ) );
 	}
 
 	/**
 	 * @test
 	 */
 	function maskRangeArray16() {
-		$this->assertCount( 65535, $this->NET->getRangeFromMask( "192.168.0.0/16" ) );
+		static::assertCount( 65535, $this->NET->getRangeFromMask( "192.168.0.0/16" ) );
 	}
 
 	/**
 	 * @test
 	 */
 	function maskRange24() {
-		$this->assertTrue( $this->NET->isIpInRange( "192.168.1.55", "192.168.1.0/24" ) );
+		static::assertTrue( $this->NET->isIpInRange( "192.168.1.55", "192.168.1.0/24" ) );
 	}
 
 	/**
 	 * @test
 	 */
 	function maskRange24Fail() {
-		$this->assertFalse( $this->NET->isIpInRange( "192.168.2.55", "192.168.1.0/24" ) );
+		static::assertFalse( $this->NET->isIpInRange( "192.168.2.55", "192.168.1.0/24" ) );
 	}
 
 	/**
 	 * @test
 	 */
 	function maskRange16() {
-		$this->assertTrue( $this->NET->isIpInRange( "192.168.2.55", "192.168.0.0/16" ) );
+		static::assertTrue( $this->NET->isIpInRange( "192.168.2.55", "192.168.0.0/16" ) );
 	}
 
 	/**
 	 * @test
 	 */
 	function maskRange8() {
-		$this->assertTrue( $this->NET->isIpInRange( "172.213.9.3", "172.0.0.0/8" ) );
+		static::assertTrue( $this->NET->isIpInRange( "172.213.9.3", "172.0.0.0/8" ) );
 	}
 
 	/**
@@ -187,7 +187,7 @@ class networkTest extends TestCase {
 		$localNetwork = new MODULE_NETWORK();
 		$localNetwork->setAlwaysResolveHostvalidation( true );
 		$urlData = $localNetwork->getUrlDomain( "http://www.tornevall.net/" );
-		$this->assertTrue( $urlData[0] == "www.tornevall.net" );
+		static::assertTrue( $urlData[0] == "www.tornevall.net" );
 	}
 
 	/**
@@ -199,7 +199,7 @@ class networkTest extends TestCase {
 		try {
 			$urlData = $localNetwork->getUrlDomain( "http://failing.domain/" );
 		} catch (\Exception $e) {
-			$this->assertTrue($e->getCode() == NETCURL_EXCEPTIONS::NETCURL_HOSTVALIDATION_FAIL);
+			static::assertTrue($e->getCode() == NETCURL_EXCEPTIONS::NETCURL_HOSTVALIDATION_FAIL);
 		}
 	}
 
@@ -209,6 +209,6 @@ class networkTest extends TestCase {
 	function hostValidationNoResolve() {
 		$localNetwork = new MODULE_NETWORK();
 		$urlData      = $localNetwork->getUrlDomain( "http://failing.domain/" );
-		$this->assertTrue( $urlData[0] == "failing.domain" );
+		static::assertTrue( $urlData[0] == "failing.domain" );
 	}
 }

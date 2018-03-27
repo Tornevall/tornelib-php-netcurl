@@ -27,7 +27,7 @@ class guzzleTest extends TestCase {
 				return $this->CURL->setDriver( NETCURL_NETWORK_DRIVERS::DRIVER_GUZZLEHTTP_STREAM );
 			}
 		} catch (\Exception $e) {
-			$this->markTestSkipped( "Can not test guzzle driver without guzzle (".$e->getMessage().")" );
+			static::markTestSkipped( "Can not test guzzle driver without guzzle (".$e->getMessage().")" );
 		}
 	}
 
@@ -39,9 +39,9 @@ class guzzleTest extends TestCase {
 			$info = $this->CURL->doPost( "https://" . \TESTURLS::getUrlTests() . "?o=json&getjson=true&var1=HasVar1", array( 'var2' => 'HasPostVar1' ) );
 			$this->CURL->getExternalDriverResponse();
 			$parsed = $this->CURL->getParsedResponse( $info );
-			$this->assertTrue( $parsed->methods->_REQUEST->var1 === "HasVar1" );
+			static::assertTrue( $parsed->methods->_REQUEST->var1 === "HasVar1" );
 		} else {
-			$this->markTestSkipped( "Can not test guzzle driver without guzzle" );
+			static::markTestSkipped( "Can not test guzzle driver without guzzle" );
 		}
 	}
 
@@ -56,9 +56,9 @@ class guzzleTest extends TestCase {
 			) );
 			$this->CURL->getExternalDriverResponse();
 			$parsed = $this->CURL->getParsedResponse( $info );
-			$this->assertTrue( $parsed->methods->_REQUEST->var1 === "HasVar1" );
+			static::assertTrue( $parsed->methods->_REQUEST->var1 === "HasVar1" );
 		} else {
-			$this->markTestSkipped( "Can not test guzzle driver without guzzle" );
+			static::markTestSkipped( "Can not test guzzle driver without guzzle" );
 		}
 	}
 
@@ -74,9 +74,9 @@ class guzzleTest extends TestCase {
 			), CURL_POST_AS::POST_AS_JSON );
 			$this->CURL->getExternalDriverResponse();
 			$parsed = $this->CURL->getParsedResponse( $info );
-			$this->assertTrue( $parsed->methods->_REQUEST->var1 === "HasVar1" );
+			static::assertTrue( $parsed->methods->_REQUEST->var1 === "HasVar1" );
 		} else {
-			$this->markTestSkipped( "Can not test guzzle driver without guzzle" );
+			static::markTestSkipped( "Can not test guzzle driver without guzzle" );
 		}
 	}
 
@@ -87,9 +87,9 @@ class guzzleTest extends TestCase {
 		if ( $this->hasGuzzle() ) {
 			// Currently, this one will fail over to SimpleSoap
 			$info = $this->CURL->doGet( "http://" . \TESTURLS::getUrlSoap() );
-			$this->assertTrue( is_object( $info ) );
+			static::assertTrue( is_object( $info ) );
 		} else {
-			$this->markTestSkipped( "Can not test guzzle driver without guzzle" );
+			static::markTestSkipped( "Can not test guzzle driver without guzzle" );
 		}
 	}
 
@@ -101,10 +101,10 @@ class guzzleTest extends TestCase {
 			try {
 				$info = $this->CURL->doPost( \TESTURLS::getUrlTests() . "&o=json&getjson=true", array( 'var1' => 'HasVar1' ) );
 			} catch ( \Exception $wrapError ) {
-				$this->assertTrue( $wrapError->getCode() == 404 );
+				static::assertTrue( $wrapError->getCode() == 404 );
 			}
 		} else {
-			$this->markTestSkipped( "Can not test guzzle driver without guzzle" );
+			static::markTestSkipped( "Can not test guzzle driver without guzzle" );
 		}
 	}
 }

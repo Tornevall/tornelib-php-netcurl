@@ -2,6 +2,7 @@
 <phpunit bootstrap="vendor/autoload.php"
          colors="true"
          verbose="true"
+         processsolation="true"
          stopOnFailure="false">
     <testsuites>
         <testsuite name="NetCurl with friends">

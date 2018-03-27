@@ -32,7 +32,7 @@ class skippablePhpTest extends TestCase {
 	function followRedirectSafeMode() {
 		// http://php.net/manual/en/ini.sect.safe-mode.php
 		if ( version_compare( PHP_VERSION, "5.4.0", ">=" ) ) {
-			$this->markTestSkipped( "Safe mode has been removed from this platform, so tests can not be performed" );
+			static::markTestSkipped( "Safe mode has been removed from this platform, so tests can not be performed" );
 
 			return;
 		}
@@ -40,11 +40,11 @@ class skippablePhpTest extends TestCase {
 			$this->pemDefault();
 			$redirectResponse = $this->CURL->doGet( "http://developer.tornevall.net/tests/tornevall_network/redirect.php?run" );
 			$redirectedUrls   = $this->CURL->getRedirectedUrls();
-			$this->assertTrue( $this->CURL->getResponseCode( $redirectResponse ) >= 300 && $this->CURL->getResponseCode( $redirectResponse ) <= 350 && ! preg_match( "/rerun/i", $this->CURL->getResponseBody( $redirectResponse ) ) && count( $redirectedUrls ) );
+			static::assertTrue( $this->CURL->getResponseCode( $redirectResponse ) >= 300 && $this->CURL->getResponseCode( $redirectResponse ) <= 350 && ! preg_match( "/rerun/i", $this->CURL->getResponseBody( $redirectResponse ) ) && count( $redirectedUrls ) );
 
 			return;
 		}
-		$this->markTestSkipped( "Safe mode is available as an option. It is however not enabled on this platform and can not therefore be tested." );
+		static::markTestSkipped( "Safe mode is available as an option. It is however not enabled on this platform and can not therefore be tested." );
 	}
 
 	/**
@@ -62,12 +62,12 @@ class skippablePhpTest extends TestCase {
 			}
 		}
 		if ( ! $serviceFound ) {
-			$this->markTestSkipped( "Skip TOR Network tests: TOR Service not found in the current control" );
+			static::markTestSkipped( "Skip TOR Network tests: TOR Service not found in the current control" );
 		} else {
 			$this->CURL->setProxy( $this->TorSetupAddress, $this->TorSetupType );
 			$CurlJson = $this->CURL->doGet( \TESTURLS::getUrlSimpleJson() );
 			$parsedIp = $this->NETWORK->getArpaFromAddr( $this->CURL->getParsedResponse()->ip, true );
-			$this->assertTrue( $parsedIp > 0 );
+			static::assertTrue( $parsedIp > 0 );
 		}
 	}
 

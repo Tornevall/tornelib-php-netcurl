@@ -311,13 +311,20 @@ if ( ! class_exists( 'MODULE_SSL' ) && ! class_exists( 'TorneLIB\MODULE_SSL' ) )
 		 * @since 6.0.0
 		 */
 		public function getSslStreamContext() {
-			return array(
-				'cafile'            => $this->getSslCertificateBundle(),
+			$sslCaBundle = $this->getSslCertificateBundle();
+			/** @var array $contextGenerateArray Default stream context array, does not contain a ca bundle */
+			$contextGenerateArray = array(
 				'verify_peer'       => $this->SSL_STRICT_VERIFICATION,
 				'verify_peer_name'  => $this->SSL_STRICT_VERIFICATION,
 				'verify_host'       => $this->SSL_STRICT_VERIFICATION,
-				'allow_self_signed' => $this->SSL_STRICT_SELF_SIGNED
+				'allow_self_signed' => $this->SSL_STRICT_SELF_SIGNED,
 			);
+			// During tests, this bundle might disappear depending on what happens in tests. If something fails, that might render
+			// strange false alarms, so we'll just add the file into the array if it's set.
+			if (!empty($sslCaBundle)) {
+				$contextGenerateArray['cafile'] = $sslCaBundle;
+			}
+			return $contextGenerateArray;
 		}
 
 		/**

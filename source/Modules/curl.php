@@ -1853,7 +1853,8 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 					return new \stdClass();
 				}
 			}
-			if ( ! is_array( $parsedContent ) ) {
+			// If something went wrong in the parsing procedure, initialize the parsedContent variable
+			if ( empty( $parsedContent ) ) {
 				// If there's still nothing parsed, try HTML too
 				$parsedContent = array();
 				$this->setParseHtml( true );
@@ -2539,7 +2540,7 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 		 * @param bool $checkSafeMode If true, we will also check if safe_mode is active
 		 * @param bool $mockSafeMode If true, NetCurl will pretend safe_mode is true (for testing)
 		 *
-		 * @return bool
+		 * @return bool If true, PHP is in secure mode and won't allow things like follow-redirects and setting up different paths for certificates, etc
 		 * @since 6.0.20
 		 */
 		public function getIsSecure( $checkSafeMode = true, $mockSafeMode = false ) {

@@ -127,7 +127,7 @@ if ( ! class_exists( 'MODULE_SSL' ) && ! class_exists( 'TorneLIB\MODULE_SSL' ) )
 		 * @param bool $checkSafeMode If true, we will also check if safe_mode is active
 		 * @param bool $mockSafeMode If true, NetCurl will pretend safe_mode is true (for testing)
 		 *
-		 * @return bool
+		 * @return bool If true, PHP is in secure mode and won't allow things like follow-redirects and setting up different paths for certificates, etc
 		 * @since 6.0.20
 		 */
 		public function getIsSecure( $checkSafeMode = true, $mockSafeMode = false ) {

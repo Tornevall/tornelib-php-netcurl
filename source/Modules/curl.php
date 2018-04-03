@@ -1467,6 +1467,7 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 		 *
 		 * @return string
 		 * @throws \Exception
+		 * @deprecated 6.0.20
 		 */
 		public function hasUpdate( $libName = 'tornelib_curl' ) {
 			if ( ! $this->isFlag( 'NETCURL_ALLOW_VERSION_REQUESTS' ) ) {
@@ -1481,6 +1482,7 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 		 *
 		 * @return string
 		 * @throws \Exception
+		 * @deprecated 6.0.20
 		 */
 		private function getHasUpdateState( $libName = 'tornelib_curl' ) {
 			// Currently only supporting this internal module (through $myRelease).

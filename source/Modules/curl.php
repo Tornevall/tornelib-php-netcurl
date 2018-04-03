@@ -222,13 +222,20 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 
 		//// COOKIE CONFIGS
 		private $useLocalCookies = false;
-		private $CookiePath = null;
+		/**
+		 * @var string $COOKIE_PATH
+		 */
+		private $COOKIE_PATH = '';
 		private $SaveCookies = false;
-		private $CookieFile = null;
-		private $CookiePathCreated = false;
+		private $CookieFile = '';
+		/**
+		 * @var bool $UseCookieExceptions
+		 * @deprecated 6.0.20
+		 */
 		private $UseCookieExceptions = false;
-		public $AllowTempAsCookiePath = false;
-		/** @var bool Use cookies and save them if needed (Normally not needed, but enabled by default) */
+		/**
+		 * @var bool $CurlUseCookies
+		 */
 		public $CurlUseCookies = true;
 
 		//// RESOLVING AND TIMEOUTS
@@ -487,13 +494,11 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 		}
 
 		/**
-		 * Termination Controller - Used amongst others, to make sure that empty cookiepaths created by this library gets removed if they are being used.
+		 * Termination Controller
+		 *
+		 * As of 6.0.20 cookies will be only stored if there is a predefined cookiepath or if system tempdir is allowed
 		 */
 		function tornecurl_terminate() {
-			// If this indicates that we created the path, make sure it's removed if empty after session completion
-			if ( ! count( glob( $this->CookiePath . "/*" ) ) && $this->CookiePathCreated ) {
-				@rmdir( $this->CookiePath );
-			}
 		}
 
 		/**
@@ -560,8 +565,7 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 		}
 
 		/**
-		 * cUrl initializer, if needed faster
-		 *
+		 * Initialize curl
 		 * @return resource
 		 * @throws \Exception
 		 * @since 5.0.0
@@ -733,48 +737,57 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 		}
 
 		/**
-		 * Initialize cookie storage
+		 * Initialize cookie handler
 		 *
-		 * @throws \Exception
+		 * @return bool
 		 */
 		private function initCookiePath() {
-			if ( defined( 'TORNELIB_DISABLE_CURL_COOKIES' ) || ! $this->useLocalCookies ) {
-				return;
-			}
+			// Method rewrite as of NetCurl 6.0.20
 
-			/**
-			 * TORNEAPI_COOKIES has priority over TORNEAPI_PATH that is the default path
-			 */
-			if ( defined( 'TORNEAPI_COOKIES' ) ) {
-				$this->CookiePath = TORNEAPI_COOKIES;
-			} else {
-				if ( defined( 'TORNEAPI_PATH' ) ) {
-					$this->CookiePath = TORNEAPI_PATH . "/cookies";
+			try {
+				$sysTempDir = sys_get_temp_dir();
+
+				if ( $this->isFlag( 'NETCURL_DISABLE_CURL_COOKIES' ) || ! $this->useLocalCookies ) {
+					return false;
 				}
-			}
-			// If path is still empty after the above check, continue checking other paths
-			if ( empty( $this->CookiePath ) || ( ! empty( $this->CookiePath ) && ! is_dir( $this->CookiePath ) ) ) {
-				// We could use /tmp as cookie path but it is not recommended (which means this permission is by default disabled
-				if ( $this->AllowTempAsCookiePath ) {
-					if ( is_dir( "/tmp" ) ) {
-						$this->CookiePath = "/tmp/";
-					}
-				} else {
-					// However, if we still failed, we're trying to use a local directory
-					$realCookiePath = realpath( __DIR__ . "/../cookies" );
-					if ( empty( $realCookiePath ) ) {
-						// Try to create a directory before bailing out
-						$getCookiePath = realpath( __DIR__ . "/tornelib-php-netcurl/" );
-						@mkdir( $getCookiePath . "/cookies/" );
-						$this->CookiePathCreated = true;
-						$this->CookiePath        = realpath( $getCookiePath . "/cookies/" );
+				$ownCookiePath = $this->getFlag( 'NETCURL_COOKIE_LOCATION' );
+				if ( ! empty( $ownCookiePath ) ) {
+					if ( is_dir( $ownCookiePath ) ) {
+						$this->COOKIE_PATH = $ownCookiePath;
+
+						return true;
 					} else {
-						$this->CookiePath = realpath( __DIR__ . "/../cookies" );
-					}
-					if ( $this->UseCookieExceptions && ( empty( $this->CookiePath ) || ! is_dir( $this->CookiePath ) ) ) {
-						throw new \Exception( NETCURL_CURL_CLIENTNAME . " " . __FUNCTION__ . " exception: Could not set up a proper cookiepath [To override this, use AllowTempAsCookiePath (not recommended)]", $this->NETWORK->getExceptionCode( 'NETCURL_COOKIEPATH_SETUP_FAIL' ) );
+						@mkdir( $ownCookiePath );
+						if ( is_dir( $ownCookiePath ) ) {
+							$this->COOKIE_PATH = $ownCookiePath;
+
+							return true;
+						}
+
+						return false;
 					}
 				}
+
+				if ( empty( $this->COOKIE_PATH ) ) {
+					if ( $this->isFlag( 'NETCURL_COOKIE_TEMP_LOCATION' ) ) {
+						if ( ! empty( $sysTempDir ) ) {
+							if ( is_dir( $sysTempDir ) ) {
+								$this->COOKIE_PATH = $sysTempDir;
+								@mkdir( $sysTempDir . "/netcurl/" );
+								if ( is_dir( $sysTempDir . "/netcurl/" ) ) {
+									$this->COOKIE_PATH = $sysTempDir . "/netcurl/";
+								}
+
+								return true;
+							} else {
+								return false;
+							}
+						}
+					}
+				}
+			} catch ( \Exception $e ) {
+				// Something happened, so we won't try this again
+				return false;
 			}
 		}
 
@@ -1064,6 +1077,15 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 		}
 
 		/**
+		 * @return string
+		 */
+		public function getCookiePath() {
+			$this->initCookiePath();
+
+			return $this->COOKIE_PATH;
+		}
+
+		/**
 		 * Enforce a response type if you're not happy with the default returned array.
 		 *
 		 * @param int $ResponseType
@@ -1156,6 +1178,8 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 		 * Exceptions are invoked, normally when the function for initializing cookies can not create the storage directory. This is something you should consider disabled in a production environment.
 		 *
 		 * @param bool $enabled
+		 *
+		 * @deprecated 6.0.20 No longer in use
 		 */
 		public function setCookieExceptions( $enabled = false ) {
 			$this->UseCookieExceptions = $enabled;
@@ -1165,6 +1189,7 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 		 * Returns the boolean value set (eventually) from setCookieException
 		 * @return bool
 		 * @since 6.0.6
+		 * @deprecated 6.0.20 No longer in use
 		 */
 		public function getCookieExceptions() {
 			return $this->UseCookieExceptions;
@@ -1403,7 +1428,7 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 		 * @deprecated 6.0.0 Use tag control
 		 */
 		public function getInternalRelease() {
-			if ( defined( 'TORNELIB_ALLOW_VERSION_REQUESTS' ) && TORNELIB_ALLOW_VERSION_REQUESTS === true ) {
+			if ( $this->isFlag( 'TORNELIB_ALLOW_VERSION_REQUESTS' ) ) {
 				return $this->TorneNetCurlVersion . "," . $this->TorneCurlReleaseDate;
 			}
 			throw new \Exception( NETCURL_CURL_CLIENTNAME . " internalReleaseException [" . __CLASS__ . "]: Version requests are not allowed in current state (permissions required)", 403 );
@@ -1446,8 +1471,8 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 		 * @throws \Exception
 		 */
 		public function hasUpdate( $libName = 'tornelib_curl' ) {
-			if ( ! defined( 'TORNELIB_ALLOW_VERSION_REQUESTS' ) ) {
-				define( 'TORNELIB_ALLOW_VERSION_REQUESTS', true );
+			if ( ! $this->isFlag( 'TORNELIB_ALLOW_VERSION_REQUESTS' ) ) {
+				$this->setFlag( 'TORNELIB_ALLOW_VERSION_REQUESTS', true );
 			}
 
 			return $this->getHasUpdateState( $libName );
@@ -1780,7 +1805,7 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 		public function ParseContent( $content = '', $isFullRequest = false, $contentType = null ) {
 			if ( $isFullRequest ) {
 				$newContent  = $this->ParseResponse( $content );
-				$content     = trim($newContent['body']);
+				$content     = trim( $newContent['body'] );
 				$contentType = isset( $newContent['header']['info']['Content-Type'] ) ? $newContent['header']['info']['Content-Type'] : null;
 			}
 			$parsedContent     = null;
@@ -1838,8 +1863,8 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 			}
 
 			// TODO: Rebuild parser to include HTML rendered data regardless of the parsed content type
-			if ( !empty($content) && empty($parsedContent) && $this->getParseHtml() ) {
-				$parsedContent = array();
+			if ( ! empty( $content ) && empty( $parsedContent ) && $this->getParseHtml() ) {
+				$parsedContent                 = array();
 				$parsedContent['ByNodes']      = array();
 				$parsedContent['ByClosestTag'] = array();
 				$parsedContent['ById']         = array();
@@ -1871,6 +1896,7 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 			}
 
 			$this->ParseContainer = $parsedContent;
+
 			return $parsedContent;
 		}
 
@@ -1880,11 +1906,12 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 		 * @return array
 		 * @since 6.0.20
 		 */
-		private function extractParsedDom($byWhat = 'Id') {
-			$validElements = array('Id', 'ClosestTag', 'Nodes');
-			if (in_array($byWhat, $validElements) && isset($this->ParseContainer['By'. $byWhat])) {
-				return $this->ParseContainer['By' . $byWhat];
+		private function extractParsedDom( $byWhat = 'Id' ) {
+			$validElements = array( 'Id', 'ClosestTag', 'Nodes' );
+			if ( in_array( $byWhat, $validElements ) && isset( $this->ParseContainer[ 'By' . $byWhat ] ) ) {
+				return $this->ParseContainer[ 'By' . $byWhat ];
 			}
+
 			return array();
 		}
 
@@ -1893,7 +1920,7 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 		 * @since 6.0.20
 		 */
 		public function getParsedDomByNodes() {
-			return $this->extractParsedDom('Nodes');
+			return $this->extractParsedDom( 'Nodes' );
 		}
 
 		/**
@@ -1901,7 +1928,7 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 		 * @since 6.0.20
 		 */
 		public function getParsedDomById() {
-			return $this->extractParsedDom('Id');
+			return $this->extractParsedDom( 'Id' );
 		}
 
 		/**
@@ -1909,7 +1936,7 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 		 * @since 6.0.20
 		 */
 		public function getParsedDomByClosestTag() {
-			return $this->extractParsedDom('ClosestTag');
+			return $this->extractParsedDom( 'ClosestTag' );
 		}
 
 		/**
@@ -2026,7 +2053,7 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 							$elementData['name']    = $nodeItem->getAttribute( 'name' );
 							$elementData['context'] = $nodeItem->nodeValue;
 							/** @since 6.0.20 Saving innerhtml */
-							$elementData['innerhtml']   = $nodeItem->ownerDocument->saveHTML( $nodeItem );
+							$elementData['innerhtml'] = $nodeItem->ownerDocument->saveHTML( $nodeItem );
 							if ( $nodeItem->hasChildNodes() ) {
 								$elementData['childElement'] = $this->getChildNodes( $nodeItem->childNodes, $getAs );
 							}
@@ -2047,7 +2074,7 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 							$idNoName = $nodeItem->tagName;
 							// Forms without id namings will get the tagname. This will open up for reading forms and other elements without id's.
 							// NOTE: If forms are not tagged with an id, the form will not render "properly" and the form fields might pop outside the real form.
-							if (empty( $elementData['id'] )) {
+							if ( empty( $elementData['id'] ) ) {
 								$elementData['id'] = $idNoName;
 							}
 
@@ -2682,11 +2709,11 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 			$postDataContainer = $this->PostDataContainer;
 
 			$domainArray = $this->NETWORK->getUrlDomain( $this->CURL_STORED_URL );
-			$domainName  = null;
-			$domainHash  = null;
+			$domainName  = '';
+			$domainHash  = '';
 			if ( isset( $domainArray[0] ) ) {
 				$domainName = $domainArray[0];
-				$domainHash = md5( $domainName );
+				$domainHash = sha1( $domainName );
 			}
 
 			/**** CONDITIONAL SETUP ****/
@@ -2755,17 +2782,17 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 			if ( isset( $this->CurlEncoding ) && ! empty( $this->CurlEncoding ) ) {
 				$this->setCurlOpt( CURLOPT_ENCODING, $this->CurlEncoding ); // overwrite old
 			}
-			if ( file_exists( $this->CookiePath ) && $this->CurlUseCookies && ! empty( $this->CURL_STORED_URL ) ) {
-				@file_put_contents( $this->CookiePath . "/tmpcookie", "test" );
-				if ( ! file_exists( $this->CookiePath . "/tmpcookie" ) ) {
+			if ( file_exists( $this->COOKIE_PATH ) && $this->CurlUseCookies && ! empty( $this->CURL_STORED_URL ) ) {
+				@file_put_contents( $this->COOKIE_PATH . "/tmpcookie", "test" );
+				if ( ! file_exists( $this->COOKIE_PATH . "/tmpcookie" ) ) {
 					$this->SaveCookies = true;
 					$this->CookieFile  = $domainHash;
-					$this->setCurlOptInternal( CURLOPT_COOKIEFILE, $this->CookiePath . "/" . $this->CookieFile );
-					$this->setCurlOptInternal( CURLOPT_COOKIEJAR, $this->CookiePath . "/" . $this->CookieFile );
+					$this->setCurlOptInternal( CURLOPT_COOKIEFILE, $this->COOKIE_PATH . "/" . $this->CookieFile );
+					$this->setCurlOptInternal( CURLOPT_COOKIEJAR, $this->COOKIE_PATH . "/" . $this->CookieFile );
 					$this->setCurlOptInternal( CURLOPT_COOKIE, 1 );
 				} else {
-					if ( file_exists( $this->CookiePath . "/tmpcookie" ) ) {
-						unlink( $this->CookiePath . "/tmpcookie" );
+					if ( file_exists( $this->COOKIE_PATH . "/tmpcookie" ) ) {
+						unlink( $this->COOKIE_PATH . "/tmpcookie" );
 					}
 					$this->SaveCookies = false;
 				}

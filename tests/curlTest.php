@@ -549,7 +549,7 @@ class curlTest extends TestCase {
 		$responses            = array();
 		$returnedExecResponse = $this->getIpListByIpRoute();
 		if ( ! empty( $returnedExecResponse ) && is_array( $returnedExecResponse ) ) {
-			$NETWORK = new MODULE_NETWORK();
+			$NETWORK     = new MODULE_NETWORK();
 			$lastValidIp = null;
 			foreach ( $returnedExecResponse as $ip ) {
 				// Making sure this test is running safely with non locals only
@@ -914,11 +914,49 @@ class curlTest extends TestCase {
 	 * @test
 	 */
 	public function getParsedDom() {
-		$this->CURL->setParseHtml(true);
+		$this->CURL->setParseHtml( true );
 		/** @var MODULE_CURL $content */
 		$content = $this->urlGet( "ssl&bool&o=xml&method=get&using=SimpleXMLElement", null, "simple.html" )->getParsedDomById();
-		static::assertTrue(isset($content['divElement']));
-		$this->CURL->setParseHtml(false);
+		static::assertTrue( isset( $content['divElement'] ) );
+		$this->CURL->setParseHtml( false );
+	}
+
+	/**
+	 * @test
+	 * @testdox Activation of storing cookies locally
+	 */
+	public function enableLocalCookiesInSysTemp() {
+		$this->CURL->setLocalCookies( true );
+		try {
+			$this->CURL->setFlag( 'NETCURL_COOKIE_TEMP_LOCATION', true );
+		} catch ( \Exception $e ) {
+
+		}
+		// For Linux based systems, we go through /tmp
+		static::assertStringStartsWith( "/tmp/netcurl", $this->CURL->getCookiePath() );
+	}
+
+	/**
+	 * @test
+	 * @throws \Exception
+	 */
+	public function enableLocalCookiesInSysTempProhibited() {
+		$this->CURL->setLocalCookies( true );
+		static::assertEquals( '', $this->CURL->getCookiePath() );
+	}
+
+	/**
+	 * @test
+	 * @testdox Set own temporary directory (remove it first so tests gives correct responses) - also testing directory creation
+	 * @throws \Exception
+	 */
+	public function enableLocalCookiesSelfLocated() {
+		$this->CURL->setLocalCookies( true );
+		@rmdir( "/tmp/netcurl_self" );
+		$this->CURL->setFlag( 'NETCURL_COOKIE_LOCATION', '/tmp/netcurl_self' );
+		// For Linux based systems, we go through /tmp
+		static::assertStringStartsWith( "/tmp/netcurl_self", $this->CURL->getCookiePath() );
+		@rmdir( "/tmp/netcurl_self" );
 	}
 
 }

@@ -532,8 +532,8 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 					$this->setFlag( $flagKey, true );
 				}
 			}
-			if ( $this->isFlag( "NOCHAIN" ) ) {
-				$this->unsetFlag( "CHAIN" );
+			if ( $this->isFlag( 'NOCHAIN' ) ) {
+				$this->unsetFlag( 'CHAIN' );
 			}
 		}
 
@@ -914,14 +914,14 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 		 */
 		public function setChain( $enable = true ) {
 			if ( $enable ) {
-				$this->setFlag( "CHAIN" );
+				$this->setFlag( 'CHAIN' );
 			} else {
-				$this->unsetFlag( "CHAIN" );
+				$this->unsetFlag( 'CHAIN' );
 			}
 		}
 
 		public function getIsChained() {
-			return $this->isFlag( "CHAIN" );
+			return $this->isFlag( 'CHAIN' );
 		}
 
 		//// EXCEPTION HANDLING
@@ -1421,14 +1421,12 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 		/**
 		 * Get this internal release version
 		 *
-		 * Requires the constant TORNELIB_ALLOW_VERSION_REQUESTS to return any information.
-		 *
 		 * @return string
 		 * @throws \Exception
 		 * @deprecated 6.0.0 Use tag control
 		 */
 		public function getInternalRelease() {
-			if ( $this->isFlag( 'TORNELIB_ALLOW_VERSION_REQUESTS' ) ) {
+			if ( $this->isFlag( 'NETCURL_ALLOW_VERSION_REQUESTS' ) ) {
 				return $this->TorneNetCurlVersion . "," . $this->TorneCurlReleaseDate;
 			}
 			throw new \Exception( NETCURL_CURL_CLIENTNAME . " internalReleaseException [" . __CLASS__ . "]: Version requests are not allowed in current state (permissions required)", 403 );
@@ -1471,8 +1469,8 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 		 * @throws \Exception
 		 */
 		public function hasUpdate( $libName = 'tornelib_curl' ) {
-			if ( ! $this->isFlag( 'TORNELIB_ALLOW_VERSION_REQUESTS' ) ) {
-				$this->setFlag( 'TORNELIB_ALLOW_VERSION_REQUESTS', true );
+			if ( ! $this->isFlag( 'NETCURL_ALLOW_VERSION_REQUESTS' ) ) {
+				$this->setFlag( 'NETCURL_ALLOW_VERSION_REQUESTS', true );
 			}
 
 			return $this->getHasUpdateState( $libName );
@@ -1944,13 +1942,13 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 		 *
 		 * @param string $content
 		 *
-		 * @return array|string|TORNELIB_CURLOBJECT
+		 * @return array|string|NETCURL_CURLOBJECT
 		 * @throws \Exception
 		 */
 		private function ParseResponse( $content = '' ) {
 			// Kill the chaining (for future releases, when we eventually raise chaining mode as default)
-			if ( $this->isFlag( "NOCHAIN" ) ) {
-				$this->unsetFlag( "CHAIN" );
+			if ( $this->isFlag( 'NOCHAIN' ) ) {
+				$this->unsetFlag( 'CHAIN' );
 			}
 
 			if ( ! is_string( $content ) ) {
@@ -2015,7 +2013,7 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 				return $returnResponseObject;
 			}
 			$this->TemporaryResponse = $returnResponse;
-			if ( $this->isFlag( "CHAIN" ) && ! $this->isFlag( 'IS_SOAP' ) ) {
+			if ( $this->isFlag( 'CHAIN' ) && ! $this->isFlag( 'IS_SOAP' ) ) {
 				return $this;
 			}
 

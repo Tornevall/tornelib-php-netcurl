@@ -29,7 +29,7 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 		define( 'NETCURL_CURL_RELEASE', '6.0.19' );
 	}
 	if ( ! defined( 'NETCURL_CURL_MODIFY' ) ) {
-		define( 'NETCURL_CURL_MODIFY', '20180328' );
+		define( 'NETCURL_CURL_MODIFY', '20180403' );
 	}
 	if ( ! defined( 'NETCURL_CURL_CLIENTNAME' ) ) {
 		define( 'NETCURL_CURL_CLIENTNAME', 'MODULE_CURL' );
@@ -139,7 +139,15 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 		 * @todo Change to SOAPCHAIN-mode when compatibility arrives
 		 */
 		private $internalFlags = array( 'CHAIN' => true, 'SOAPCHAIN' => false );
-		private $contentType;
+
+		/**
+		 * @var string $contentType Pre-Set content type, when installed modules needs to know in what format we are sending data
+		 */
+		private $contentType = '';
+
+		/**
+		 * @var array $debugData Debug data from session
+		 */
 		private $debugData = array(
 			'data'     => array(
 				'info' => array()
@@ -156,48 +164,22 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 		/// DEFAULT: Most of the settings are set to be disabled, so that the system handles this automatically with defaults
 		/// If there are problems reaching wsdl or connecting to https-based URLs, try set $testssl to true
 
-		/**
-		 * @var bool $testssl
-		 *
-		 * For PHP >= 5.6.0: If defined, try to guess if there is valid certificate bundles when using for example https links (used with openssl).
-		 *
-		 * This function activated by setting this value to true, tries to detect whether sslVerify should be used or not.
-		 * The default value of this setting is normally false, since there should be no problems in a properly installed environment.
-		 */
-		private $testssl = true;
-		/** @var bool Do not test certificates on older PHP-version (< 5.6.0) if this is false */
-		private $testssldeprecated = false;
-		/** @var bool If there are problems with certificates bound to a host/peer, set this to false if necessary. Default is to always try to verify them */
-		private $sslVerify = true;
 		/** @var bool If SSL has been compiled in CURL, this will transform to true */
 		private $CURL_SSL_AVAILABLE = false;
-		/**
-		 * Allow https calls to unverified peers/hosts
-		 *
-		 * @since 5.0.0
-		 * @var bool
-		 */
-		private $allowSslUnverified = false;
-		/** @var string Defines what file to use as a certificate bundle */
-		private $useCertFile = "";
-		/** @var bool Shows if the certificate file found has been found internally or if it was set by user */
-		private $hasDefaultCertFile = false;
-		/** @var bool Shows if the certificate check has been runned */
-		private $openSslGuessed = false;
 
 		//// IP AND PROXY CONFIG
-		private $CurlIp = null;
-		private $CurlIpType = null;
+		private $CURL_IP_ADDRESS = null;
+		private $CURL_IP_ADDRESS_TYPE = null;
 		/** @var null CurlProxy, if set, we will try to proxify the traffic */
-		private $CurlProxy = null;
+		private $CURL_PROXY_GATEWAY = null;
 		/** @var null, if not set, but CurlProxy is, we will use HTTP as proxy (See CURLPROXY_* for more information) */
-		private $CurlProxyType = null;
+		private $CURL_PROXY_TYPE = null;
 		/** @var bool Enable tunneling mode */
-		private $CurlTunnel = false;
+		private $CURL_TUNNEL = false;
 
 		//// URL REDIRECT
 		/** @var bool Decide whether the curl library should follow an url redirect or not */
-		private $followLocationSet = true;
+		private $FOLLOW_LOCATION_ENABLE = true;
 		/** @var array List of redirections during curl calls */
 		private $redirectedUrls = array();
 
@@ -1133,7 +1115,7 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 		 * @since 5.0.0/2017.4
 		 */
 		public function setEnforceFollowLocation( $setEnabledState = true ) {
-			$this->followLocationSet = $setEnabledState;
+			$this->FOLLOW_LOCATION_ENABLE = $setEnabledState;
 		}
 
 		/**
@@ -1142,7 +1124,7 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 		 * @since 6.0.6
 		 */
 		public function getEnforceFollowLocation() {
-			return $this->followLocationSet;
+			return $this->FOLLOW_LOCATION_ENABLE;
 		}
 
 		/**
@@ -1689,8 +1671,8 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 		 * @throws \Exception
 		 */
 		private function handleIpList() {
-			$this->CurlIp = null;
-			$UseIp        = "";
+			$this->CURL_IP_ADDRESS = null;
+			$UseIp                 = "";
 			if ( is_array( $this->IpAddr ) ) {
 				if ( count( $this->IpAddr ) == 1 ) {
 					$UseIp = ( isset( $this->IpAddr[0] ) && ! empty( $this->IpAddr[0] ) ? $this->IpAddr[0] : null );
@@ -1714,14 +1696,14 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 					throw new \Exception( NETCURL_CURL_CLIENTNAME . " " . __FUNCTION__ . " exception: " . $UseIp . " is not a valid ip-address", $this->NETWORK->getExceptionCode( 'NETCURL_IPCONFIG_NOT_VALID' ) );
 				}
 			} else {
-				$this->CurlIp = $UseIp;
+				$this->CURL_IP_ADDRESS = $UseIp;
 				curl_setopt( $this->CurlSession, CURLOPT_INTERFACE, $UseIp );
 				if ( $ipType == 6 ) {
 					curl_setopt( $this->CurlSession, CURLOPT_IPRESOLVE, CURL_IPRESOLVE_V6 );
-					$this->CurlIpType = 6;
+					$this->CURL_IP_ADDRESS_TYPE = 6;
 				} else {
 					curl_setopt( $this->CurlSession, CURLOPT_IPRESOLVE, CURL_IPRESOLVE_V4 );
-					$this->CurlIpType = 4;
+					$this->CURL_IP_ADDRESS_TYPE = 4;
 				}
 			}
 		}
@@ -1735,12 +1717,12 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 		 * @throws \Exception
 		 */
 		public function setProxy( $ProxyAddr, $ProxyType = CURLPROXY_HTTP ) {
-			$this->CurlProxy     = $ProxyAddr;
-			$this->CurlProxyType = $ProxyType;
+			$this->CURL_PROXY_GATEWAY = $ProxyAddr;
+			$this->CURL_PROXY_TYPE    = $ProxyType;
 			// Run from proxy on request
-			$this->setCurlOptInternal( CURLOPT_PROXY, $this->CurlProxy );
-			if ( isset( $this->CurlProxyType ) && ! empty( $this->CurlProxyType ) ) {
-				$this->setCurlOptInternal( CURLOPT_PROXYTYPE, $this->CurlProxyType );
+			$this->setCurlOptInternal( CURLOPT_PROXY, $this->CURL_PROXY_GATEWAY );
+			if ( isset( $this->CURL_PROXY_TYPE ) && ! empty( $this->CURL_PROXY_TYPE ) ) {
+				$this->setCurlOptInternal( CURLOPT_PROXYTYPE, $this->CURL_PROXY_TYPE );
 			}
 		}
 
@@ -1752,8 +1734,8 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 		 */
 		public function getProxy() {
 			return array(
-				'curlProxy'     => $this->CurlProxy,
-				'curlProxyType' => $this->CurlProxyType
+				'curlProxy'     => $this->CURL_PROXY_GATEWAY,
+				'curlProxyType' => $this->CURL_PROXY_TYPE
 			);
 		}
 
@@ -1767,7 +1749,7 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 		 */
 		public function setTunnel( $curlTunnelEnable = true ) {
 			// Run in tunneling mode
-			$this->CurlTunnel = $curlTunnelEnable;
+			$this->CURL_TUNNEL = $curlTunnelEnable;
 			$this->setCurlOptInternal( CURLOPT_HTTPPROXYTUNNEL, $curlTunnelEnable );
 		}
 
@@ -1777,7 +1759,7 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 		 * @return bool
 		 */
 		public function getTunnel() {
-			return $this->CurlTunnel;
+			return $this->CURL_TUNNEL;
 		}
 
 
@@ -1991,7 +1973,7 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 				$returnResponse['parsed'] = ( ! empty( $parsedContent ) ? $parsedContent : null );
 			}
 			$returnResponse['URL'] = $this->CURL_STORED_URL;
-			$returnResponse['ip']  = isset( $this->CurlIp ) ? $this->CurlIp : null;  // Will only be filled if there is custom address set.
+			$returnResponse['ip']  = isset( $this->CURL_IP_ADDRESS ) ? $this->CURL_IP_ADDRESS : null;  // Will only be filled if there is custom address set.
 
 			if ( $this->ResponseType == NETCURL_RESPONSETYPE::RESPONSETYPE_OBJECT ) {
 				// This is probably not necessary and will not be the default setup after all.
@@ -2683,10 +2665,10 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 			// Refers to http://php.net/manual/en/ini.sect.safe-mode.php
 			if ( ! $this->getIsSecure( true ) ) {
 				// To disable the default behaviour of this function, use setEnforceFollowLocation([bool]).
-				if ( $this->followLocationSet ) {
+				if ( $this->FOLLOW_LOCATION_ENABLE ) {
 					// Since setCurlOptInternal is not an overrider, using the overrider here, will have no effect on the curlopt setting
 					// as it has already been set from our top defaults. This has to be pushed in, by force.
-					$this->setCurlOpt( CURLOPT_FOLLOWLOCATION, $this->followLocationSet );
+					$this->setCurlOpt( CURLOPT_FOLLOWLOCATION, $this->FOLLOW_LOCATION_ENABLE );
 				}
 			}
 
@@ -2749,11 +2731,11 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 
 			$this->setCurlOptInternal( CURLOPT_VERBOSE, false );
 			// Tunnel and proxy setup. If this is set, make sure the default IP setup gets cleared out.
-			if ( ! empty( $this->CurlProxy ) && ! empty( $this->CurlProxyType ) ) {
-				unset( $this->CurlIp );
+			if ( ! empty( $this->CURL_PROXY_GATEWAY ) && ! empty( $this->CURL_PROXY_TYPE ) ) {
+				unset( $this->CURL_IP_ADDRESS );
 			}
 			if ( $this->getTunnel() ) {
-				unset( $this->CurlIp );
+				unset( $this->CURL_IP_ADDRESS );
 			}
 
 			// Another HTTP_REFERER
@@ -2865,12 +2847,12 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 					if ( $errorCode == CURLE_COULDNT_RESOLVE_HOST || $errorCode === 45 ) {
 						$this->errorContainer[] = array( 'code' => $errorCode, 'message' => $errorMessage );
 						$this->CurlRetryTypes['resolve'] ++;
-						unset( $this->CurlIp );
+						unset( $this->CURL_IP_ADDRESS );
 						$this->CurlResolveForced = true;
-						if ( $this->CurlIpType == 6 ) {
+						if ( $this->CURL_IP_ADDRESS_TYPE == 6 ) {
 							$this->CurlResolve = NETCURL_RESOLVER::RESOLVER_IPV4;
 						}
-						if ( $this->CurlIpType == 4 ) {
+						if ( $this->CURL_IP_ADDRESS_TYPE == 4 ) {
 							$this->CurlResolve = NETCURL_RESOLVER::RESOLVER_IPV6;
 						}
 

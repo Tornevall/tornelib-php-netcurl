@@ -20,6 +20,7 @@
  * @package TorneLIB
  * @version 6.0.19
  */
+
 /**
  * Want to test this library with an external library like Guzzle? Add this row to composer:
  *
@@ -45,5 +46,9 @@ if ( ! defined( 'NETCURL_RELEASE' ) ) {
 	define( 'NETCURL_RELEASE', '6.0.20' );
 }
 if ( ! defined( 'NETCURL_MODIFY' ) ) {
-	define( 'NETCURL_MODIFY', '20180325' );
+	define( 'NETCURL_MODIFY', '20180328' );
+}
+if ( ! defined( 'TORNELIB_NETCURL_RELEASE' ) ) {
+// Compatibility constant
+	define( 'TORNELIB_NETCURL_RELEASE', NETCURL_RELEASE );
 }

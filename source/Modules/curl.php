@@ -18,7 +18,7 @@
  * Tornevall Networks netCurl library - Yet another http- and network communicator library
  * Each class in this library has its own version numbering to keep track of where the changes are. However, there is a major version too.
  * @package TorneLIB
- * @version 6.0.20
+ * @version 6.0.19
  */
 
 namespace TorneLIB;
@@ -26,10 +26,10 @@ namespace TorneLIB;
 if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' ) ) {
 
 	if ( ! defined( 'NETCURL_CURL_RELEASE' ) ) {
-		define( 'NETCURL_CURL_RELEASE', '6.0.18' );
+		define( 'NETCURL_CURL_RELEASE', '6.0.19' );
 	}
 	if ( ! defined( 'NETCURL_CURL_MODIFY' ) ) {
-		define( 'NETCURL_CURL_MODIFY', '20180325' );
+		define( 'NETCURL_CURL_MODIFY', '20180328' );
 	}
 	if ( ! defined( 'NETCURL_CURL_CLIENTNAME' ) ) {
 		define( 'NETCURL_CURL_CLIENTNAME', 'MODULE_CURL' );
@@ -126,17 +126,18 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 		 * Target environment (if target is production some debugging values will be skipped)
 		 *
 		 * @since 5.0.0
-		 * @var int
+		 * @var int $TARGET_ENVIRONMENT
 		 * @deprecated 6.0.20 Not in use
 		 */
 		private $TARGET_ENVIRONMENT = NETCURL_ENVIRONMENT::ENVIRONMENT_PRODUCTION;
 		/** @var null Our communication channel */
 		private $CurlSession = null;
 		/** @var null URL that was set to communicate with */
-		private $CurlURL = null;
-		/** @var array Flags controller to change behaviour on internal function */
-		//private $internalFlags = array();
-		// Change to this flagSet when compatibility has been fixed
+		private $CURL_STORED_URL = null;
+		/**
+		 * @var array $internalFlags Flags controller to change behaviour on internal function
+		 * @todo Change to SOAPCHAIN-mode when compatibility arrives
+		 */
 		private $internalFlags = array( 'CHAIN' => true, 'SOAPCHAIN' => false );
 		private $contentType;
 		private $debugData = array(
@@ -318,8 +319,8 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 
 			$this->CurlUserAgent = $this->userAgents['Mozilla'] . ' ' . NETCURL_CURL_CLIENTNAME . '-' . NETCURL_RELEASE . "/" . __CLASS__ . "-" . NETCURL_CURL_RELEASE . ' (' . $this->netCurlUrl . ')';
 			if ( ! empty( $PreferredURL ) ) {
-				$this->CurlURL   = $PreferredURL;
-				$InstantResponse = null;
+				$this->CURL_STORED_URL = $PreferredURL;
+				$InstantResponse       = null;
 				if ( $PreferredMethod == NETCURL_POST_METHODS::METHOD_GET ) {
 					$InstantResponse = $this->doGet( $PreferredURL );
 				} else if ( $PreferredMethod == NETCURL_POST_METHODS::METHOD_POST ) {
@@ -586,7 +587,7 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 		public function init() {
 			$this->initCookiePath();
 			if ( $this->hasCurl() ) {
-				$this->CurlSession = curl_init( $this->CurlURL );
+				$this->CurlSession = curl_init( $this->CURL_STORED_URL );
 			}
 
 			return $this->CurlSession;
@@ -1966,7 +1967,7 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 
 			// If response code starts with 3xx, this is probably a redirect
 			if ( preg_match( "/^3/", $code ) ) {
-				$this->redirectedUrls[] = $this->CurlURL;
+				$this->redirectedUrls[] = $this->CURL_STORED_URL;
 				$redirectArray[]        = array(
 					'header' => $header,
 					'body'   => $body,
@@ -1989,7 +1990,7 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 				$parsedContent            = $this->ParseContent( $returnResponse['body'], false, $contentType );
 				$returnResponse['parsed'] = ( ! empty( $parsedContent ) ? $parsedContent : null );
 			}
-			$returnResponse['URL'] = $this->CurlURL;
+			$returnResponse['URL'] = $this->CURL_STORED_URL;
 			$returnResponse['ip']  = isset( $this->CurlIp ) ? $this->CurlIp : null;  // Will only be filled if there is custom address set.
 
 			if ( $this->ResponseType == NETCURL_RESPONSETYPE::RESPONSETYPE_OBJECT ) {
@@ -2661,7 +2662,7 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 		 */
 		private function executeCurl( $url = '', $postData = array(), $CurlMethod = NETCURL_POST_METHODS::METHOD_GET, $postAs = NETCURL_POST_DATATYPES::DATATYPE_NOT_SET ) {
 			if ( ! empty( $url ) ) {
-				$this->CurlURL = $url;
+				$this->CURL_STORED_URL = $url;
 			}
 			$this->getAvailableDrivers();
 
@@ -2693,12 +2694,12 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 			$this->handleIpList();      // Pick up externally selected outgoing ip if any requested
 
 			// This curlopt makes it possible to make a call to a specific ip address and still use the HTTP_HOST (Must override)
-			$this->setCurlOpt( CURLOPT_URL, $this->CurlURL );
+			$this->setCurlOpt( CURLOPT_URL, $this->CURL_STORED_URL );
 
 			$this->executePostData( $postData, $postAs );
 			$postDataContainer = $this->PostDataContainer;
 
-			$domainArray = $this->NETWORK->getUrlDomain( $this->CurlURL );
+			$domainArray = $this->NETWORK->getUrlDomain( $this->CURL_STORED_URL );
 			$domainName  = null;
 			$domainHash  = null;
 			if ( isset( $domainArray[0] ) ) {
@@ -2772,7 +2773,7 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 			if ( isset( $this->CurlEncoding ) && ! empty( $this->CurlEncoding ) ) {
 				$this->setCurlOpt( CURLOPT_ENCODING, $this->CurlEncoding ); // overwrite old
 			}
-			if ( file_exists( $this->CookiePath ) && $this->CurlUseCookies && ! empty( $this->CurlURL ) ) {
+			if ( file_exists( $this->CookiePath ) && $this->CurlUseCookies && ! empty( $this->CURL_STORED_URL ) ) {
 				@file_put_contents( $this->CookiePath . "/tmpcookie", "test" );
 				if ( ! file_exists( $this->CookiePath . "/tmpcookie" ) ) {
 					$this->SaveCookies = true;
@@ -2810,7 +2811,7 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 			$this->setCurlOpt( CURLINFO_HEADER_OUT, true );
 
 			// Override with SoapClient just before the real curl_exec is the most proper way to handle inheritages
-			if ( preg_match( "/\?wsdl$|\&wsdl$/i", $this->CurlURL ) || $postAs == NETCURL_POST_DATATYPES::DATATYPE_SOAP ) {
+			if ( preg_match( "/\?wsdl$|\&wsdl$/i", $this->CURL_STORED_URL ) || $postAs == NETCURL_POST_DATATYPES::DATATYPE_SOAP ) {
 				if ( ! $this->hasSoap() ) {
 					throw new \Exception( NETCURL_CURL_CLIENTNAME . " " . __FUNCTION__ . " exception: SoapClient is not available in this system", $this->NETWORK->getExceptionCode( 'NETCURL_SOAPCLIENT_CLASS_MISSING' ) );
 				}
@@ -2831,7 +2832,7 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 				if ( curl_errno( $this->CurlSession ) ) {
 
 					$this->debugData['data']['url'][] = array(
-						'url'       => $this->CurlURL,
+						'url'       => $this->CURL_STORED_URL,
 						'opt'       => $this->getCurlOptByKeys(),
 						'success'   => false,
 						'exception' => curl_error( $this->CurlSession )
@@ -2846,19 +2847,19 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 					$errorCode    = curl_errno( $this->CurlSession );
 					$errorMessage = curl_error( $this->CurlSession );
 					if ( $this->CurlResolveForced && $this->CurlRetryTypes['resolve'] >= 2 ) {
-						throw new \Exception( NETCURL_CURL_CLIENTNAME . " exception in " . __FUNCTION__ . ": The maximum tries of curl_exec() for " . $this->CurlURL . " has been reached without any successful response. Normally, this happens after " . $this->CurlRetryTypes['resolve'] . " CurlResolveRetries and might be connected with a bad URL or similar that can not resolve properly.\nCurl error message follows: " . $errorMessage, $errorCode );
+						throw new \Exception( NETCURL_CURL_CLIENTNAME . " exception in " . __FUNCTION__ . ": The maximum tries of curl_exec() for " . $this->CURL_STORED_URL . " has been reached without any successful response. Normally, this happens after " . $this->CurlRetryTypes['resolve'] . " CurlResolveRetries and might be connected with a bad URL or similar that can not resolve properly.\nCurl error message follows: " . $errorMessage, $errorCode );
 					}
 					// CURLE_SSL_CACERT = 60
 					if ( $errorCode == CURLE_SSL_CACERT && $this->SSL->getStrictFallback() ) {
 						if ( $this->CurlRetryTypes['sslunverified'] >= 2 ) {
-							throw new \Exception( NETCURL_CURL_CLIENTNAME . " exception in " . __FUNCTION__ . ": The maximum tries of curl_exec() for " . $this->CurlURL . ", during a try to make a SSL connection to work, has been reached without any successful response. This normally happens when allowSslUnverified is activated in the library and " . $this->CurlRetryTypes['resolve'] . " tries to fix the problem has been made, but failed.\nCurl error message follows: " . $errorMessage, $errorCode );
+							throw new \Exception( NETCURL_CURL_CLIENTNAME . " exception in " . __FUNCTION__ . ": The maximum tries of curl_exec() for " . $this->CURL_STORED_URL . ", during a try to make a SSL connection to work, has been reached without any successful response. This normally happens when allowSslUnverified is activated in the library and " . $this->CurlRetryTypes['resolve'] . " tries to fix the problem has been made, but failed.\nCurl error message follows: " . $errorMessage, $errorCode );
 						} else {
 							$this->errorContainer[] = array( 'code' => $errorCode, 'message' => $errorMessage );
 							$this->setSslVerify( false, false );
 							$this->unsafeSslCall = true;
 							$this->CurlRetryTypes['sslunverified'] ++;
 
-							return $this->executeCurl( $this->CurlURL, $postData, $CurlMethod );
+							return $this->executeCurl( $this->CURL_STORED_URL, $postData, $CurlMethod );
 						}
 					}
 					if ( $errorCode == CURLE_COULDNT_RESOLVE_HOST || $errorCode === 45 ) {
@@ -2873,12 +2874,12 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 							$this->CurlResolve = NETCURL_RESOLVER::RESOLVER_IPV6;
 						}
 
-						return $this->executeCurl( $this->CurlURL, $postData, $CurlMethod );
+						return $this->executeCurl( $this->CURL_STORED_URL, $postData, $CurlMethod );
 					}
 					throw new \Exception( NETCURL_CURL_CLIENTNAME . " exception from PHP/CURL at " . __FUNCTION__ . ": " . curl_error( $this->CurlSession ), curl_errno( $this->CurlSession ) );
 				} else {
 					$this->debugData['data']['url'][] = array(
-						'url'       => $this->CurlURL,
+						'url'       => $this->CURL_STORED_URL,
 						'opt'       => $this->getCurlOptByKeys(),
 						'success'   => true,
 						'exception' => null
@@ -2905,7 +2906,7 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 		 */
 		private function executeHttpSoap( $url = '', $postData = array(), $CurlMethod = NETCURL_POST_METHODS::METHOD_GET ) {
 			$this->setChain( false );
-			$Soap = new MODULE_SOAP( $this->CurlURL, $this );
+			$Soap = new MODULE_SOAP( $this->CURL_STORED_URL, $this );
 			$Soap->setFlag( 'IS_SOAP' );
 			/** @since 6.0.20 */
 			$Soap->setChain( false );
@@ -2919,7 +2920,7 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 			try {
 				$getSoapResponse                      = $Soap->getSoap();
 				$this->debugData['soapdata']['url'][] = array(
-					'url'       => $this->CurlURL,
+					'url'       => $this->CURL_STORED_URL,
 					'opt'       => $this->getCurlOptByKeys(),
 					'success'   => true,
 					'exception' => null,
@@ -2927,7 +2928,7 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 				);
 			} catch ( \Exception $getSoapResponseException ) {
 				$this->debugData['soapdata']['url'][] = array(
-					'url'       => $this->CurlURL,
+					'url'       => $this->CURL_STORED_URL,
 					'opt'       => $this->getCurlOptByKeys(),
 					'success'   => false,
 					'exception' => $getSoapResponseException,
@@ -2953,7 +2954,7 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 		 * @since 6.0.14
 		 */
 		private function executeHttpExternal( $url = '', $postData = array(), $CurlMethod = NETCURL_POST_METHODS::METHOD_GET, $postAs = NETCURL_POST_DATATYPES::DATATYPE_NOT_SET ) {
-			if ( preg_match( "/\?wsdl$|\&wsdl$/i", $this->CurlURL ) || $postAs == NETCURL_POST_DATATYPES::DATATYPE_SOAP ) {
+			if ( preg_match( "/\?wsdl$|\&wsdl$/i", $this->CURL_STORED_URL ) || $postAs == NETCURL_POST_DATATYPES::DATATYPE_SOAP ) {
 				if ( ! $this->hasSoap() ) {
 					throw new \Exception( NETCURL_CURL_CLIENTNAME . " " . __FUNCTION__ . " exception: SoapClient is not available in this system", $this->NETWORK->getExceptionCode( 'NETCURL_SOAPCLIENT_CLASS_MISSING' ) );
 				}

@@ -16,7 +16,6 @@ use \TorneLIB\MODULE_CURL;
 ini_set( 'memory_limit', - 1 );    // Free memory limit, some tests requires more memory (like ip-range handling)
 
 class extendedTest extends TestCase {
-
 	/**
 	 * @var MODULE_CURL $CURL
 	 */
@@ -106,7 +105,12 @@ class extendedTest extends TestCase {
 		} catch ( \Exception $e ) {
 			// As of 6.0.16, SOAPWARNINGS are always enabled. Setting NOSOAPWARNINGS in flags, will render blind errors since the authentication errors are located in uncatchable warnings
 			$errorCode = $e->getCode();
-			static::assertTrue( $errorCode == 500 ? true : false );
+			if ( version_compare( TORNELIB_NETCURL_RELEASE, "6.0.20", '>=' ) ) {
+				static::assertTrue( $errorCode == 500 ? true : false );
+			} else {
+				// For older versions than 6.0.20, we can't turn SOAPWARNINGS off prorperly, so in those versions our errorcode 401 remains
+				static::assertTrue( $errorCode == 401 ? true : false );
+			}
 		}
 	}
 
@@ -172,5 +176,4 @@ class extendedTest extends TestCase {
 			static::markTestSkipped( __FUNCTION__ . ": " . $e->getMessage() );
 		}
 	}
-
 }

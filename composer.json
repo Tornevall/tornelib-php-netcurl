@@ -4,9 +4,7 @@
   "minimum-stability": "stable",
   "license": "Apache-2.0",
   "require": {
-    "php": ">=5.3",
-    "ext-soap": "*",
-    "ext-curl": "*"
+    "php": ">=5.3"
   },
   "authors": [
     {
@@ -18,6 +16,9 @@
   ],
   "autoload": {
     "files": [
+      "source/Interface/drivers.php",
+      "source/Modules/Drivers/guzzle.php",
+      "source/Modules/Drivers/wordpress.php",
       "source/Modules/netcurl_init.php",
       "source/Modules/drivers.php",
       "source/Modules/ssl.php",

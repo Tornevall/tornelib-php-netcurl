@@ -27,7 +27,11 @@ class driversTest extends TestCase {
 	 * @test
 	 */
 	function getSystemWideDrivers() {
-		static::assertTrue( count( $this->DRIVERCLASS->getSystemWideDrivers() ) > 1 ? true : false );
+		if ($this->DRIVERCLASS->getSystemWideDrivers()) {
+			static::assertTrue( count( $this->DRIVERCLASS->getSystemWideDrivers() ) > 1 ? true : false );
+		} else {
+			static::markTestSkipped("Test is built to return an array of available drivers. Your system seem to miss at least one driver, to trig this test. This test is skipped.");
+		}
 	}
 
 	/**

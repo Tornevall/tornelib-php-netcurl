@@ -121,8 +121,8 @@ class driversTest extends TestCase {
 	 */
 	function doCurl() {
 		/** @var MODULE_CURL $requestContent */
-		$requestContent = $this->CURL->doGet("https://identifier.tornevall.net/?json");
-		print_R($requestContent->getParsedResponse());
+		$requestContent = $this->CURL->doGet("https://identifier.tornevall.net/?json")->getParsedResponse();
+		static::assertTrue(is_object($requestContent) && isset($requestContent->ip));
 	}
 
 }

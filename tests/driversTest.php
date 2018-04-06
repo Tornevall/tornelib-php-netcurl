@@ -6,7 +6,7 @@ if ( file_exists( __DIR__ . '/../vendor/autoload.php' ) ) {
 	require_once( __DIR__ . '/../vendor/autoload.php' );
 }
 
-require_once(__DIR__ . "/testurls.php");
+require_once( __DIR__ . "/testurls.php" );
 
 use PHPUnit\Framework\TestCase;
 
@@ -20,7 +20,7 @@ class driversTest extends TestCase {
 
 	function setUp() {
 		$this->DRIVERCLASS = new NETCURL_DRIVER_CONTROLLER();
-		$this->CURL = new MODULE_CURL();
+		$this->CURL        = new MODULE_CURL();
 	}
 
 	/**
@@ -81,10 +81,36 @@ class driversTest extends TestCase {
 	 * @test
 	 */
 	function getDriverGuzzle() {
-		if ($this->DRIVERCLASS->getIsDriver(NETCURL_NETWORK_DRIVERS::DRIVER_GUZZLEHTTP)) {
+		if ( $this->DRIVERCLASS->getIsDriver( NETCURL_NETWORK_DRIVERS::DRIVER_GUZZLEHTTP ) ) {
 			$this->CURL->setDriver( NETCURL_NETWORK_DRIVERS::DRIVER_GUZZLEHTTP );
 			$returnedDriver = $this->CURL->getDriver();
 			static::assertStringEndsWith( "GUZZLEHTTP", get_class( $returnedDriver ) );
+		} else {
+			static::markTestSkipped( "Can not test guzzle without guzzle" );
+		}
+	}
+
+	/**
+	 * @test
+	 * @testdox Auto detection of drivers (choose "next available")
+	 */
+	function autoDetect() {
+		$this->CURL->setDriverAuto();
+		$driverIdentification = $this->CURL->getDriver();
+		if ( is_object( $driverIdentification ) ) {
+			static::markTestSkipped( is_object( $this->CURL->getDriver() ), "isObject/another driver than curl" );
+		} else {
+			static::assertTrue( $this->CURL->getDriver() === NETCURL_NETWORK_DRIVERS::DRIVER_CURL, "internalDriver" );
+		}
+	}
+
+	/**
+	 * @test
+	 */
+	function setGuzzle() {
+		if ( $this->DRIVERCLASS->getIsDriver( NETCURL_NETWORK_DRIVERS::DRIVER_GUZZLEHTTP ) || $this->DRIVERCLASS->getIsDriver( NETCURL_NETWORK_DRIVERS::DRIVER_GUZZLEHTTP_STREAM ) ) {
+			$this->CURL->setDriver(NETCURL_NETWORK_DRIVERS::DRIVER_GUZZLEHTTP_STREAM);
+			static::assertTrue(is_object($this->CURL->getDriver()));
 		} else {
 			static::markTestSkipped("Can not test guzzle without guzzle");
 		}
@@ -93,8 +119,10 @@ class driversTest extends TestCase {
 	/**
 	 * @test
 	 */
-	function allDriversDisabled() {
-		$this->CURL->setDriver( NETCURL_NETWORK_DRIVERS::DRIVER_GUZZLEHTTP );
+	function doCurl() {
+		/** @var MODULE_CURL $requestContent */
+		$requestContent = $this->CURL->doGet("https://identifier.tornevall.net/?json");
+		print_R($requestContent->getParsedResponse());
 	}
 
 }

@@ -31,9 +31,327 @@ if ( ! class_exists( 'NETCURL_DRIVER_CONTROLLER' ) && ! class_exists( 'TorneLIB\
 	 */
 	class NETCURL_DRIVER_CONTROLLER {
 
-		public function getSystemWideDrivers() {
-
+		function __construct() {
+			$this->NETWORK = new MODULE_NETWORK();
+			$this->getDisabledFunctions();
+			$this->getInternalDriver();
+			$this->getAvailableClasses();
 		}
+
+		/**
+		 * Class drivers supported by NETCURL
+		 * @var array
+		 */
+		private $DRIVERS_SUPPORTED = array(
+			'GuzzleHttp\Client'                => NETCURL_NETWORK_DRIVERS::DRIVER_GUZZLEHTTP,
+			'GuzzleHttp\Handler\StreamHandler' => NETCURL_NETWORK_DRIVERS::DRIVER_GUZZLEHTTP_STREAM,
+			'WP_Http'                          => NETCURL_NETWORK_DRIVERS::DRIVER_WORDPRESS
+		);
+
+		private $DRIVERS_BRIDGED = array(
+			'GuzzleHttp\Client'                => 'NETCURL_DRIVER_GUZZLEHTTP',
+			'GuzzleHttp\Handler\StreamHandler' => 'NETCURL_DRIVER_GUZZLEHTTP'
+		);
+
+		private $DRIVERS_STREAMABLE = array(
+			'GuzzleHttp\Handler\StreamHandler' => 'NETCURL_DRIVER_GUZZLEHTTP'
+		);
+
+		/** @var array $DRIVERS_AVAILABLE */
+		private $DRIVERS_AVAILABLE = array();
+
+		/** @var array $FUNCTIONS_DISABLED List of functions disabled via php.ini, arrayed */
+		private $FUNCTIONS_DISABLED = array();
+
+		/** @var NETCURL_DRIVERS_INTERFACE $DRIVER Preloaded driver when setDriver is used */
+		private $DRIVER = null;
+
+		private $URL = array(
+			'drivers' => 'https://docs.tornevall.net/x/CYBiAQ#Module:NetCurl-Internaldrivers'
+		);
+
+		/**
+		 * @var MODULE_NETWORK $NETWORK Handles exceptions
+		 */
+		private $NETWORK;
+
+		/**
+		 * @return string
+		 */
+		public function getDisabledFunctions() {
+			$disabledFunctions        = @ini_get( 'disable_functions' );
+			$disabledArray            = array_map( "trim", explode( ",", $disabledFunctions ) );
+			$this->FUNCTIONS_DISABLED = is_array( $disabledArray ) ? $disabledArray : array();
+
+			return $this->FUNCTIONS_DISABLED;
+		}
+
+		/**
+		 * @return bool
+		 */
+		public function hasCurl() {
+			if ( isset( $this->DRIVERS_AVAILABLE[ NETCURL_NETWORK_DRIVERS::DRIVER_CURL ] ) ) {
+				return true;
+			}
+
+			return false;
+		}
+
+		/**
+		 * @return NETCURL_DRIVER_CONTROLLER
+		 */
+		private static function getStatic() {
+			return new NETCURL_DRIVER_CONTROLLER();
+		}
+
+		/**
+		 * @return bool
+		 */
+		public static function getCurl() {
+			return self::getStatic()->hasCurl();
+		}
+
+
+		/**
+		 * Checks if it is possible to use the standard setup
+		 *
+		 * @return bool
+		 */
+		private function getInternalDriver() {
+			if ( function_exists( 'curl_init' ) && function_exists( 'curl_exec' ) ) {
+				$this->DRIVERS_AVAILABLE[ NETCURL_NETWORK_DRIVERS::DRIVER_CURL ] = NETCURL_NETWORK_DRIVERS::DRIVER_CURL;
+
+				return true;
+			}
+
+			return false;
+		}
+
+		private function getAvailableClasses() {
+			$DRIVERS_AVAILABLE = array();
+			foreach ( $this->DRIVERS_SUPPORTED as $driverClass => $driverClassId ) {
+				if ( class_exists( $driverClass ) ) {
+					$DRIVERS_AVAILABLE[ $driverClassId ] = $driverClass;
+					// Guzzle supports both curl and stream so include it here
+					if ( $driverClassId == NETCURL_NETWORK_DRIVERS::DRIVER_GUZZLEHTTP ) {
+						if ( ! $this->hasCurl() ) {
+							unset( $DRIVERS_AVAILABLE[ NETCURL_NETWORK_DRIVERS::DRIVER_GUZZLEHTTP ] );
+						}
+						$DRIVERS_AVAILABLE [ NETCURL_NETWORK_DRIVERS::DRIVER_GUZZLEHTTP_STREAM ] = $driverClass;
+					}
+				}
+			}
+			$this->DRIVERS_AVAILABLE += $DRIVERS_AVAILABLE;
+
+			return $DRIVERS_AVAILABLE;
+		}
+
+		/**
+		 * @return int|NETCURL_DRIVERS_INTERFACE
+		 * @throws \Exception
+		 */
+		public function getAutodetectedDriver() {
+			if ( $this->hasCurl() ) {
+				$this->DRIVER = NETCURL_NETWORK_DRIVERS::DRIVER_CURL;
+
+				return $this->DRIVER;
+			} else {
+				if ( is_array( $this->DRIVERS_AVAILABLE ) && count( $this->DRIVERS_AVAILABLE ) ) {
+					$availableDriverIds = array_keys( $this->DRIVERS_AVAILABLE );
+					$nextDriver         = array_pop( $availableDriverIds );
+					$this->setDriver( $nextDriver );
+
+					return $this->DRIVER;
+				} else {
+					throw new \Exception( NETCURL_CURL_CLIENTNAME . " NetCurlDriverException: No communication drivers are currently available (not even curl).", $this->NETWORK->getExceptionCode( 'NETCURL_NO_DRIVER_AVAILABLE' ) );
+				}
+			}
+		}
+
+		public static function setAutoDetect() {
+			return self::getStatic()->getAutodetectedDriver();
+		}
+
+		/**
+		 * Get list of available drivers
+		 *
+		 * @return array
+		 */
+		public function getSystemWideDrivers() {
+			return $this->DRIVERS_AVAILABLE;
+		}
+
+		/**
+		 * Get status of disabled function
+		 *
+		 * @param string $functionName
+		 *
+		 * @return bool
+		 */
+		public function getIsDisabled( $functionName = '' ) {
+			if ( is_string( $functionName ) ) {
+				if ( preg_match( "/,/", $functionName ) ) {
+					$findMultiple = array_map( "trim", explode( ",", $functionName ) );
+
+					return $this->getIsDisabled( $findMultiple );
+				}
+				if ( in_array( $functionName, $this->FUNCTIONS_DISABLED ) ) {
+					return true;
+				}
+			} else if ( is_array( $functionName ) ) {
+				foreach ( array_map( "strtolower", $functionName ) as $findFunction ) {
+					if ( in_array( $findFunction, $this->FUNCTIONS_DISABLED ) ) {
+						return true;
+					}
+				}
+			}
+
+			return false;
+		}
+
+		/**
+		 * Set up driver by class name
+		 *
+		 * @param int $driverId
+		 * @param array $parameters
+		 *
+		 * @return NETCURL_DRIVERS_INTERFACE
+		 */
+		private function getDriverByClass( $driverId = NETCURL_NETWORK_DRIVERS::DRIVER_NOT_SET, $parameters = null ) {
+			$driverClass = isset( $this->DRIVERS_AVAILABLE[ $driverId ] ) ? $this->DRIVERS_AVAILABLE[ $driverId ] : null;
+			/** @var NETCURL_DRIVERS_INTERFACE $newDriver */
+			$newDriver       = null;
+			$bridgeClassName = "";
+
+			// Guzzle primary driver is based on curl, so we'll check if curl is available
+			if ( $driverId == NETCURL_NETWORK_DRIVERS::DRIVER_GUZZLEHTTP && ! $this->hasCurl() ) {
+				// If curl is unavailable, we'll fall  back to guzzleStream
+				$driverId = NETCURL_NETWORK_DRIVERS::DRIVER_GUZZLEHTTP_STREAM;
+			}
+
+			if ( class_exists( $driverClass ) ) {
+				if ( isset( $this->DRIVERS_BRIDGED[ $driverClass ] ) ) {
+					if ( class_exists( $this->DRIVERS_BRIDGED[ $driverClass ] ) ) {
+						$bridgeClassName = $this->DRIVERS_BRIDGED[ $driverClass ];
+					} else if ( class_exists( '\\TorneLIB\\' . $this->DRIVERS_BRIDGED[ $driverClass ] ) ) {
+						$bridgeClassName = '\\TorneLIB\\' . $this->DRIVERS_BRIDGED[ $driverClass ];
+					}
+					if ( is_null( $parameters ) ) {
+						$newDriver = new $bridgeClassName();
+					} else {
+						$newDriver = new $bridgeClassName( $parameters );
+					}
+				} else {
+					if ( is_null( $parameters ) ) {
+						$newDriver = new $driverClass();
+					} else {
+						$newDriver = new $driverClass( $parameters );
+					}
+				}
+				if ( ! is_null( $newDriver ) ) {
+					$newDriver->setDriverId( $driverId );
+				}
+			}
+
+			$this->DRIVER = $newDriver;
+
+			return $newDriver;
+		}
+
+		/**
+		 * @param int $driverNameConstans
+		 *
+		 * @return bool
+		 */
+		public function getIsDriver( $driverNameConstans = NETCURL_NETWORK_DRIVERS::DRIVER_CURL ) {
+			if ( isset( $this->DRIVERS_AVAILABLE[ $driverNameConstans ] ) ) {
+				return true;
+			}
+
+			return false;
+		}
+
+		/**
+		 * Initialize driver
+		 *
+		 * @param int $netDriver
+		 * @param null $parameters
+		 *
+		 * @return int|NETCURL_DRIVERS_INTERFACE
+		 * @throws \Exception
+		 */
+		public function setDriver( $netDriver = NETCURL_NETWORK_DRIVERS::DRIVER_CURL, $parameters = null ) {
+			$this->DRIVER = null;
+
+			return $this->getDriver( $netDriver, $parameters );
+		}
+
+		/**
+		 * @param int $netDriver
+		 * @param null $parameters
+		 *
+		 * @return int|NETCURL_DRIVERS_INTERFACE
+		 * @throws \Exception
+		 */
+		public function getDriver( $netDriver = NETCURL_NETWORK_DRIVERS::DRIVER_CURL, $parameters = null ) {
+
+			if ( is_object( $this->DRIVER ) ) {
+				return $this->DRIVER;
+			}
+
+			if ( $this->getIsDriver( $netDriver ) ) {
+				if ( is_string( $this->DRIVERS_AVAILABLE[ $netDriver ] ) && ! is_numeric( $this->DRIVERS_AVAILABLE[ $netDriver ] ) ) {
+					/** @var NETCURL_DRIVERS_INTERFACE DRIVER */
+					$this->DRIVER = $this->getDriverByClass( $netDriver, $parameters );
+				} else if ( is_numeric( $this->DRIVERS_AVAILABLE[ $netDriver ] ) && $this->DRIVERS_AVAILABLE[ $netDriver ] == $netDriver ) {
+					$this->DRIVER = $netDriver;
+				}
+
+			} else {
+				if ( $this->hasCurl() ) {
+					$this->DRIVER = NETCURL_NETWORK_DRIVERS::DRIVER_CURL;
+				} else {
+					// Last resort: Check if there is any other driver available if this fails
+					$testDriverAvailability = $this->getAutodetectedDriver();
+					if ( is_object( $testDriverAvailability ) ) {
+						$this->DRIVER = $testDriverAvailability;
+					} else {
+						throw new \Exception( NETCURL_CURL_CLIENTNAME . " NetCurlDriverException: No communication drivers are currently available (not even curl).", $this->NETWORK->getExceptionCode( 'NETCURL_NO_DRIVER_AVAILABLE' ) );
+					}
+				}
+			}
+
+			return $this->DRIVER;
+		}
+
+		/**
+		 * Check if SOAP exists in system
+		 *
+		 * @param bool $extendedSearch Extend search for SOAP (unsafe method, looking for constants defined as SOAP_*)
+		 *
+		 * @return bool
+		 */
+		public function hasSoap( $extendedSearch = false ) {
+			$soapClassBoolean = false;
+			if ( ( class_exists( 'SoapClient' ) || class_exists( '\SoapClient' ) ) ) {
+				$soapClassBoolean = true;
+			}
+			$sysConst = get_defined_constants();
+			if ( in_array( 'SOAP_1_1', $sysConst ) || in_array( 'SOAP_1_2', $sysConst ) ) {
+				$soapClassBoolean = true;
+			} else {
+				if ( $extendedSearch ) {
+					foreach ( $sysConst as $constantKey => $constantValue ) {
+						if ( preg_match( '/^SOAP_/', $constantKey ) ) {
+							$soapClassBoolean = true;
+						}
+					}
+				}
+			}
+
+			return $soapClassBoolean;
+		}
+
 
 	}
 }

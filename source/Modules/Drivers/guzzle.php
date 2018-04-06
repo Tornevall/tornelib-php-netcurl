@@ -22,32 +22,35 @@
 
 namespace TorneLIB;
 
-if ( ! class_exists( 'NETCURL_NETWORK_DRIVERS' ) && ! class_exists( 'TorneLIB\NETCURL_NETWORK_DRIVERS' ) ) {
+if ( ! class_exists( 'NETCURL_DRIVER_GUZZLEHTTP' ) && ! class_exists( 'TorneLIB\NETCURL_DRIVER_GUZZLEHTTPINTERFACE' ) ) {
 	/**
-	 * Class NETCURL_NETWORK_DRIVERS Supported network Addons
+	 * Class NETCURL_DRIVERS Network communications driver detection
+	 *
 	 * @package TorneLIB
-	 * @since 6.0.20
 	 */
-	abstract class NETCURL_NETWORK_DRIVERS {
-		const DRIVER_NOT_SET = 0;
-		const DRIVER_CURL = 1;
-		const DRIVER_WORDPRESS = 1000;
-		const DRIVER_GUZZLEHTTP = 1001;
-		const DRIVER_GUZZLEHTTP_STREAM = 1002;
+	class NETCURL_DRIVER_GUZZLEHTTP implements NETCURL_DRIVERS_INTERFACE {
 
-		/**
-		 * @deprecated Internal driver should be named DRIVER_CURL
-		 */
-		const DRIVER_INTERNAL = 1;
-	}
-}
-if ( ! class_exists( 'TORNELIB_CURL_DRIVERS' ) && ! class_exists( 'TorneLIB\TORNELIB_CURL_DRIVERS' ) ) {
-	/**
-	 * Class TORNELIB_CURL_DRIVERS
-	 * @package TorneLIB
-	 * @deprecated use NETCURL_NETWORK_DRIVERS
-	 * @since 6.0.20
-	 */
-	abstract class TORNELIB_CURL_DRIVERS extends NETCURL_NETWORK_DRIVERS {
+		private $DRIVER_ID = NETCURL_NETWORK_DRIVERS::DRIVER_NOT_SET;
+		private $PARAMETERS = array();
+		private $DRIVER;
+
+		private $CLASS = array(
+			'GuzzleHttp\Client',
+			'GuzzleHttp\Handler\StreamHandler'
+		);
+
+		public function __construct( $parameters = null ) {
+			if ( ! is_null( $parameters ) ) {
+				$this->setParameters( $parameters );
+			}
+		}
+
+		public function setDriverId( $driverId = NETCURL_NETWORK_DRIVERS::DRIVER_NOT_SET ) {
+			$this->DRIVER_ID = $driverId;
+		}
+
+		public function setParameters( $parameters = array() ) {
+			$this->PARAMETERS = $parameters;
+		}
 	}
 }

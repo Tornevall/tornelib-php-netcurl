@@ -666,7 +666,7 @@ class curlTest extends TestCase {
 	 */
 	function failUrl() {
 		try {
-			$this->CURL->doGet( "http://abc" . sha1( microtime( true ) ) );
+			$this->CURL->doGet( "http://" . sha1( microtime( true ) ) );
 		} catch ( \Exception $e ) {
 			$errorMessage = $e->getMessage();
 			static::assertTrue( ( preg_match( "/maximum tries/", $errorMessage ) ? true : false ) );
@@ -822,7 +822,7 @@ class curlTest extends TestCase {
 		} catch ( \Exception $e ) {
 			echo $e->getMessage() . "\n";
 		}
-		static::assertTrue( $driverList );
+		static::assertTrue( is_array($driverList) );
 	}
 
 	/**

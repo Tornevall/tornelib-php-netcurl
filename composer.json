@@ -21,6 +21,7 @@
       "source/Modules/Drivers/guzzle.php",
       "source/Modules/Drivers/wordpress.php",
       "source/Modules/netcurl_init.php",
+      "source/Modules/parser.php",
       "source/Modules/drivers.php",
       "source/Modules/ssl.php",
       "source/Addons/netbits.php",

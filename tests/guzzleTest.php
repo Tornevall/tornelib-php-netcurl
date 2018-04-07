@@ -2,7 +2,8 @@
 
 namespace TorneLIB;
 
-require_once (__DIR__ . "/../vendor/autoload.php");
+require_once( __DIR__ . "/../vendor/autoload.php" );
+require_once( __DIR__ . '/testurls.php' );
 
 use PHPUnit\Framework\TestCase;
 use \TorneLIB\MODULE_SSL;
@@ -22,12 +23,12 @@ class guzzleTest extends TestCase {
 	private function hasGuzzle( $useStream = false ) {
 		try {
 			if ( ! $useStream ) {
-				return $this->CURL->setDriver( NETCURL_NETWORK_DRIVERS::DRIVER_GUZZLEHTTP );
+				return is_object( $this->CURL->setDriver( NETCURL_NETWORK_DRIVERS::DRIVER_GUZZLEHTTP ) ) ? true : false;
 			} else {
-				return $this->CURL->setDriver( NETCURL_NETWORK_DRIVERS::DRIVER_GUZZLEHTTP_STREAM );
+				return is_object( $this->CURL->setDriver( NETCURL_NETWORK_DRIVERS::DRIVER_GUZZLEHTTP_STREAM ) ) ? true : false;
 			}
-		} catch (\Exception $e) {
-			static::markTestSkipped( "Can not test guzzle driver without guzzle (".$e->getMessage().")" );
+		} catch ( \Exception $e ) {
+			static::markTestSkipped( "Can not test guzzle driver without guzzle (" . $e->getMessage() . ")" );
 		}
 	}
 
@@ -36,10 +37,10 @@ class guzzleTest extends TestCase {
 	 */
 	function enableGuzzle() {
 		if ( $this->hasGuzzle() ) {
-			$info = $this->CURL->doPost( "https://" . \TESTURLS::getUrlTests() . "?o=json&getjson=true&var1=HasVar1", array( 'var2' => 'HasPostVar1' ) );
-			$this->CURL->getExternalDriverResponse();
-			$parsed = $this->CURL->getParsedResponse( $info );
-			static::assertTrue( $parsed->methods->_REQUEST->var1 === "HasVar1" );
+			$info = $this->CURL->doPost( "https://" . \TESTURLS::getUrlTests() . "?o=json&getjson=true&var1=HasVar1", array( 'var2' => 'HasPostVar1' ) )->getParsedResponse();
+			//$this->CURL->getExternalDriverResponse();
+			//$parsed = $this->CURL->getParsedResponse( $info );
+			static::assertTrue( $info->methods->_REQUEST->var1 === "HasVar1" );
 		} else {
 			static::markTestSkipped( "Can not test guzzle driver without guzzle" );
 		}
@@ -53,10 +54,9 @@ class guzzleTest extends TestCase {
 			$info = $this->CURL->doPost( "https://" . \TESTURLS::getUrlTests() . "?o=json&getjson=true&getVar=true", array(
 				'var1'    => 'HasVar1',
 				'postVar' => "true"
-			) );
-			$this->CURL->getExternalDriverResponse();
-			$parsed = $this->CURL->getParsedResponse( $info );
-			static::assertTrue( $parsed->methods->_REQUEST->var1 === "HasVar1" );
+			) )->getParsedResponse();
+			//$parsed = $this->CURL->getParsedResponse( $info );
+			static::assertTrue( $info->methods->_REQUEST->var1 === "HasVar1" );
 		} else {
 			static::markTestSkipped( "Can not test guzzle driver without guzzle" );
 		}
@@ -71,10 +71,9 @@ class guzzleTest extends TestCase {
 				'var1'    => 'HasVar1',
 				'postVar' => "true",
 				'asJson'  => 'true'
-			), CURL_POST_AS::POST_AS_JSON );
-			$this->CURL->getExternalDriverResponse();
-			$parsed = $this->CURL->getParsedResponse( $info );
-			static::assertTrue( $parsed->methods->_REQUEST->var1 === "HasVar1" );
+			), NETCURL_POST_DATATYPES::DATATYPE_JSON )->getParsedResponse();
+			//$parsed = $this->CURL->getParsedResponse( $info );
+			static::assertTrue( $info->methods->_REQUEST->var1 === "HasVar1" );
 		} else {
 			static::markTestSkipped( "Can not test guzzle driver without guzzle" );
 		}
@@ -99,7 +98,7 @@ class guzzleTest extends TestCase {
 	function enableGuzzleErrors() {
 		if ( $this->hasGuzzle() ) {
 			try {
-				$info = $this->CURL->doPost( \TESTURLS::getUrlTests() . "&o=json&getjson=true", array( 'var1' => 'HasVar1' ) );
+				$this->CURL->doPost( \TESTURLS::getUrlTests() . "&o=json&getjson=true", array( 'var1' => 'HasVar1' ) );
 			} catch ( \Exception $wrapError ) {
 				static::assertTrue( $wrapError->getCode() == 404 );
 			}

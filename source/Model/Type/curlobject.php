@@ -27,7 +27,6 @@ if ( ! class_exists( 'NETCURL_HTTP_OBJECT' ) && ! class_exists( 'TorneLIB\NETCUR
 	 * Class NETCURL_CURLOBJECT
 	 * @package TorneLIB
 	 * @since 6.0.20
-	 * @todo Getters and setters
 	 */
 	class NETCURL_HTTP_OBJECT {
 

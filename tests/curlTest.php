@@ -438,7 +438,8 @@ class curlTest extends TestCase {
 	 */
 	function getSimpleDom() {
 		$this->pemDefault();
-		$this->CURL->setParseHtml( true );
+		// setParseHtml is no longer necessary
+		//$this->CURL->setParseHtml( true );
 		try {
 			$container = $this->getParsed( $this->urlGet( "ssl&bool&o=xml&method=get&using=SimpleXMLElement", null, "simple.html" ) );
 		} catch ( \Exception $e ) {
@@ -448,6 +449,14 @@ class curlTest extends TestCase {
 		static::assertTrue( isset( $container['ById'] ) && count( $container['ById'] ) > 0 );
 	}
 
+	/**
+	 * @test
+	 */
+	function getSimpleDomChain() {
+		/** @var MODULE_CURL $getRequest */
+		$getRequest = $this->urlGet( "ssl&bool&o=xml&method=get&using=SimpleXMLElement", null, "simple.html" );
+		static::assertTrue( isset( $getRequest->getParsedResponse()['ByNodes'] ) && isset( $getRequest->getParsedDomById()['html'] ) );
+	}
 
 	/***************
 	 *  SSL TESTS  *
@@ -822,7 +831,7 @@ class curlTest extends TestCase {
 		} catch ( \Exception $e ) {
 			echo $e->getMessage() . "\n";
 		}
-		static::assertTrue( is_array($driverList) );
+		static::assertTrue( is_array( $driverList ) );
 	}
 
 	/**
@@ -957,6 +966,29 @@ class curlTest extends TestCase {
 		// For Linux based systems, we go through /tmp
 		static::assertStringStartsWith( "/tmp/netcurl_self", $this->CURL->getCookiePath() );
 		@rmdir( "/tmp/netcurl_self" );
+	}
+
+	/**
+	 * @test
+	 */
+	function responseTypeHttpObject() {
+		$this->CURL->setResponseType(NETCURL_RESPONSETYPE::RESPONSETYPE_OBJECT);
+		/** @var NETCURL_HTTP_OBJECT $request */
+		$request = $this->CURL->doGet(\TESTURLS::getUrlSimpleJson());
+		$parsed = $request->getParsed();
+		static::assertTrue(get_class($request) == 'TorneLIB\NETCURL_HTTP_OBJECT' && is_object($parsed) && isset($parsed->ip));
+	}
+
+	/**
+	 * @test
+	 * @testdox Request urls with NETCURL_HTTP_OBJECT
+	 * @throws \Exception
+	 */
+	function responseTypeHttpObjectChain() {
+		$this->CURL->setResponseType(NETCURL_RESPONSETYPE::RESPONSETYPE_OBJECT);
+		/** @var NETCURL_HTTP_OBJECT $request */
+		$request = $this->CURL->doGet(\TESTURLS::getUrlSimpleJson())->getParsed();
+		static::assertTrue(is_object($request) && isset($request->ip));
 	}
 
 }

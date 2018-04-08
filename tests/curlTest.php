@@ -396,8 +396,8 @@ class curlTest extends TestCase {
 	 */
 	function getJson() {
 		$this->pemDefault();
-		$container = $this->urlGet( "ssl&bool&o=json&method=get" );
-		static::assertTrue( is_object( $this->CURL->getParsedResponse()->methods->_GET ) );
+		$this->urlGet( "ssl&bool&o=json&method=get" );
+		static::assertTrue( is_object( $this->CURL->getParsed()->methods->_GET ) );
 	}
 
 	/**
@@ -407,7 +407,8 @@ class curlTest extends TestCase {
 	function getSerialize() {
 		$this->pemDefault();
 		$container = $this->urlGet( "ssl&bool&o=serialize&method=get" );
-		static::assertTrue( is_array( $this->CURL->getParsedResponse()['methods']['_GET'] ) );
+		$parsed = $this->CURL->getParsed($container);
+		static::assertTrue( is_array( $parsed['methods']['_GET'] ) );
 	}
 
 	/**
@@ -455,7 +456,7 @@ class curlTest extends TestCase {
 	function getSimpleDomChain() {
 		/** @var MODULE_CURL $getRequest */
 		$getRequest = $this->urlGet( "ssl&bool&o=xml&method=get&using=SimpleXMLElement", null, "simple.html" );
-		static::assertTrue( isset( $getRequest->getParsedResponse()['ByNodes'] ) && isset( $getRequest->getParsedDomById()['html'] ) );
+		static::assertTrue( isset( $getRequest->getParsedResponse()['ByNodes'] ) && isset( $getRequest->getDomById()['html'] ) );
 	}
 
 	/***************
@@ -925,7 +926,7 @@ class curlTest extends TestCase {
 	public function getParsedDom() {
 		$this->CURL->setParseHtml( true );
 		/** @var MODULE_CURL $content */
-		$content = $this->urlGet( "ssl&bool&o=xml&method=get&using=SimpleXMLElement", null, "simple.html" )->getParsedDomById();
+		$content = $this->urlGet( "ssl&bool&o=xml&method=get&using=SimpleXMLElement", null, "simple.html" )->getDomById();
 		static::assertTrue( isset( $content['divElement'] ) );
 		$this->CURL->setParseHtml( false );
 	}

@@ -441,6 +441,7 @@ class curlTest extends TestCase {
 		$this->pemDefault();
 		// setParseHtml is no longer necessary
 		//$this->CURL->setParseHtml( true );
+		$container = null;
 		try {
 			$container = $this->getParsed( $this->urlGet( "ssl&bool&o=xml&method=get&using=SimpleXMLElement", null, "simple.html" ) );
 		} catch ( \Exception $e ) {
@@ -456,7 +457,9 @@ class curlTest extends TestCase {
 	function getSimpleDomChain() {
 		/** @var MODULE_CURL $getRequest */
 		$getRequest = $this->urlGet( "ssl&bool&o=xml&method=get&using=SimpleXMLElement", null, "simple.html" );
-		static::assertTrue( isset( $getRequest->getParsedResponse()['ByNodes'] ) && isset( $getRequest->getDomById()['html'] ) );
+		$parsed = $getRequest->getParsed();
+		$dom = $getRequest->getDomById();
+		static::assertTrue( isset( $parsed['ByNodes'] ) && isset( $dom['html'] ) );
 	}
 
 	/***************

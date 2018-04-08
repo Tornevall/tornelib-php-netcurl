@@ -160,7 +160,8 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 		private $contentType = '';
 
 		/**
-		 * @var array $debugData Debug data from session
+		 * @var array $debugData Debug data stored from session
+		 * @todo Rename
 		 */
 		private $debugData = array(
 			'data'     => array(
@@ -200,7 +201,10 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 		//// URL REDIRECT
 		/** @var bool Decide whether the curl library should follow an url redirect or not */
 		private $FOLLOW_LOCATION_ENABLE = true;
-		/** @var array List of redirections during curl calls */
+		/**
+		 * @var array $redirectedUrls List of redirections during curl calls
+		 * @todo Rename the array
+		 */
 		private $redirectedUrls = array();
 
 		//// POST-GET-RESPONSE
@@ -218,16 +222,27 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 		 * @var array $ParseContainer
 		 * @deprecated 6.0.20
 		 */
-		private $ParseContainer = array();
-		/** @var NETCURL_POST_DATATYPES $forcePostType What post type to use when using POST (Enforced) */
+		private $ParseContainer;
+
+		/**
+		 * @var NETCURL_POST_DATATYPES $forcePostType What post type to use when using POST (Enforced)
+		 * @todo Rename variable
+		 */
 		private $forcePostType = null;
-		/** @var string Sets an encoding to the http call */
-		public $CurlEncoding = null;
-		/** @var array Run-twice-in-handler (replaces CurlResolveRetry, etc) */
+		/**
+		 * @var string Current encoding
+		 */
+		public $HTTP_CHARACTER_ENCODING = null;
+		/**
+		 * @var array $CURL_RETRY_TYPES Counter for how many tries that has been done in a call
+		 */
 		private $CURL_RETRY_TYPES = array( 'resolve' => 0, 'sslunverified' => 0 );
 		/** @var string Custom User-Agent sent in the HTTP-HEADER */
-		private $CurlUserAgent;
-		/** @var string Custom User-Agent Memory */
+		private $HTTP_USER_AGENT;
+		/**
+		 * @var array Custom User-Agent Memory
+		 * @todo Rename
+		 */
 		private $CustomUserAgent = array();
 		/**
 		 * @var bool Try to automatically parse the retrieved body content. Supports, amongst others json, serialization, etc
@@ -249,24 +264,38 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 		private $NETCURL_HEADERS_USER_DEFINED = array();
 		private $allowCdata = false;
 		private $useXmlSerializer = false;
-		/** @var bool Store information about the URL call and if the SSL was unsafe (disabled) */
+		/**
+		 * Store information about the URL call and if the SSL was unsafe (disabled)
+		 * @var bool
+		 */
 		protected $unsafeSslCall = false;
 
 		//// COOKIE CONFIGS
 		private $useLocalCookies = false;
 		/**
+		 * To which path we store cookies
 		 * @var string $COOKIE_PATH
 		 */
 		private $COOKIE_PATH = '';
+		/**
+		 * Allow saving cookies
+		 * @var bool
+		 */
 		private $SaveCookies = false;
+		/**
+		 * @var string $CookieFile The name of the file to save cookies in
+		 */
 		private $CookieFile = '';
 		/**
 		 * @var bool $UseCookieExceptions
 		 * @deprecated 6.0.20
+		 * @todo Use getters and setters
 		 */
 		private $UseCookieExceptions = false;
 		/**
 		 * @var bool $CurlUseCookies
+		 * @deprecated 6.0.20
+		 * @todo Use getters and setters
 		 */
 		public $CurlUseCookies = true;
 
@@ -279,6 +308,8 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 		 * RESOLVER_IPV6
 		 *
 		 * @var int
+		 * @deprecated 6.0.20
+		 * @todo Use getters and setters
 		 */
 		public $CurlResolve;
 		/** @var string Sets another timeout in seconds when curl_exec should finish the current operation. Sets both TIMEOUT and CONNECTTIMEOUT */
@@ -303,20 +334,22 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 		 * Note: This does not cover everything in the library. It was set up for handling SoapExceptions.
 		 *
 		 * @var bool
+		 * @deprecated 6.0.20
+		 * @todo Always throw
 		 */
 		public $canThrow = true;
 
 		/**
 		 * MODULE_CURL constructor.
 		 *
-		 * @param string $PreferredURL
-		 * @param array $PreparedPostData
-		 * @param int $PreferredMethod
-		 * @param array $flags
+		 * @param string $requestUrl
+		 * @param array $requestPostData
+		 * @param int $requestPostMethod
+		 * @param array $requestFlags
 		 *
 		 * @throws \Exception
 		 */
-		public function __construct( $PreferredURL = '', $PreparedPostData = array(), $PreferredMethod = NETCURL_POST_METHODS::METHOD_POST, $flags = array() ) {
+		public function __construct( $requestUrl = '', $requestPostData = array(), $requestPostMethod = NETCURL_POST_METHODS::METHOD_POST, $requestFlags = array() ) {
 			register_shutdown_function( array( $this, 'netcurl_terminate' ) );
 
 			// PHP versions not supported to chaining gets the chaining parameter disabled by default.
@@ -327,8 +360,8 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 					// This will never occur
 				}
 			}
-			if ( is_array( $flags ) && count( $flags ) ) {
-				$this->setFlags( $flags );
+			if ( is_array( $requestFlags ) && count( $requestFlags ) ) {
+				$this->setFlags( $requestFlags );
 			}
 
 			$this->NETWORK = new MODULE_NETWORK();
@@ -339,18 +372,18 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 			$this->throwableHttpCodes = array();
 			$this->getSslDriver();
 
-			$this->CurlUserAgent = $this->userAgents['Mozilla'] . ' ' . NETCURL_CURL_CLIENTNAME . '-' . NETCURL_RELEASE . "/" . __CLASS__ . "-" . NETCURL_CURL_RELEASE . ' (' . $this->netCurlUrl . ')';
-			if ( ! empty( $PreferredURL ) ) {
-				$this->CURL_STORED_URL = $PreferredURL;
+			$this->HTTP_USER_AGENT = $this->userAgents['Mozilla'] . ' ' . NETCURL_CURL_CLIENTNAME . '-' . NETCURL_RELEASE . "/" . __CLASS__ . "-" . NETCURL_CURL_RELEASE . ' (' . $this->netCurlUrl . ')';
+			if ( ! empty( $requestUrl ) ) {
+				$this->CURL_STORED_URL = $requestUrl;
 				$InstantResponse       = null;
-				if ( $PreferredMethod == NETCURL_POST_METHODS::METHOD_GET ) {
-					$InstantResponse = $this->doGet( $PreferredURL );
-				} else if ( $PreferredMethod == NETCURL_POST_METHODS::METHOD_POST ) {
-					$InstantResponse = $this->doPost( $PreferredURL, $PreparedPostData );
-				} else if ( $PreferredMethod == NETCURL_POST_METHODS::METHOD_PUT ) {
-					$InstantResponse = $this->doPut( $PreferredURL, $PreparedPostData );
-				} else if ( $PreferredMethod == NETCURL_POST_METHODS::METHOD_DELETE ) {
-					$InstantResponse = $this->doDelete( $PreferredURL, $PreparedPostData );
+				if ( $requestPostMethod == NETCURL_POST_METHODS::METHOD_GET ) {
+					$InstantResponse = $this->doGet( $requestUrl );
+				} else if ( $requestPostMethod == NETCURL_POST_METHODS::METHOD_POST ) {
+					$InstantResponse = $this->doPost( $requestUrl, $requestPostData );
+				} else if ( $requestPostMethod == NETCURL_POST_METHODS::METHOD_PUT ) {
+					$InstantResponse = $this->doPut( $requestUrl, $requestPostData );
+				} else if ( $requestPostMethod == NETCURL_POST_METHODS::METHOD_DELETE ) {
+					$InstantResponse = $this->doDelete( $requestUrl, $requestPostData );
 				}
 
 				return $InstantResponse;
@@ -1212,9 +1245,9 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 				}
 
 				// NETCURL_CURL_CLIENTNAME . '-' . NETCURL_RELEASE . "/" . __CLASS__ . "-" . NETCURL_CURL_RELEASE
-				$this->CurlUserAgent = implode( " ", $this->CustomUserAgent ) . " +TorneLIB-NETCURL-" . NETCURL_RELEASE . " +" . NETCURL_CURL_CLIENTNAME . "-" . NETCURL_CURL_RELEASE . " (" . $this->netCurlUrl . ")";
+				$this->HTTP_USER_AGENT = implode( " ", $this->CustomUserAgent ) . " +TorneLIB-NETCURL-" . NETCURL_RELEASE . " +" . NETCURL_CURL_CLIENTNAME . "-" . NETCURL_CURL_RELEASE . " (" . $this->netCurlUrl . ")";
 			} else {
-				$this->CurlUserAgent = $this->userAgents['Mozilla'] . ' +TorneLIB-NetCURL-' . NETCURL_RELEASE . " +" . NETCURL_CURL_CLIENTNAME . "+-" . NETCURL_CURL_RELEASE . ' (' . $this->netCurlUrl . ')';
+				$this->HTTP_USER_AGENT = $this->userAgents['Mozilla'] . ' +TorneLIB-NetCURL-' . NETCURL_RELEASE . " +" . NETCURL_CURL_CLIENTNAME . "+-" . NETCURL_CURL_RELEASE . ' (' . $this->netCurlUrl . ')';
 			}
 		}
 
@@ -1225,7 +1258,7 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 		 * @since 6.0
 		 */
 		public function getUserAgent() {
-			return $this->CurlUserAgent;
+			return $this->HTTP_USER_AGENT;
 		}
 
 		/**
@@ -1779,120 +1812,6 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 		}
 
 
-		//// PARSING
-
-		/**
-		 * Parse content and handle specially received content automatically
-		 *
-		 * If this functions receives a json string or any other special content (as PHP-serializations), it will try to convert that string automatically to a readable array.
-		 *
-		 * @param string $content
-		 * @param bool $isFullRequest
-		 * @param null $contentType
-		 *
-		 * @return array|mixed|null
-		 * @throws \Exception
-		 * @since 6.0
-		 * @todo Move parsers to own module
-		 */
-		public function ParseContent( $content = '', $isFullRequest = false, $contentType = null ) {
-			if ( $isFullRequest ) {
-				$newContent  = $this->ParseResponse( $content );
-				$content     = trim( $newContent['body'] );
-				$contentType = isset( $newContent['header']['info']['Content-Type'] ) ? $newContent['header']['info']['Content-Type'] : null;
-			}
-			$parsedContent     = null;
-			$testSerialization = null;
-			$testJson          = @json_decode( $content );
-			if ( gettype( $testJson ) === "object" || ( ! empty( $testJson ) && is_array( $testJson ) ) ) {
-				$parsedContent = $testJson;
-			} else {
-				if ( is_string( $content ) ) {
-					$testSerialization = @unserialize( $content );
-					if ( gettype( $testSerialization ) == "object" || gettype( $testSerialization ) === "array" ) {
-						$parsedContent = $testSerialization;
-					}
-				}
-			}
-			if ( is_null( $parsedContent ) && ( preg_match( "/xml version/", $content ) || preg_match( "/rss version/", $content ) || preg_match( "/xml/i", $contentType ) ) ) {
-				$trimmedContent        = trim( $content ); // PHP 5.3: Can't use function return value in write context
-				$overrideXmlSerializer = false;
-				if ( $this->useXmlSerializer ) {
-					$serializerPath = stream_resolve_include_path( 'XML/Unserializer.php' );
-					if ( ! empty( $serializerPath ) ) {
-						$overrideXmlSerializer = true;
-						/** @noinspection PhpIncludeInspection */
-						require_once( 'XML/Unserializer.php' );
-					}
-				}
-
-				if ( class_exists( 'SimpleXMLElement' ) && ! $overrideXmlSerializer ) {
-					if ( ! empty( $trimmedContent ) ) {
-						if ( ! $this->allowCdata ) {
-							$simpleXML = new \SimpleXMLElement( $content, LIBXML_NOCDATA );
-						} else {
-							$simpleXML = new \SimpleXMLElement( $content );
-						}
-						if ( isset( $simpleXML ) && ( is_object( $simpleXML ) || is_array( $simpleXML ) ) ) {
-							return $simpleXML;
-						}
-					} else {
-						return null;
-					}
-				} else {
-					// Returns empty class if the SimpleXMLElement is missing.
-					if ( $overrideXmlSerializer ) {
-						/** @noinspection PhpUndefinedClassInspection */
-						$xmlSerializer = new \XML_Unserializer();
-						/** @noinspection PhpUndefinedMethodInspection */
-						$xmlSerializer->unserialize( $content );
-
-						/** @noinspection PhpUndefinedMethodInspection */
-						return $xmlSerializer->getUnserializedData();
-					}
-
-					return new \stdClass();
-				}
-			}
-
-			// TODO: Rebuild parser to include HTML rendered data regardless of the parsed content type
-			if ( ! empty( $content ) && empty( $parsedContent ) && $this->getParseHtml() ) {
-				$parsedContent                 = array();
-				$parsedContent['ByNodes']      = array();
-				$parsedContent['ByClosestTag'] = array();
-				$parsedContent['ById']         = array();
-
-				if ( class_exists( 'DOMDocument' ) ) {
-					/** @var \DOMDocument $DOM */
-					$DOM = new \DOMDocument();
-					libxml_use_internal_errors( true );
-					$DOM->loadHTML( $content );
-					if ( isset( $DOM->childNodes->length ) && $DOM->childNodes->length > 0 ) {
-						$elementsByTagName = $DOM->getElementsByTagName( '*' );
-						$childNodeArray    = $this->getChildNodes( $elementsByTagName );
-						$childTagArray     = $this->getChildNodes( $elementsByTagName, 'tagnames' );
-						$childIdArray      = $this->getChildNodes( $elementsByTagName, 'id' );
-
-						if ( is_array( $childNodeArray ) && count( $childNodeArray ) ) {
-							$parsedContent['ByNodes'] = $childNodeArray;
-						}
-						if ( is_array( $childTagArray ) && count( $childTagArray ) ) {
-							$parsedContent['ByClosestTag'] = $childTagArray;
-						}
-						if ( is_array( $childIdArray ) && count( $childIdArray ) ) {
-							$parsedContent['ById'] = $childIdArray;
-						}
-					}
-				} else {
-					throw new \Exception( NETCURL_CURL_CLIENTNAME . " HtmlParse exception: Can not parse DOMDocuments without the DOMDocuments class", $this->NETWORK->getExceptionCode( "NETCURL_DOMDOCUMENT_CLASS_MISSING" ) );
-				}
-			}
-
-			$this->ParseContainer = $parsedContent;
-
-			return $parsedContent;
-		}
-
 		/**
 		 * @param string $byWhat
 		 *
@@ -1909,123 +1828,12 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 		}
 
 		/**
-		 * @return array
-		 * @since 6.0.20
-		 */
-		public function getParsedDomByNodes() {
-			return $this->extractParsedDom( 'Nodes' );
-		}
-
-		/**
-		 * @return array
-		 * @since 6.0.20
-		 */
-		public function getParsedDomById() {
-			return $this->extractParsedDom( 'Id' );
-		}
-
-		/**
-		 * @return array
-		 * @since 6.0.20
-		 */
-		public function getParsedDomByClosestTag() {
-			return $this->extractParsedDom( 'ClosestTag' );
-		}
-
-		/**
-		 * Parse response, in case of there is any followed traces from the curl engine, so we'll always land on the right ending stream
-		 *
-		 * @param string $content
-		 *
-		 * @return array|string|NETCURL_CURLOBJECT
-		 * @throws \Exception
-		 * @since 6.0
-		 * @deprecated 6.0.20
-		 */
-		private function ParseResponse( $content = '' ) {
-			// Kill the chaining (for future releases, when we eventually raise chaining mode as default)
-			if ( $this->isFlag( 'NOCHAIN' ) ) {
-				$this->unsetFlag( 'CHAIN' );
-			}
-
-			if ( ! is_string( $content ) ) {
-				return $content;
-			}
-			list( $header, $body ) = explode( "\r\n\r\n", $content, 2 );
-			$rows              = explode( "\n", $header );
-			$response          = explode( " ", isset( $rows[0] ) ? $rows[0] : null );
-			$shortCodeResponse = explode( " ", isset( $rows[0] ) ? $rows[0] : null, 3 );
-			$httpMessage       = isset( $shortCodeResponse[2] ) ? $shortCodeResponse[2] : null;
-			$code              = isset( $response[1] ) ? $response[1] : null;
-			// If the first row of the body contains a HTTP/-string, we'll try to reparse it
-			if ( preg_match( "/^HTTP\//", $body ) ) {
-				$newBody = $this->ParseResponse( $body );
-				if ( is_object( $newBody ) ) {
-					$header = $newBody->TemporaryResponse['header'];
-					$body   = $newBody->TemporaryResponse['body'];
-				} else {
-					$header = $newBody['header'];
-					$body   = $newBody['body'];
-				}
-			}
-
-			// If response code starts with 3xx, this is probably a redirect
-			if ( preg_match( "/^3/", $code ) ) {
-				$this->redirectedUrls[] = $this->CURL_STORED_URL;
-				$redirectArray[]        = array(
-					'header' => $header,
-					'body'   => $body,
-					'code'   => $code
-				);
-				//if ( $this->isFlag( 'FOLLOWLOCATION_INTERNAL' ) ) {
-				// For future coding only: Add internal follow function, eventually.
-				//}
-			}
-			$headerInfo     = $this->GetHeaderKeyArray( $rows );
-			$returnResponse = array(
-				'header' => array( 'info' => $headerInfo, 'full' => $header ),
-				'body'   => $body,
-				'code'   => $code
-			);
-
-			$this->throwCodeException( $httpMessage, $code );
-			if ( $this->CurlAutoParse ) {
-				$contentType              = isset( $headerInfo['Content-Type'] ) ? $headerInfo['Content-Type'] : null;
-				$parsedContent            = $this->ParseContent( $returnResponse['body'], false, $contentType );
-				$returnResponse['parsed'] = ( ! empty( $parsedContent ) ? $parsedContent : null );
-			}
-			$returnResponse['URL'] = $this->CURL_STORED_URL;
-			$returnResponse['ip']  = isset( $this->CURL_IP_ADDRESS ) ? $this->CURL_IP_ADDRESS : null;  // Will only be filled if there is custom address set.
-
-			if ( $this->NETCURL_RETURN_RESPONSE_TYPE == NETCURL_RESPONSETYPE::RESPONSETYPE_OBJECT ) {
-				// This is probably not necessary and will not be the default setup after all.
-				$returnResponseObject         = new TORNELIB_CURLOBJECT();
-				$returnResponseObject->header = $returnResponse['header'];
-				$returnResponseObject->body   = $returnResponse['body'];
-				$returnResponseObject->code   = $returnResponse['code'];
-				$returnResponseObject->parsed = $returnResponse['parsed'];
-				$returnResponseObject->url    = $returnResponse['URL'];
-				$returnResponseObject->ip     = $returnResponse['ip'];
-
-				return $returnResponseObject;
-			}
-			$this->TemporaryResponse = $returnResponse;
-			if ( $this->isFlag( 'CHAIN' ) && ! $this->isFlag( 'IS_SOAP' ) ) {
-				return $this;
-			}
-
-			return $returnResponse;
-		}
-
-		/**
 		 * @param string $rawInput
 		 *
-		 * @return NETCURL_HTTP_OBJECT
+		 * @return $this|array|NETCURL_HTTP_OBJECT
 		 * @throws \Exception
 		 */
 		private function netcurl_split_raw( $rawInput = '' ) {
-			list( $header, $body ) = explode( "\r\n\r\n", $rawInput, 2 );
-
 			// Standard response output
 			$arrayedResponse = array(
 				'header' => array(),
@@ -2076,8 +1884,6 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 
 			$this->throwCodeException( $httpMessage, $code );
 			$contentType = isset( $headerInfo['Content-Type'] ) ? $headerInfo['Content-Type'] : null;
-			//$contentParser             = new NETCURL_PARSER( $arrayedResponse['body'], $contentType );
-			//$parsedContent             = $contentParser->getParsedResponse();
 			$parsedContent             = ( new NETCURL_PARSER( $arrayedResponse['body'], $contentType ) )->getParsedResponse();
 			$arrayedResponse['parsed'] = $parsedContent;
 			$arrayedResponse['ip']     = $this->CURL_IP_ADDRESS;
@@ -2124,81 +1930,6 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 			return $parsedResponse;
 		}
 
-
-		/**
-		 * Experimental: Convert DOMDocument to an array
-		 *
-		 * @param array $childNode
-		 * @param string $getAs
-		 *
-		 * @return array
-		 * @since 6.0
-		 */
-		private function getChildNodes( $childNode = array(), $getAs = '' ) {
-			$childNodeArray      = array();
-			$childAttributeArray = array();
-			$childIdArray        = array();
-			$returnContext       = "";
-			if ( is_object( $childNode ) ) {
-				/** @var \DOMNodeList $nodeItem */
-				foreach ( $childNode as $nodeItem ) {
-					if ( is_object( $nodeItem ) ) {
-						if ( isset( $nodeItem->tagName ) ) {
-							if ( strtolower( $nodeItem->tagName ) == "title" ) {
-								$elementData['pageTitle'] = $nodeItem->nodeValue;
-							}
-							$elementData            = array( 'tagName' => $nodeItem->tagName );
-							$elementData['id']      = $nodeItem->getAttribute( 'id' );
-							$elementData['name']    = $nodeItem->getAttribute( 'name' );
-							$elementData['context'] = $nodeItem->nodeValue;
-							/** @since 6.0.20 Saving innerhtml */
-							$elementData['innerhtml'] = $nodeItem->ownerDocument->saveHTML( $nodeItem );
-							if ( $nodeItem->hasChildNodes() ) {
-								$elementData['childElement'] = $this->getChildNodes( $nodeItem->childNodes, $getAs );
-							}
-							$identificationName = $nodeItem->tagName;
-							if ( empty( $identificationName ) && ! empty( $elementData['name'] ) ) {
-								$identificationName = $elementData['name'];
-							}
-							if ( empty( $identificationName ) && ! empty( $elementData['id'] ) ) {
-								$identificationName = $elementData['id'];
-							}
-							$childNodeArray[] = $elementData;
-							if ( ! isset( $childAttributeArray[ $identificationName ] ) ) {
-								$childAttributeArray[ $identificationName ] = $elementData;
-							} else {
-								$childAttributeArray[ $identificationName ][] = $elementData;
-							}
-
-							$idNoName = $nodeItem->tagName;
-							// Forms without id namings will get the tagname. This will open up for reading forms and other elements without id's.
-							// NOTE: If forms are not tagged with an id, the form will not render "properly" and the form fields might pop outside the real form.
-							if ( empty( $elementData['id'] ) ) {
-								$elementData['id'] = $idNoName;
-							}
-
-							if ( ! empty( $elementData['id'] ) ) {
-								if ( ! isset( $childIdArray[ $elementData['id'] ] ) ) {
-									$childIdArray[ $elementData['id'] ] = $elementData;
-								} else {
-									$childIdArray[ $elementData['id'] ][] = $elementData;
-								}
-							}
-						}
-					}
-				}
-			}
-			if ( empty( $getAs ) || $getAs == "domnodes" ) {
-				$returnContext = $childNodeArray;
-			} else if ( $getAs == "tagnames" ) {
-				$returnContext = $childAttributeArray;
-			} else if ( $getAs == "id" ) {
-				$returnContext = $childIdArray;
-			}
-
-			return $returnContext;
-		}
-
 		/**
 		 * Get head and body from a request parsed
 		 *
@@ -2209,7 +1940,32 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 		 * @since 6.0
 		 */
 		public function getHeader( $content = "" ) {
-			return $this->ParseResponse( $content . "\r\n\r\n" );
+			return $this->NETCURL_RESPONSE_CONTAINER_HEADER;
+		}
+
+
+		/**
+		 * @return array
+		 * @since 6.0.20
+		 */
+		public function getDomByNodes() {
+			return $this->extractParsedDom( 'Nodes' );
+		}
+
+		/**
+		 * @return array
+		 * @since 6.0.20
+		 */
+		public function getDomById() {
+			return $this->extractParsedDom( 'Id' );
+		}
+
+		/**
+		 * @return array
+		 * @since 6.0.20
+		 */
+		public function getDomByClosestTag() {
+			return $this->extractParsedDom( 'ClosestTag' );
 		}
 
 		/**
@@ -2219,9 +1975,9 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 		 *
 		 * @return null
 		 * @throws \Exception
-		 * @since 6.0
+		 * @since 6.0.20
 		 */
-		public function getParsedResponse( $inputResponse = null ) {
+		public function getParsed( $inputResponse = null ) {
 			if ( is_array( $inputResponse ) ) {
 				if ( isset( $inputResponse['code'] ) && $inputResponse['code'] >= 400 ) {
 					throw new \Exception( NETCURL_CURL_CLIENTNAME . " parseResponse exception - Unexpected response code from server: " . $inputResponse['code'], $inputResponse['code'] );
@@ -2248,22 +2004,12 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 		}
 
 		/**
-		 * @return array
-		 *
-		 * @since 6.0.16
-		 * @deprecated 6.0.20
-		 */
-		public function getTemporaryResponse() {
-			return $this->TemporaryResponse;
-		}
-
-		/**
 		 * @param null $ResponseContent
 		 *
 		 * @return int
-		 * @since 6.0
+		 * @since 6.0.20
 		 */
-		public function getResponseCode( $ResponseContent = null ) {
+		public function getCode($ResponseContent = null) {
 			if ( method_exists( $ResponseContent, "getResponseCode" ) ) {
 				return $ResponseContent->getResponseCode();
 			}
@@ -2281,9 +2027,9 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 		 * @param null $ResponseContent
 		 *
 		 * @return null
-		 * @since 6.0
+		 * @since 6.0.20
 		 */
-		public function getResponseBody( $ResponseContent = null ) {
+		public function getBody( $ResponseContent = null ) {
 			if ( method_exists( $ResponseContent, "getResponseBody" ) ) {
 				return $ResponseContent->getResponseBody();
 			}
@@ -2300,10 +2046,10 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 		/**
 		 * @param null $ResponseContent
 		 *
-		 * @return string
-		 * @since 6.0.16
+		 * @return null|string
+		 * @since 6.0.20
 		 */
-		public function getResponseUrl( $ResponseContent = null ) {
+		public function getUrl( $ResponseContent = null ) {
 			if ( method_exists( $ResponseContent, "getResponseUrl" ) ) {
 				return $ResponseContent->getResponseUrl();
 			}
@@ -2316,6 +2062,7 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 
 			return '';
 		}
+
 
 		/**
 		 * Extract a specific key from a parsed webrequest
@@ -2337,8 +2084,8 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 					return $ParsedValue->$keyName;
 				}
 			} else {
-				if ( is_null( $responseContent ) && ! empty( $this->TemporaryResponse ) ) {
-					$responseContent = $this->TemporaryResponse;
+				if ( is_null( $responseContent ) && ! empty( $this->NETCURL_RESPONSE_CONTAINER ) ) {
+					$responseContent = $this->NETCURL_RESPONSE_CONTAINER;
 				}
 				$Parsed       = $this->getParsedResponse( $responseContent );
 				$hasRecursion = false;
@@ -2486,7 +2233,7 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 		 * @param array $postData
 		 * @param int $postAs
 		 *
-		 * @return array
+		 * @return null|string|void
 		 * @throws \Exception
 		 * @since 5.0
 		 */
@@ -2505,7 +2252,7 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 		 * @param array $postData
 		 * @param int $postAs
 		 *
-		 * @return array
+		 * @return null|string|void
 		 * @throws \Exception
 		 * @since 5.0
 		 */
@@ -2710,13 +2457,6 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 		}
 
 		/**
-		 * @since 6.0.20
-		 */
-		private function setSslUserAgent() {
-			$this->setUserAgent( NETCURL_SSL_CLIENTNAME . "-" . NETCURL_SSL_RELEASE );
-		}
-
-		/**
 		 * The current status of trusted pems
 		 *
 		 * @return bool
@@ -2724,6 +2464,13 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 		 */
 		public function getTrustedSslBundles() {
 			return $this->TRUST_SSL_BUNDLES;
+		}
+
+		/**
+		 * @since 6.0.20
+		 */
+		private function setSslUserAgent() {
+			$this->setUserAgent( NETCURL_SSL_CLIENTNAME . "-" . NETCURL_SSL_RELEASE );
 		}
 
 		private function internal_curl_configure_ssl() {
@@ -2918,11 +2665,11 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 			if ( isset( $this->NETCURL_HTTP_REFERER ) && ! empty( $this->NETCURL_HTTP_REFERER ) ) {
 				$this->setCurlOptInternal( CURLOPT_REFERER, $this->NETCURL_HTTP_REFERER );
 			}
-			if ( isset( $this->CurlUserAgent ) && ! empty( $this->CurlUserAgent ) ) {
-				$this->setCurlOpt( CURLOPT_USERAGENT, $this->CurlUserAgent ); // overwrite old
+			if ( isset( $this->HTTP_USER_AGENT ) && ! empty( $this->HTTP_USER_AGENT ) ) {
+				$this->setCurlOpt( CURLOPT_USERAGENT, $this->HTTP_USER_AGENT ); // overwrite old
 			}
-			if ( isset( $this->CurlEncoding ) && ! empty( $this->CurlEncoding ) ) {
-				$this->setCurlOpt( CURLOPT_ENCODING, $this->CurlEncoding ); // overwrite old
+			if ( isset( $this->HTTP_CHARACTER_ENCODING ) && ! empty( $this->HTTP_CHARACTER_ENCODING ) ) {
+				$this->setCurlOpt( CURLOPT_ENCODING, $this->HTTP_CHARACTER_ENCODING ); // overwrite old
 			}
 		}
 
@@ -3241,39 +2988,10 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 
 		}
 
-		/**
-		 * Execution of http-calls via external Addons
-		 *
-		 * @param string $url
-		 * @param array $postData
-		 * @param int $CurlMethod
-		 * @param int $postAs
-		 *
-		 * @return bool|MODULE_CURL|MODULE_SOAP
-		 * @throws \Exception
-		 * @since 6.0.14
-		 * @deprecated 6.0.20
-		 */
-		private function executeHttpExternal( $url = '', $postData = array(), $CurlMethod = NETCURL_POST_METHODS::METHOD_GET, $postAs = NETCURL_POST_DATATYPES::DATATYPE_NOT_SET ) {
-			if ( preg_match( "/\?wsdl$|\&wsdl$/i", $this->CURL_STORED_URL ) || $postAs == NETCURL_POST_DATATYPES::DATATYPE_SOAP ) {
-				if ( ! $this->hasSoap() ) {
-					throw new \Exception( NETCURL_CURL_CLIENTNAME . " " . __FUNCTION__ . " exception: SoapClient is not available in this system", $this->NETWORK->getExceptionCode( 'NETCURL_SOAPCLIENT_CLASS_MISSING' ) );
-				}
 
-				return $this->executeHttpSoap( $url, $this->POST_DATA_HANDLED, $CurlMethod );
-			}
-			$guzDrivers = array(
-				NETCURL_NETWORK_DRIVERS::DRIVER_GUZZLEHTTP,
-				NETCURL_NETWORK_DRIVERS::DRIVER_GUZZLEHTTP_STREAM
-			);
-			if ( $this->getDriver() == NETCURL_NETWORK_DRIVERS::DRIVER_WORDPRESS ) {
-				return $this->executeWpHttp( $url, $this->POST_DATA_HANDLED, $CurlMethod, $postAs );
-			} else if ( in_array( $this->getDriver(), $guzDrivers ) ) {
-				return $this->executeGuzzleHttp( $url, $this->POST_DATA_HANDLED, $CurlMethod, $postAs );
-			} else {
-				return false;
-			}
-		}
+
+		/// DEPRECATIONS TO MOVE
+
 
 		/**
 		 * Using WordPress curl driver to make webcalls
@@ -3342,6 +3060,68 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 			$this->ParseResponse( $rawResponse );
 
 			return $this;
+		}
+
+
+		//////// LONG TIME DEPRECATIONS
+		/**
+		 * @param null $responseInData
+		 *
+		 * @return int
+		 * @since 6.0
+		 * @deprecated 6.0.20 Use getCode
+		 */
+		public function getResponseCode( $responseInData = null ) {
+			return $this->getCode($responseInData);
+		}
+
+		/**
+		 * @param null $responseInData
+		 *
+		 * @return null
+		 * @since 6.0
+		 * @deprecated 6.0.20 Use getBody
+		 */
+		public function getResponseBody( $responseInData = null ) {
+			return $this->getBody($responseInData);
+		}
+
+		/**
+		 * @param null $responseInData
+		 *
+		 * @return string
+		 * @since 6.0.16
+		 * @deprecated 6.0.20 Use getUrl
+		 */
+		public function getResponseUrl( $responseInData = null ) {
+			return $this->getUrl($responseInData);
+		}
+
+		/**
+		 * @param null $inputResponse
+		 *
+		 * @return null
+		 * @throws \Exception
+		 * @since 6.0
+		 * @deprecated 6.0.20
+		 */
+		public function getParsedResponse($inputResponse = null) {
+			return $this->getParsed($inputResponse);
+		}
+
+
+
+
+		//////// DEPRECATED FUNCTIONS BEGIN /////////
+		/**
+		 * Get what external driver see
+		 *
+		 * @return null
+		 * @since 6.0
+		 * @deprecated 6.0.20
+		 */
+		public function getExternalDriverResponse() {
+			return $this->TemporaryExternalResponse;
 		}
 
 		/**
@@ -3465,14 +3245,236 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 		}
 
 		/**
-		 * Get what external driver see
+		 * Execution of http-calls via external Addons
 		 *
-		 * @return null
-		 * @since 6.0
+		 * @param string $url
+		 * @param array $postData
+		 * @param int $CurlMethod
+		 * @param int $postAs
+		 *
+		 * @return bool|MODULE_CURL|MODULE_SOAP
+		 * @throws \Exception
+		 * @since 6.0.14
+		 * @deprecated 6.0.20
 		 */
-		public function getExternalDriverResponse() {
-			return $this->TemporaryExternalResponse;
+		private function executeHttpExternal( $url = '', $postData = array(), $CurlMethod = NETCURL_POST_METHODS::METHOD_GET, $postAs = NETCURL_POST_DATATYPES::DATATYPE_NOT_SET ) {
+			if ( preg_match( "/\?wsdl$|\&wsdl$/i", $this->CURL_STORED_URL ) || $postAs == NETCURL_POST_DATATYPES::DATATYPE_SOAP ) {
+				if ( ! $this->hasSoap() ) {
+					throw new \Exception( NETCURL_CURL_CLIENTNAME . " " . __FUNCTION__ . " exception: SoapClient is not available in this system", $this->NETWORK->getExceptionCode( 'NETCURL_SOAPCLIENT_CLASS_MISSING' ) );
+				}
+
+				return $this->executeHttpSoap( $url, $this->POST_DATA_HANDLED, $CurlMethod );
+			}
+			$guzDrivers = array(
+				NETCURL_NETWORK_DRIVERS::DRIVER_GUZZLEHTTP,
+				NETCURL_NETWORK_DRIVERS::DRIVER_GUZZLEHTTP_STREAM
+			);
+			if ( $this->getDriver() == NETCURL_NETWORK_DRIVERS::DRIVER_WORDPRESS ) {
+				return $this->executeWpHttp( $url, $this->POST_DATA_HANDLED, $CurlMethod, $postAs );
+			} else if ( in_array( $this->getDriver(), $guzDrivers ) ) {
+				return $this->executeGuzzleHttp( $url, $this->POST_DATA_HANDLED, $CurlMethod, $postAs );
+			} else {
+				return false;
+			}
 		}
+
+		/**
+		 * Experimental: Convert DOMDocument to an array
+		 *
+		 * @param array $childNode
+		 * @param string $getAs
+		 *
+		 * @return array
+		 * @since 6.0
+		 * @deprecated Use parser instead
+		 */
+		private function getChildNodes( $childNode = array(), $getAs = '' ) {
+			$childNodeArray      = array();
+			$childAttributeArray = array();
+			$childIdArray        = array();
+			$returnContext       = "";
+			if ( is_object( $childNode ) ) {
+				/** @var \DOMNodeList $nodeItem */
+				foreach ( $childNode as $nodeItem ) {
+					if ( is_object( $nodeItem ) ) {
+						if ( isset( $nodeItem->tagName ) ) {
+							if ( strtolower( $nodeItem->tagName ) == "title" ) {
+								$elementData['pageTitle'] = $nodeItem->nodeValue;
+							}
+							$elementData            = array( 'tagName' => $nodeItem->tagName );
+							$elementData['id']      = $nodeItem->getAttribute( 'id' );
+							$elementData['name']    = $nodeItem->getAttribute( 'name' );
+							$elementData['context'] = $nodeItem->nodeValue;
+							/** @since 6.0.20 Saving innerhtml */
+							$elementData['innerhtml'] = $nodeItem->ownerDocument->saveHTML( $nodeItem );
+							if ( $nodeItem->hasChildNodes() ) {
+								$elementData['childElement'] = $this->getChildNodes( $nodeItem->childNodes, $getAs );
+							}
+							$identificationName = $nodeItem->tagName;
+							if ( empty( $identificationName ) && ! empty( $elementData['name'] ) ) {
+								$identificationName = $elementData['name'];
+							}
+							if ( empty( $identificationName ) && ! empty( $elementData['id'] ) ) {
+								$identificationName = $elementData['id'];
+							}
+							$childNodeArray[] = $elementData;
+							if ( ! isset( $childAttributeArray[ $identificationName ] ) ) {
+								$childAttributeArray[ $identificationName ] = $elementData;
+							} else {
+								$childAttributeArray[ $identificationName ][] = $elementData;
+							}
+
+							$idNoName = $nodeItem->tagName;
+							// Forms without id namings will get the tagname. This will open up for reading forms and other elements without id's.
+							// NOTE: If forms are not tagged with an id, the form will not render "properly" and the form fields might pop outside the real form.
+							if ( empty( $elementData['id'] ) ) {
+								$elementData['id'] = $idNoName;
+							}
+
+							if ( ! empty( $elementData['id'] ) ) {
+								if ( ! isset( $childIdArray[ $elementData['id'] ] ) ) {
+									$childIdArray[ $elementData['id'] ] = $elementData;
+								} else {
+									$childIdArray[ $elementData['id'] ][] = $elementData;
+								}
+							}
+						}
+					}
+				}
+			}
+			if ( empty( $getAs ) || $getAs == "domnodes" ) {
+				$returnContext = $childNodeArray;
+			} else if ( $getAs == "tagnames" ) {
+				$returnContext = $childAttributeArray;
+			} else if ( $getAs == "id" ) {
+				$returnContext = $childIdArray;
+			}
+
+			return $returnContext;
+		}
+
+		/**
+		 * @return array
+		 *
+		 * @since 6.0.16
+		 * @deprecated 6.0.20
+		 */
+		public function getTemporaryResponse() {
+			return $this->TemporaryResponse;
+		}
+
+		/**
+		 * Parse content and handle specially received content automatically
+		 *
+		 * If this functions receives a json string or any other special content (as PHP-serializations), it will try to convert that string automatically to a readable array.
+		 *
+		 * @param string $content
+		 * @param bool $isFullRequest
+		 * @param null $contentType
+		 *
+		 * @return array|mixed|null
+		 * @throws \Exception
+		 * @since 6.0
+		 * @deprecated 6.0.20
+		 */
+		public function ParseContent( $content = '', $isFullRequest = false, $contentType = null ) {
+			if ( $isFullRequest ) {
+				$newContent  = $this->ParseResponse( $content );
+				$content     = trim( $newContent['body'] );
+				$contentType = isset( $newContent['header']['info']['Content-Type'] ) ? $newContent['header']['info']['Content-Type'] : null;
+			}
+			$parsedContent     = null;
+			$testSerialization = null;
+			$testJson          = @json_decode( $content );
+			if ( gettype( $testJson ) === "object" || ( ! empty( $testJson ) && is_array( $testJson ) ) ) {
+				$parsedContent = $testJson;
+			} else {
+				if ( is_string( $content ) ) {
+					$testSerialization = @unserialize( $content );
+					if ( gettype( $testSerialization ) == "object" || gettype( $testSerialization ) === "array" ) {
+						$parsedContent = $testSerialization;
+					}
+				}
+			}
+			if ( is_null( $parsedContent ) && ( preg_match( "/xml version/", $content ) || preg_match( "/rss version/", $content ) || preg_match( "/xml/i", $contentType ) ) ) {
+				$trimmedContent        = trim( $content ); // PHP 5.3: Can't use function return value in write context
+				$overrideXmlSerializer = false;
+				if ( $this->useXmlSerializer ) {
+					$serializerPath = stream_resolve_include_path( 'XML/Unserializer.php' );
+					if ( ! empty( $serializerPath ) ) {
+						$overrideXmlSerializer = true;
+						/** @noinspection PhpIncludeInspection */
+						require_once( 'XML/Unserializer.php' );
+					}
+				}
+
+				if ( class_exists( 'SimpleXMLElement' ) && ! $overrideXmlSerializer ) {
+					if ( ! empty( $trimmedContent ) ) {
+						if ( ! $this->allowCdata ) {
+							$simpleXML = new \SimpleXMLElement( $content, LIBXML_NOCDATA );
+						} else {
+							$simpleXML = new \SimpleXMLElement( $content );
+						}
+						if ( isset( $simpleXML ) && ( is_object( $simpleXML ) || is_array( $simpleXML ) ) ) {
+							return $simpleXML;
+						}
+					} else {
+						return null;
+					}
+				} else {
+					// Returns empty class if the SimpleXMLElement is missing.
+					if ( $overrideXmlSerializer ) {
+						/** @noinspection PhpUndefinedClassInspection */
+						$xmlSerializer = new \XML_Unserializer();
+						/** @noinspection PhpUndefinedMethodInspection */
+						$xmlSerializer->unserialize( $content );
+
+						/** @noinspection PhpUndefinedMethodInspection */
+						return $xmlSerializer->getUnserializedData();
+					}
+
+					return new \stdClass();
+				}
+			}
+
+			// TODO: Rebuild parser to include HTML rendered data regardless of the parsed content type
+			if ( ! empty( $content ) && empty( $parsedContent ) && $this->getParseHtml() ) {
+				$parsedContent                 = array();
+				$parsedContent['ByNodes']      = array();
+				$parsedContent['ByClosestTag'] = array();
+				$parsedContent['ById']         = array();
+
+				if ( class_exists( 'DOMDocument' ) ) {
+					/** @var \DOMDocument $DOM */
+					$DOM = new \DOMDocument();
+					libxml_use_internal_errors( true );
+					$DOM->loadHTML( $content );
+					if ( isset( $DOM->childNodes->length ) && $DOM->childNodes->length > 0 ) {
+						$elementsByTagName = $DOM->getElementsByTagName( '*' );
+						$childNodeArray    = $this->getChildNodes( $elementsByTagName );
+						$childTagArray     = $this->getChildNodes( $elementsByTagName, 'tagnames' );
+						$childIdArray      = $this->getChildNodes( $elementsByTagName, 'id' );
+
+						if ( is_array( $childNodeArray ) && count( $childNodeArray ) ) {
+							$parsedContent['ByNodes'] = $childNodeArray;
+						}
+						if ( is_array( $childTagArray ) && count( $childTagArray ) ) {
+							$parsedContent['ByClosestTag'] = $childTagArray;
+						}
+						if ( is_array( $childIdArray ) && count( $childIdArray ) ) {
+							$parsedContent['ById'] = $childIdArray;
+						}
+					}
+				} else {
+					throw new \Exception( NETCURL_CURL_CLIENTNAME . " HtmlParse exception: Can not parse DOMDocuments without the DOMDocuments class", $this->NETWORK->getExceptionCode( "NETCURL_DOMDOCUMENT_CLASS_MISSING" ) );
+				}
+			}
+
+			$this->ParseContainer = $parsedContent;
+
+			return $parsedContent;
+		}
+
 
 	}
 
@@ -3484,8 +3486,8 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 		 * @since 6.0
 		 */
 		class Tornevall_cURL extends MODULE_CURL {
-			function __construct( $PreferredURL = '', $PreparedPostData = array(), $PreferredMethod = NETCURL_POST_METHODS::METHOD_POST, $flags = array() ) {
-				return parent::__construct( $PreferredURL, $PreparedPostData, $PreferredMethod );
+			function __construct( $requestUrl = '', $requestPostData = array(), $requestPostMethod = NETCURL_POST_METHODS::METHOD_POST, $requestFlags = array() ) {
+				return parent::__construct( $requestUrl, $requestPostData, $requestPostMethod );
 			}
 		}
 	}

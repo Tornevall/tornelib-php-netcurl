@@ -34,6 +34,8 @@ if ( ! class_exists( 'NETCURL_POST_DATATYPES' ) && ! class_exists( 'TorneLIB\NET
 		const DATATYPE_NOT_SET = 0;
 		const DATATYPE_JSON = 1;
 		const DATATYPE_SOAP = 2;
+		const DATATYPE_XML = 3;
+		const DATATYPE_SOAP_XML = 4;
 	}
 }
 if ( ! class_exists( 'CURL_POST_AS' ) && ! class_exists( 'TorneLIB\CURL_POST_AS' ) ) {

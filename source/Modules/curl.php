@@ -79,6 +79,7 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 
 		/** @var array $NETCURL_POST_DATA Could also be a string */
 		private $NETCURL_POST_DATA = array();
+		private $NETCURL_POST_PREPARED_XML = '';
 		/** @var NETCURL_POST_METHODS $NETCURL_POST_METHOD */
 		private $NETCURL_POST_METHOD = NETCURL_POST_METHODS::METHOD_GET;
 		/** @var NETCURL_POST_DATATYPES $NETCURL_POST_DATA_TYPE */
@@ -129,8 +130,14 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 		 * @var MODULE_NETWORK
 		 */
 		private $NETWORK;
-		/** @var NETCURL_DRIVER_CONTROLLER $DRIVER Communications driver controller */
+		/**
+		 * @var NETCURL_DRIVER_CONTROLLER $DRIVER Communications driver controller
+		 */
 		private $DRIVER;
+		/**
+		 * @var TorneLIB_IO $IO
+		 */
+		private $IO;
 
 		/** @var MODULE_SSL */
 		private $SSL;
@@ -366,6 +373,7 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 
 			$this->NETWORK = new MODULE_NETWORK();
 			$this->DRIVER  = new NETCURL_DRIVER_CONTROLLER();
+			$this->IO      = new TorneLIB_IO();
 			$this->setConstantsContainer();
 			$this->setPreparedAuthentication();
 			$this->CurlResolve        = NETCURL_RESOLVER::RESOLVER_DEFAULT;
@@ -408,6 +416,9 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 		 */
 		public function initializeNetCurl() {
 			$this->initCookiePath();
+			if ( ! $this->isFlag( 'NOTHROWABLES' ) ) {
+				$this->setThrowableHttpCodes();
+			}
 			if ( ! is_object( $this->DRIVER->getDriver() ) && $this->DRIVER->getDriver() == NETCURL_NETWORK_DRIVERS::DRIVER_CURL ) {
 				$this->initCurl();
 			}
@@ -1264,7 +1275,7 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 		/**
 		 * Get the value of customized user agent
 		 *
-		 * @return string
+		 * @return array
 		 * @since 6.0.6
 		 */
 		public function getCustomUserAgent() {
@@ -1883,7 +1894,7 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 			$returnResponse['ip']  = isset( $this->CURL_IP_ADDRESS ) ? $this->CURL_IP_ADDRESS : null;  // Will only be filled if there is custom address set.
 
 			$this->throwCodeException( $httpMessage, $code );
-			$contentType = isset( $headerInfo['Content-Type'] ) ? $headerInfo['Content-Type'] : null;
+			$contentType               = isset( $headerInfo['Content-Type'] ) ? $headerInfo['Content-Type'] : null;
 			$parsedContent             = ( new NETCURL_PARSER( $arrayedResponse['body'], $contentType ) )->getParsedResponse();
 			$arrayedResponse['parsed'] = $parsedContent;
 			$arrayedResponse['ip']     = $this->CURL_IP_ADDRESS;
@@ -1988,7 +1999,7 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 			if ( is_object( $inputResponse ) ) {
 				if ( method_exists( $inputResponse, "getParsedResponse" ) ) {
 					return $inputResponse->getParsedResponse();
-				} else if (isset($inputResponse->NETCURL_RESPONSE_CONTAINER_PARSED)) {
+				} else if ( isset( $inputResponse->NETCURL_RESPONSE_CONTAINER_PARSED ) ) {
 					return $inputResponse->NETCURL_RESPONSE_CONTAINER_PARSED;
 				}
 			}
@@ -2009,7 +2020,7 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 		 * @return int
 		 * @since 6.0.20
 		 */
-		public function getCode($ResponseContent = null) {
+		public function getCode( $ResponseContent = null ) {
 			if ( method_exists( $ResponseContent, "getResponseCode" ) ) {
 				return $ResponseContent->getResponseCode();
 			}
@@ -2356,17 +2367,18 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 		 * Make sure that postdata is correctly rendered to interfaces before sending it
 		 *
 		 * @return string
+		 * @throws \Exception
 		 * @since 6.0.15
 		 */
 		private function executePostData() {
 			$this->POST_DATA_REAL = $this->NETCURL_POST_DATA;
 			$postDataContainer    = $this->NETCURL_POST_DATA;
 
-			$postAs = $this->NETCURL_POST_DATA_TYPE;
+			$POST_AS_DATATYPE = $this->NETCURL_POST_DATA_TYPE;
 
 			// Enforce postAs: If you'd like to force everything to use json you can for example use: $myLib->setPostTypeDefault(NETCURL_POST_DATATYPES::DATATYPE_JSON)
 			if ( ! is_null( $this->forcePostType ) ) {
-				$postAs = $this->forcePostType;
+				$POST_AS_DATATYPE = $this->forcePostType;
 			}
 			$parsedPostData = $this->NETCURL_POST_DATA;
 			if ( is_array( $this->NETCURL_POST_DATA ) || is_object( $this->NETCURL_POST_DATA ) ) {
@@ -2374,7 +2386,7 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 			}
 			$this->POSTDATACONTAINER = $postDataContainer;
 
-			if ( $postAs == NETCURL_POST_DATATYPES::DATATYPE_JSON ) {
+			if ( $POST_AS_DATATYPE == NETCURL_POST_DATATYPES::DATATYPE_JSON ) {
 				// Using $jsonRealData to validate the string
 				$jsonRealData = null;
 				if ( ! is_string( $this->NETCURL_POST_DATA ) ) {
@@ -2386,6 +2398,20 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 					}
 				}
 				$parsedPostData = $jsonRealData;
+			} else if ( ( $POST_AS_DATATYPE == NETCURL_POST_DATATYPES::DATATYPE_XML || $POST_AS_DATATYPE == NETCURL_POST_DATATYPES::DATATYPE_SOAP_XML ) ) {
+				$this->setContentType( 'text/xml' ); // ; charset=utf-8
+				$this->setCurlHeader( 'Content-Type', $this->getContentType() );
+				if ( ! empty( $this->NETCURL_POST_PREPARED_XML ) ) {
+					$parsedPostData = $this->NETCURL_POST_PREPARED_XML;
+				} else {
+					try {
+						if ( is_array( $this->NETCURL_POST_DATA ) && count( $this->NETCURL_POST_DATA ) ) {
+							$parsedPostData = $this->IO->renderXml( $this->NETCURL_POST_DATA );
+						}
+					} catch ( \Exception $e ) {
+						// Silently fail and return nothing if prepared data is failing
+					}
+				}
 			}
 
 			$this->POST_DATA_HANDLED = $parsedPostData;
@@ -2593,18 +2619,23 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 			}
 			if ( $this->NETCURL_POST_METHOD == NETCURL_POST_METHODS::METHOD_POST || $this->NETCURL_POST_METHOD == NETCURL_POST_METHODS::METHOD_PUT || $this->NETCURL_POST_METHOD == NETCURL_POST_METHODS::METHOD_DELETE ) {
 				if ( $this->NETCURL_POST_METHOD == NETCURL_POST_METHODS::METHOD_PUT ) {
-					$this->setCurlOpt( CURLOPT_CUSTOMREQUEST, "PUT" );
+					$this->setCurlOpt( CURLOPT_CUSTOMREQUEST, 'PUT' );
 				} else if ( $this->NETCURL_POST_METHOD == NETCURL_POST_METHODS::METHOD_DELETE ) {
-					$this->setCurlOpt( CURLOPT_CUSTOMREQUEST, "DELETE" );
+					$this->setCurlOpt( CURLOPT_CUSTOMREQUEST, 'DELETE' );
 				} else {
 					$this->setCurlOpt( CURLOPT_POST, true );
 				}
 
 				if ( $this->NETCURL_POST_DATA_TYPE == NETCURL_POST_DATATYPES::DATATYPE_JSON ) {
 					// Using $jsonRealData to validate the string
-					$this->NETCURL_HEADERS_SYSTEM_DEFINED['Content-Type']   = "application/json; charset=utf-8";
+					$this->NETCURL_HEADERS_SYSTEM_DEFINED['Content-Type']   = 'application/json; charset=utf-8';
 					$this->NETCURL_HEADERS_SYSTEM_DEFINED['Content-Length'] = strlen( $this->POST_DATA_HANDLED );
 					$this->setCurlOpt( CURLOPT_POSTFIELDS, $this->POST_DATA_HANDLED );  // overwrite old
+				} else if ( ( $this->NETCURL_POST_DATA_TYPE == NETCURL_POST_DATATYPES::DATATYPE_XML || $this->NETCURL_POST_DATA_TYPE == NETCURL_POST_DATATYPES::DATATYPE_SOAP_XML ) ) {
+					$this->NETCURL_HEADERS_SYSTEM_DEFINED['Content-Type'] = 'text/xml'; // ; charset=utf-8
+					$this->NETCURL_HEADERS_SYSTEM_DEFINED['Content-Length'] = strlen( $this->NETCURL_POST_DATA );
+					$this->setCurlOpt( CURLOPT_CUSTOMREQUEST, 'POST' );
+					$this->setCurlOpt( CURLOPT_POSTFIELDS, $this->POST_DATA_HANDLED );
 				}
 			}
 		}
@@ -2861,8 +2892,18 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 		 * @since 6.0.20
 		 */
 		private function internal_soap_checker() {
+
+			$isSoapRequest = false;
+
+			if ( $this->NETCURL_POST_DATA_TYPE == NETCURL_POST_DATATYPES::DATATYPE_SOAP ) {
+				$isSoapRequest = true;
+			}
+			if ( preg_match( "/\?wsdl$|\&wsdl$/i", $this->CURL_STORED_URL ) && $this->NETCURL_POST_DATA_TYPE == NETCURL_POST_DATATYPES::DATATYPE_NOT_SET ) {
+				$isSoapRequest = true;
+			}
+
 			// SOAP HANDLER: Override with SoapClient just before the real curl_exec is the most proper way to handle inheritages
-			if ( preg_match( "/\?wsdl$|\&wsdl$/i", $this->CURL_STORED_URL ) || $this->NETCURL_POST_DATA_TYPE == NETCURL_POST_DATATYPES::DATATYPE_SOAP ) {
+			if ( $isSoapRequest ) {
 				if ( ! $this->hasSoap() ) {
 					throw new \Exception( NETCURL_CURL_CLIENTNAME . " " . __FUNCTION__ . " exception: SoapClient is not available in this system", $this->NETWORK->getExceptionCode( 'NETCURL_SOAPCLIENT_CLASS_MISSING' ) );
 				}
@@ -2904,9 +2945,9 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 			$this->debugData['calls'] ++;
 
 			// Initialize drivers
-			$this->initializeNetCurl();
-			$this->handleIpList();      // Pick up externally selected outgoing ip if any requested
 			$this->executePostData();
+			$this->handleIpList();      // Pick up externally selected outgoing ip if any requested
+			$this->initializeNetCurl();
 
 			// Headers used by any
 			$this->fixHttpHeaders( $this->NETCURL_HEADERS_USER_DEFINED );
@@ -3064,6 +3105,7 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 
 
 		//////// LONG TIME DEPRECATIONS
+
 		/**
 		 * @param null $responseInData
 		 *
@@ -3072,7 +3114,7 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 		 * @deprecated 6.0.20 Use getCode
 		 */
 		public function getResponseCode( $responseInData = null ) {
-			return $this->getCode($responseInData);
+			return $this->getCode( $responseInData );
 		}
 
 		/**
@@ -3083,7 +3125,7 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 		 * @deprecated 6.0.20 Use getBody
 		 */
 		public function getResponseBody( $responseInData = null ) {
-			return $this->getBody($responseInData);
+			return $this->getBody( $responseInData );
 		}
 
 		/**
@@ -3094,7 +3136,7 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 		 * @deprecated 6.0.20 Use getUrl
 		 */
 		public function getResponseUrl( $responseInData = null ) {
-			return $this->getUrl($responseInData);
+			return $this->getUrl( $responseInData );
 		}
 
 		/**
@@ -3105,14 +3147,15 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 		 * @since 6.0
 		 * @deprecated 6.0.20
 		 */
-		public function getParsedResponse($inputResponse = null) {
-			return $this->getParsed($inputResponse);
+		public function getParsedResponse( $inputResponse = null ) {
+			return $this->getParsed( $inputResponse );
 		}
 
 
 
 
 		//////// DEPRECATED FUNCTIONS BEGIN /////////
+
 		/**
 		 * Get what external driver see
 		 *
@@ -3286,7 +3329,7 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 		 *
 		 * @return array
 		 * @since 6.0
-		 * @deprecated Use parser instead
+		 * @deprecated 6.0.20 Use parser instead
 		 */
 		private function getChildNodes( $childNode = array(), $getAs = '' ) {
 			$childNodeArray      = array();
@@ -3474,6 +3517,28 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 
 			return $parsedContent;
 		}
+
+		// Created for future use
+		/*public function __call( $name, $arguments ) {
+
+			// WARNING: Experimental
+			if ( $this->isFlag( 'XMLSOAP' ) && $this->IO->getHasXmlSerializer() && $this->NETCURL_POST_DATA_TYPE == NETCURL_POST_DATATYPES::DATATYPE_SOAP_XML ) {
+				$this->setContentType( 'text/xml' ); // ; charset=utf-8
+				$this->setCurlHeader( 'Content-Type', $this->getContentType() );
+				$soapifyArray = array(
+					'Body' => array(
+						$name => array()
+					)
+				);
+				$this->IO->setXmlSimple( true );
+				$this->IO->setSoapXml( true );
+				$this->NETCURL_POST_PREPARED_XML = $this->IO->renderXml( $soapifyArray, false, TORNELIB_CRYPTO_TYPES::TYPE_NONE, $name, 'SOAP-ENV' );
+
+				return $this->doPost( $this->CURL_STORED_URL, $this->NETCURL_POST_PREPARED_XML, NETCURL_POST_DATATYPES::DATATYPE_XML );
+			}
+
+			throw new \Exception( NETCURL_CURL_CLIENTNAME . " exception: Function " . $name . " does not exist!", $this->NETWORK->getExceptionCode( "NETCURL_UNEXISTENT_FUNCTION" ) );
+		}*/
 
 
 	}

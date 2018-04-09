@@ -22,6 +22,7 @@ class extendedTest extends TestCase {
 	private $CURL;
 	private $username = "ecomphpPipelineTest";
 	private $password = "4Em4r5ZQ98x3891D6C19L96TQ72HsisD";
+	private $wsdl = "https://test.resurs.com/ecommerce-test/ws/V4/SimplifiedShopFlowService?wsdl";
 
 	function setUp() {
 		$this->CURL = new MODULE_CURL();
@@ -33,7 +34,7 @@ class extendedTest extends TestCase {
 	 * @throws \Exception
 	 */
 	function soapFaultstring() {
-		$wsdl = $this->CURL->doGet( 'https://test.resurs.com/ecommerce-test/ws/V4/SimplifiedShopFlowService?wsdl' );
+		$wsdl = $this->CURL->doGet( $this->wsdl );
 		try {
 			$wsdl->getPaymentMethods();
 		} catch ( \Exception $e ) {
@@ -48,7 +49,7 @@ class extendedTest extends TestCase {
 	 * @throws \Exception
 	 */
 	function soapUnauthorized() {
-		$wsdl = $this->CURL->doGet( 'https://test.resurs.com/ecommerce-test/ws/V4/SimplifiedShopFlowService?wsdl' );
+		$wsdl = $this->CURL->doGet( $this->wsdl );
 		try {
 			$wsdl->getPaymentMethods();
 		} catch ( \Exception $e ) {
@@ -65,7 +66,7 @@ class extendedTest extends TestCase {
 		$this->CURL->setAuthentication( "fail", "fail" );
 		// SOAPWARNINGS is set true by default on authentication activation
 		try {
-			$wsdl = $this->CURL->doGet( 'https://test.resurs.com/ecommerce-test/ws/V4/SimplifiedShopFlowService?wsdl' );
+			$wsdl = $this->CURL->doGet( $this->wsdl );
 			$wsdl->getPaymentMethods();
 		} catch ( \Exception $e ) {
 			$errorMessage = $e->getMessage();
@@ -101,7 +102,7 @@ class extendedTest extends TestCase {
 		$this->CURL->setAuthentication( "fail", "fail" );
 		$this->CURL->setFlag( "NOSOAPWARNINGS" );
 		try {
-			$this->CURL->doGet( 'https://test.resurs.com/ecommerce-test/ws/V4/SimplifiedShopFlowService?wsdl' );
+			$this->CURL->doGet( $this->wsdl );
 		} catch ( \Exception $e ) {
 			// As of 6.0.16, SOAPWARNINGS are always enabled. Setting NOSOAPWARNINGS in flags, will render blind errors since the authentication errors are located in uncatchable warnings
 			$errorCode = $e->getCode();
@@ -138,13 +139,12 @@ class extendedTest extends TestCase {
 	function rbSoapBackToNoChain() {
 		$this->CURL->setAuthentication( $this->username, $this->password );
 		try {
-			$wsdlResponse = $this->CURL->doGet( 'https://test.resurs.com/ecommerce-test/ws/V4/SimplifiedShopFlowService?wsdl' )->getPaymentMethods();
+			$wsdlResponse = $this->CURL->doGet( $this->wsdl )->getPaymentMethods();
 			static::assertTrue( is_array( $this->CURL->getParsedResponse( $wsdlResponse ) ) && count( $this->CURL->getParsedResponse( $wsdlResponse ) ) > 1 );
 		} catch ( \Exception $e ) {
 			static::markTestSkipped( __FUNCTION__ . ": " . $e->getMessage() );
 		}
 	}
-
 
 	/**
 	 * @test
@@ -155,7 +155,7 @@ class extendedTest extends TestCase {
 		$this->CURL->setFlag( "SOAPCHAIN" );
 		$this->CURL->setAuthentication( $this->username, $this->password );
 		try {
-			$this->CURL->doGet( 'https://test.resurs.com/ecommerce-test/ws/V4/SimplifiedShopFlowService?wsdl' )->getPaymentMethodz();
+			$this->CURL->doGet( $this->wsdl )->getPaymentMethodz();
 		} catch ( \Exception $e ) {
 			static::assertTrue( $e->getMessage() != "" );
 		}
@@ -170,10 +170,26 @@ class extendedTest extends TestCase {
 		$this->CURL->setFlag( "SOAPCHAIN" );
 		$this->CURL->setAuthentication( $this->username, $this->password );
 		try {
-			$wsdlResponse = $this->CURL->doGet( 'https://test.resurs.com/ecommerce-test/ws/V4/SimplifiedShopFlowService?wsdl' )->getPaymentMethods();
+			$wsdlResponse = $this->CURL->doGet( $this->wsdl )->getPaymentMethods();
 			static::assertTrue( is_array( $wsdlResponse ) && count( $wsdlResponse ) > 1 );
 		} catch ( \Exception $e ) {
 			static::markTestSkipped( __FUNCTION__ . ": " . $e->getMessage() );
 		}
 	}
+
+	/**
+	 * @testdox Experimental
+	 */
+	function rbSimpleXml() {
+		try {
+			$this->CURL->setAuthentication( $this->username, $this->password );
+			$this->CURL->setFlag('XMLSOAP', true);
+			/** @var MODULE_CURL $wsdlResponse */
+			$wsdlResponse = $this->CURL->doGet( $this->wsdl, NETCURL_POST_DATATYPES::DATATYPE_SOAP_XML )->getPaymentMethods();
+			print_R($wsdlResponse);
+		} catch (\Exception $e) {
+			static::fail($e->getMessage());
+		}
+	}
+
 }

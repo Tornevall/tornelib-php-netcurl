@@ -1724,6 +1724,7 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 
 		/**
 		 * Making sure the $IpAddr contains valid address list
+		 * Pick up externally selected outgoing ip if any requested
 		 *
 		 * @throws \Exception
 		 * @since 5.0
@@ -2946,8 +2947,8 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 
 			// Initialize drivers
 			$this->executePostData();
-			$this->handleIpList();      // Pick up externally selected outgoing ip if any requested
 			$this->initializeNetCurl();
+			$this->handleIpList();
 
 			// Headers used by any
 			$this->fixHttpHeaders( $this->NETCURL_HEADERS_USER_DEFINED );

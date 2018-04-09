@@ -177,16 +177,13 @@ class extendedTest extends TestCase {
 		}
 	}
 
-	/**
-	 * @testdox Experimental
-	 */
+	// Currently dysfunctional
 	function rbSimpleXml() {
 		try {
 			$this->CURL->setAuthentication( $this->username, $this->password );
 			$this->CURL->setFlag('XMLSOAP', true);
 			/** @var MODULE_CURL $wsdlResponse */
 			$wsdlResponse = $this->CURL->doGet( $this->wsdl, NETCURL_POST_DATATYPES::DATATYPE_SOAP_XML )->getPaymentMethods();
-			print_R($wsdlResponse);
 		} catch (\Exception $e) {
 			static::fail($e->getMessage());
 		}

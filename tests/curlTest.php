@@ -114,7 +114,7 @@ class curlTest extends TestCase {
 			return true;
 		}
 		if ( is_object( $container ) ) {
-			if ( is_string( $container->getResponseBody() ) ) {
+			if ( is_string( $container->getBody() ) ) {
 				return true;
 			}
 		}
@@ -124,9 +124,9 @@ class curlTest extends TestCase {
 
 	private function getBody( $container ) {
 		if ( is_object( $container ) ) {
-			return $container->getResponseBody();
+			return $container->getBody();
 		} else {
-			return $this->CURL->getResponseBody();
+			return $this->CURL->getBody();
 		}
 
 		return "";
@@ -135,7 +135,7 @@ class curlTest extends TestCase {
 	private function getParsed( $container ) {
 		if ( $this->hasBody( $container ) ) {
 			if ( is_object( $container ) ) {
-				return $container->getParsedResponse();
+				return $container->getParsed();
 			}
 
 			return $container['parsed'];
@@ -201,7 +201,7 @@ class curlTest extends TestCase {
 	function getParsedSelf() {
 		$this->pemDefault();
 		$this->urlGet( "ssl&bool&o=json&method=get" );
-		$ParsedResponse = $this->CURL->getParsedResponse();
+		$ParsedResponse = $this->CURL->getParsed();
 		static::assertTrue( is_object( $ParsedResponse ) );
 	}
 
@@ -211,7 +211,7 @@ class curlTest extends TestCase {
 	 */
 	function quickInitParsed() {
 		$tempCurl = new MODULE_CURL( "https://identifier.tornevall.net/?json" );
-		static::assertTrue( is_object( $tempCurl->getParsedResponse() ) );
+		static::assertTrue( is_object( $tempCurl->getParsed() ) );
 	}
 
 	/**
@@ -220,7 +220,7 @@ class curlTest extends TestCase {
 	 */
 	function quickInitResponseCode() {
 		$tempCurl = new MODULE_CURL( "https://identifier.tornevall.net/?json" );
-		static::assertTrue( $tempCurl->getResponseCode() == 200 );
+		static::assertTrue( $tempCurl->getCode() == 200 );
 	}
 
 	/**
@@ -230,7 +230,7 @@ class curlTest extends TestCase {
 	function quickInitResponseBody() {
 		$tempCurl = new MODULE_CURL( "https://identifier.tornevall.net/?json" );
 		// Some content must exists in the body
-		static::assertTrue( strlen( $tempCurl->getResponseBody() ) >= 10 );
+		static::assertTrue( strlen( $tempCurl->getBody() ) >= 10 );
 	}
 
 	/**
@@ -240,7 +240,7 @@ class curlTest extends TestCase {
 	function getParsedFromResponse() {
 		$this->pemDefault();
 		$container      = $this->urlGet( "ssl&bool&o=json&method=get" );
-		$ParsedResponse = $this->CURL->getParsedResponse( $container );
+		$ParsedResponse = $this->CURL->getParsed( $container );
 		static::assertTrue( is_object( $ParsedResponse ) );
 	}
 
@@ -251,8 +251,8 @@ class curlTest extends TestCase {
 	function getParsedValue() {
 		$this->pemDefault();
 		$this->urlGet( "ssl&bool&o=json&method=get" );
-		$pRes      = $this->CURL->getParsedResponse();
-		$ValueFrom = $this->CURL->getParsedValue( 'methods' );
+		$pRes      = $this->CURL->getParsed();
+		$ValueFrom = $this->CURL->getValue( 'methods' );
 		static::assertTrue( is_object( $ValueFrom->_REQUEST ) );
 	}
 
@@ -263,7 +263,7 @@ class curlTest extends TestCase {
 	function getParsedSubValue() {
 		$this->pemDefault();
 		$this->urlGet( "ssl&bool&o=json&method=get" );
-		$ValueFrom = $this->CURL->getParsedValue( array( 'nesting', 'subarr4', 'child4' ) );
+		$ValueFrom = $this->CURL->getValue( array( 'nesting', 'subarr4', 'child4' ) );
 		static::assertTrue( count( $ValueFrom ) === 3 );
 	}
 
@@ -274,7 +274,7 @@ class curlTest extends TestCase {
 	function getParsedSubValueNoArray() {
 		$this->pemDefault();
 		$this->urlGet( "ssl&bool&o=json&method=get" );
-		$ValueFrom = $this->CURL->getParsedValue( new \stdClass() );
+		$ValueFrom = $this->CURL->getValue( new \stdClass() );
 		static::assertTrue( empty( $ValueFrom ) );
 	}
 
@@ -287,7 +287,7 @@ class curlTest extends TestCase {
 		$this->urlGet( "ssl&bool&o=json&method=get" );
 		$ExpectFailure = false;
 		try {
-			$this->CURL->getParsedValue( array( 'nesting', 'subarrfail' ) );
+			$this->CURL->getValue( array( 'nesting', 'subarrfail' ) );
 		} catch ( \Exception $parseException ) {
 			$ExpectFailure = true;
 		}
@@ -312,7 +312,7 @@ class curlTest extends TestCase {
 	function getSimple200() {
 		$this->pemDefault();
 		$this->simpleGet();
-		static::assertTrue( $this->CURL->getResponseCode() == 200 );
+		static::assertTrue( $this->CURL->getCode() == 200 );
 	}
 
 	/**
@@ -337,7 +337,7 @@ class curlTest extends TestCase {
 		} catch ( \Exception $e ) {
 			// CURLE_PEER_FAILED_VERIFICATION = 51
 			// CURLE_SSL_CACERT = 60
-			static::assertTrue( $e->getCode() == 60 || $e->getCode() == 51 || $e->getCode() == 500 || $e->getCode() === TORNELIB_NETCURL_EXCEPTIONS::NETCURL_SETSSLVERIFY_UNVERIFIED_NOT_SET, $e->getCode() );
+			static::assertTrue( $e->getCode() == 60 || $e->getCode() == 51 || $e->getCode() == 500 || $e->getCode() === NETCURL_EXCEPTIONS::NETCURL_SETSSLVERIFY_UNVERIFIED_NOT_SET, $e->getCode() );
 		}
 	}
 
@@ -352,7 +352,7 @@ class curlTest extends TestCase {
 		} catch ( \Exception $e ) {
 			// CURLE_PEER_FAILED_VERIFICATION = 51
 			// CURLE_SSL_CACERT = 60
-			static::assertTrue( $e->getCode() == 60 || $e->getCode() == 51 || $e->getCode() == 500 || $e->getCode() === TORNELIB_NETCURL_EXCEPTIONS::NETCURL_SETSSLVERIFY_UNVERIFIED_NOT_SET );
+			static::assertTrue( $e->getCode() == 60 || $e->getCode() == 51 || $e->getCode() == 500 || $e->getCode() === NETCURL_EXCEPTIONS::NETCURL_SETSSLVERIFY_UNVERIFIED_NOT_SET );
 		}
 	}
 
@@ -363,12 +363,12 @@ class curlTest extends TestCase {
 		try {
 			$this->CURL->setStrictFallback( true );
 			$this->CURL->setSslVerify( true, true );
-			$container = $this->CURL->getParsedResponse( $this->CURL->doGet( \TESTURLS::getUrlSelfSigned() . "/tests/tornevall_network/index.php?o=json&bool" ) );
+			$container = $this->CURL->getParsed( $this->CURL->doGet( \TESTURLS::getUrlSelfSigned() . "/tests/tornevall_network/index.php?o=json&bool" ) );
 			if ( is_object( $container ) ) {
 				static::assertTrue( isset( $container->methods ) );
 			}
 		} catch ( \Exception $e ) {
-			$this->markTestSkipped( "Got exception " . $e->getCode() . ": " . $e->getMessage() );
+			static::markTestSkipped( "Got exception " . $e->getCode() . ": " . $e->getMessage() );
 		}
 	}
 
@@ -380,13 +380,13 @@ class curlTest extends TestCase {
 		$this->pemDefault();
 		try {
 			$this->CURL->setSslVerify( false );
-			$container = $this->CURL->getParsedResponse( $this->CURL->doGet( \TESTURLS::getUrlSelfSigned() . "/tests/tornevall_network/index.php?o=json&bool" ) );
+			$container = $this->CURL->getParsed( $this->CURL->doGet( \TESTURLS::getUrlSelfSigned() . "/tests/tornevall_network/index.php?o=json&bool" ) );
 			// The hasErrors function should return at least one error here
 			if ( is_object( $container ) && ! $this->CURL->hasErrors() ) {
 				static::assertTrue( isset( $container->methods ) );
 			}
 		} catch ( \Exception $e ) {
-			$this->markTestSkipped( "Got exception " . $e->getCode() . ": " . $e->getMessage() );
+			static::markTestSkipped( "Got exception " . $e->getCode() . ": " . $e->getMessage() );
 		}
 	}
 
@@ -407,7 +407,7 @@ class curlTest extends TestCase {
 	function getSerialize() {
 		$this->pemDefault();
 		$container = $this->urlGet( "ssl&bool&o=serialize&method=get" );
-		$parsed = $this->CURL->getParsed($container);
+		$parsed    = $this->CURL->getParsed( $container );
 		static::assertTrue( is_array( $parsed['methods']['_GET'] ) );
 	}
 
@@ -457,8 +457,8 @@ class curlTest extends TestCase {
 	function getSimpleDomChain() {
 		/** @var MODULE_CURL $getRequest */
 		$getRequest = $this->urlGet( "ssl&bool&o=xml&method=get&using=SimpleXMLElement", null, "simple.html" );
-		$parsed = $getRequest->getParsed();
-		$dom = $getRequest->getDomById();
+		$parsed     = $getRequest->getParsed();
+		$dom        = $getRequest->getDomById();
 		static::assertTrue( isset( $parsed['ByNodes'] ) && isset( $dom['html'] ) );
 	}
 
@@ -548,7 +548,7 @@ class curlTest extends TestCase {
 			}
 			$this->CURL->IpAddr = $ipArray;
 			$CurlJson           = $this->CURL->doGet( \TESTURLS::getUrlSimpleJson() );
-			static::assertNotEmpty( $this->CURL->getParsedResponse()->ip );
+			static::assertNotEmpty( $this->CURL->getParsed()->ip );
 		}
 	}
 
@@ -578,8 +578,8 @@ class curlTest extends TestCase {
 					} catch ( \Exception $e ) {
 
 					}
-					if ( isset( $this->CURL->getParsedResponse()->ip ) && $this->NETWORK->getArpaFromAddr( $this->CURL->getParsedResponse()->ip, true ) > 0 ) {
-						$responses[ $ip ] = $this->CURL->getParsedResponse()->ip;
+					if ( isset( $this->CURL->getParsed()->ip ) && $this->NETWORK->getArpaFromAddr( $this->CURL->getParsed()->ip, true ) > 0 ) {
+						$responses[ $ip ] = $this->CURL->getParsed()->ip;
 					}
 				}
 			} else {
@@ -597,7 +597,7 @@ class curlTest extends TestCase {
 		$this->pemDefault();
 		$redirectResponse = $this->CURL->doGet( "http://developer.tornevall.net/tests/tornevall_network/redirect.php?run" );
 		$redirectedUrls   = $this->CURL->getRedirectedUrls();
-		static::assertTrue( intval( $this->CURL->getResponseCode( $redirectResponse ) ) >= 300 && intval( $this->CURL->getResponseCode( $redirectResponse ) ) <= 350 && count( $redirectedUrls ) );
+		static::assertTrue( intval( $this->CURL->getCode( $redirectResponse ) ) >= 300 && intval( $this->CURL->getCode( $redirectResponse ) ) <= 350 && count( $redirectedUrls ) );
 	}
 
 	/**
@@ -609,7 +609,21 @@ class curlTest extends TestCase {
 		$this->CURL->setEnforceFollowLocation( false );
 		$redirectResponse = $this->CURL->doGet( "http://developer.tornevall.net/tests/tornevall_network/redirect.php?run" );
 		$redirectedUrls   = $this->CURL->getRedirectedUrls();
-		static::assertTrue( $this->CURL->getResponseCode( $redirectResponse ) >= 300 && $this->CURL->getResponseCode( $redirectResponse ) <= 350 && ! preg_match( "/rerun/i", $this->CURL->getResponseBody( $redirectResponse ) ) && count( $redirectedUrls ) );
+		static::assertTrue( $this->CURL->getCode( $redirectResponse ) >= 300 && $this->CURL->getCode( $redirectResponse ) <= 350 && ! preg_match( "/rerun/i", $this->CURL->getBody( $redirectResponse ) ) && count( $redirectedUrls ) );
+	}
+
+	/**
+	 * @test
+	 * @testdox Activating the flag FOLLOWLOCATION_INTERNAL will make NetCurl make its own follow recursion
+	 */
+	function followRedirectDisabledFlagEnabled() {
+		$this->pemDefault();
+		$this->CURL->setFlag( 'FOLLOWLOCATION_INTERNAL' );
+		$this->CURL->setEnforceFollowLocation( false );
+		/** @var MODULE_CURL $redirectResponse */
+		$redirectResponse = $this->CURL->doGet( "http://developer.tornevall.net/tests/tornevall_network/redirect.php?run" );
+		$redirectedUrls   = $this->CURL->getRedirectedUrls();
+		static::assertTrue( intval( $this->CURL->getCode( $redirectResponse ) ) >= 200 && intval( $this->CURL->getCode( $redirectResponse ) ) <= 300 && count( $redirectedUrls ) && preg_match( "/rerun/i", $this->CURL->getBody() ) );
 	}
 
 	/**
@@ -620,7 +634,7 @@ class curlTest extends TestCase {
 		$this->CURL->setEnforceFollowLocation( false );
 		$redirectResponse = $this->CURL->doGet( "http://developer.tornevall.net/tests/tornevall_network/redirect.php?run" );
 		$redirectedUrls   = $this->CURL->getRedirectedUrls();
-		static::assertTrue( $this->CURL->getResponseCode( $redirectResponse ) >= 300 && $this->CURL->getResponseCode( $redirectResponse ) <= 350 && ! preg_match( "/rerun/i", $this->CURL->getResponseBody( $redirectResponse ) ) && count( $redirectedUrls ) );
+		static::assertTrue( $this->CURL->getCode( $redirectResponse ) >= 300 && $this->CURL->getCode( $redirectResponse ) <= 350 && ! preg_match( "/rerun/i", $this->CURL->getBody( $redirectResponse ) ) && count( $redirectedUrls ) );
 	}
 
 	/**
@@ -633,7 +647,7 @@ class curlTest extends TestCase {
 		$this->CURL->setCurlOpt( CURLOPT_FOLLOWLOCATION, false );  // This is the doer since there are internal protection against the above enforcer
 		$redirectResponse = $this->CURL->doGet( "http://developer.tornevall.net/tests/tornevall_network/redirect.php?run" );
 		$redirectedUrls   = $this->CURL->getRedirectedUrls();
-		static::assertTrue( $this->CURL->getResponseCode( $redirectResponse ) >= 300 && $this->CURL->getResponseCode( $redirectResponse ) <= 350 && count( $redirectedUrls ) );
+		static::assertTrue( $this->CURL->getCode( $redirectResponse ) >= 300 && $this->CURL->getCode( $redirectResponse ) <= 350 && count( $redirectedUrls ) );
 	}
 
 	/**
@@ -865,7 +879,7 @@ class curlTest extends TestCase {
 	 * @test
 	 */
 	function getJsonByConstructor() {
-		$identifierByJson = ( new MODULE_CURL( \TESTURLS::getUrlSimpleJson() ) )->getParsedResponse();
+		$identifierByJson = ( new MODULE_CURL( \TESTURLS::getUrlSimpleJson() ) )->getParsed();
 		static::assertTrue( isset( $identifierByJson->ip ) );
 	}
 
@@ -976,11 +990,11 @@ class curlTest extends TestCase {
 	 * @test
 	 */
 	function responseTypeHttpObject() {
-		$this->CURL->setResponseType(NETCURL_RESPONSETYPE::RESPONSETYPE_OBJECT);
+		$this->CURL->setResponseType( NETCURL_RESPONSETYPE::RESPONSETYPE_OBJECT );
 		/** @var NETCURL_HTTP_OBJECT $request */
-		$request = $this->CURL->doGet(\TESTURLS::getUrlSimpleJson());
-		$parsed = $request->getParsed();
-		static::assertTrue(get_class($request) == 'TorneLIB\NETCURL_HTTP_OBJECT' && is_object($parsed) && isset($parsed->ip));
+		$request = $this->CURL->doGet( \TESTURLS::getUrlSimpleJson() );
+		$parsed  = $request->getParsed();
+		static::assertTrue( get_class( $request ) == 'TorneLIB\NETCURL_HTTP_OBJECT' && is_object( $parsed ) && isset( $parsed->ip ) );
 	}
 
 	/**
@@ -989,10 +1003,10 @@ class curlTest extends TestCase {
 	 * @throws \Exception
 	 */
 	function responseTypeHttpObjectChain() {
-		$this->CURL->setResponseType(NETCURL_RESPONSETYPE::RESPONSETYPE_OBJECT);
+		$this->CURL->setResponseType( NETCURL_RESPONSETYPE::RESPONSETYPE_OBJECT );
 		/** @var NETCURL_HTTP_OBJECT $request */
-		$request = $this->CURL->doGet(\TESTURLS::getUrlSimpleJson())->getParsed();
-		static::assertTrue(is_object($request) && isset($request->ip));
+		$request = $this->CURL->doGet( \TESTURLS::getUrlSimpleJson() )->getParsed();
+		static::assertTrue( is_object( $request ) && isset( $request->ip ) );
 	}
 
 }

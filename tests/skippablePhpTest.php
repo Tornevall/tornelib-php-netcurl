@@ -40,7 +40,7 @@ class skippablePhpTest extends TestCase {
 			$this->pemDefault();
 			$redirectResponse = $this->CURL->doGet( "http://developer.tornevall.net/tests/tornevall_network/redirect.php?run" );
 			$redirectedUrls   = $this->CURL->getRedirectedUrls();
-			static::assertTrue( $this->CURL->getResponseCode( $redirectResponse ) >= 300 && $this->CURL->getResponseCode( $redirectResponse ) <= 350 && ! preg_match( "/rerun/i", $this->CURL->getResponseBody( $redirectResponse ) ) && count( $redirectedUrls ) );
+			static::assertTrue( $this->CURL->getCode( $redirectResponse ) >= 300 && $this->CURL->getCode( $redirectResponse ) <= 350 && ! preg_match( "/rerun/i", $this->CURL->getResponseBody( $redirectResponse ) ) && count( $redirectedUrls ) );
 
 			return;
 		}
@@ -66,7 +66,7 @@ class skippablePhpTest extends TestCase {
 		} else {
 			$this->CURL->setProxy( $this->TorSetupAddress, $this->TorSetupType );
 			$CurlJson = $this->CURL->doGet( \TESTURLS::getUrlSimpleJson() );
-			$parsedIp = $this->NETWORK->getArpaFromAddr( $this->CURL->getParsedResponse()->ip, true );
+			$parsedIp = $this->NETWORK->getArpaFromAddr( $this->CURL->getParsed()->ip, true );
 			static::assertTrue( $parsedIp > 0 );
 		}
 	}

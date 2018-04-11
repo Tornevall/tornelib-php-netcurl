@@ -109,6 +109,7 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 		private $NETCURL_RESPONSE_CONTAINER_BODY;
 		private $NETCURL_RESPONSE_CONTAINER_CODE;
 		private $NETCURL_RESPONSE_CONTAINER_HEADER;
+		private $NETCURL_RESPONSE_RAW;
 
 		private $userAgents = array(
 			'Mozilla' => 'Mozilla/4.0 (compatible; MSIE 7.0; Windows NT 5.1; .NET CLR 1.0.3705; .NET CLR 1.1.4322; Media Center PC 4.0;)'
@@ -1865,13 +1866,16 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 			if ( preg_match( "/^HTTP\//", $body ) ) {
 				$newBody = $this->netcurl_split_raw( $body );
 				if ( is_object( $newBody ) ) {
-					$header = $newBody->TemporaryResponse['header'];
-					$body   = $newBody->TemporaryResponse['body'];
+					$header = $newBody->getHeader();
+					$body   = $newBody->getBody();
 				} else {
 					$header = $newBody['header'];
 					$body   = $newBody['body'];
 				}
+				$rows = explode( "\n", $header );
 			}
+
+			$headerInfo = $this->GetHeaderKeyArray( $rows );
 
 			// If response code starts with 3xx, this is probably a redirect
 			if ( preg_match( "/^3/", $code ) ) {
@@ -1882,10 +1886,20 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 					'code'   => $code
 				);
 				if ( $this->isFlag( 'FOLLOWLOCATION_INTERNAL' ) ) {
-					// TODO: Simulated follow location (recalling curl)
+					$transferByLocation = array( 300, 301, 302, 307, 308 );
+					if ( isset( $headerInfo['Location'] ) ) {
+						$newLocation = $headerInfo['Location'];
+						if ( ! preg_match( "/^http/i", $newLocation ) ) {
+							$this->CURL_STORED_URL .= $newLocation;
+						} else {
+							$this->CURL_STORED_URL = $newLocation;
+						}
+						/** @var MODULE_CURL $newRequest */
+						$newRequest = $this->doRepeat();
+						return $this->netcurl_split_raw($newRequest->getRaw());
+					}
 				}
 			}
-			$headerInfo            = $this->GetHeaderKeyArray( $rows );
 			$arrayedResponse       = array(
 				'header' => array( 'info' => $headerInfo, 'full' => $header ),
 				'body'   => $body,
@@ -1900,6 +1914,7 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 			$arrayedResponse['parsed'] = $parsedContent;
 			$arrayedResponse['ip']     = $this->CURL_IP_ADDRESS;
 
+			$this->NETCURL_RESPONSE_RAW              = $rawInput;
 			$this->NETCURL_RESPONSE_CONTAINER        = $arrayedResponse;
 			$this->NETCURL_RESPONSE_CONTAINER_PARSED = $parsedContent;
 			$this->NETCURL_RESPONSE_CONTAINER_CODE   = $code;
@@ -1943,6 +1958,14 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 		}
 
 		/**
+		 * @return mixed
+		 * @since 6.0.20
+		 */
+		public function getRaw() {
+			return $this->NETCURL_RESPONSE_RAW;
+		}
+
+		/**
 		 * Get head and body from a request parsed
 		 *
 		 * @param string $content
@@ -1952,9 +1975,12 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 		 * @since 6.0
 		 */
 		public function getHeader( $content = "" ) {
+			if ( ! empty( $content ) ) {
+				$this->netcurl_split_raw( $content . "\r\n\r\n" );
+			}
+
 			return $this->NETCURL_RESPONSE_CONTAINER_HEADER;
 		}
-
 
 		/**
 		 * @return array
@@ -2084,9 +2110,9 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 		 *
 		 * @return mixed|null
 		 * @throws \Exception
-		 * @since 6.0
+		 * @since 6.0.20
 		 */
-		public function getParsedValue( $keyName = null, $responseContent = null ) {
+		public function getValue( $keyName = null, $responseContent = null ) {
 			if ( is_string( $keyName ) ) {
 				$ParsedValue = $this->getParsedResponse( $responseContent );
 				if ( is_array( $ParsedValue ) && isset( $ParsedValue[ $keyName ] ) ) {
@@ -2217,6 +2243,23 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 		 */
 		public function getStoreSessionExceptions() {
 			return $this->canStoreSessionException;
+		}
+
+		/**
+		 * @return array|null|string|NETCURL_CURLOBJECT|void
+		 * @throws \Exception
+		 * @since 6.0.20
+		 */
+		function doRepeat() {
+			if ( $this->NETCURL_POST_METHOD == NETCURL_POST_METHODS::METHOD_GET ) {
+				return $this->doGet( $this->CURL_STORED_URL, $this->NETCURL_POST_DATA_TYPE );
+			} else if ( $this->NETCURL_POST_METHOD == NETCURL_POST_METHODS::METHOD_POST ) {
+				return $this->doPost( $this->CURL_STORED_URL, $this->POST_DATA_REAL, $this->NETCURL_POST_DATA_TYPE );
+			} else if ( $this->NETCURL_POST_METHOD == NETCURL_POST_METHODS::METHOD_PUT ) {
+				return $this->doPost( $this->CURL_STORED_URL, $this->POST_DATA_REAL, $this->NETCURL_POST_DATA_TYPE );
+			} else if ( $this->NETCURL_POST_METHOD == NETCURL_POST_METHODS::METHOD_DELETE ) {
+				return $this->doPost( $this->CURL_STORED_URL, $this->POST_DATA_REAL, $this->NETCURL_POST_DATA_TYPE );
+			}
 		}
 
 		/**
@@ -2633,7 +2676,7 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 					$this->NETCURL_HEADERS_SYSTEM_DEFINED['Content-Length'] = strlen( $this->POST_DATA_HANDLED );
 					$this->setCurlOpt( CURLOPT_POSTFIELDS, $this->POST_DATA_HANDLED );  // overwrite old
 				} else if ( ( $this->NETCURL_POST_DATA_TYPE == NETCURL_POST_DATATYPES::DATATYPE_XML || $this->NETCURL_POST_DATA_TYPE == NETCURL_POST_DATATYPES::DATATYPE_SOAP_XML ) ) {
-					$this->NETCURL_HEADERS_SYSTEM_DEFINED['Content-Type'] = 'text/xml'; // ; charset=utf-8
+					$this->NETCURL_HEADERS_SYSTEM_DEFINED['Content-Type']   = 'text/xml'; // ; charset=utf-8
 					$this->NETCURL_HEADERS_SYSTEM_DEFINED['Content-Length'] = strlen( $this->NETCURL_POST_DATA );
 					$this->setCurlOpt( CURLOPT_CUSTOMREQUEST, 'POST' );
 					$this->setCurlOpt( CURLOPT_POSTFIELDS, $this->POST_DATA_HANDLED );
@@ -3152,6 +3195,18 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 			return $this->getParsed( $inputResponse );
 		}
 
+		/**
+		 * @param null $keyName
+		 * @param null $responseContent
+		 *
+		 * @return mixed|null
+		 * @throws \Exception
+		 * @since 6.0
+		 * @deprecated 6.0.20
+		 */
+		public function getParsedValue( $keyName = null, $responseContent = null ) {
+			return $this->getValue( $keyName, $responseContent );
+		}
 
 
 

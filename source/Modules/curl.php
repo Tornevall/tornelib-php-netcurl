@@ -1867,14 +1867,9 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 
 			// If the first row of the body contains a HTTP/-string, we'll try to reparse it
 			if ( preg_match( "/^HTTP\//", $body ) ) {
-				$newBody = $this->netcurl_split_raw( $body );
-				if ( is_object( $newBody ) ) {
-					$header = $newBody->getHeader();
-					$body   = $newBody->getBody();
-				} else {
-					$header = $newBody['header'];
-					$body   = $newBody['body'];
-				}
+				$this->netcurl_split_raw( $body );
+				$header = $this->getHeader();
+				$body = $this->getBody();
 				$rows = explode( "\n", $header );
 			}
 
@@ -2181,23 +2176,25 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 		/**
 		 * Create an array of a header, with keys and values
 		 *
-		 * @param $HeaderRows
+		 * @param array $HeaderRows
 		 *
 		 * @return array
 		 * @since 6.0
 		 */
-		private function GetHeaderKeyArray( $HeaderRows ) {
+		private function GetHeaderKeyArray( $HeaderRows = array() ) {
 			$headerInfo = array();
-			foreach ( $HeaderRows as $headRow ) {
-				$colon = array_map( "trim", explode( ":", $headRow, 2 ) );
-				if ( isset( $colon[1] ) ) {
-					$headerInfo[ $colon[0] ] = $colon[1];
-				} else {
-					$rowSpc = explode( " ", $headRow );
-					if ( isset( $rowSpc[0] ) ) {
-						$headerInfo[ $rowSpc[0] ] = $headRow;
+			if (is_array($HeaderRows)) {
+				foreach ( $HeaderRows as $headRow ) {
+					$colon = array_map( "trim", explode( ":", $headRow, 2 ) );
+					if ( isset( $colon[1] ) ) {
+						$headerInfo[ $colon[0] ] = $colon[1];
 					} else {
-						$headerInfo[ $headRow ] = $headRow;
+						$rowSpc = explode( " ", $headRow );
+						if ( isset( $rowSpc[0] ) ) {
+							$headerInfo[ $rowSpc[0] ] = $headRow;
+						} else {
+							$headerInfo[ $headRow ] = $headRow;
+						}
 					}
 				}
 			}

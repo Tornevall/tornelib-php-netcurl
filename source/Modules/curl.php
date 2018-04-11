@@ -1846,7 +1846,7 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 		 * @return $this|array|NETCURL_HTTP_OBJECT
 		 * @throws \Exception
 		 */
-		private function netcurl_split_raw( $rawInput = '' ) {
+		public function netcurl_split_raw( $rawInput = '' ) {
 			// Standard response output
 			$arrayedResponse = array(
 				'header' => array(),
@@ -1855,7 +1855,10 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 				'parsed' => ''
 			);
 
-			list( $header, $body ) = explode( "\r\n\r\n", $rawInput, 2 );
+			// Generate safer content than via list()
+			$explodeRaw = explode( "\r\n\r\n", $rawInput . "\r\n", 2 );
+			$header = isset($explodeRaw[0]) ? $explodeRaw[0] : "";
+			$body = isset($explodeRaw[1]) ? $explodeRaw[1] : "";
 			$rows              = explode( "\n", $header );
 			$response          = explode( " ", isset( $rows[0] ) ? $rows[0] : null );
 			$shortCodeResponse = explode( " ", isset( $rows[0] ) ? $rows[0] : null, 3 );
@@ -1976,7 +1979,7 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 		 */
 		public function getHeader( $content = "" ) {
 			if ( ! empty( $content ) ) {
-				return $this->netcurl_split_raw( $content . "\r\n\r\n" );
+				$this->netcurl_split_raw( $content);
 			}
 
 			return $this->NETCURL_RESPONSE_CONTAINER_HEADER;

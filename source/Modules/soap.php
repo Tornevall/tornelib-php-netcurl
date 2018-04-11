@@ -304,16 +304,12 @@ if ( ! class_exists( 'MODULE_SOAP' ) && ! class_exists( 'TorneLIB\MODULE_SOAP' )
 				$this->soapResponse = $this->soapClient->__getLastResponse();
 				/** @noinspection PhpUndefinedMethodInspection */
 				$this->soapResponseHeaders = $this->soapClient->__getLastResponseHeaders();
-				$parsedHeader              = $this->getHeader( $this->soapResponseHeaders );
-				if ( ! is_object( $parsedHeader ) ) {
-					$returnResponse['header'] = $parsedHeader['header'];
-					$returnResponse['code']   = isset( $parsedHeader['code'] ) ? $parsedHeader['code'] : 0;
-					$returnResponse['body']   = $this->soapResponse;
-					$returnResponse['parsed'] = $SoapClientResponse;
-				} else {
-					$returnResponse = $parsedHeader->getTemporaryResponse();
-				}
-				// Collect the response received internally, before throwing
+				//$parsedHeader              = $this->getHeader( $this->soapResponseHeaders );
+				$this->netcurl_split_raw( $this->soapResponseHeaders );
+				$returnResponse['header']       = $this->getHeader();
+				$returnResponse['code']         = $this->getCode();
+				$returnResponse['body']         = $this->soapResponse;
+				$returnResponse['parsed']       = $SoapClientResponse;
 				$this->libResponse              = $returnResponse;
 				$this->soapFaultExceptionObject = $e;
 				if ( $this->canThrowSoapFaults ) {
@@ -331,22 +327,18 @@ if ( ! class_exists( 'MODULE_SOAP' ) && ! class_exists( 'TorneLIB\MODULE_SOAP' )
 			$this->soapResponse = $this->soapClient->__getLastResponse();
 			/** @noinspection PhpUndefinedMethodInspection */
 			$this->soapResponseHeaders = $this->soapClient->__getLastResponseHeaders();
-			$returnResponse['parsed']  = $SoapClientResponse;
+
+			$this->getHeader( $this->soapResponseHeaders );
+
+			$returnResponse['parsed'] = $SoapClientResponse;
 			if ( isset( $SoapClientResponse->return ) ) {
 				$returnResponse['parsed'] = $SoapClientResponse->return;
 			}
-			$parsedHeader = $this->getHeader( $this->soapResponseHeaders );
-			if ( ! is_object( $parsedHeader ) ) {
-				$returnResponse['header'] = $parsedHeader['header'];
-				$returnResponse['code']   = isset( $parsedHeader['code'] ) ? $parsedHeader['code'] : 0;
-				$returnResponse['body']   = $this->soapResponse;
-			} else {
-				$returnResponse = $parsedHeader->getTemporaryResponse();
-			}
-			$this->libResponse = $returnResponse;
+			$returnResponse['header'] = $this->getHeader();
+			$returnResponse['code']   = $this->getCode();
+			$returnResponse['body']   = $this->getBody();
+			$this->libResponse        = $returnResponse;
 			if ( $this->isFlag( 'SOAPCHAIN' ) && isset( $returnResponse['parsed'] ) && ! empty( $returnResponse['parsed'] ) ) {
-				// Add backward compatibility
-				//$returnResponse['parsed']['parsed'] = $returnResponse['parsed'];
 				return $returnResponse['parsed'];
 			}
 

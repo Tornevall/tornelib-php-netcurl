@@ -140,7 +140,7 @@ class extendedTest extends TestCase {
 		$this->CURL->setAuthentication( $this->username, $this->password );
 		try {
 			$wsdlResponse = $this->CURL->doGet( $this->wsdl )->getPaymentMethods();
-			static::assertTrue( is_array( $this->CURL->getParsedResponse( $wsdlResponse ) ) && count( $this->CURL->getParsedResponse( $wsdlResponse ) ) > 1 );
+			static::assertTrue( is_array( $this->CURL->getParsed( $wsdlResponse ) ) && count( $this->CURL->getParsed( $wsdlResponse ) ) > 1 );
 		} catch ( \Exception $e ) {
 			static::markTestSkipped( __FUNCTION__ . ": " . $e->getMessage() );
 		}

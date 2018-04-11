@@ -1976,7 +1976,7 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 		 */
 		public function getHeader( $content = "" ) {
 			if ( ! empty( $content ) ) {
-				$this->netcurl_split_raw( $content . "\r\n\r\n" );
+				return $this->netcurl_split_raw( $content . "\r\n\r\n" );
 			}
 
 			return $this->NETCURL_RESPONSE_CONTAINER_HEADER;

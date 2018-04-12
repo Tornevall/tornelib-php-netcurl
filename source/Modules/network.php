@@ -278,14 +278,15 @@ if ( ! class_exists( 'MODULE_NETWORK' ) && ! class_exists( 'TorneLIB\MODULE_NETW
 		 * @param int $offset
 		 * @param int $urlLimit
 		 * @param array $protocols
+		 * @param bool $preventDuplicates
 		 *
 		 * @return array
 		 */
-		public function getUrlsFromHtml( $stringWithUrls, $offset = - 1, $urlLimit = - 1, $protocols = array( "http", "https" ) ) {
+		public function getUrlsFromHtml( $stringWithUrls, $offset = - 1, $urlLimit = - 1, $protocols = array( "http" ), $preventDuplicates = true ) {
 			$returnArray = array();
 			$urls        = array();
 
-			// Pick up all urls by protocol
+			// Pick up all urls by protocol (adding http will include https too)
 			foreach ( $protocols as $protocol ) {
 				$regex = "@[\"|\']$protocol(.*?)[\"|\']@is";
 				preg_match_all( $regex, $stringWithUrls, $matches );
@@ -297,7 +298,13 @@ if ( ! class_exists( 'MODULE_NETWORK' ) && ! class_exists( 'TorneLIB\MODULE_NETW
 					foreach ( $urls as $url ) {
 						if ( ! empty( trim( $url ) ) ) {
 							$prependUrl    = $protocol . $url;
-							$returnArray[] = $prependUrl;
+							if (!$preventDuplicates) {
+								$returnArray[] = $prependUrl;
+							} else {
+								if (!in_array($prependUrl, $returnArray)) {
+									$returnArray[] = $prependUrl;
+								}
+							}
 						}
 					}
 				}

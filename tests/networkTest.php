@@ -16,6 +16,7 @@ ini_set( 'memory_limit', - 1 );    // Free memory limit, some tests requires mor
 
 class networkTest extends TestCase {
 
+	/** @var MODULE_NETWORK $NET */
 	private $NET;
 
 	function setUp() {
@@ -210,5 +211,34 @@ class networkTest extends TestCase {
 		$localNetwork = new MODULE_NETWORK();
 		$urlData      = $localNetwork->getUrlDomain( "http://failing.domain/" );
 		static::assertTrue( $urlData[0] == "failing.domain" );
+	}
+
+	/**
+	 * @test
+	 */
+	function getUrlsFromHtml() {
+		$html = '
+		<html>
+			<a href="http://test.com/url1">URL 1</a>
+			<a href=\'http://test.com/url2\'>URL 2</a>
+			<a href= "http://test.com/url3" >URL 3</a>
+			<a href= \'http://test.com/url4\' >URL 4</a>
+			<img src="http://test.com/img1">IMG 1</a>
+			<img src=\'http://test.com/img2\'>IMG 2</a>
+			<img src= "http://test.com/img3" >IMG 3</a>
+			<img src= \'http://test.com/img4\' >IMG 4</a>
+
+			<a href="http://test.com/durl1">Duplicate URL 1</a>
+			<a href=\'http://test.com/durl2\'>Duplicate URL 2</a>
+			<a href= "http://test.com/durl3" >Duplicate URL 3</a>
+			<a href= \'http://test.com/durl4\' >Duplicate URL 4</a>
+			<img src="http://test.com/dimg1">Duplicate IMG 1</a>
+			<img src=\'http://test.com/dimg2\'>Duplicate IMG 2</a>
+			<img src= "http://test.com/dimg3" >Duplicate IMG 3</a>
+			<img src= \'http://test.com/dimg4\' >Duplicate IMG 4</a>
+			</html>
+		';
+
+		static::assertCount(16, $this->NET->getUrlsFromHtml($html));
 	}
 }

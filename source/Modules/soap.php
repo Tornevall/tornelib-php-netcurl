@@ -59,7 +59,7 @@ if ( ! class_exists( 'MODULE_SOAP' ) && ! class_exists( 'TorneLIB\MODULE_SOAP' )
 		private $soapResponseHeaders;
 		private $libResponse;
 		private $canThrowSoapFaults = true;
-		private $CustomUserAgent;
+		private $CUSTOM_USER_AGENT;
 		private $soapFaultExceptionObject;
 		/** @var MODULE_CURL */
 		private $PARENT;

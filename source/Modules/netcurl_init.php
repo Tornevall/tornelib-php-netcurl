@@ -38,9 +38,6 @@
 
 namespace TorneLIB;
 
-if ( file_exists( __DIR__ . '/../vendor/autoload.php' ) ) {
-	require_once( __DIR__ . '/../vendor/autoload.php' );
-}
 // Library Release Information
 if ( ! defined( 'NETCURL_RELEASE' ) ) {
 	define( 'NETCURL_RELEASE', '6.0.20' );
@@ -49,6 +46,19 @@ if ( ! defined( 'NETCURL_MODIFY' ) ) {
 	define( 'NETCURL_MODIFY', '20180328' );
 }
 if ( ! defined( 'TORNELIB_NETCURL_RELEASE' ) ) {
-// Compatibility constant
+	// Compatibility constant
 	define( 'TORNELIB_NETCURL_RELEASE', NETCURL_RELEASE );
+}
+
+if ( defined( 'NETCURL_REQUIRE' ) ) {
+	if ( ! defined( 'NETCURL_REQUIRE_OPERATOR' ) ) {
+		define( 'NETCURL_REQUIRE_OPERATOR', '==' );
+	}
+	define( 'NETCURL_ALLOW_AUTOLOAD', version_compare( NETCURL_RELEASE, NETCURL_REQUIRE, NETCURL_REQUIRE_OPERATOR ) ? true : false );
+} else {
+	define( 'NETCURL_ALLOW_AUTOLOAD', true );
+}
+
+if ( file_exists( __DIR__ . '/../vendor/autoload.php' ) && defined( 'NETCURL_ALLOW_AUTOLOAD' ) && NETCURL_ALLOW_AUTOLOAD === true ) {
+	require_once( __DIR__ . '/../vendor/autoload.php' );
 }

@@ -50,7 +50,8 @@ if ( ! class_exists( 'NETCURL_DRIVER_CONTROLLER' ) && ! class_exists( 'TorneLIB\
 
 		private $DRIVERS_BRIDGED = array(
 			'GuzzleHttp\Client'                => 'NETCURL_DRIVER_GUZZLEHTTP',
-			'GuzzleHttp\Handler\StreamHandler' => 'NETCURL_DRIVER_GUZZLEHTTP'
+			'GuzzleHttp\Handler\StreamHandler' => 'NETCURL_DRIVER_GUZZLEHTTP',
+			'WP_Http'                          => 'NETCURL_DRIVER_WORDPRESS'
 		);
 
 		private $DRIVERS_STREAMABLE = array(
@@ -65,6 +66,9 @@ if ( ! class_exists( 'NETCURL_DRIVER_CONTROLLER' ) && ! class_exists( 'TorneLIB\
 
 		/** @var NETCURL_DRIVERS_INTERFACE $DRIVER Preloaded driver when setDriver is used */
 		private $DRIVER = null;
+
+		/** @var int $DRIVER_ID */
+		private $DRIVER_ID = 0;
 
 		private $URL = array(
 			'drivers' => 'https://docs.tornevall.net/x/CYBiAQ#Module:NetCurl-Internaldrivers'
@@ -217,7 +221,7 @@ if ( ! class_exists( 'NETCURL_DRIVER_CONTROLLER' ) && ! class_exists( 'TorneLIB\
 		 *
 		 * @return NETCURL_DRIVERS_INTERFACE
 		 */
-		private function getDriverByClass( $driverId = NETCURL_NETWORK_DRIVERS::DRIVER_NOT_SET, $parameters = null ) {
+		private function getDriverByClass( $driverId = NETCURL_NETWORK_DRIVERS::DRIVER_NOT_SET, $parameters = null, $ownClass = null ) {
 			$driverClass = isset( $this->DRIVERS_AVAILABLE[ $driverId ] ) ? $this->DRIVERS_AVAILABLE[ $driverId ] : null;
 			/** @var NETCURL_DRIVERS_INTERFACE $newDriver */
 			$newDriver       = null;
@@ -227,6 +231,16 @@ if ( ! class_exists( 'NETCURL_DRIVER_CONTROLLER' ) && ! class_exists( 'TorneLIB\
 			if ( $driverId == NETCURL_NETWORK_DRIVERS::DRIVER_GUZZLEHTTP && ! $this->hasCurl() ) {
 				// If curl is unavailable, we'll fall  back to guzzleStream
 				$driverId = NETCURL_NETWORK_DRIVERS::DRIVER_GUZZLEHTTP_STREAM;
+			}
+
+			if ( ! is_null( $ownClass ) && class_exists( $ownClass ) ) {
+				if ( is_null( $parameters ) ) {
+					$newDriver = new $ownClass();
+				} else {
+					$newDriver = new $ownClass( $parameters );
+				}
+
+				return $newDriver;
 			}
 
 			if ( class_exists( $driverClass ) ) {
@@ -248,7 +262,8 @@ if ( ! class_exists( 'NETCURL_DRIVER_CONTROLLER' ) && ! class_exists( 'TorneLIB\
 						$newDriver = new $driverClass( $parameters );
 					}
 				}
-				if ( ! is_null( $newDriver ) ) {
+				// Follow standards for internal bridges if method exists, otherwise skip this part. By doing this, we'd be able to import and directly use external drivers.
+				if ( ! is_null( $newDriver ) && method_exists( $newDriver, 'setDriverId' ) ) {
 					$newDriver->setDriverId( $driverId );
 				}
 			}
@@ -276,40 +291,50 @@ if ( ! class_exists( 'NETCURL_DRIVER_CONTROLLER' ) && ! class_exists( 'TorneLIB\
 		 *
 		 * @param int $netDriver
 		 * @param null $parameters
+		 * @param null $ownClass
 		 *
 		 * @return int|NETCURL_DRIVERS_INTERFACE
 		 * @throws \Exception
 		 */
-		public function setDriver( $netDriver = NETCURL_NETWORK_DRIVERS::DRIVER_CURL, $parameters = null ) {
+		public function setDriver( $netDriver = NETCURL_NETWORK_DRIVERS::DRIVER_CURL, $parameters = null, $ownClass = null ) {
 			$this->DRIVER = null;
 
-			return $this->getDriver( $netDriver, $parameters );
+			return $this->getDriver( $netDriver, $parameters, $ownClass );
 		}
 
 		/**
 		 * @param int $netDriver
 		 * @param null $parameters
+		 * @param null $ownClass
 		 *
 		 * @return int|NETCURL_DRIVERS_INTERFACE
 		 * @throws \Exception
 		 */
-		public function getDriver( $netDriver = NETCURL_NETWORK_DRIVERS::DRIVER_CURL, $parameters = null ) {
+		public function getDriver( $netDriver = NETCURL_NETWORK_DRIVERS::DRIVER_CURL, $parameters = null, $ownClass = null ) {
 
 			if ( is_object( $this->DRIVER ) ) {
+				return $this->DRIVER;
+			}
+
+			if (!is_null($ownClass) && class_exists($ownClass)) {
+				$this->DRIVER = $this->getDriverByClass($netDriver, $parameters, $ownClass);
+				$this->DRIVER_ID = $netDriver;
 				return $this->DRIVER;
 			}
 
 			if ( $this->getIsDriver( $netDriver ) ) {
 				if ( is_string( $this->DRIVERS_AVAILABLE[ $netDriver ] ) && ! is_numeric( $this->DRIVERS_AVAILABLE[ $netDriver ] ) ) {
 					/** @var NETCURL_DRIVERS_INTERFACE DRIVER */
-					$this->DRIVER = $this->getDriverByClass( $netDriver, $parameters );
+					$this->DRIVER = $this->getDriverByClass( $netDriver, $parameters, $ownClass );
 				} else if ( is_numeric( $this->DRIVERS_AVAILABLE[ $netDriver ] ) && $this->DRIVERS_AVAILABLE[ $netDriver ] == $netDriver ) {
 					$this->DRIVER = $netDriver;
 				}
+				$this->DRIVER_ID = $netDriver;
 
 			} else {
 				if ( $this->hasCurl() ) {
 					$this->DRIVER = NETCURL_NETWORK_DRIVERS::DRIVER_CURL;
+					$this->DRIVER_ID = NETCURL_NETWORK_DRIVERS::DRIVER_CURL;
 				} else {
 					// Last resort: Check if there is any other driver available if this fails
 					$testDriverAvailability = $this->getAutodetectedDriver();
@@ -322,6 +347,10 @@ if ( ! class_exists( 'NETCURL_DRIVER_CONTROLLER' ) && ! class_exists( 'TorneLIB\
 			}
 
 			return $this->DRIVER;
+		}
+
+		public function getDriverById() {
+			return $this->DRIVER_ID;
 		}
 
 		/**

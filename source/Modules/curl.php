@@ -160,7 +160,7 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 		 * @var array $internalFlags Flags controller to change behaviour on internal function
 		 * Chaining should eventually be default active in future (6.1?+)
 		 */
-		private $internalFlags = array( 'CHAIN' => true, 'SOAPCHAIN' => false );
+		private $internalFlags = array( 'CHAIN' => true, 'SOAPCHAIN' => true );
 
 		/**
 		 * @var string $contentType Pre-Set content type, when installed modules needs to know in what format we are sending data
@@ -693,13 +693,15 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 
 		/**
 		 * @param int $driverId
+		 * @param array $parameters
+		 * @param null $ownClass
 		 *
 		 * @return int|NETCURL_DRIVERS_INTERFACE
 		 * @throws \Exception
 		 * @since 6.0.20
 		 */
-		public function setDriver( $driverId = NETCURL_NETWORK_DRIVERS::DRIVER_NOT_SET ) {
-			return $this->DRIVER->setDriver( $driverId );
+		public function setDriver( $driverId = NETCURL_NETWORK_DRIVERS::DRIVER_NOT_SET, $parameters = array(), $ownClass = null ) {
+			return $this->DRIVER->setDriver( $driverId, $parameters, $ownClass );
 		}
 
 		/**
@@ -707,10 +709,26 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 		 *
 		 * @since 6.0.15
 		 */
-		public function getDriver() {
-			$this->currentDriver = $this->DRIVER->getDriver();
+		public function getDriver($byId = false) {
+			if (!$byId) {
+				$this->currentDriver = $this->DRIVER->getDriver();
+			} else {
+				if ($this->isFlag('IS_SOAP')) {
+					return NETCURL_NETWORK_DRIVERS::DRIVER_SOAPCLIENT;
+				}
+
+				return $this->DRIVER->getDriverById();
+			}
 
 			return $this->currentDriver;
+		}
+
+		/**
+		 * @return int|NETCURL_DRIVERS_INTERFACE
+		 * @since 6.0.20
+		 */
+		public function getDriverById() {
+			return $this->getDriver(true);
 		}
 
 		/**
@@ -1974,7 +1992,7 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 			$returnResponse['URL'] = $this->CURL_STORED_URL;
 			$returnResponse['ip']  = isset( $this->CURL_IP_ADDRESS ) ? $this->CURL_IP_ADDRESS : null;  // Will only be filled if there is custom address set.
 
-			$this->throwCodeException( $httpMessage, $code );
+			$this->throwCodeException( trim($httpMessage), $code );
 			$contentType               = isset( $headerInfo['Content-Type'] ) ? $headerInfo['Content-Type'] : null;
 			$parsedContent             = ( new NETCURL_PARSER( $arrayedResponse['body'], $contentType ) )->getParsedResponse();
 			$arrayedResponse['parsed'] = $parsedContent;
@@ -2102,6 +2120,11 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 			} else if ( isset( $inputResponse['parsed'] ) ) {
 				// Deprecated
 				return $inputResponse['parsed'];
+			}
+
+			if (is_array($inputResponse)) {
+				// This might already be parsed, if the array reaches this point
+				return $inputResponse;
 			}
 
 			return null;
@@ -3027,6 +3050,12 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 
 				return $this->executeHttpSoap( $this->CURL_STORED_URL, $this->NETCURL_POST_DATA, $this->NETCURL_POST_DATA_TYPE );
 			}
+			$this->unsetFlag('IS_SOAP');
+			if ($this->isFlag('WAS_SOAP_CHAIN')) {
+				// Enable chaining if flags was reset by SOAP
+				$this->setChain(true);
+				$this->unsetFlag('WAS_SOAP_CHAIN');
+			}
 
 			return null;
 
@@ -3105,9 +3134,12 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 		 * @since 6.0.14
 		 */
 		private function executeHttpSoap( $url = '', $postData = array(), $CurlMethod = NETCURL_POST_METHODS::METHOD_GET ) {
-			$this->setChain( false );
 			$Soap = new MODULE_SOAP( $this->CURL_STORED_URL, $this );
+			$this->setFlag('WAS_SOAP_CHAIN', $this->getIsChained());
+			$Soap->setFlag('WAS_SOAP_CHAIN', $this->getIsChained());
+			$this->setChain( false );
 			$Soap->setFlag( 'IS_SOAP' );
+			$this->setFlag('IS_SOAP');
 			/** @since 6.0.20 */
 			$Soap->setChain( false );
 			if ( $this->isFlag( 'SOAPCHAIN' ) ) {

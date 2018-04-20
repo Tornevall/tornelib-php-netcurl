@@ -24,7 +24,6 @@
 namespace TorneLIB;
 
 if ( ! class_exists( 'MODULE_NETWORK' ) && ! class_exists( 'TorneLIB\MODULE_NETWORK' ) ) {
-
 	if (!defined('NETCURL_NETWORK_RELEASE')) {
 		define( 'NETCURL_NETWORK_RELEASE', '6.0.6' );
 	}
@@ -39,6 +38,7 @@ if ( ! class_exists( 'MODULE_NETWORK' ) && ! class_exists( 'TorneLIB\MODULE_NETW
 	 * @link https://phpdoc.tornevall.net/TorneLIBv5/class-TorneLIB.TorneLIB_Network.html PHPDoc/Staging - TorneLIB_Network
 	 * @link https://docs.tornevall.net/x/KQCy TorneLIB (PHP) Landing documentation
 	 * @link https://bitbucket.tornevall.net/projects/LIB/repos/tornelib-php/browse Sources of TorneLIB
+	 * 
 	 * @package TorneLIB
 	 */
 	class MODULE_NETWORK {

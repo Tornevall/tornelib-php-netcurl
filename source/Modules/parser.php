@@ -128,11 +128,11 @@ if ( ! class_exists( 'NETCURL_PARSER' ) && ! class_exists( 'TorneLIB\NETCURL_PAR
 		private function getContentByTest() {
 			$returnNonNullValue = null;
 
-			if ( ! is_null( $respond = $this->getContentByXml() ) ) {
+			if ( ! is_null( $respond = $this->getContentByJson() ) ) {
 				$returnNonNullValue = $respond;
 			} else if ( ! is_null( $respond = $this->getContentBySerial() ) ) {
 				$returnNonNullValue = $respond;
-			} else if ( ! is_null( $respond = $this->getContentByJson() ) ) {
+			} else if ( ! is_null( $respond = $this->getContentByXml() ) ) {
 				$returnNonNullValue = $respond;
 			} else if ( ! is_null( $respond = $this->getContentByYaml() ) ) {
 				$returnNonNullValue = $respond;

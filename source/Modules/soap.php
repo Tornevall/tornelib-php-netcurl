@@ -327,8 +327,9 @@ if ( ! class_exists( 'MODULE_SOAP' ) && ! class_exists( 'TorneLIB\MODULE_SOAP' )
 			$this->soapResponse = $this->soapClient->__getLastResponse();
 			/** @noinspection PhpUndefinedMethodInspection */
 			$this->soapResponseHeaders = $this->soapClient->__getLastResponseHeaders();
+			$headerAndBody = $this->soapResponseHeaders . "\r\n" . $this->soapResponse; // Own row for debugging
 
-			$this->getHeader( $this->soapResponseHeaders );
+			$this->getHeader( $headerAndBody );
 
 			$returnResponse['parsed'] = $SoapClientResponse;
 			if ( isset( $SoapClientResponse->return ) ) {

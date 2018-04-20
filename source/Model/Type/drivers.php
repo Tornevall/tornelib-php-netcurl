@@ -39,6 +39,11 @@ if ( ! class_exists( 'NETCURL_NETWORK_DRIVERS' ) && ! class_exists( 'TorneLIB\NE
 		 * @deprecated Internal driver should be named DRIVER_CURL
 		 */
 		const DRIVER_INTERNAL = 1;
+		const DRIVER_SOAPCLIENT = 2;
+
+		/** @var int Using the class itself */
+		const DRIVER_OWN_EXTERNAL = 100;
+
 	}
 }
 if ( ! class_exists( 'TORNELIB_CURL_DRIVERS' ) && ! class_exists( 'TorneLIB\TORNELIB_CURL_DRIVERS' ) ) {

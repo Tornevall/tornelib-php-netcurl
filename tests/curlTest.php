@@ -1009,4 +1009,29 @@ class curlTest extends TestCase {
 		static::assertTrue( is_object( $request ) && isset( $request->ip ) );
 	}
 
+	/**
+	 * @test
+	 * @testdox Testing that switching between driverse (SOAP) works - when SOAP is not used, NetCURL should switch back to the regular driver
+	 */
+	function multiCallsSwitchingBetweenRegularAndSoap() {
+		$driversUsed = array(
+			'1' => 0,
+			'2' => 0
+		);
+		$this->CURL->setAuthentication( 'atest', 'atest' );
+		$this->CURL->doGet( "http://identifier.tornevall.net/?json" )->getParsed();
+		$driversUsed[ $this->CURL->getDriverById() ] ++;
+		$this->CURL->doGet( 'https://test.resurs.com/ecommerce-test/ws/V4/SimplifiedShopFlowService?wsdl' )->getPaymentMethods();
+		$driversUsed[ $this->CURL->getDriverById() ] ++;
+		$this->CURL->doGet( "http://identifier.tornevall.net/?json" )->getParsed();
+		$driversUsed[ $this->CURL->getDriverById() ] ++;
+		$this->CURL->doGet( 'https://test.resurs.com/ecommerce-test/ws/V4/SimplifiedShopFlowService?wsdl' )->getPaymentMethods();
+		$driversUsed[ $this->CURL->getDriverById() ] ++;
+		$this->CURL->doGet( "http://identifier.tornevall.net/?json" )->getParsed();
+		$driversUsed[ $this->CURL->getDriverById() ] ++;
+
+		$this->assertTrue($driversUsed[1] == 3 && $driversUsed[2] == 2 ? true:false);
+
+	}
+
 }

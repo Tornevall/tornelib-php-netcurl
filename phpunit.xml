@@ -5,7 +5,7 @@
          processisolation="true"
          stopOnFailure="false">
     <testsuites>
-        <testsuite name="NetCurl with friends">
+        <testsuite name="NetCURL with friends">
             <directory>tests</directory>
         </testsuite>
     </testsuites>

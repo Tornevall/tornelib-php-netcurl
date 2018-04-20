@@ -22,7 +22,7 @@
 
 namespace TorneLIB;
 
-if ( ! class_exists( 'TorneLIB_Network_IP_Protocols' ) && ! class_exists( 'TorneLIB\TorneLIB_Network_IP_Protocols' ) ) {
+if ( ! class_exists( 'NETCURL_IP_PROTOCOLS' ) && ! class_exists( 'TorneLIB\NETCURL_IP_PROTOCOLS' ) ) {
 	/**
 	 * Class NETCURL_IP_PROTOCOLS IP Address Types class
 	 * @package TorneLIB

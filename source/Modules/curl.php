@@ -1932,7 +1932,15 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 		 * @return $this|array|NETCURL_HTTP_OBJECT
 		 * @throws \Exception
 		 */
-		public function netcurl_split_raw( $rawInput = '' ) {
+		public function netcurl_split_raw( $rawInput = null, $internalRaw = false ) {
+
+			$rawDataTest = $this->getRaw();
+			if ( $internalRaw && is_null( $rawInput ) && ! empty( $rawDataTest ) ) {
+				$this->netcurl_split_raw( $rawDataTest );
+
+				return $this;
+			}
+
 			// Standard response output
 			$arrayedResponse = array(
 				'header' => array(),

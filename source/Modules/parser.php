@@ -58,8 +58,12 @@ if ( ! class_exists( 'NETCURL_PARSER' ) && ! class_exists( 'TorneLIB\NETCURL_PAR
 		 * @return null|string
 		 * @since 6.0.0
 		 */
-		private function getContentByJson() {
+		public function getContentByJson( $returnAsIs = false ) {
 			try {
+				if ( $returnAsIs ) {
+					return $this->IO->getFromJson( $this->PARSE_CONTAINER );
+				}
+
 				return $this->getNull( $this->IO->getFromJson( $this->PARSE_CONTAINER ) );
 			} catch ( \Exception $e ) {
 
@@ -69,11 +73,17 @@ if ( ! class_exists( 'NETCURL_PARSER' ) && ! class_exists( 'TorneLIB\NETCURL_PAR
 		}
 
 		/**
+		 * @param bool $returnAsIs
+		 *
 		 * @return null|string
 		 * @since 6.0.0
 		 */
-		private function getContentByXml() {
+		public function getContentByXml( $returnAsIs = false ) {
 			try {
+				if ( $returnAsIs ) {
+					return $this->IO->getFromXml( $this->PARSE_CONTAINER );
+				}
+
 				return $this->getNull( $this->IO->getFromXml( $this->PARSE_CONTAINER ) );
 			} catch ( \Exception $e ) {
 
@@ -83,11 +93,17 @@ if ( ! class_exists( 'NETCURL_PARSER' ) && ! class_exists( 'TorneLIB\NETCURL_PAR
 		}
 
 		/**
+		 * @param bool $returnAsIs
+		 *
 		 * @return null|string
 		 * @since 6.0.0
 		 */
-		private function getContentByYaml() {
+		public function getContentByYaml( $returnAsIs = false ) {
 			try {
+				if ( $returnAsIs ) {
+					$this->IO->getFromYaml( $this->PARSE_CONTAINER );
+				}
+
 				return $this->getNull( $this->IO->getFromYaml( $this->PARSE_CONTAINER ) );
 			} catch ( \Exception $e ) {
 
@@ -97,11 +113,17 @@ if ( ! class_exists( 'NETCURL_PARSER' ) && ! class_exists( 'TorneLIB\NETCURL_PAR
 		}
 
 		/**
+		 * @param bool $returnAsIs
+		 *
 		 * @return null|string
 		 * @since 6.0.0
 		 */
-		private function getContentBySerial() {
+		public function getContentBySerial( $returnAsIs = false ) {
 			try {
+				if ( $returnAsIs ) {
+					return $this->IO->getFromSerializerInternal( $this->PARSE_CONTAINER )
+				}
+
 				return $this->getNull( $this->IO->getFromSerializerInternal( $this->PARSE_CONTAINER ) );
 			} catch ( \Exception $e ) {
 

@@ -2146,8 +2146,8 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 		 * @since 6.0.20
 		 */
 		public function getCode( $ResponseContent = null ) {
-			if ( method_exists( $ResponseContent, "getResponseCode" ) ) {
-				return $ResponseContent->getResponseCode();
+			if ( method_exists( $ResponseContent, "getCode" ) ) {
+				return $ResponseContent->getCode();
 			}
 
 			if ( is_null( $ResponseContent ) && ! empty( $this->NETCURL_RESPONSE_CONTAINER_CODE ) ) {
@@ -2158,6 +2158,25 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 
 			return 0;
 		}
+
+		/**
+		 * @param null $ResponseContent
+		 *
+		 * @return int
+		 * @since 6.0.20
+		 */
+		public function getMessage( $ResponseContent = null ) {
+			if ( method_exists( $ResponseContent, "getMessage" ) ) {
+				return $ResponseContent->getMessage();
+			}
+
+			if ( is_null( $ResponseContent ) && ! empty( $this->NETCURL_RESPONSE_CONTAINER_HTTPMESSAGE ) ) {
+				return (string) $this->NETCURL_RESPONSE_CONTAINER_HTTPMESSAGE;
+			}
+
+			return null;
+		}
+
 
 		/**
 		 * @param null $ResponseContent

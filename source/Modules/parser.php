@@ -121,7 +121,7 @@ if ( ! class_exists( 'NETCURL_PARSER' ) && ! class_exists( 'TorneLIB\NETCURL_PAR
 		public function getContentBySerial( $returnAsIs = false ) {
 			try {
 				if ( $returnAsIs ) {
-					return $this->IO->getFromSerializerInternal( $this->PARSE_CONTAINER )
+					return $this->IO->getFromSerializerInternal( $this->PARSE_CONTAINER );
 				}
 
 				return $this->getNull( $this->IO->getFromSerializerInternal( $this->PARSE_CONTAINER ) );

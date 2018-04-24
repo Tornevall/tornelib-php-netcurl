@@ -108,6 +108,7 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 		private $NETCURL_RESPONSE_CONTAINER_PARSED;
 		private $NETCURL_RESPONSE_CONTAINER_BODY;
 		private $NETCURL_RESPONSE_CONTAINER_CODE;
+		private $NETCURL_RESPONSE_CONTAINER_HTTPMESSAGE;
 		private $NETCURL_RESPONSE_CONTAINER_HEADER;
 		private $NETCURL_RESPONSE_RAW;
 
@@ -709,11 +710,11 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 		 *
 		 * @since 6.0.15
 		 */
-		public function getDriver($byId = false) {
-			if (!$byId) {
+		public function getDriver( $byId = false ) {
+			if ( ! $byId ) {
 				$this->currentDriver = $this->DRIVER->getDriver();
 			} else {
-				if ($this->isFlag('IS_SOAP')) {
+				if ( $this->isFlag( 'IS_SOAP' ) ) {
 					return NETCURL_NETWORK_DRIVERS::DRIVER_SOAPCLIENT;
 				}
 
@@ -728,7 +729,7 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 		 * @since 6.0.20
 		 */
 		public function getDriverById() {
-			return $this->getDriver(true);
+			return $this->getDriver( true );
 		}
 
 		/**
@@ -1992,18 +1993,19 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 			$returnResponse['URL'] = $this->CURL_STORED_URL;
 			$returnResponse['ip']  = isset( $this->CURL_IP_ADDRESS ) ? $this->CURL_IP_ADDRESS : null;  // Will only be filled if there is custom address set.
 
-			$this->throwCodeException( trim($httpMessage), $code );
+			$this->throwCodeException( trim( $httpMessage ), $code );
 			$contentType               = isset( $headerInfo['Content-Type'] ) ? $headerInfo['Content-Type'] : null;
 			$parsedContent             = ( new NETCURL_PARSER( $arrayedResponse['body'], $contentType ) )->getParsedResponse();
 			$arrayedResponse['parsed'] = $parsedContent;
 			$arrayedResponse['ip']     = $this->CURL_IP_ADDRESS;
 
-			$this->NETCURL_RESPONSE_RAW              = $rawInput;
-			$this->NETCURL_RESPONSE_CONTAINER        = $arrayedResponse;
-			$this->NETCURL_RESPONSE_CONTAINER_PARSED = $parsedContent;
-			$this->NETCURL_RESPONSE_CONTAINER_CODE   = $code;
-			$this->NETCURL_RESPONSE_CONTAINER_BODY   = $body;
-			$this->NETCURL_RESPONSE_CONTAINER_HEADER = $header;
+			$this->NETCURL_RESPONSE_RAW                   = $rawInput;
+			$this->NETCURL_RESPONSE_CONTAINER             = $arrayedResponse;
+			$this->NETCURL_RESPONSE_CONTAINER_PARSED      = $parsedContent;
+			$this->NETCURL_RESPONSE_CONTAINER_CODE        = trim( $code );
+			$this->NETCURL_RESPONSE_CONTAINER_HTTPMESSAGE = trim( $httpMessage );
+			$this->NETCURL_RESPONSE_CONTAINER_BODY        = $body;
+			$this->NETCURL_RESPONSE_CONTAINER_HEADER      = $header;
 
 			if ( $this->NETCURL_RETURN_RESPONSE_TYPE == NETCURL_RESPONSETYPE::RESPONSETYPE_OBJECT ) {
 				return new NETCURL_HTTP_OBJECT( $arrayedResponse['header'], $arrayedResponse['body'], $arrayedResponse['code'], $arrayedResponse['parsed'], $this->CURL_STORED_URL, $this->CURL_IP_ADDRESS );
@@ -2100,7 +2102,9 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 		 * @since 6.0.20
 		 */
 		public function getParsed( $inputResponse = null ) {
+
 			if ( is_array( $inputResponse ) ) {
+				// If the input response is an array and contains the deprecated editon of an error code
 				if ( isset( $inputResponse['code'] ) && $inputResponse['code'] >= 400 ) {
 					throw new \Exception( NETCURL_CURL_CLIENTNAME . " parseResponse exception - Unexpected response code from server: " . $inputResponse['code'], $inputResponse['code'] );
 				}
@@ -2117,13 +2121,18 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 
 			if ( is_null( $inputResponse ) && ! empty( $this->NETCURL_RESPONSE_CONTAINER_PARSED ) ) {
 				return $this->NETCURL_RESPONSE_CONTAINER_PARSED;
-			} else if ( isset( $inputResponse['parsed'] ) ) {
-				// Deprecated
-				return $inputResponse['parsed'];
+			} else if ( is_array( $inputResponse ) ) {
+				// Return a deprecated answer
+				if ( isset( $inputResponse['parsed'] ) ) {
+					return $inputResponse['parsed'];
+				}
 			}
 
-			if (is_array($inputResponse)) {
+			if ( is_array( $inputResponse ) ) {
 				// This might already be parsed, if the array reaches this point
+				return $inputResponse;
+			} else if ( is_object( $inputResponse ) ) {
+				// This is an object. Either it is ourselves or it is an already parsed object
 				return $inputResponse;
 			}
 
@@ -3050,11 +3059,11 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 
 				return $this->executeHttpSoap( $this->CURL_STORED_URL, $this->NETCURL_POST_DATA, $this->NETCURL_POST_DATA_TYPE );
 			}
-			$this->unsetFlag('IS_SOAP');
-			if ($this->isFlag('WAS_SOAP_CHAIN')) {
+			$this->unsetFlag( 'IS_SOAP' );
+			if ( $this->isFlag( 'WAS_SOAP_CHAIN' ) ) {
 				// Enable chaining if flags was reset by SOAP
-				$this->setChain(true);
-				$this->unsetFlag('WAS_SOAP_CHAIN');
+				$this->setChain( true );
+				$this->unsetFlag( 'WAS_SOAP_CHAIN' );
 			}
 
 			return null;
@@ -3135,11 +3144,11 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 		 */
 		private function executeHttpSoap( $url = '', $postData = array(), $CurlMethod = NETCURL_POST_METHODS::METHOD_GET ) {
 			$Soap = new MODULE_SOAP( $this->CURL_STORED_URL, $this );
-			$this->setFlag('WAS_SOAP_CHAIN', $this->getIsChained());
-			$Soap->setFlag('WAS_SOAP_CHAIN', $this->getIsChained());
+			$this->setFlag( 'WAS_SOAP_CHAIN', $this->getIsChained() );
+			$Soap->setFlag( 'WAS_SOAP_CHAIN', $this->getIsChained() );
 			$this->setChain( false );
 			$Soap->setFlag( 'IS_SOAP' );
-			$this->setFlag('IS_SOAP');
+			$this->setFlag( 'IS_SOAP' );
 			/** @since 6.0.20 */
 			$Soap->setChain( false );
 			if ( $this->isFlag( 'SOAPCHAIN' ) ) {

@@ -104,13 +104,13 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 		private $POST_DATA_REAL;
 
 		/** @var array $NETCURL_RESPONSE_CONTAINER */
-		private $NETCURL_RESPONSE_CONTAINER;
-		private $NETCURL_RESPONSE_CONTAINER_PARSED;
-		private $NETCURL_RESPONSE_CONTAINER_BODY;
-		private $NETCURL_RESPONSE_CONTAINER_CODE;
-		private $NETCURL_RESPONSE_CONTAINER_HTTPMESSAGE;
-		private $NETCURL_RESPONSE_CONTAINER_HEADER;
-		private $NETCURL_RESPONSE_RAW;
+		protected $NETCURL_RESPONSE_CONTAINER;
+		protected $NETCURL_RESPONSE_CONTAINER_PARSED;
+		protected $NETCURL_RESPONSE_CONTAINER_BODY;
+		protected $NETCURL_RESPONSE_CONTAINER_CODE;
+		protected $NETCURL_RESPONSE_CONTAINER_HTTPMESSAGE;
+		protected $NETCURL_RESPONSE_CONTAINER_HEADER;
+		protected $NETCURL_RESPONSE_RAW;
 
 		private $userAgents = array(
 			'Mozilla' => 'Mozilla/4.0 (compatible; MSIE 7.0; Windows NT 5.1; .NET CLR 1.0.3705; .NET CLR 1.1.4322; Media Center PC 4.0;)'
@@ -1928,6 +1928,7 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 
 		/**
 		 * @param string $rawInput
+		 * @param bool $internalRaw
 		 *
 		 * @return $this|array|NETCURL_HTTP_OBJECT
 		 * @throws \Exception

@@ -327,10 +327,9 @@ if ( ! class_exists( 'MODULE_SOAP' ) && ! class_exists( 'TorneLIB\MODULE_SOAP' )
 			$this->soapResponse = $this->soapClient->__getLastResponse();
 			/** @noinspection PhpUndefinedMethodInspection */
 			$this->soapResponseHeaders = $this->soapClient->__getLastResponseHeaders();
-			$headerAndBody = $this->soapResponseHeaders . "\r\n" . $this->soapResponse; // Own row for debugging
+			$headerAndBody             = $this->soapResponseHeaders . "\r\n" . $this->soapResponse; // Own row for debugging
 
 			$this->getHeader( $headerAndBody );
-
 			$returnResponse['parsed'] = $SoapClientResponse;
 			if ( isset( $SoapClientResponse->return ) ) {
 				$returnResponse['parsed'] = $SoapClientResponse->return;
@@ -339,6 +338,26 @@ if ( ! class_exists( 'MODULE_SOAP' ) && ! class_exists( 'TorneLIB\MODULE_SOAP' )
 			$returnResponse['code']   = $this->getCode();
 			$returnResponse['body']   = $this->getBody();
 			$this->libResponse        = $returnResponse;
+
+			$this->NETCURL_RESPONSE_RAW              = $headerAndBody;
+			$this->NETCURL_RESPONSE_CONTAINER_PARSED = $returnResponse['parsed'];
+			$this->NETCURL_RESPONSE_CONTAINER_CODE   = $this->getCode();
+			$this->NETCURL_RESPONSE_CONTAINER_BODY   = $this->getBody();
+			$this->NETCURL_RESPONSE_CONTAINER_HEADER = $this->getHeader();
+			$this->NETCURL_RESPONSE_CONTAINER        = $returnResponse;
+
+			if ( ! is_null( $this->PARENT ) ) {
+				$this->PARENT->NETCURL_RESPONSE_RAW              = $this->NETCURL_RESPONSE_RAW;
+				$this->PARENT->NETCURL_RESPONSE_CONTAINER_PARSED = $this->NETCURL_RESPONSE_CONTAINER_PARSED;
+				$this->PARENT->NETCURL_RESPONSE_CONTAINER_CODE   = $this->NETCURL_RESPONSE_CONTAINER_CODE;
+				$this->PARENT->NETCURL_RESPONSE_CONTAINER_BODY   = $this->NETCURL_RESPONSE_CONTAINER_BODY;
+				$this->PARENT->NETCURL_RESPONSE_CONTAINER_HEADER = $this->NETCURL_RESPONSE_CONTAINER_HTTPMESSAGE;
+				$this->PARENT->NETCURL_RESPONSE_CONTAINER        = $this->NETCURL_RESPONSE_CONTAINER;
+			}
+
+			// HTTPMESSAGE is not applicable for this section
+			//$this->NETCURL_RESPONSE_CONTAINER_HTTPMESSAGE = trim( $httpMessage );
+
 			if ( $this->isFlag( 'SOAPCHAIN' ) && isset( $returnResponse['parsed'] ) && ! empty( $returnResponse['parsed'] ) ) {
 				return $returnResponse['parsed'];
 			}

@@ -1031,7 +1031,20 @@ class curlTest extends TestCase {
 		$driversUsed[ $this->CURL->getDriverById() ] ++;
 
 		$this->assertTrue($driversUsed[1] == 3 && $driversUsed[2] == 2 ? true:false);
+	}
 
+	/**
+	 * @test
+	 * @testdox Another way to extract stuff on
+	 * @throws \Exception
+	 */
+	function soapIoParse() {
+		$this->CURL->setAuthentication( 'atest', 'atest' );
+		$this->CURL->doGet( 'https://test.resurs.com/ecommerce-test/ws/V4/SimplifiedShopFlowService?wsdl' )->getPaymentMethods();
+		$IO = new MODULE_IO();
+		$XML = $IO->getFromXml($this->CURL->getBody(), true);
+		$id = (isset($XML[0]) && isset($XML[0]->id) ? $XML[0]->id : null);
+		$this->assertTrue(strlen($id) > 0 ? true : false);
 	}
 
 }

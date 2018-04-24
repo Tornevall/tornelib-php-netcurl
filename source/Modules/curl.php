@@ -2038,6 +2038,7 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 			}
 
 			if ( ! is_string( $netCurlResponse ) ) {
+				// This method exists in external drivers interface. Do not mistakenly consider it the internal getRaw()
 				if ( method_exists( $netCurlResponse, 'getRawResponse' ) ) {
 					$htmlResponseData = $netCurlResponse->getRawResponse();
 				} else {
@@ -3179,7 +3180,7 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 			$this->setFlag( 'IS_SOAP' );
 			/** @since 6.0.20 */
 			$Soap->setChain( false );
-			if ( $this->isFlag( 'SOAPCHAIN' ) ) {
+			if ( $this->hasFlag( 'SOAPCHAIN' ) ) {
 				$Soap->setFlag( 'SOAPCHAIN', $this->getFlag( 'SOAPCHAIN' ) );
 			}
 			$Soap->setCustomUserAgent( $this->CUSTOM_USER_AGENT );

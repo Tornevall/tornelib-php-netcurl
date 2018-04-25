@@ -82,7 +82,7 @@ class extendedTest extends TestCase {
 			$isUnCode = $exCode == 401 ? true : false;
 			$isUnText = preg_match( "/unauthorized/i", $exMessage ) ? true : false;
 
-			if ( intval( $exCode ) <= 3 && intval( $exCode ) > 0 ) {
+			if ( (intval( $exCode ) <= 3 && intval( $exCode ) > 0) || preg_match("/14090086/", $exMessage) ) {
 				static::markTestSkipped( 'Getting exception codes below 3 here, might indicate that your cacerts is not installed properly' );
 
 				return;

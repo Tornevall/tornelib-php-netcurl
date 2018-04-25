@@ -314,7 +314,11 @@ if ( ! class_exists( 'MODULE_SOAP' ) && ! class_exists( 'TorneLIB\MODULE_SOAP' )
 				$this->libResponse              = $returnResponse;
 				$this->soapFaultExceptionObject = $e;
 				if ( $this->canThrowSoapFaults ) {
-					throw new \Exception( NETCURL_CURL_CLIENTNAME . " exception from soapClient: " . $e->getMessage(), $e->getCode(), $e );
+					$exceptionCode = $e->getCode();
+					if (!$exceptionCode && $this->getCode() > 0) {
+						$exceptionCode = $this->getCode();
+					}
+					throw new \Exception( NETCURL_CURL_CLIENTNAME . " exception from soapClient: " . $e->getMessage(), $exceptionCode, $e );
 				}
 				$this->SoapFaultString = $e->getMessage();
 				$this->SoapFaultCode   = $e->getCode();

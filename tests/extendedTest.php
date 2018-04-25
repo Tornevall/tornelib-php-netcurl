@@ -70,20 +70,25 @@ class extendedTest extends TestCase {
 	 * @testdox Testing unauthorized request by regular request (should give the same repsonse as soapFaultString)
 	 * @throws \Exception
 	 */
-	function soapUnauthorized() {
+	function soapUnauthorizedSoapUnauthorized() {
 		$this->disableSslVerifyByPhpVersions();
 		$wsdl = $this->CURL->doGet( $this->wsdl );
 		try {
 			$wsdl->getPaymentMethods();
 		} catch ( \Exception $e ) {
+			$exMessage = $e->getMessage();
+			$exCode    = $e->getCode();
 
-			if ( $e->getCode() < 3 ) {
+			$isUnCode = $exCode == 401 ? true : false;
+			$isUnText = preg_match( "/unauthorized/i", $exMessage ) ? true : false;
+
+			if ( intval( $exCode ) <= 3 && intval( $exCode ) > 0 ) {
 				static::markTestSkipped( 'Getting exception codes below 3 here, might indicate that your cacerts is not installed properly' );
 
 				return;
 			}
 
-			static::assertTrue( preg_match( "/unauthorized/i", $e->getMessage() ) ? true : false );
+			static::assertTrue( ( $isUnCode || $isUnText ) ? true : false );
 		}
 	}
 

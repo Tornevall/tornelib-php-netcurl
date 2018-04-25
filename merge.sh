@@ -31,7 +31,7 @@ fi
 
 if [ "" != "$1" ] ; then
     # Usage:
-    # ./merge.sh "Resursbank\\\RBEcomPHP"
+    # ./merge.sh "Resursbank\\\\RBEcomPHP"
     echo "Update merged library with new namespace: $namespace => $1"
     sed -i "s/namespace TorneLIB/namespace $1/" ${mergeTo}
 fi

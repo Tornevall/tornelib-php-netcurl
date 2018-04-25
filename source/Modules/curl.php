@@ -137,7 +137,7 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 		 */
 		private $DRIVER;
 		/**
-		 * @var TorneLIB_IO $IO
+		 * @var MODULE_IO $IO
 		 */
 		private $IO;
 
@@ -388,7 +388,9 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 
 			$this->NETWORK = new MODULE_NETWORK();
 			$this->DRIVER  = new NETCURL_DRIVER_CONTROLLER();
-			$this->IO      = new TorneLIB_IO();
+			if ( class_exists( 'TorneLIB\MODULE_IO' ) ) {
+				$this->IO = new MODULE_IO();
+			}
 			$this->setConstantsContainer();
 			$this->setPreparedAuthentication();
 			$this->CurlResolve        = NETCURL_RESOLVER::RESOLVER_DEFAULT;
@@ -2579,7 +2581,11 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 				} else {
 					try {
 						if ( is_array( $this->NETCURL_POST_DATA ) && count( $this->NETCURL_POST_DATA ) ) {
-							$parsedPostData = $this->IO->renderXml( $this->NETCURL_POST_DATA );
+							if ( ! is_null( $this->IO ) ) {
+								$parsedPostData = $this->IO->renderXml( $this->NETCURL_POST_DATA );
+							} else {
+								throw new \Exception( NETCURL_CURL_CLIENTNAME . " can not render XML data properly, since the IO library is not initialized", $this->NETWORK->getExceptionCode( 'NETCURL_PARSE_XML_FAILURE' ) );
+							}
 						}
 					} catch ( \Exception $e ) {
 						// Silently fail and return nothing if prepared data is failing

@@ -34,7 +34,7 @@ if ( ! class_exists( 'NETCURL_DRIVER_WORDPRESS' ) && ! class_exists( 'TorneLIB\N
 		/** @var MODULE_NETWORK $NETWORK */
 		private $NETWORK;
 
-		/** @var TorneLIB_IO */
+		/** @var MODULE_IO */
 		private $IO;
 
 		/** @var NETCURL_NETWORK_DRIVERS $DRIVER_ID */
@@ -84,7 +84,7 @@ if ( ! class_exists( 'NETCURL_DRIVER_WORDPRESS' ) && ! class_exists( 'TorneLIB\N
 
 		public function __construct( $parameters = null ) {
 			$this->NETWORK = new MODULE_NETWORK();
-			$this->IO      = new TorneLIB_IO();
+			$this->IO      = new MODULE_IO();
 		}
 
 		public function setDriverId( $driverId = NETCURL_NETWORK_DRIVERS::DRIVER_NOT_SET ) {

@@ -20,3 +20,9 @@ do
         fi
     fi
 done
+
+io=`find |grep tornevall_io.php`
+if [ "" != "$io" ] ; then
+    echo "Merging ${io} into ${mergeTo}"
+    sed -e '1,/namespace/d' $io >>${mergeTo}
+fi

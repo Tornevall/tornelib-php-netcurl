@@ -71,9 +71,9 @@ class extendedTest extends TestCase {
 	 * @throws \Exception
 	 */
 	function soapUnauthorizedSoapUnauthorized() {
-		$this->disableSslVerifyByPhpVersions();
-		$wsdl = $this->CURL->doGet( $this->wsdl );
 		try {
+			$this->disableSslVerifyByPhpVersions();
+			$wsdl = $this->CURL->doGet( $this->wsdl );
 			$wsdl->getPaymentMethods();
 		} catch ( \Exception $e ) {
 			$exMessage = $e->getMessage();

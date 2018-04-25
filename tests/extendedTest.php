@@ -48,12 +48,19 @@ class extendedTest extends TestCase {
 	 * @throws \Exception
 	 */
 	function soapFaultstring() {
-		$this->disableSslVerifyByPhpVersions();
+		$this->disableSslVerifyByPhpVersions( true );
 		$wsdl = $this->CURL->doGet( $this->wsdl );
 		try {
 			$wsdl->getPaymentMethods();
 		} catch ( \Exception $e ) {
 			$previousException = $e->getPrevious();
+
+			if ( $e->getCode() < 3 ) {
+				static::markTestSkipped( 'Getting exception codes below 3 here, might indicate that your cacerts is not installed properly' );
+
+				return;
+			}
+
 			static::assertTrue( isset( $previousException->faultstring ) && ! empty( $previousException->faultstring ) && preg_match( "/unauthorized/i", $e->getMessage() ) );
 		}
 	}
@@ -69,6 +76,13 @@ class extendedTest extends TestCase {
 		try {
 			$wsdl->getPaymentMethods();
 		} catch ( \Exception $e ) {
+
+			if ( $e->getCode() < 3 ) {
+				static::markTestSkipped( 'Getting exception codes below 3 here, might indicate that your cacerts is not installed properly' );
+
+				return;
+			}
+
 			static::assertTrue( preg_match( "/unauthorized/i", $e->getMessage() ) ? true : false );
 		}
 	}
@@ -79,9 +93,9 @@ class extendedTest extends TestCase {
 	 * @throws \Exception
 	 */
 	function soapAuthErrorInitialSoapFaultsWsdl() {
-		if (version_compare(PHP_VERSION, '5.4.0', '<')) {
-			$this->CURL->setChain(false);
-			$this->CURL->setFlag('SOAPCHAIN', false);
+		if ( version_compare( PHP_VERSION, '5.4.0', '<' ) ) {
+			$this->CURL->setChain( false );
+			$this->CURL->setFlag( 'SOAPCHAIN', false );
 		}
 		$this->CURL->setAuthentication( "fail", "fail" );
 		$this->disableSslVerifyByPhpVersions();
@@ -93,17 +107,19 @@ class extendedTest extends TestCase {
 			$errorMessage = $e->getMessage();
 			$errorCode    = $e->getCode();
 
-			if (preg_match('/this when not in object context/i', $errorMessage)) {
-				static::markTestIncomplete('This test might not support chaining: ' . $errorMessage);
+			if ( preg_match( '/this when not in object context/i', $errorMessage ) ) {
+				static::markTestIncomplete( 'This test might not support chaining: ' . $errorMessage );
+
 				return;
 			}
 
 			$assertThis = false;
-			if ( intval($errorCode) == 401 ) {
+			if ( intval( $errorCode ) == 401 ) {
 				$assertThis = true;
 			}
-			if (intval($errorCode) == 2) {
-				static::markTestSkipped("Possible SSL3_GET_SERVER_CERTIFICATE - If you run this test, make sure the certificate verification works");
+			if ( intval( $errorCode ) == 2 ) {
+				static::markTestSkipped( "Possible SSL3_GET_SERVER_CERTIFICATE - If you run this test, make sure the certificate verification works" );
+
 				return;
 			}
 			static::assertTrue( $assertThis, $errorMessage . " (" . $errorCode . ")" );
@@ -126,8 +142,9 @@ class extendedTest extends TestCase {
 			$errorMessage = $e->getMessage();
 			$errorCode    = $e->getCode();
 
-			if (preg_match('/this when not in object context/i', $errorMessage)) {
-				static::markTestIncomplete('This test might not support chaining: ' . $errorMessage);
+			if ( preg_match( '/this when not in object context/i', $errorMessage ) ) {
+				static::markTestIncomplete( 'This test might not support chaining: ' . $errorMessage );
+
 				return;
 			}
 
@@ -135,8 +152,9 @@ class extendedTest extends TestCase {
 			if ( $errorCode == 401 ) {
 				$assertThis = true;
 			}
-			if (intval($errorCode) == 2) {
-				static::markTestSkipped("Possible SSL3_GET_SERVER_CERTIFICATE - If you run this test, make sure the certificate verification works");
+			if ( intval( $errorCode ) == 2 ) {
+				static::markTestSkipped( "Possible SSL3_GET_SERVER_CERTIFICATE - If you run this test, make sure the certificate verification works" );
+
 				return;
 			}
 
@@ -181,8 +199,9 @@ class extendedTest extends TestCase {
 			$errorMessage = $e->getMessage();
 			$errorCode    = $e->getCode();
 
-			if (preg_match('/this when not in object context/i', $errorMessage)) {
-				static::markTestIncomplete('This test might not support chaining: ' . $errorMessage);
+			if ( preg_match( '/this when not in object context/i', $errorMessage ) ) {
+				static::markTestIncomplete( 'This test might not support chaining: ' . $errorMessage );
+
 				return;
 			}
 
@@ -190,8 +209,9 @@ class extendedTest extends TestCase {
 			if ( $errorCode == 401 ) {
 				$assertThis = true;
 			}
-			if (intval($errorCode) == 2) {
-				static::markTestSkipped("Possible SSL3_GET_SERVER_CERTIFICATE - If you run this test, make sure the certificate verification works");
+			if ( intval( $errorCode ) == 2 ) {
+				static::markTestSkipped( "Possible SSL3_GET_SERVER_CERTIFICATE - If you run this test, make sure the certificate verification works" );
+
 				return;
 			}
 

@@ -1993,8 +1993,9 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 						/** @var MODULE_CURL $newRequest */
 						$newRequest = $this->doRepeat();
 						// Make sure getRaw exists (this might fail from PHP 5.3)
-						if (method_exists($newRequest, 'getRaw')) {
+						if ( method_exists( $newRequest, 'getRaw' ) ) {
 							$rawRequest = $newRequest->getRaw();
+
 							return $this->netcurl_split_raw( $rawRequest );
 						}
 					}
@@ -2009,9 +2010,9 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 			$returnResponse['ip']  = isset( $this->CURL_IP_ADDRESS ) ? $this->CURL_IP_ADDRESS : null;  // Will only be filled if there is custom address set.
 
 			$this->throwCodeException( trim( $httpMessage ), $code );
-			$contentType               = isset( $headerInfo['Content-Type'] ) ? $headerInfo['Content-Type'] : null;
+			$contentType = isset( $headerInfo['Content-Type'] ) ? $headerInfo['Content-Type'] : null;
 			// php 5.3 compliant
-			$NCP = new NETCURL_PARSER( $arrayedResponse['body'], $contentType );
+			$NCP                       = new NETCURL_PARSER( $arrayedResponse['body'], $contentType );
 			$parsedContent             = $NCP->getParsedResponse();
 			$arrayedResponse['parsed'] = $parsedContent;
 			$arrayedResponse['ip']     = $this->CURL_IP_ADDRESS;
@@ -3234,8 +3235,8 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 					'previous'  => $getSoapResponseException->getPrevious()
 				);
 
-				if ($this->NETCURL_ERRORHANDLER_RERUN) {
-					return $this->executeHttpSoap($url, $postData, $CurlMethod);
+				if ( $this->NETCURL_ERRORHANDLER_RERUN ) {
+					return $this->executeHttpSoap( $url, $postData, $CurlMethod );
 				}
 
 				throw new \Exception( NETCURL_CURL_CLIENTNAME . " exception from soapClient: [" . $getSoapResponseException->getCode() . "] " . $getSoapResponseException->getMessage(), $getSoapResponseException->getCode() );

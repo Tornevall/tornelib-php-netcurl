@@ -12,6 +12,7 @@ if ( file_exists( __DIR__ . "/../tornelib.php" ) ) {
 require_once( __DIR__ . '/testurls.php' );
 
 use PHPUnit\Framework\TestCase;
+
 ini_set( 'memory_limit', - 1 );    // Free memory limit, some tests requires more memory (like ip-range handling)
 
 class curlTest extends TestCase {
@@ -423,8 +424,9 @@ class curlTest extends TestCase {
 	 * @testdox Test if XML/Serializer are parsed correctly
 	 */
 	function getXmlSerializer() {
-		if (!class_exists( 'XML_Serializer' )) {
-			static::markTestIncomplete('XML_Serializer test can not run without XML_Serializer');
+		if ( ! class_exists( 'XML_Serializer' ) ) {
+			static::markTestIncomplete( 'XML_Serializer test can not run without XML_Serializer' );
+
 			return;
 		}
 		$this->pemDefault();
@@ -468,11 +470,12 @@ class curlTest extends TestCase {
 	function getSimpleDomChain() {
 		/** @var MODULE_CURL $getRequest */
 		$getRequest = $this->urlGet( "ssl&bool&o=xml&method=get&using=SimpleXMLElement", null, "simple.html" );
-		if (method_exists($getRequest, 'getParsed')) {
-		$parsed     = $getRequest->getParsed();
-		$dom        = $getRequest->getDomById();
+		if ( method_exists( $getRequest, 'getParsed' ) ) {
+			$parsed = $getRequest->getParsed();
+			$dom    = $getRequest->getDomById();
 		} else {
-			static::markTestIncomplete("For some reason $getRequest->getParsed() does not exist (PHP ".PHP_VERSION.")");
+			static::markTestIncomplete( "For some reason $getRequest->getParsed() does not exist (PHP " . PHP_VERSION . ")" );
+
 			return;
 		}
 		static::assertTrue( isset( $parsed['ByNodes'] ) && isset( $dom['html'] ) );
@@ -639,8 +642,9 @@ class curlTest extends TestCase {
 	 * @testdox Activating the flag FOLLOWLOCATION_INTERNAL will make NetCurl make its own follow recursion
 	 */
 	function followRedirectDisabledFlagEnabled() {
-		if (version_compare(PHP_VERSION, '5.4.0', '<')) {
-			static::markTestIncomplete('Internal URL following may cause problems in PHP versions lower than 5.4 ('.PHP_VERSION.')');
+		if ( version_compare( PHP_VERSION, '5.4.0', '<' ) ) {
+			static::markTestIncomplete( 'Internal URL following may cause problems in PHP versions lower than 5.4 (' . PHP_VERSION . ')' );
+
 			return;
 		}
 		$this->pemDefault();
@@ -649,8 +653,8 @@ class curlTest extends TestCase {
 		/** @var MODULE_CURL $redirectResponse */
 		$redirectResponse = $this->CURL->doGet( "http://developer.tornevall.net/tests/tornevall_network/redirect.php?run" );
 		$redirectedUrls   = $this->CURL->getRedirectedUrls();
-		$responseCode = $this->CURL->getCode( $redirectResponse);
-		$curlBody = $this->CURL->getBody();
+		$responseCode     = $this->CURL->getCode( $redirectResponse );
+		$curlBody         = $this->CURL->getBody();
 		static::assertTrue( intval( $responseCode ) >= 200 && intval( $responseCode ) <= 300 && count( $redirectedUrls ) && preg_match( "/rerun/i", $curlBody ) );
 	}
 
@@ -760,12 +764,12 @@ class curlTest extends TestCase {
 	 * @test
 	 */
 	function chainGet() {
-		if (version_compare(PHP_VERSION, '5.4.0', '>=')) {
-		$this->CURL->setFlag( "CHAIN" );
-		static::assertTrue( method_exists( $this->CURL->doGet( \TESTURLS::getUrlSimpleJson() ), 'getParsedResponse' ) );
-		$this->CURL->unsetFlag( "CHAIN" );
+		if ( version_compare( PHP_VERSION, '5.4.0', '>=' ) ) {
+			$this->CURL->setFlag( "CHAIN" );
+			static::assertTrue( method_exists( $this->CURL->doGet( \TESTURLS::getUrlSimpleJson() ), 'getParsedResponse' ) );
+			$this->CURL->unsetFlag( "CHAIN" );
 		} else {
-			static::markTestSkipped('Chaining PHP is not available in PHP version under 5.4 (This is '.PHP_VERSION.')');
+			static::markTestSkipped( 'Chaining PHP is not available in PHP version under 5.4 (This is ' . PHP_VERSION . ')' );
 		}
 	}
 
@@ -785,10 +789,10 @@ class curlTest extends TestCase {
 	 */
 	function chainByInit() {
 		$Chainer = new MODULE_CURL( null, null, null, array( "CHAIN" ) );
-		if (version_compare(PHP_VERSION, '5.4.0', '>=')) {
+		if ( version_compare( PHP_VERSION, '5.4.0', '>=' ) ) {
 			static::assertTrue( is_object( $Chainer->doGet( \TESTURLS::getUrlSimpleJson() )->getParsedResponse() ) );
 		} else {
-			static::markTestIncomplete("Chaining can't be tested from PHP " . PHP_VERSION);
+			static::markTestIncomplete( "Chaining can't be tested from PHP " . PHP_VERSION );
 		}
 	}
 
@@ -914,7 +918,7 @@ class curlTest extends TestCase {
 	 * @test
 	 */
 	function getJsonByConstructor() {
-		$quickCurl = new MODULE_CURL( \TESTURLS::getUrlSimpleJson() );
+		$quickCurl        = new MODULE_CURL( \TESTURLS::getUrlSimpleJson() );
 		$identifierByJson = $quickCurl->getParsed();
 		static::assertTrue( isset( $identifierByJson->ip ) );
 	}
@@ -980,12 +984,12 @@ class curlTest extends TestCase {
 		$this->CURL->setParseHtml( true );
 		/** @var MODULE_CURL $content */
 		$phpAntiChain = $this->urlGet( "ssl&bool&o=xml&method=get&using=SimpleXMLElement", null, "simple.html" );  // PHP 5.3 compliant
-		if (method_exists($phpAntiChain, 'getDomById')) {
+		if ( method_exists( $phpAntiChain, 'getDomById' ) ) {
 			$content = $phpAntiChain->getDomById();
 			static::assertTrue( isset( $content['divElement'] ) );
 			$this->CURL->setParseHtml( false );
 		} else {
-			static::markTestIncomplete("getDomById is unreachable (PHP v".PHP_VERSION.")");
+			static::markTestIncomplete( "getDomById is unreachable (PHP v" . PHP_VERSION . ")" );
 		}
 	}
 
@@ -1055,8 +1059,9 @@ class curlTest extends TestCase {
 	 * @testdox Testing that switching between driverse (SOAP) works - when SOAP is not used, NetCURL should switch back to the regular driver
 	 */
 	function multiCallsSwitchingBetweenRegularAndSoap() {
-		if (version_compare(PHP_VERSION, '5.4.0', '<')) {
-			static::markTestIncomplete("Multicall switching test is not compliant with PHP 5.3 - however, the function switching itself is supported");
+		if ( version_compare( PHP_VERSION, '5.4.0', '<' ) ) {
+			static::markTestIncomplete( "Multicall switching test is not compliant with PHP 5.3 - however, the function switching itself is supported" );
+
 			return;
 		}
 
@@ -1065,20 +1070,29 @@ class curlTest extends TestCase {
 			'2' => 0
 		);
 
-		$this->disableSslVerifyByPhpVersions();
-		$this->CURL->setAuthentication( 'atest', 'atest' );
-		$this->CURL->doGet( "http://identifier.tornevall.net/?json" )->getParsed();
-		$driversUsed[ $this->CURL->getDriverById() ] ++;
-		$this->CURL->doGet( 'https://test.resurs.com/ecommerce-test/ws/V4/SimplifiedShopFlowService?wsdl' )->getPaymentMethods();
-		$driversUsed[ $this->CURL->getDriverById() ] ++;
-		$this->CURL->doGet( "http://identifier.tornevall.net/?json" )->getParsed();
-		$driversUsed[ $this->CURL->getDriverById() ] ++;
-		$this->CURL->doGet( 'https://test.resurs.com/ecommerce-test/ws/V4/SimplifiedShopFlowService?wsdl' )->getPaymentMethods();
-		$driversUsed[ $this->CURL->getDriverById() ] ++;
-		$this->CURL->doGet( "http://identifier.tornevall.net/?json" )->getParsed();
-		$driversUsed[ $this->CURL->getDriverById() ] ++;
+		$this->disableSslVerifyByPhpVersions( true );
+		try {
+			$this->CURL->setAuthentication( 'atest', 'atest' );
+			$this->CURL->doGet( "http://identifier.tornevall.net/?json" )->getParsed();
+			$driversUsed[ $this->CURL->getDriverById() ] ++;
+			$this->CURL->doGet( 'https://test.resurs.com/ecommerce-test/ws/V4/SimplifiedShopFlowService?wsdl' )->getPaymentMethods();
+			$driversUsed[ $this->CURL->getDriverById() ] ++;
+			$this->CURL->doGet( "http://identifier.tornevall.net/?json" )->getParsed();
+			$driversUsed[ $this->CURL->getDriverById() ] ++;
+			$this->CURL->doGet( 'https://test.resurs.com/ecommerce-test/ws/V4/SimplifiedShopFlowService?wsdl' )->getPaymentMethods();
+			$driversUsed[ $this->CURL->getDriverById() ] ++;
+			$this->CURL->doGet( "http://identifier.tornevall.net/?json" )->getParsed();
+			$driversUsed[ $this->CURL->getDriverById() ] ++;
 
-		$this->assertTrue( $driversUsed[1] == 3 && $driversUsed[2] == 2 ? true : false );
+			$this->assertTrue( $driversUsed[1] == 3 && $driversUsed[2] == 2 ? true : false );
+		} catch ( \Exception $e ) {
+			if ( $e->getCode() < 3 ) {
+				static::markTestSkipped( 'Getting exception codes below 3 here, might indicate that your cacerts is not installed properly' );
+
+				return;
+			}
+			throw new \Exception( $e->getMessage(), $e->getCode(), $e );
+		}
 	}
 
 	/**
@@ -1093,13 +1107,23 @@ class curlTest extends TestCase {
 			return;
 		}
 
-		$this->disableSslVerifyByPhpVersions();
+		$this->disableSslVerifyByPhpVersions( true );
 		$this->CURL->setAuthentication( 'atest', 'atest' );
-		$this->CURL->doGet( 'https://test.resurs.com/ecommerce-test/ws/V4/SimplifiedShopFlowService?wsdl' )->getPaymentMethods();
-		$IO  = new MODULE_IO();
-		$XML = $IO->getFromXml( $this->CURL->getBody(), true );
-		$id  = ( isset( $XML[0] ) && isset( $XML[0]->id ) ? $XML[0]->id : null );
-		$this->assertTrue( strlen( $id ) > 0 ? true : false );
+		try {
+			$php53UnChainified = $this->CURL->doGet( 'https://test.resurs.com/ecommerce-test/ws/V4/SimplifiedShopFlowService?wsdl' );
+			$php53UnChainified->getPaymentMethods();
+			$IO  = new MODULE_IO();
+			$XML = $IO->getFromXml( $this->CURL->getBody(), true );
+			$id  = ( isset( $XML[0] ) && isset( $XML[0]->id ) ? $XML[0]->id : null );
+			$this->assertTrue( strlen( $id ) > 0 ? true : false );
+		} catch ( \Exception $e ) {
+			if ( $e->getCode() < 3 ) {
+				static::markTestSkipped( 'Getting exception codes below 3 here, might indicate that your cacerts is not installed properly' );
+
+				return;
+			}
+			throw new \Exception( $e->getMessage(), $e->getCode(), $e );
+		}
 	}
 
 }

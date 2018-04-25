@@ -27,10 +27,10 @@ class driversTest extends TestCase {
 	 * @test
 	 */
 	function getSystemWideDrivers() {
-		if ($this->DRIVERCLASS->getSystemWideDrivers()) {
+		if ( $this->DRIVERCLASS->getSystemWideDrivers() ) {
 			static::assertTrue( count( $this->DRIVERCLASS->getSystemWideDrivers() ) >= 1 ? true : false );
 		} else {
-			static::markTestSkipped("Test is built to return an array of available drivers. Your system seem to miss at least one driver, to trig this test. This test is skipped.");
+			static::markTestSkipped( "Test is built to return an array of available drivers. Your system seem to miss at least one driver, to trig this test. This test is skipped." );
 		}
 	}
 
@@ -113,10 +113,10 @@ class driversTest extends TestCase {
 	 */
 	function setGuzzle() {
 		if ( $this->DRIVERCLASS->getIsDriver( NETCURL_NETWORK_DRIVERS::DRIVER_GUZZLEHTTP ) || $this->DRIVERCLASS->getIsDriver( NETCURL_NETWORK_DRIVERS::DRIVER_GUZZLEHTTP_STREAM ) ) {
-			$this->CURL->setDriver(NETCURL_NETWORK_DRIVERS::DRIVER_GUZZLEHTTP_STREAM);
-			static::assertTrue(is_object($this->CURL->getDriver()));
+			$this->CURL->setDriver( NETCURL_NETWORK_DRIVERS::DRIVER_GUZZLEHTTP_STREAM );
+			static::assertTrue( is_object( $this->CURL->getDriver() ) );
 		} else {
-			static::markTestSkipped("Can not test guzzle without guzzle");
+			static::markTestSkipped( "Can not test guzzle without guzzle" );
 		}
 	}
 
@@ -124,13 +124,13 @@ class driversTest extends TestCase {
 	 * @test
 	 */
 	function doCurl() {
-		$php53AntiChain = $this->CURL->doGet("https://identifier.tornevall.net/?json");
-		if (method_exists($php53AntiChain, 'getParsedResponse')) {
+		$php53AntiChain = $this->CURL->doGet( "https://identifier.tornevall.net/?json" );
+		if ( method_exists( $php53AntiChain, 'getParsedResponse' ) ) {
 			/** @var MODULE_CURL $requestContent */
 			$requestContent = $php53AntiChain->getParsedResponse();
-			static::assertTrue(is_object($requestContent) && isset($requestContent->ip));
+			static::assertTrue( is_object( $requestContent ) && isset( $requestContent->ip ) );
 		} else {
-			static::markTestIncomplete("This test is disabled as most of the testing is based on chaining, which is not available from PHP 5.3 (".PHP_VERSION.")");
+			static::markTestIncomplete( "This test is disabled as most of the testing is based on chaining, which is not available from PHP 5.3 (" . PHP_VERSION . ")" );
 		}
 	}
 

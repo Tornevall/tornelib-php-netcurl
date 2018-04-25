@@ -21,21 +21,6 @@
  * @version 6.0.19
  */
 
-/**
- * Want to test this library with an external library like Guzzle? Add this row to composer:
- *
- *     "guzzlehttp/guzzle": "6.3.0"
- *
- * Then call for this method on initiation:
- *
- *      $LIB->setDriver( TORNELIB_CURL_DRIVERS::DRIVER_GUZZLEHTTP )
- *    or
- *      $LIB->setDriver( TORNELIB_CURL_DRIVERS::DRIVER_GUZZLEHTTP_STREAM )
- *
- * Observe that you still need curl if you are running SOAP-calls
- *
- */
-
 namespace TorneLIB;
 
 // Library Release Information

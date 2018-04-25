@@ -7,4 +7,3 @@ vendor
 runit.sh
 coverage
 source/build/netcurl.php
-phpunit-4.8.phar

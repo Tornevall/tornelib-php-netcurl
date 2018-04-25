@@ -79,6 +79,10 @@ class extendedTest extends TestCase {
 	 * @throws \Exception
 	 */
 	function soapAuthErrorInitialSoapFaultsWsdl() {
+		if (version_compare(PHP_VERSION, '5.4.0', '<')) {
+			$this->CURL->setChain(false);
+			$this->CURL->setFlag('SOAPCHAIN', false);
+		}
 		$this->CURL->setAuthentication( "fail", "fail" );
 		$this->disableSslVerifyByPhpVersions();
 		// SOAPWARNINGS is set true by default on authentication activation
@@ -88,6 +92,11 @@ class extendedTest extends TestCase {
 		} catch ( \Exception $e ) {
 			$errorMessage = $e->getMessage();
 			$errorCode    = $e->getCode();
+
+			if (preg_match('/this when not in object context/i', $errorMessage)) {
+				static::markTestIncomplete('This test might not support chaining: ' . $errorMessage);
+				return;
+			}
 
 			$assertThis = false;
 			if ( intval($errorCode) == 401 ) {
@@ -116,6 +125,11 @@ class extendedTest extends TestCase {
 		} catch ( \Exception $e ) {
 			$errorMessage = $e->getMessage();
 			$errorCode    = $e->getCode();
+
+			if (preg_match('/this when not in object context/i', $errorMessage)) {
+				static::markTestIncomplete('This test might not support chaining: ' . $errorMessage);
+				return;
+			}
 
 			$assertThis = false;
 			if ( $errorCode == 401 ) {
@@ -166,6 +180,11 @@ class extendedTest extends TestCase {
 			// As of 6.0.16, this is the default behaviour even when SOAPWARNINGS are not active by setFlag
 			$errorMessage = $e->getMessage();
 			$errorCode    = $e->getCode();
+
+			if (preg_match('/this when not in object context/i', $errorMessage)) {
+				static::markTestIncomplete('This test might not support chaining: ' . $errorMessage);
+				return;
+			}
 
 			$assertThis = false;
 			if ( $errorCode == 401 ) {

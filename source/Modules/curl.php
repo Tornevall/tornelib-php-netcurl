@@ -1779,6 +1779,7 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 		 */
 		public function TestCerts() {
 			$certificateBundleData = $this->SSL->getSslCertificateBundle();
+
 			return ( ! empty( $certificateBundleData ) ? true : false );
 		}
 
@@ -2975,6 +2976,31 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 			}
 		}
 
+		private function sslVerificationAdjustment( $errorCode, $errorMessage ) {
+			// Special case: SSL failures (CURLE_SSL_CACERT = 60)
+			if ( $this->SSL->getStrictFallback() ) {
+				if ( $errorCode == CURLE_SSL_CACERT ) {
+					if ( $this->CURL_RETRY_TYPES['sslunverified'] >= 2 ) {
+						throw new \Exception( NETCURL_CURL_CLIENTNAME . " exception in " . __FUNCTION__ . ": The maximum tries of curl_exec() for " . $this->CURL_STORED_URL . ", during a try to make a SSL connection to work, has been reached without any successful response. This normally happens when allowSslUnverified is activated in the library and " . $this->CURL_RETRY_TYPES['resolve'] . " tries to fix the problem has been made, but failed.\nCurl error message follows: " . $errorMessage, $errorCode );
+					} else {
+						$this->NETCURL_ERROR_CONTAINER[] = array( 'code' => $errorCode, 'message' => $errorMessage );
+						$this->setSslVerify( false, false );
+						$this->unsafeSslCall = true;
+						$this->CURL_RETRY_TYPES['sslunverified'] ++;
+						$this->NETCURL_ERRORHANDLER_RERUN = true;
+					}
+				}
+				if ( false === strpos( $errorMessage, '14090086' ) && false === strpos( $errorMessage, '1407E086' ) ) {
+					$this->NETCURL_ERROR_CONTAINER[] = array( 'code' => $errorCode, 'message' => $errorMessage );
+					$this->setSslVerify( false, false );
+					$this->unsafeSslCall = true;
+					$this->CURL_RETRY_TYPES['sslunverified'] ++;
+					$this->NETCURL_ERRORHANDLER_RERUN = true;
+				}
+
+			}
+		}
+
 		/**
 		 * Handle curl-errors
 		 *
@@ -2991,18 +3017,7 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 
 			if ( ! is_null( $errorCode ) || ! is_null( $errorMessage ) ) {
 				$this->NETCURL_ERRORHANDLER_HAS_ERRORS = true;
-				// Special case: SSL failures (CURLE_SSL_CACERT = 60)
-				if ( $errorCode == CURLE_SSL_CACERT && $this->SSL->getStrictFallback() ) {
-					if ( $this->CURL_RETRY_TYPES['sslunverified'] >= 2 ) {
-						throw new \Exception( NETCURL_CURL_CLIENTNAME . " exception in " . __FUNCTION__ . ": The maximum tries of curl_exec() for " . $this->CURL_STORED_URL . ", during a try to make a SSL connection to work, has been reached without any successful response. This normally happens when allowSslUnverified is activated in the library and " . $this->CURL_RETRY_TYPES['resolve'] . " tries to fix the problem has been made, but failed.\nCurl error message follows: " . $errorMessage, $errorCode );
-					} else {
-						$this->NETCURL_ERROR_CONTAINER[] = array( 'code' => $errorCode, 'message' => $errorMessage );
-						$this->setSslVerify( false, false );
-						$this->unsafeSslCall = true;
-						$this->CURL_RETRY_TYPES['sslunverified'] ++;
-						$this->NETCURL_ERRORHANDLER_RERUN = true;
-					}
-				}
+				$this->sslVerificationAdjustment( $errorCode, $errorMessage );
 
 				// Special case: Resolver failures
 				if ( $this->CURL_RESOLVER_FORCED && $this->CURL_RETRY_TYPES['resolve'] >= 2 ) {
@@ -3204,6 +3219,9 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 					'previous'  => null
 				);
 			} catch ( \Exception $getSoapResponseException ) {
+
+				$this->sslVerificationAdjustment( $getSoapResponseException->getCode(), $getSoapResponseException->getMessage() );
+
 				$this->DEBUG_DATA['soapdata']['url'][] = array(
 					'url'       => $this->CURL_STORED_URL,
 					'opt'       => $this->getCurlOptByKeys(),
@@ -3211,7 +3229,12 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 					'exception' => $getSoapResponseException,
 					'previous'  => $getSoapResponseException->getPrevious()
 				);
-				throw new \Exception( NETCURL_CURL_CLIENTNAME . " exception from soapClient: " . $getSoapResponseException->getMessage(), $getSoapResponseException->getCode() );
+
+				if ($this->NETCURL_ERRORHANDLER_RERUN) {
+					return $this->executeHttpSoap($url, $postData, $CurlMethod);
+				}
+
+				throw new \Exception( NETCURL_CURL_CLIENTNAME . " exception from soapClient: [" . $getSoapResponseException->getCode() . "] " . $getSoapResponseException->getMessage(), $getSoapResponseException->getCode() );
 			}
 
 			return $getSoapResponse;

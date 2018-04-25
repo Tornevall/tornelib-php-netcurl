@@ -49,6 +49,14 @@ class curlTest extends TestCase {
 		$this->CURL->setSslUnverified( false );
 	}
 
+	private function disableSslVerifyByPhpVersions( $always = false ) {
+		if ( version_compare( PHP_VERSION, '5.5.0', '<=' ) ) {
+			$this->CURL->setSslVerify( false, false );
+		} else if ( $always ) {
+			$this->CURL->setSslVerify( false, false );
+		}
+	}
+
 	function tearDown() {
 		// DebugData collects stats about the curled session.
 		// $debugData = $this->CURL->getDebugData();
@@ -509,7 +517,13 @@ class curlTest extends TestCase {
 		try {
 			$this->getParsed( $this->urlGet( "ssl&bool&o=json", "https" ) );
 		} catch ( \Exception $e ) {
-			static::assertTrue( $e->getCode() == CURLE_SSL_CACERT_BADFILE );
+			$assertThis = false;
+			$errorCode  = $e->getCode();
+			// CURLE_SSL_CACERT_BADFILE
+			if ( intval( $errorCode ) == 77 ) {
+				$assertThis = true;
+			}
+			static::assertTrue( $assertThis, $e->getMessage() . " (" . $e->getCode() . ")" );
 		}
 	}
 
@@ -1018,6 +1032,8 @@ class curlTest extends TestCase {
 			'1' => 0,
 			'2' => 0
 		);
+
+		$this->disableSslVerifyByPhpVersions();
 		$this->CURL->setAuthentication( 'atest', 'atest' );
 		$this->CURL->doGet( "http://identifier.tornevall.net/?json" )->getParsed();
 		$driversUsed[ $this->CURL->getDriverById() ] ++;
@@ -1041,8 +1057,11 @@ class curlTest extends TestCase {
 	function soapIoParse() {
 		if ( ! class_exists( 'TorneLIB\MODULE_IO' ) ) {
 			static::markTestSkipped( "MODULE_IO is missing, this test is skipped" );
+
 			return;
 		}
+
+		$this->disableSslVerifyByPhpVersions();
 		$this->CURL->setAuthentication( 'atest', 'atest' );
 		$this->CURL->doGet( 'https://test.resurs.com/ecommerce-test/ws/V4/SimplifiedShopFlowService?wsdl' )->getPaymentMethods();
 		$IO  = new MODULE_IO();

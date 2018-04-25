@@ -154,7 +154,8 @@ if ( ! class_exists( 'MODULE_SOAP' ) && ! class_exists( 'TorneLIB\MODULE_SOAP' )
 		public function getSoap() {
 			$this->soapClient = null;
 			$sslOpt           = $this->getSslOpt();
-			$optionsStream    = $this->sslGetOptionsStream();
+			//$optionsStream    = $this->sslGetOptionsStream();
+			$optionsStream    = $this->PARENT->sslGetOptionsStream();
 
 			if ( is_array( $optionsStream ) && count( $optionsStream ) ) {
 				foreach ( $optionsStream as $optionKey => $optionValue ) {

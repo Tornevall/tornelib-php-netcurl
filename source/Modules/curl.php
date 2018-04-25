@@ -1778,7 +1778,8 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 		 * @deprecated 6.0.20
 		 */
 		public function TestCerts() {
-			return ( ! empty( $this->SSL->getSslCertificateBundle() ) ? true : false );
+			$certificateBundleData = $this->SSL->getSslCertificateBundle();
+			return ( ! empty( $certificateBundleData ) ? true : false );
 		}
 
 		/**

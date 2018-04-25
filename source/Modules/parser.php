@@ -38,6 +38,9 @@ if ( ! class_exists( 'NETCURL_PARSER' ) && ! class_exists( 'TorneLIB\NETCURL_PAR
 		/** @var MODULE_IO $IO */
 		private $IO;
 
+		/** @var MODULE_NETWORK */
+		private $NETWORK;
+
 		/**
 		 * NETCURL_PARSER constructor.
 		 *
@@ -48,11 +51,11 @@ if ( ! class_exists( 'NETCURL_PARSER' ) && ! class_exists( 'TorneLIB\NETCURL_PAR
 		 * @since 6.0.0
 		 */
 		public function __construct( $htmlContent = '', $contentType = '' ) {
-			if (class_exists('TorneLIB\MODULE_IO')) {
-				$this->IO = new MODULE_IO();
-			} else {
+			$this->NETWORK = new MODULE_NETWORK();
+			$this->IO      = new MODULE_IO();
+			/*if (is_null($this->IO)) {
 				throw new \Exception( NETCURL_CURL_CLIENTNAME . " is missing MODULE_IO for rendering post data content", $this->NETWORK->getExceptionCode( 'NETCURL_PARSE_XML_FAILURE' ) );
-			}
+			}*/
 			$this->PARSE_CONTAINER      = $htmlContent;
 			$this->PARSE_CONTENT_TYPE   = $contentType;
 			$this->PARSE_CONTENT_OUTPUT = $this->getContentByTest();

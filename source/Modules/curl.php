@@ -1938,7 +1938,6 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 		 * @throws \Exception
 		 */
 		public function netcurl_split_raw( $rawInput = null, $internalRaw = false ) {
-
 			$rawDataTest = $this->getRaw();
 			if ( $internalRaw && is_null( $rawInput ) && ! empty( $rawDataTest ) ) {
 				$this->netcurl_split_raw( $rawDataTest );
@@ -1993,8 +1992,11 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 						}
 						/** @var MODULE_CURL $newRequest */
 						$newRequest = $this->doRepeat();
-
-						return $this->netcurl_split_raw( $newRequest->getRaw() );
+						// Make sure getRaw exists (this might fail from PHP 5.3)
+						if (method_exists($newRequest, 'getRaw')) {
+							$rawRequest = $newRequest->getRaw();
+							return $this->netcurl_split_raw( $rawRequest );
+						}
 					}
 				}
 			}
@@ -2008,7 +2010,9 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 
 			$this->throwCodeException( trim( $httpMessage ), $code );
 			$contentType               = isset( $headerInfo['Content-Type'] ) ? $headerInfo['Content-Type'] : null;
-			$parsedContent             = ( new NETCURL_PARSER( $arrayedResponse['body'], $contentType ) )->getParsedResponse();
+			// php 5.3 compliant
+			$NCP = new NETCURL_PARSER( $arrayedResponse['body'], $contentType );
+			$parsedContent             = $NCP->getParsedResponse();
 			$arrayedResponse['parsed'] = $parsedContent;
 			$arrayedResponse['ip']     = $this->CURL_IP_ADDRESS;
 

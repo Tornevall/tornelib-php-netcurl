@@ -124,9 +124,14 @@ class driversTest extends TestCase {
 	 * @test
 	 */
 	function doCurl() {
-		/** @var MODULE_CURL $requestContent */
-		$requestContent = $this->CURL->doGet("https://identifier.tornevall.net/?json")->getParsedResponse();
-		static::assertTrue(is_object($requestContent) && isset($requestContent->ip));
+		$php53AntiChain = $this->CURL->doGet("https://identifier.tornevall.net/?json");
+		if (method_exists($php53AntiChain, 'getParsedResponse')) {
+			/** @var MODULE_CURL $requestContent */
+			$requestContent = $php53AntiChain->getParsedResponse();
+			static::assertTrue(is_object($requestContent) && isset($requestContent->ip));
+		} else {
+			static::markTestIncomplete("This test is disabled as most of the testing is based on chaining, which is not available from PHP 5.3 (".PHP_VERSION.")");
+		}
 	}
 
 }

@@ -296,7 +296,8 @@ if ( ! class_exists( 'MODULE_NETWORK' ) && ! class_exists( 'TorneLIB\MODULE_NETW
 				}
 				if ( count( $urls ) ) {
 					foreach ( $urls as $url ) {
-						if ( ! empty( trim( $url ) ) ) {
+						$trimUrl = trim( $url );
+						if ( ! empty( $trimUrl ) ) {
 							$prependUrl    = $protocol . $url;
 							if (!$preventDuplicates) {
 								$returnArray[] = $prependUrl;

@@ -2010,12 +2010,19 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 			$returnResponse['ip']  = isset( $this->CURL_IP_ADDRESS ) ? $this->CURL_IP_ADDRESS : null;  // Will only be filled if there is custom address set.
 
 			$this->throwCodeException( trim( $httpMessage ), $code );
-			$contentType = isset( $headerInfo['Content-Type'] ) ? $headerInfo['Content-Type'] : null;
+			$contentType           = isset( $headerInfo['Content-Type'] ) ? $headerInfo['Content-Type'] : null;
+			$arrayedResponse['ip'] = $this->CURL_IP_ADDRESS;
+
+			if ( $this->isFlag( 'IS_SOAP' ) && ! $this->isFlag( 'ALLOW_PARSE_SOAP' ) ) {
+				$arrayedResponse['parsed'] = null;
+
+				return $arrayedResponse;
+			}
+
 			// php 5.3 compliant
 			$NCP                       = new NETCURL_PARSER( $arrayedResponse['body'], $contentType );
 			$parsedContent             = $NCP->getParsedResponse();
 			$arrayedResponse['parsed'] = $parsedContent;
-			$arrayedResponse['ip']     = $this->CURL_IP_ADDRESS;
 
 			$this->NETCURL_RESPONSE_RAW                   = $rawInput;
 			$this->NETCURL_RESPONSE_CONTAINER             = $arrayedResponse;

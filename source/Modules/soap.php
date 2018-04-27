@@ -223,7 +223,10 @@ if ( ! class_exists( 'MODULE_SOAP' ) && ! class_exists( 'TorneLIB\MODULE_SOAP' )
 									if ( isset( $httpSplitError[1] ) && intval( $httpSplitError[1] ) > 0 ) {
 										$throwErrorCode = $httpSplitError[1];
 										if ( isset( $httpSplitError[2] ) && is_string( $httpSplitError[2] ) && ! empty( $httpSplitError[2] ) ) {
-											$throwErrorMessage = "HTTP-Request-Exception: " . $httpSplitError[1] . " " . trim( $httpSplitError[2] ) . "\n" . $throwErrorMessage;
+											if (!$this->isFlag('SOAPWARNINGS_EXTEND')) {
+												unset($throwErrorMessage);
+											}
+											$throwErrorMessage = "HTTP-Request exception (".$throwErrorCode."): " . $httpSplitError[1] . " " . trim( $httpSplitError[2] ) . "\n" . $throwErrorMessage;
 										}
 									}
 								}

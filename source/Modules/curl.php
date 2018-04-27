@@ -2028,10 +2028,10 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 			}
 
 			// php 5.3 compliant
-			$NCP                       = new NETCURL_PARSER( $arrayedResponse['body'], $contentType );
-			$parsedContent             = $NCP->getParsedResponse();
-			$arrayedResponse['parsed'] = $parsedContent;
-			$this->NETCURL_RESPONSE_CONTAINER_PARSED      = $parsedContent;
+			$NCP                                     = new NETCURL_PARSER( $arrayedResponse['body'], $contentType );
+			$parsedContent                           = $NCP->getParsedResponse();
+			$arrayedResponse['parsed']               = $parsedContent;
+			$this->NETCURL_RESPONSE_CONTAINER_PARSED = $parsedContent;
 
 
 			if ( $this->NETCURL_RETURN_RESPONSE_TYPE == NETCURL_RESPONSETYPE::RESPONSETYPE_OBJECT ) {
@@ -3120,6 +3120,9 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 					$this->setFlag( "SOAPWARNINGS", true );
 				} else {
 					$this->unsetFlag( 'SOAPWARNINGS' );
+				}
+				if ( $this->hasFlag( 'SOAPWARNINGS_EXTEND' ) ) {
+					$this->setFlag( 'SOAPWARNINGS_EXTEND', $this->getFlag( 'SOAPWARNINGS_EXTEND' ) );
 				}
 
 				return $this->executeHttpSoap( $this->CURL_STORED_URL, $this->NETCURL_POST_DATA, $this->NETCURL_POST_DATA_TYPE );

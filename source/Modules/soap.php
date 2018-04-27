@@ -179,6 +179,9 @@ if ( ! class_exists( 'MODULE_SOAP' ) && ! class_exists( 'TorneLIB\MODULE_SOAP' )
 			$soapFaultOnInit = false;
 
 			$parentFlags = $this->PARENT->getFlags();
+			foreach ( $parentFlags as $flagKey => $flagValue ) {
+				$this->setFlag( $flagKey, $flagValue );
+			}
 
 			if ( $this->SoapTryOnce ) {
 				try {
@@ -223,7 +226,7 @@ if ( ! class_exists( 'MODULE_SOAP' ) && ! class_exists( 'TorneLIB\MODULE_SOAP' )
 									if ( isset( $httpSplitError[1] ) && intval( $httpSplitError[1] ) > 0 ) {
 										$throwErrorCode = $httpSplitError[1];
 										if ( isset( $httpSplitError[2] ) && is_string( $httpSplitError[2] ) && ! empty( $httpSplitError[2] ) ) {
-											if ( ! $this->isFlag( 'SOAPWARNINGS_EXTEND' ) ) {
+											if ( ! isset( $parentFlags['SOAPWARNINGS_EXTEND'] ) ) {
 												unset( $throwErrorMessage );
 											}
 											$throwErrorMessage = "HTTP-Request exception (" . $throwErrorCode . "): " . $httpSplitError[1] . " " . trim( $httpSplitError[2] ) . "\n" . $throwErrorMessage;

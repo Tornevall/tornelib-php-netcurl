@@ -2276,19 +2276,24 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 		 * @since 6.0.20
 		 */
 		public function getValue( $keyName = null, $responseContent = null ) {
+			$testInternalParsed = $this->getParsed();
+			if (is_null($responseContent) && !empty($testInternalParsed)) {
+				$responseContent = $testInternalParsed;
+			}
+
 			if ( is_string( $keyName ) ) {
-				$ParsedValue = $this->getParsedResponse( $responseContent );
+				$ParsedValue = $this->getParsed($responseContent);
 				if ( is_array( $ParsedValue ) && isset( $ParsedValue[ $keyName ] ) ) {
 					return $ParsedValue[ $keyName ];
 				}
 				if ( is_object( $ParsedValue ) && isset( $ParsedValue->$keyName ) ) {
-					return $ParsedValue->$keyName;
+					return $ParsedValue->{$keyName};
 				}
 			} else {
 				if ( is_null( $responseContent ) && ! empty( $this->NETCURL_RESPONSE_CONTAINER ) ) {
 					$responseContent = $this->NETCURL_RESPONSE_CONTAINER;
 				}
-				$Parsed       = $this->getParsedResponse( $responseContent );
+				$Parsed       = $this->getParsed($responseContent);
 				$hasRecursion = false;
 				if ( is_array( $keyName ) ) {
 					$TheKeys  = array_reverse( $keyName );
@@ -2301,7 +2306,7 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 								$hasRecursion = true;
 							}
 						} else if ( is_object( $Parsed ) ) {
-							if ( isset( $Parsed->$CurrentKey ) ) {
+							if ( isset( $Parsed->{$CurrentKey} ) ) {
 								$hasRecursion = true;
 							}
 						} else {
@@ -2312,7 +2317,7 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 							break;
 						}
 						if ( $hasRecursion ) {
-							$Parsed = $this->getParsedValue( $CurrentKey, array( 'parsed' => $Parsed ) );
+							$Parsed = $this->getValue( $CurrentKey, array( 'parsed' => $Parsed ) );
 							// Break if this was the last one
 							if ( ! count( $TheKeys ) ) {
 								break;

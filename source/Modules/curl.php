@@ -3121,9 +3121,6 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 				} else {
 					$this->unsetFlag( 'SOAPWARNINGS' );
 				}
-				if ( $this->hasFlag( 'SOAPWARNINGS_EXTEND' ) ) {
-					$this->setFlag( 'SOAPWARNINGS_EXTEND', $this->getFlag( 'SOAPWARNINGS_EXTEND' ) );
-				}
 
 				return $this->executeHttpSoap( $this->CURL_STORED_URL, $this->NETCURL_POST_DATA, $this->NETCURL_POST_DATA_TYPE );
 			}
@@ -3212,11 +3209,19 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 		 */
 		private function executeHttpSoap( $url = '', $postData = array(), $CurlMethod = NETCURL_POST_METHODS::METHOD_GET ) {
 			$Soap = new MODULE_SOAP( $this->CURL_STORED_URL, $this );
+
+			// Proper inherits
+			foreach ($this->getFlags() as $flagKey => $flagValue) {
+				$this->setFlag($flagKey, $flagValue);
+				$Soap->setFlag($flagKey, $flagValue);
+			}
+
 			$this->setFlag( 'WAS_SOAP_CHAIN', $this->getIsChained() );
 			$Soap->setFlag( 'WAS_SOAP_CHAIN', $this->getIsChained() );
 			$this->setChain( false );
 			$Soap->setFlag( 'IS_SOAP' );
 			$this->setFlag( 'IS_SOAP' );
+
 			/** @since 6.0.20 */
 			$Soap->setChain( false );
 			if ( $this->hasFlag( 'SOAPCHAIN' ) ) {

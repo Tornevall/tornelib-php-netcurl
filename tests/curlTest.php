@@ -1098,6 +1098,8 @@ class curlTest extends TestCase {
 				static::markTestSkipped( 'Getting exception codes below 3 here, might indicate that your cacerts is not installed properly' );
 
 				return;
+			} else if ($e->getCode() >= 500) {
+				static::markTestSkipped("Got errors (".$e->getCode().") on URL call, can't complete request: " . $e->getMessage());
 			}
 			throw new \Exception( $e->getMessage(), $e->getCode(), $e );
 		}
@@ -1129,6 +1131,8 @@ class curlTest extends TestCase {
 				static::markTestSkipped( 'Getting exception codes below 3 here, might indicate that your cacerts is not installed properly' );
 
 				return;
+			} else if ($e->getCode() >= 500) {
+				static::markTestSkipped("Got errors (".$e->getCode().") on URL call, can't complete request: " . $e->getMessage());
 			}
 			throw new \Exception( $e->getMessage(), $e->getCode(), $e );
 		}

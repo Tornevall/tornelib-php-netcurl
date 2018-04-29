@@ -88,6 +88,8 @@ class extendedTest extends TestCase {
 				static::markTestSkipped( 'Getting exception codes below 3 here, might indicate that your cacerts is not installed properly or the connection to the server is not responding' );
 
 				return;
+			} else if ( $exCode >= 500 ) {
+				static::markTestSkipped( "Got errors (" . $e->getCode() . ") on URL call, can't complete request: " . $e->getMessage() );
 			}
 
 			static::assertTrue( ( $isUnCode || $isUnText ) ? true : false );
@@ -128,6 +130,8 @@ class extendedTest extends TestCase {
 				static::markTestSkipped( "Possible SSL3_GET_SERVER_CERTIFICATE - If you run this test, make sure the certificate verification works" );
 
 				return;
+			} else if ( $errorCode >= 500 ) {
+				static::markTestSkipped( "Got errors (" . $e->getCode() . ") on URL call, can't complete request: " . $e->getMessage() );
 			}
 			static::assertTrue( $assertThis, $errorMessage . " (" . $errorCode . ")" );
 		}
@@ -163,6 +167,8 @@ class extendedTest extends TestCase {
 				static::markTestSkipped( "Possible SSL3_GET_SERVER_CERTIFICATE - If you run this test, make sure the certificate verification works" );
 
 				return;
+			} else if ( $errorCode >= 500 ) {
+				static::markTestSkipped( "Got errors (" . $e->getCode() . ") on URL call, can't complete request: " . $e->getMessage() );
 			}
 
 			static::assertTrue( $assertThis, $errorMessage . " (" . $errorCode . ")" );
@@ -220,6 +226,8 @@ class extendedTest extends TestCase {
 				static::markTestSkipped( "Possible SSL3_GET_SERVER_CERTIFICATE - If you run this test, make sure the certificate verification works" );
 
 				return;
+			} else if ( $errorCode >= 500 ) {
+				static::markTestSkipped( "Got errors (" . $e->getCode() . ") on URL call, can't complete request: " . $e->getMessage() );
 			}
 
 			static::assertTrue( $assertThis, $errorMessage . " (" . $errorCode . ")" );

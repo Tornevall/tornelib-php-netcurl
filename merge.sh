@@ -32,6 +32,7 @@ fi
 if [ "" != "$1" ] ; then
     # Usage:
     # ./merge.sh "Resursbank\\\\RBEcomPHP"
+    # ./merge.sh Tornevall_WP_DNSBL
     echo "Update merged library with new namespace: $namespace => $1"
     sed -i "s/namespace TorneLIB/namespace $1/" ${mergeTo}
     sed -i "s/\&\& \! class_exists( 'TorneLIB\\\\/\&\& \! class_exists( '$1\\\\/g" ${mergeTo}

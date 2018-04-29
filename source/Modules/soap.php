@@ -191,7 +191,7 @@ if ( ! class_exists( 'MODULE_SOAP' ) && ! class_exists( 'Tornevall_WP_DNSBL\MODU
 					if ( ! $soapCode ) {
 						$soapCode = 500;
 					}
-					$throwErrorMessage = NETCURL_CURL_CLIENTNAME . " exception from soapClient: " . $soapException->getMessage();
+					$throwErrorMessage = NETCURL_CURL_CLIENTNAME . " (internal/simplesoap) exception from SoapClient: " . $soapException->getMessage();
 					$throwErrorCode    = $soapCode;
 					$throwBackCurrent  = $soapException;
 					//$throwPrevious     = $soapException->getPrevious();
@@ -222,7 +222,7 @@ if ( ! class_exists( 'MODULE_SOAP' ) && ! class_exists( 'Tornevall_WP_DNSBL\MODU
 								preg_match_all( "/! (http\/\d+\.\d+ \d+ (.*?))\n/is", $throwErrorMessage, $outInfo );
 								if ( isset( $outInfo[1] ) && isset( $outInfo[1][0] ) && preg_match( "/^HTTP\//", $outInfo[1][0] ) ) {
 									$httpError      = $outInfo[1][0];
-									$httpSplitError = explode( " ", $httpError );
+									$httpSplitError = explode( " ", $httpError, 3 );
 									if ( isset( $httpSplitError[1] ) && intval( $httpSplitError[1] ) > 0 ) {
 										$throwErrorCode = $httpSplitError[1];
 										if ( isset( $httpSplitError[2] ) && is_string( $httpSplitError[2] ) && ! empty( $httpSplitError[2] ) ) {

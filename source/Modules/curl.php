@@ -3279,7 +3279,11 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 					return $this->executeHttpSoap( $url, $postData, $CurlMethod );
 				}
 
-				throw new \Exception( NETCURL_CURL_CLIENTNAME . " exception from soapClient: [" . $getSoapResponseException->getCode() . "] " . $getSoapResponseException->getMessage(), $getSoapResponseException->getCode() );
+				switch ( $getSoapResponseException->getCode() ) {
+					default:
+						throw new \Exception( NETCURL_CURL_CLIENTNAME . " exception from SoapClient: [" . $getSoapResponseException->getCode() . "] " . $getSoapResponseException->getMessage(), $getSoapResponseException->getCode() );
+				}
+
 			}
 
 			return $getSoapResponse;

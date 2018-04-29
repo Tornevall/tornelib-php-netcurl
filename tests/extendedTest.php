@@ -49,8 +49,8 @@ class extendedTest extends TestCase {
 	 */
 	function soapFaultstring() {
 		$this->disableSslVerifyByPhpVersions( true );
-		$wsdl = $this->CURL->doGet( $this->wsdl );
 		try {
+			$wsdl = $this->CURL->doGet( $this->wsdl );
 			$wsdl->getPaymentMethods();
 		} catch ( \Exception $e ) {
 			$previousException = $e->getPrevious();

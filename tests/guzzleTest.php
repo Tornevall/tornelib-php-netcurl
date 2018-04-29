@@ -83,12 +83,22 @@ class guzzleTest extends TestCase {
 	 * @test
 	 */
 	function enableGuzzleWsdl() {
-		if ( $this->hasGuzzle() ) {
-			// Currently, this one will fail over to SimpleSoap
-			$info = $this->CURL->doGet( "http://" . \TESTURLS::getUrlSoap() );
-			static::assertTrue( is_object( $info ) );
-		} else {
-			static::markTestSkipped( "Can not test guzzle driver without guzzle" );
+		try {
+			if ( $this->hasGuzzle() ) {
+				// Currently, this one will fail over to SimpleSoap
+				$info = $this->CURL->doGet( "http://" . \TESTURLS::getUrlSoap() );
+				static::assertTrue( is_object( $info ) );
+			} else {
+				static::markTestSkipped( "Can not test guzzle driver without guzzle" );
+			}
+		} catch (\Exception $e) {
+			if ( $e->getCode() < 3 ) {
+				static::markTestSkipped( 'Getting exception codes below 3 here, might indicate that your cacerts is not installed properly or the connection to the server is not responding' );
+
+				return;
+			} else if ( $e->getCode() >= 500 ) {
+				static::markTestSkipped( "Got errors (" . $e->getCode() . ") on URL call, can't complete request: " . $e->getMessage() );
+			}
 		}
 	}
 

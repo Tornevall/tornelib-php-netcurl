@@ -35,7 +35,7 @@ class curlTest extends TestCase {
 		$this->StartErrorReporting = error_reporting();
 		$this->NETWORK             = new MODULE_NETWORK();
 		$this->CURL                = new MODULE_CURL();
-		$this->CURL->setTimeout( 6 );
+		//$this->CURL->setTimeout( 6 );
 		$this->CURL->setUserAgent( "PHPUNIT" );
 
 		if ( function_exists( 'curl_version' ) ) {
@@ -1098,8 +1098,8 @@ class curlTest extends TestCase {
 				static::markTestSkipped( 'Getting exception codes below 3 here, might indicate that your cacerts is not installed properly or the connection to the server is not responding' );
 
 				return;
-			} else if ($e->getCode() >= 500) {
-				static::markTestSkipped("Got errors (".$e->getCode().") on URL call, can't complete request: " . $e->getMessage());
+			} else if ( $e->getCode() >= 500 ) {
+				static::markTestSkipped( "Got errors (" . $e->getCode() . ") on URL call, can't complete request: " . $e->getMessage() );
 			}
 			throw new \Exception( $e->getMessage(), $e->getCode(), $e );
 		}
@@ -1131,8 +1131,8 @@ class curlTest extends TestCase {
 				static::markTestSkipped( 'Getting exception codes below 3 here, might indicate that your cacerts is not installed properly or the connection to the server is not responding' );
 
 				return;
-			} else if ($e->getCode() >= 500) {
-				static::markTestSkipped("Got errors (".$e->getCode().") on URL call, can't complete request: " . $e->getMessage());
+			} else if ( $e->getCode() >= 500 ) {
+				static::markTestSkipped( "Got errors (" . $e->getCode() . ") on URL call, can't complete request: " . $e->getMessage() );
 			}
 			throw new \Exception( $e->getMessage(), $e->getCode(), $e );
 		}

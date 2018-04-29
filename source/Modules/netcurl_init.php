@@ -41,7 +41,7 @@ if ( defined( 'NETCURL_REQUIRE' ) ) {
 	}
 	define( 'NETCURL_ALLOW_AUTOLOAD', version_compare( NETCURL_RELEASE, NETCURL_REQUIRE, NETCURL_REQUIRE_OPERATOR ) ? true : false );
 } else {
-	if ( defined( 'NETCURL_ALLOW_AUTOLOAD' ) ) {
+	if ( ! defined( 'NETCURL_ALLOW_AUTOLOAD' ) ) {
 		define( 'NETCURL_ALLOW_AUTOLOAD', true );
 	}
 }

@@ -56,7 +56,7 @@ class extendedTest extends TestCase {
 			$previousException = $e->getPrevious();
 
 			if ( $e->getCode() < 3 ) {
-				static::markTestSkipped( 'Getting exception codes below 3 here, might indicate that your cacerts is not installed properly' );
+				static::markTestSkipped( 'Getting exception codes below 3 here, might indicate that your cacerts is not installed properly or the connection to the server is not responding' );
 
 				return;
 			} else if ( $e->getCode() >= 500 ) {
@@ -85,7 +85,7 @@ class extendedTest extends TestCase {
 			$isUnText = preg_match( "/unauthorized/i", $exMessage ) ? true : false;
 
 			if ( ( intval( $exCode ) <= 3 && intval( $exCode ) > 0 ) || preg_match( "/14090086/", $exMessage ) ) {
-				static::markTestSkipped( 'Getting exception codes below 3 here, might indicate that your cacerts is not installed properly' );
+				static::markTestSkipped( 'Getting exception codes below 3 here, might indicate that your cacerts is not installed properly or the connection to the server is not responding' );
 
 				return;
 			}

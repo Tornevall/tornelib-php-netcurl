@@ -1095,7 +1095,7 @@ class curlTest extends TestCase {
 			$this->assertTrue( $driversUsed[1] == 3 && $driversUsed[2] == 2 ? true : false );
 		} catch ( \Exception $e ) {
 			if ( $e->getCode() < 3 ) {
-				static::markTestSkipped( 'Getting exception codes below 3 here, might indicate that your cacerts is not installed properly' );
+				static::markTestSkipped( 'Getting exception codes below 3 here, might indicate that your cacerts is not installed properly or the connection to the server is not responding' );
 
 				return;
 			} else if ($e->getCode() >= 500) {
@@ -1128,7 +1128,7 @@ class curlTest extends TestCase {
 			$this->assertTrue( strlen( $id ) > 0 ? true : false );
 		} catch ( \Exception $e ) {
 			if ( $e->getCode() < 3 ) {
-				static::markTestSkipped( 'Getting exception codes below 3 here, might indicate that your cacerts is not installed properly' );
+				static::markTestSkipped( 'Getting exception codes below 3 here, might indicate that your cacerts is not installed properly or the connection to the server is not responding' );
 
 				return;
 			} else if ($e->getCode() >= 500) {

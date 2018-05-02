@@ -85,7 +85,11 @@ if ( ! class_exists( 'MODULE_SSL' ) && ! class_exists( 'TorneLIB\MODULE_SSL' ) )
 			// Common ssl checkers (if they fail, there is a sslDriverError to recall
 
 			$sslDriverError = array();
-			if ( ! in_array( 'https', @stream_get_wrappers() ) ) {
+			$streamWrappers = @stream_get_wrappers();
+			if ( ! is_array( $streamWrappers ) ) {
+				$streamWrappers = array();
+			}
+			if ( ! in_array( 'https', array_map( "strtolower", $streamWrappers ) ) ) {
 				$sslDriverError[] = "SSL Failure: HTTPS wrapper can not be found";
 			}
 			if ( ! extension_loaded( 'openssl' ) ) {

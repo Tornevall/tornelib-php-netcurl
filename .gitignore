@@ -7,3 +7,4 @@ vendor
 runit.sh
 coverage
 source/build
+*.swp

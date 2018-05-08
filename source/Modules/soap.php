@@ -38,7 +38,7 @@ if ( ! class_exists( 'MODULE_SOAP' ) && ! class_exists( 'TorneLIB\MODULE_SOAP' )
 	/**
 	 * Class TorneLIB_SimpleSoap Simple SOAP client.
 	 *
-	 * Masking no difference of a SOAP call and a regular GET/POST
+	 * Making no difference of a SOAP call and a regular GET/POST
 	 *
 	 * @package TorneLIB
 	 */

@@ -5,7 +5,8 @@
 
 ## Compatibility
 
-This library should be compatible with at least PHP 5.3 up to PHP 7.2
+This library should be compatible with at least PHP 5.3 up to PHP 7.2.
+
 Observe that SOAP-calls requires SoapClient and PHP streams to be enabled.
 
 
@@ -13,7 +14,7 @@ Observe that SOAP-calls requires SoapClient and PHP streams to be enabled.
 
 Want to test this library with an external library like Guzzle? Add this row to composer:
 
-    "guzzlehttp/guzzle": "6.3.0"
+    "guzzlehttp/guzzle": "^6.3"
 
 Then call for this method on initiation:
 

@@ -472,7 +472,7 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 		 */
 		private function setPreparedAuthentication() {
 			$authFlags = $this->getFlag( 'auth' );
-			if ( isset( $authFlags['username'] ) && isset( $authFlags['password'] ) ) {
+			if ( is_array( $authFlags ) && isset( $authFlags['username'] ) && isset( $authFlags['password'] ) ) {
 				$this->setAuthentication( $authFlags['username'], $authFlags['password'], isset( $authFlags['type'] ) ? $authFlags['type'] : NETCURL_AUTH_TYPES::AUTHTYPE_BASIC );
 			}
 		}
@@ -843,52 +843,73 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 		 */
 		private function initCookiePath() {
 			// Method rewrite as of NetCurl 6.0.20
+			if ( $this->isFlag( 'NETCURL_DISABLE_CURL_COOKIES' ) || ! $this->useLocalCookies ) {
+				return false;
+			}
 
 			try {
-				$sysTempDir = sys_get_temp_dir();
-
-				if ( $this->isFlag( 'NETCURL_DISABLE_CURL_COOKIES' ) || ! $this->useLocalCookies ) {
-					return false;
-				}
 				$ownCookiePath = $this->getFlag( 'NETCURL_COOKIE_LOCATION' );
 				if ( ! empty( $ownCookiePath ) ) {
-					if ( is_dir( $ownCookiePath ) ) {
-						$this->COOKIE_PATH = $ownCookiePath;
-
-						return true;
-					} else {
-						@mkdir( $ownCookiePath );
-						if ( is_dir( $ownCookiePath ) ) {
-							$this->COOKIE_PATH = $ownCookiePath;
-
-							return true;
-						}
-
-						return false;
-					}
+					return $this->setCookiePathUserDefined($ownCookiePath);
 				}
+				return $this->setCookiePathBySystem();
 
-				if ( empty( $this->COOKIE_PATH ) ) {
-					if ( $this->isFlag( 'NETCURL_COOKIE_TEMP_LOCATION' ) ) {
-						if ( ! empty( $sysTempDir ) ) {
-							if ( is_dir( $sysTempDir ) ) {
-								$this->COOKIE_PATH = $sysTempDir;
-								@mkdir( $sysTempDir . "/netcurl/" );
-								if ( is_dir( $sysTempDir . "/netcurl/" ) ) {
-									$this->COOKIE_PATH = $sysTempDir . "/netcurl/";
-								}
-
-								return true;
-							} else {
-								return false;
-							}
-						}
-					}
-				}
 			} catch ( \Exception $e ) {
 				// Something happened, so we won't try this again
 				return false;
 			}
+		}
+
+		/**
+		 * Sets, if defined by user, up a cookie directory storage
+		 * @param $ownCookiePath
+		 *
+		 * @return bool
+		 * @since 6.0.20
+		 */
+		private function setCookiePathUserDefined($ownCookiePath) {
+			if ( is_dir( $ownCookiePath ) ) {
+				$this->COOKIE_PATH = $ownCookiePath;
+
+				return true;
+			} else {
+				@mkdir( $ownCookiePath );
+				if ( is_dir( $ownCookiePath ) ) {
+					$this->COOKIE_PATH = $ownCookiePath;
+
+					return true;
+				}
+
+				return false;
+			}
+
+		}
+
+		/**
+		 * Sets up cookie path if allowed, to system default storage path
+		 * @return bool
+		 * @since 6.0.20
+		 */
+		private function setCookiePathBySystem() {
+			$sysTempDir = sys_get_temp_dir();
+			if ( empty( $this->COOKIE_PATH ) ) {
+				if ( $this->isFlag( 'NETCURL_COOKIE_TEMP_LOCATION' ) ) {
+					if ( ! empty( $sysTempDir ) ) {
+						if ( is_dir( $sysTempDir ) ) {
+							$this->COOKIE_PATH = $sysTempDir;
+							@mkdir( $sysTempDir . "/netcurl/" );
+							if ( is_dir( $sysTempDir . "/netcurl/" ) ) {
+								$this->COOKIE_PATH = $sysTempDir . "/netcurl/";
+							}
+
+							return true;
+						} else {
+							return false;
+						}
+					}
+				}
+			}
+			return false;
 		}
 
 		/**
@@ -1342,16 +1363,24 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 			}
 
 			if ( ! empty( $CustomUserAgent ) ) {
-				$trimmedUserAgent = trim( $CustomUserAgent );
-				if ( ! in_array( $trimmedUserAgent, $this->CUSTOM_USER_AGENT ) ) {
-					$this->CUSTOM_USER_AGENT[] = $trimmedUserAgent;
-				}
-
-				// NETCURL_CURL_CLIENTNAME . '-' . NETCURL_RELEASE . "/" . __CLASS__ . "-" . NETCURL_CURL_RELEASE
-				$this->HTTP_USER_AGENT = implode( " ", $this->CUSTOM_USER_AGENT ) . " +TorneLIB-NETCURL-" . NETCURL_RELEASE . " +" . NETCURL_CURL_CLIENTNAME . "-" . NETCURL_CURL_RELEASE . " (" . $this->netCurlUrl . ")";
+				$this->mergeUserAgent($CustomUserAgent);
 			} else {
 				$this->HTTP_USER_AGENT = $this->userAgents['Mozilla'] . ' +TorneLIB-NetCURL-' . NETCURL_RELEASE . " +" . NETCURL_CURL_CLIENTNAME . "+-" . NETCURL_CURL_RELEASE . ' (' . $this->netCurlUrl . ')';
 			}
+		}
+
+		/**
+		 * @param string $CustomUserAgent
+		 * @since 6.0.20
+		 */
+		private function mergeUserAgent($CustomUserAgent = "") {
+			$trimmedUserAgent = trim( $CustomUserAgent );
+			if ( ! in_array( $trimmedUserAgent, $this->CUSTOM_USER_AGENT ) ) {
+				$this->CUSTOM_USER_AGENT[] = $trimmedUserAgent;
+			}
+
+			// NETCURL_CURL_CLIENTNAME . '-' . NETCURL_RELEASE . "/" . __CLASS__ . "-" . NETCURL_CURL_RELEASE
+			$this->HTTP_USER_AGENT = implode( " ", $this->CUSTOM_USER_AGENT ) . " +TorneLIB-NETCURL-" . NETCURL_RELEASE . " +" . NETCURL_CURL_CLIENTNAME . "-" . NETCURL_CURL_RELEASE . " (" . $this->netCurlUrl . ")";
 		}
 
 		/**
@@ -1604,7 +1633,6 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 		 */
 		private function getHasUpdateState( $libName = 'tornelib_curl' ) {
 			// Currently only supporting this internal module (through $myRelease).
-			//$myRelease  = $this->getInternalRelease();
 			$myRelease  = NETCURL_RELEASE;
 			$libRequest = ( ! empty( $libName ) ? "lib/" . $libName : "" );
 			$getInfo    = $this->doGet( "https://api.tornevall.net/2.0/libs/getLibs/" . $libRequest . "/me/" . $myRelease );
@@ -1614,8 +1642,6 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 					if ( isset( $getInfo['parsed']->response->getLibsResponse->libs->tornelib_curl ) ) {
 						return $getInfo['parsed']->response->getLibsResponse->libs->tornelib_curl;
 					}
-				} else {
-					return "";
 				}
 			}
 
@@ -1821,6 +1847,7 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 		 *
 		 * @throws \Exception
 		 * @since 5.0
+		 * @todo Split code (try to fix all if/elses)
 		 */
 		private function handleIpList() {
 			$this->CURL_IP_ADDRESS = null;
@@ -1840,6 +1867,7 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 			} else if ( ! empty( $this->IpAddr ) ) {
 				$UseIp = $this->IpAddr;
 			}
+
 			$ipType = $this->NETWORK->getArpaFromAddr( $UseIp, true );
 			// Bind interface to specific ip only if any are found
 			if ( $ipType == "0" ) {
@@ -1932,12 +1960,17 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 			return array();
 		}
 
+		private function netcurl_split_get_base() {
+
+		}
+
 		/**
 		 * @param string $rawInput
 		 * @param bool $internalRaw
 		 *
 		 * @return $this|array|NETCURL_HTTP_OBJECT
 		 * @throws \Exception
+		 * @todo Can this be split up?
 		 */
 		public function netcurl_split_raw( $rawInput = null, $internalRaw = false ) {
 			$rawDataTest = $this->getRaw();
@@ -1955,7 +1988,7 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 				'parsed' => ''
 			);
 
-			// Generate safer content than via list()
+			// explodeRaw usages - header and body
 			$explodeRaw        = explode( "\r\n\r\n", $rawInput . "\r\n", 2 );
 			$header            = isset( $explodeRaw[0] ) ? $explodeRaw[0] : "";
 			$body              = isset( $explodeRaw[1] ) ? $explodeRaw[1] : "";

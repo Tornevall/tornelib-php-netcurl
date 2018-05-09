@@ -3952,6 +3952,7 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 		 * @package TorneLIB
 		 * @throws \Exception
 		 * @since 6.0
+		 * @deprecated 6.0.20
 		 */
 		class Tornevall_cURL extends MODULE_CURL {
 			function __construct( $requestUrl = '', $requestPostData = array(), $requestPostMethod = NETCURL_POST_METHODS::METHOD_POST, $requestFlags = array() ) {

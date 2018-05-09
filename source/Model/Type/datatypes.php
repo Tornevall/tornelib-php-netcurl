@@ -29,7 +29,6 @@ if ( ! class_exists( 'NETCURL_POST_DATATYPES' ) && ! class_exists( 'TorneLIB\NET
 	 * @package TorneLIB
 	 * @since 6.0.20
 	 */
-
 	abstract class NETCURL_POST_DATATYPES {
 		const DATATYPE_NOT_SET = 0;
 		const DATATYPE_JSON = 1;

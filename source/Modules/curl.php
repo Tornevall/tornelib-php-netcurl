@@ -850,8 +850,9 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 			try {
 				$ownCookiePath = $this->getFlag( 'NETCURL_COOKIE_LOCATION' );
 				if ( ! empty( $ownCookiePath ) ) {
-					return $this->setCookiePathUserDefined($ownCookiePath);
+					return $this->setCookiePathUserDefined( $ownCookiePath );
 				}
+
 				return $this->setCookiePathBySystem();
 
 			} catch ( \Exception $e ) {
@@ -862,12 +863,13 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 
 		/**
 		 * Sets, if defined by user, up a cookie directory storage
+		 *
 		 * @param $ownCookiePath
 		 *
 		 * @return bool
 		 * @since 6.0.20
 		 */
-		private function setCookiePathUserDefined($ownCookiePath) {
+		private function setCookiePathUserDefined( $ownCookiePath ) {
 			if ( is_dir( $ownCookiePath ) ) {
 				$this->COOKIE_PATH = $ownCookiePath;
 
@@ -909,6 +911,7 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 					}
 				}
 			}
+
 			return false;
 		}
 
@@ -1363,7 +1366,7 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 			}
 
 			if ( ! empty( $CustomUserAgent ) ) {
-				$this->mergeUserAgent($CustomUserAgent);
+				$this->mergeUserAgent( $CustomUserAgent );
 			} else {
 				$this->HTTP_USER_AGENT = $this->userAgents['Mozilla'] . ' +TorneLIB-NetCURL-' . NETCURL_RELEASE . " +" . NETCURL_CURL_CLIENTNAME . "+-" . NETCURL_CURL_RELEASE . ' (' . $this->netCurlUrl . ')';
 			}
@@ -1371,9 +1374,10 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 
 		/**
 		 * @param string $CustomUserAgent
+		 *
 		 * @since 6.0.20
 		 */
-		private function mergeUserAgent($CustomUserAgent = "") {
+		private function mergeUserAgent( $CustomUserAgent = "" ) {
 			$trimmedUserAgent = trim( $CustomUserAgent );
 			if ( ! in_array( $trimmedUserAgent, $this->CUSTOM_USER_AGENT ) ) {
 				$this->CUSTOM_USER_AGENT[] = $trimmedUserAgent;
@@ -2194,13 +2198,14 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 		 * @throws \Exception
 		 * @since 6.0.20
 		 */
-		private function getParsedExceptionCheck($inputResponse) {
+		private function getParsedExceptionCheck( $inputResponse ) {
 			// If the input response is an array and contains the deprecated editon of an error code
 			if ( is_array( $inputResponse ) ) {
 				if ( isset( $inputResponse['code'] ) && $inputResponse['code'] >= 400 ) {
 					throw new \Exception( NETCURL_CURL_CLIENTNAME . " parseResponse exception - Unexpected response code from server: " . $inputResponse['code'], $inputResponse['code'] );
 				}
 			}
+
 			return false;
 		}
 
@@ -3951,7 +3956,6 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 		 * Class MODULE_CURL
 		 * @package TorneLIB
 		 * @throws \Exception
-		 * @since 6.0
 		 * @deprecated 6.0.20
 		 */
 		class Tornevall_cURL extends MODULE_CURL {

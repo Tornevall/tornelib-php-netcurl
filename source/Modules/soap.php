@@ -41,6 +41,7 @@ if ( ! class_exists( 'MODULE_SOAP' ) && ! class_exists( 'TorneLIB\MODULE_SOAP' )
 	 * Making no difference of a SOAP call and a regular GET/POST
 	 *
 	 * @package TorneLIB
+	 * @since 6.0.20
 	 */
 	class MODULE_SOAP extends MODULE_CURL {
 		protected $soapClient;
@@ -425,6 +426,7 @@ if ( ! class_exists( 'MODULE_SOAP' ) && ! class_exists( 'TorneLIB\MODULE_SOAP' )
 		/**
 		 * Class MODULE_CURL
 		 * @package TorneLIB
+		 * @deprecated 6.0.20 Use MODULE_SOAP
 		 */
 		class Tornevall_SimpleSoap extends MODULE_SOAP {
 			function __construct( string $Url, $that = null ) {

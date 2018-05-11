@@ -373,16 +373,28 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 		 *
 		 * @throws \Exception
 		 */
-		public function __construct( $requestUrl = '', $requestPostData = array(), $requestPostMethod = NETCURL_POST_METHODS::METHOD_POST, $requestFlags = array() ) {
+		public function __construct( $requestUrl = '', $requestPostData = array(), $requestPostMethod = null, $requestFlags = array() ) {
 			register_shutdown_function( array( $this, 'netcurl_terminate' ) );
+
+			if (!is_null($requestPostData)) {
+				$requestPostData = array();
+			}
 
 			// PHP versions not supported to chaining gets the chaining parameter disabled by default.
 			if ( version_compare( PHP_VERSION, "5.4.0", "<" ) ) {
+				// Something really magic happens in PHP 5.3 with default request method, so instead we default this to GET
+				// instead of POST if running lower versions.
+				if (is_null($requestPostMethod)) {
+					$requestPostMethod = NETCURL_POST_METHODS::METHOD_GET;
+				}
 				try {
 					$this->setFlag( 'NOCHAIN', true );
 				} catch ( \Exception $ignoreEmptyException ) {
 					// This will never occur
 				}
+			}
+			if (is_null($requestPostMethod)) {
+				$requestPostMethod = NETCURL_POST_METHODS::METHOD_POST;
 			}
 			if ( is_array( $requestFlags ) && count( $requestFlags ) ) {
 				$this->setFlags( $requestFlags );
@@ -412,7 +424,6 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 				} else if ( $requestPostMethod == NETCURL_POST_METHODS::METHOD_DELETE ) {
 					$InstantResponse = $this->doDelete( $requestUrl, $requestPostData );
 				}
-
 				return $InstantResponse;
 			}
 
@@ -3336,6 +3347,7 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 			if ( $currentDriver === NETCURL_NETWORK_DRIVERS::DRIVER_CURL ) {
 				try {
 					$returnContent                     = $this->internal_curl_execute();
+
 					$this->DEBUG_DATA['data']['url'][] = array(
 						'url'       => $this->CURL_STORED_URL,
 						'opt'       => $this->getCurlOptByKeys(),

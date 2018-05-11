@@ -219,7 +219,7 @@ class curlTest extends TestCase {
 	 * @testdox Make a direct call to the curl library
 	 */
 	function quickInitParsed() {
-		$tempCurl = new MODULE_CURL( "https://identifier.tornevall.net/?json" );
+		$tempCurl = new MODULE_CURL( "https://identifier.tornevall.net/index.php?json" );
 		static::assertTrue( is_object( $tempCurl->getParsed() ) );
 	}
 
@@ -469,6 +469,12 @@ class curlTest extends TestCase {
 	 * @test
 	 */
 	function getSimpleDomChain() {
+
+		if (version_compare(PHP_VERSION, '5.4.0', '<')) {
+			static::markTestIncomplete( 'Chaining PHP is not available in PHP version under 5.4 (This is ' . PHP_VERSION . ')' );
+			return;
+		}
+
 		/** @var MODULE_CURL $getRequest */
 		$getRequest = $this->urlGet( "ssl&bool&o=xml&method=get&using=SimpleXMLElement", null, "simple.html" );
 		if ( method_exists( $getRequest, 'getParsed' ) ) {
@@ -1111,19 +1117,26 @@ class curlTest extends TestCase {
 	 * @throws \Exception
 	 */
 	function soapIoParse() {
+		if ( version_compare( PHP_VERSION, '5.4.0', '<' ) ) {
+			static::markTestIncomplete( "Test causes segfaults on some older system without any valid reason." );
+
+			return;
+		}
+
 		if ( ! class_exists( 'TorneLIB\MODULE_IO' ) ) {
 			static::markTestSkipped( "MODULE_IO is missing, this test is skipped" );
 
 			return;
 		}
-
-		$this->disableSslVerifyByPhpVersions( true );
-		$this->CURL->setAuthentication( 'atest', 'atest' );
 		try {
+			$this->disableSslVerifyByPhpVersions( true );
+			$this->CURL->setAuthentication( 'atest', 'atest' );
 			$php53UnChainified = $this->CURL->doGet( 'https://test.resurs.com/ecommerce-test/ws/V4/SimplifiedShopFlowService?wsdl' );
 			$php53UnChainified->getPaymentMethods();
 			$IO  = new MODULE_IO();
-			$XML = $IO->getFromXml( $this->CURL->getBody(), true );
+			// Chaining this might segfaultify something
+			$php53Bodified = $this->CURL->getBody();
+			$XML = $IO->getFromXml( $php53Bodified, true );
 			$id  = ( isset( $XML[0] ) && isset( $XML[0]->id ) ? $XML[0]->id : null );
 			$this->assertTrue( strlen( $id ) > 0 ? true : false );
 		} catch ( \Exception $e ) {

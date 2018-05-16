@@ -387,6 +387,7 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 				if (is_null($requestPostMethod)) {
 					$requestPostMethod = NETCURL_POST_METHODS::METHOD_GET;
 				}
+
 				try {
 					$this->setFlag( 'NOCHAIN', true );
 				} catch ( \Exception $ignoreEmptyException ) {

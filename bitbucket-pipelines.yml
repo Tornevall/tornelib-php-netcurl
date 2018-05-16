@@ -5,19 +5,6 @@
 pipelines:
   default:
     - step:
-        name: NetCURL 6.0/PHP 5.4
-        image: php:5.4.45
-        caches:
-          - composer
-        script:
-          - apt-get update && apt-get install -y unzip libxml2-dev git ca-certificates
-          - docker-php-ext-install soap
-          - docker-php-ext-enable soap
-          - curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
-          - composer install
-          - composer require phpunit/phpunit
-          - vendor/bin/phpunit --configuration ./phpunit.xml
-    - step:
         name: NetCURL 6.0/PHP 7.2
         image: php:7.2.3
         caches:
@@ -44,6 +31,19 @@ pipelines:
           - composer require phpunit/phpunit
           - vendor/bin/phpunit --configuration ./phpunit.xml
     - step:
+        name: NetCURL 6.0/PHP 5.6
+        image: php:5.6.23
+        caches:
+          - composer
+        script:
+          - apt-get update && apt-get install -y unzip libxml2-dev git ca-certificates openssl libssl-dev
+          - docker-php-ext-install soap
+          - docker-php-ext-enable soap
+          - curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
+          - composer install
+          - composer require phpunit/phpunit
+          - vendor/bin/phpunit --configuration ./phpunit.xml
+    - step:
         name: NetCURL 6.0/PHP 5.5
         image: php:5.5.38
         caches:
@@ -57,30 +57,41 @@ pipelines:
           - composer require phpunit/phpunit
           - vendor/bin/phpunit --configuration ./phpunit.xml
     - step:
-        name: NetCURL 6.0/PHP 5.6
-        image: php:5.6.23
+        name: NetCURL 6.0/PHP 5.4
+        image: php:5.4.45
         caches:
           - composer
         script:
-          - apt-get update && apt-get install -y unzip libxml2-dev git ca-certificates openssl libssl-dev
+          - apt-get update && apt-get install -y unzip libxml2-dev git ca-certificates
           - docker-php-ext-install soap
           - docker-php-ext-enable soap
           - curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
           - composer install
           - composer require phpunit/phpunit
           - vendor/bin/phpunit --configuration ./phpunit.xml
-#    - step:
-#        name: NetCURL 6.0/PHP 5.3.29
-#        image: php:5.3.29
-#        caches:
-#          - composer
-#        script:
-#          - apt-get update && apt-get -y upgrade && apt-get install -y software-properties-common
-#          - cp tests/xenial.list /etc/apt/sources.list.d/
-#          - apt-get update && apt-get install -y --force-yes unzip libxml2-dev git ca-certificates openssl libssl-dev php53-mod-json grep sed libssl101r php53-mod-openssl php53-mod-dom php53-mod-xml php53-mod-tokenizer php53-mod-curl php53-mod-soap
-#          - curl -sS http://www.netcurl.org/composer.phar -o /usr/local/bin/composer
-#          - chmod +x /usr/local/bin/composer
-#          - composer install
-#          - composer require phpunit/phpunit
-#          - composer require tornevall/tornelib-php-netcurl dev-develop/6.0
-#          - vendor/bin/phpunit --configuration ./phpunit.xml
+    #- step:
+    #    name: NetCURL 6.0/PHP 5.3.29
+    #    image: php:5.3.29
+    #    caches:
+    #      - composer
+    #    script:
+    #      - cp tests/xenial.list /etc/apt/sources.list.d/
+    #      - apt-get update
+    #      - apt-get install -y --force-yes python-software-properties software-properties-common
+    #      - apt-get install -y --force-yes libcurl4-openssl-dev
+    #      - apt-get install -y --force-yes php53-common php53-cli php53-mod-soap php53-mod-xml php53-mod-xmlreader php53-mod-xmlwriter php53-mod-dom php53-mod-json php53-mod-openssl php53-mod-phar php53-mod-simplexml php53-mod-curl php53-mod-readline php53-mod-tokenizer php53-mod-xsl
+    #      #- apt-get install -y --force-yes libxml2-dev git ca-certificates openssl libssl-dev libssl101r
+    #      #- apt-get install -y --force-yes unzip libxml2-dev git ca-certificates openssl libssl-dev php53-mod-json grep sed libssl101r php53-mod-openssl php53-mod-dom php53-mod-xml php53-mod-tokenizer php53-mod-curl php53-mod-soap
+    #      #- apt-get -y --force-yes upgrade
+    #      #- php -i
+    #      #- php -m
+    #      - curl -sS http://www.netcurl.org/composer.phar -o /usr/local/bin/composer
+    #      - chmod +x /usr/local/bin/composer
+    #      - composer install
+    #      - composer require phpunit/phpunit
+    #      - composer require tornevall/tornelib-php-netcurl dev-develop/6.0
+    #      - vendor/bin/phpunit --configuration ./phpunit.xml
+  definitions:
+    services:
+      docker:
+        memory: 4096

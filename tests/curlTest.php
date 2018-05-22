@@ -1117,12 +1117,6 @@ class curlTest extends TestCase {
 	 * @throws \Exception
 	 */
 	function soapIoParse() {
-		if ( version_compare( PHP_VERSION, '5.4.0', '<' ) ) {
-			static::markTestIncomplete( "Test causes segfaults on some older system without any valid reason." );
-
-			return;
-		}
-
 		if ( ! class_exists( 'TorneLIB\MODULE_IO' ) ) {
 			static::markTestSkipped( "MODULE_IO is missing, this test is skipped" );
 
@@ -1150,5 +1144,4 @@ class curlTest extends TestCase {
 			throw new \Exception( $e->getMessage(), $e->getCode(), $e );
 		}
 	}
-
 }

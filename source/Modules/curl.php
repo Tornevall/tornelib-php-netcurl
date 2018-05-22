@@ -20,7 +20,7 @@
  * All since-markings are based on the major release of NetCurl.
  *
  * @package TorneLIB
- * @version 6.0.19
+ * @version 6.0.20
  */
 
 namespace TorneLIB;
@@ -28,10 +28,10 @@ namespace TorneLIB;
 if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' ) ) {
 
 	if ( ! defined( 'NETCURL_CURL_RELEASE' ) ) {
-		define( 'NETCURL_CURL_RELEASE', '6.0.19' );
+		define( 'NETCURL_CURL_RELEASE', '6.0.20' );
 	}
 	if ( ! defined( 'NETCURL_CURL_MODIFY' ) ) {
-		define( 'NETCURL_CURL_MODIFY', '20180403' );
+		define( 'NETCURL_CURL_MODIFY', '20180522' );
 	}
 	if ( ! defined( 'NETCURL_CURL_CLIENTNAME' ) ) {
 		define( 'NETCURL_CURL_CLIENTNAME', 'MODULE_CURL' );
@@ -2059,8 +2059,6 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 			);
 			$returnResponse['URL'] = $this->CURL_STORED_URL;
 			$returnResponse['ip']  = isset( $this->CURL_IP_ADDRESS ) ? $this->CURL_IP_ADDRESS : null;  // Will only be filled if there is custom address set.
-
-			$this->throwCodeException( trim( $httpMessage ), $code );
 			$contentType           = isset( $headerInfo['Content-Type'] ) ? $headerInfo['Content-Type'] : null;
 			$arrayedResponse['ip'] = $this->CURL_IP_ADDRESS;
 
@@ -2071,6 +2069,7 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 			$this->NETCURL_RESPONSE_CONTAINER_HTTPMESSAGE = trim( $httpMessage );
 			$this->NETCURL_RESPONSE_CONTAINER_BODY        = $body;
 			$this->NETCURL_RESPONSE_CONTAINER_HEADER      = $header;
+			$this->throwCodeException( trim( $httpMessage ), $code );
 
 			if ( $this->isFlag( 'IS_SOAP' ) && ! $this->isFlag( 'ALLOW_PARSE_SOAP' ) ) {
 				$arrayedResponse['parsed'] = null;

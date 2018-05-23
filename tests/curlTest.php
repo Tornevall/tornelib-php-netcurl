@@ -1113,6 +1113,22 @@ class curlTest extends TestCase {
 
 	/**
 	 * @test
+	 * @testdox Make sure that simplified responses returns proper data immediately on call
+	 */
+	function setSimplifiedResponse() {
+		$curlobject = $this->CURL->doGet( "http://identifier.tornevall.net/?json" );
+		$this->CURL->setSimplifiedResponse();
+		$responseobject = $this->CURL->doGet( "http://identifier.tornevall.net/?json" );
+		$callWithBody   = $this->CURL->doGet( "https://www.aftonbladet.se" );
+
+		// If we still want to see "oldstyle"-data, we can always call the core object directly
+		$urlGetCode = $this->CURL->getCode();
+
+		static::assertTrue( get_class( $curlobject ) == 'TorneLIB\MODULE_CURL' && is_object( $responseobject ) && isset( $responseobject->ip ) && is_string( $callWithBody ) && $urlGetCode == "200" );
+	}
+
+	/**
+	 * @test
 	 * @testdox Another way to extract stuff on
 	 * @throws \Exception
 	 */

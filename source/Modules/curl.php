@@ -114,6 +114,13 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 		protected $NETCURL_REQUEST_HEADERS;
 		protected $NETCURL_REQUEST_BODY;
 
+		/**
+		 * When you just need output responses and nothing else (except for exceptions)
+		 * @var bool $NETCURL_SIMPLIFY_RESPONSES
+		 * @since 6.0.21
+		 */
+		protected $NETCURL_SIMPLIFY_RESPONSES = false;
+
 		private $userAgents = array(
 			'Mozilla' => 'Mozilla/4.0 (compatible; MSIE 7.0; Windows NT 5.1; .NET CLR 1.0.3705; .NET CLR 1.1.4322; Media Center PC 4.0;)'
 		);
@@ -439,6 +446,15 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 		}
 
 		/**
+		 * Termination Controller
+		 *
+		 * As of 6.0.20 cookies will be only stored if there is a predefined cookiepath or if system tempdir is allowed
+		 * @since 5.0
+		 */
+		function netcurl_terminate() {
+		}
+
+		/**
 		 * Initialize NetCURL module and requirements
 		 *
 		 * @return resource
@@ -636,12 +652,23 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 		}
 
 		/**
-		 * Termination Controller
+		 * When you just need responses and nothing else (except for exceptions)
 		 *
-		 * As of 6.0.20 cookies will be only stored if there is a predefined cookiepath or if system tempdir is allowed
-		 * @since 5.0
+		 * Activation means you will always get a proper response back, on http requests (defaults to parsed content, but if the parse is empty, we will fall back on the body parts and if bodyparts is empty netcurl will fall back to an array called simplifiedContainer).
+		 *
+		 * @param bool $simplifyResponses
 		 */
-		function netcurl_terminate() {
+		public function setSimplifiedResponse($simplifyResponses = true) {
+			$this->NETCURL_SIMPLIFY_RESPONSES = $simplifyResponses;
+		}
+
+		/**
+		 * Get the status of the simplified responses setting
+		 * @return bool
+		 * @since 6.0.21
+		 */
+		public function getSimplifiedResponse() {
+			return $this->NETCURL_SIMPLIFY_RESPONSES;
 		}
 
 		/**
@@ -2083,15 +2110,41 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 			$arrayedResponse['parsed']               = $parsedContent;
 			$this->NETCURL_RESPONSE_CONTAINER_PARSED = $parsedContent;
 
-
 			if ( $this->NETCURL_RETURN_RESPONSE_TYPE == NETCURL_RESPONSETYPE::RESPONSETYPE_OBJECT ) {
 				return new NETCURL_HTTP_OBJECT( $arrayedResponse['header'], $arrayedResponse['body'], $arrayedResponse['code'], $arrayedResponse['parsed'], $this->CURL_STORED_URL, $this->CURL_IP_ADDRESS );
 			}
+
+			if ( $this->NETCURL_SIMPLIFY_RESPONSES ) {
+				return $this->getSimplifiedResponseReturnData();
+			}
+
 			if ( $this->isFlag( 'CHAIN' ) && ! $this->isFlag( 'IS_SOAP' ) ) {
 				return $this;
 			}
-
 			return $arrayedResponse;
+		}
+
+		/**
+		 * @return array|null
+		 * @since 6.0.21
+		 */
+		private function getSimplifiedResponseReturnData() {
+			if ( ! empty( $this->NETCURL_RESPONSE_CONTAINER_PARSED ) ) {
+				return $this->NETCURL_RESPONSE_CONTAINER_PARSED;
+			} else if ( ! empty( $this->NETCURL_RESPONSE_CONTAINER_BODY ) ) {
+				return $this->NETCURL_RESPONSE_CONTAINER_BODY;
+			} else {
+				return array(
+					'simplifiedContainer' => array(
+						'NETCURL_RESPONSE_RAW'                   => $this->NETCURL_RESPONSE_RAW,
+						'NETCURL_RESPONSE_CONTAINER'             => $this->NETCURL_RESPONSE_CONTAINER,
+						'NETCURL_RESPONSE_CONTAINER_CODE'        => $this->NETCURL_RESPONSE_CONTAINER_CODE,
+						'NETCURL_RESPONSE_CONTAINER_HTTPMESSAGE' => $this->NETCURL_RESPONSE_CONTAINER_HTTPMESSAGE,
+						'NETCURL_RESPONSE_CONTAINER_BODY'        => $this->NETCURL_RESPONSE_CONTAINER_BODY,
+						'NETCURL_RESPONSE_CONTAINER_HEADER'      => $this->NETCURL_RESPONSE_CONTAINER_HEADER,
+					)
+				);
+			}
 		}
 
 		/**

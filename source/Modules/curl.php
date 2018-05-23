@@ -121,6 +121,20 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 		 */
 		protected $NETCURL_SIMPLIFY_RESPONSES = false;
 
+		/**
+		 * Allow domcontent to be parsed in simplified mode
+		 * @var bool
+		 * @since 6.0.21
+		 */
+		protected $NETCURL_SIMPLIFY_DOMCONTENT = false;
+
+		/**
+		 * Will be set to true if the parser passed DOM-content analyze
+		 * @var bool
+		 * @since 6.0.21
+		 */
+		protected $NETCURL_CONTENT_IS_DOMCONTENT = false;
+
 		private $userAgents = array(
 			'Mozilla' => 'Mozilla/4.0 (compatible; MSIE 7.0; Windows NT 5.1; .NET CLR 1.0.3705; .NET CLR 1.1.4322; Media Center PC 4.0;)'
 		);
@@ -657,9 +671,11 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 		 * Activation means you will always get a proper response back, on http requests (defaults to parsed content, but if the parse is empty, we will fall back on the body parts and if bodyparts is empty netcurl will fall back to an array called simplifiedContainer).
 		 *
 		 * @param bool $simplifyResponses
+		 * @param bool $allowDomTree
 		 */
-		public function setSimplifiedResponse($simplifyResponses = true) {
-			$this->NETCURL_SIMPLIFY_RESPONSES = $simplifyResponses;
+		public function setSimplifiedResponse( $simplifyResponses = true, $allowDomTree = false ) {
+			$this->NETCURL_SIMPLIFY_RESPONSES  = $simplifyResponses;
+			$this->NETCURL_SIMPLIFY_DOMCONTENT = $allowDomTree;
 		}
 
 		/**
@@ -2112,6 +2128,9 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 			$arrayedResponse['parsed']               = $parsedContent;
 			$this->NETCURL_RESPONSE_CONTAINER_PARSED = $parsedContent;
 
+			$this->NETCURL_CONTENT_IS_DOMCONTENT = $NCP->getIsDomContent();
+
+
 			if ( $this->NETCURL_RETURN_RESPONSE_TYPE == NETCURL_RESPONSETYPE::RESPONSETYPE_OBJECT ) {
 				return new NETCURL_HTTP_OBJECT( $arrayedResponse['header'], $arrayedResponse['body'], $arrayedResponse['code'], $arrayedResponse['parsed'], $this->CURL_STORED_URL, $this->CURL_IP_ADDRESS );
 			}
@@ -2123,6 +2142,7 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 			if ( $this->isFlag( 'CHAIN' ) && ! $this->isFlag( 'IS_SOAP' ) ) {
 				return $this;
 			}
+
 			return $arrayedResponse;
 		}
 
@@ -2131,6 +2151,17 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 		 * @since 6.0.21
 		 */
 		private function getSimplifiedResponseReturnData() {
+
+			// If domcontent is detected it us usually parsed as a domtree object. This defines if domtrees are allowed to be dumped out
+			// or if the body should be use primarily
+			if ( $this->NETCURL_CONTENT_IS_DOMCONTENT ) {
+				if ( $this->NETCURL_SIMPLIFY_DOMCONTENT ) {
+					return $this->NETCURL_RESPONSE_CONTAINER_PARSED;
+				} else {
+					return $this->NETCURL_RESPONSE_CONTAINER_BODY;
+				}
+			}
+
 			if ( ! empty( $this->NETCURL_RESPONSE_CONTAINER_PARSED ) ) {
 				return $this->NETCURL_RESPONSE_CONTAINER_PARSED;
 			} else if ( ! empty( $this->NETCURL_RESPONSE_CONTAINER_BODY ) ) {
@@ -3972,6 +4003,8 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 						$childNodeArray    = $this->getChildNodes( $elementsByTagName );
 						$childTagArray     = $this->getChildNodes( $elementsByTagName, 'tagnames' );
 						$childIdArray      = $this->getChildNodes( $elementsByTagName, 'id' );
+
+						$this->NETCURL_CONTENT_IS_DOMCONTENT = true;
 
 						if ( is_array( $childNodeArray ) && count( $childNodeArray ) ) {
 							$parsedContent['ByNodes'] = $childNodeArray;

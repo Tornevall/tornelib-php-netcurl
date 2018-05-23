@@ -1114,12 +1114,13 @@ class curlTest extends TestCase {
 	/**
 	 * @test
 	 * @testdox Make sure that simplified responses returns proper data immediately on call
+	 * @throws \Exception
 	 */
 	function setSimplifiedResponse() {
 		$curlobject = $this->CURL->doGet( "http://identifier.tornevall.net/?json" );
 		$this->CURL->setSimplifiedResponse();
 		$responseobject = $this->CURL->doGet( "http://identifier.tornevall.net/?json" );
-		$callWithBody   = $this->CURL->doGet( "https://www.aftonbladet.se" );
+		$callWithBody   = $this->CURL->doGet( "https://developer.tornevall.net/tests/tornevall_network/simple.html" );
 
 		// If we still want to see "oldstyle"-data, we can always call the core object directly
 		$urlGetCode = $this->CURL->getCode();

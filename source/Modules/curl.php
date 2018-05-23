@@ -2096,6 +2096,8 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 			$this->NETCURL_RESPONSE_CONTAINER_HTTPMESSAGE = trim( $httpMessage );
 			$this->NETCURL_RESPONSE_CONTAINER_BODY        = $body;
 			$this->NETCURL_RESPONSE_CONTAINER_HEADER      = $header;
+
+			// Check if there is any exception to take care of and throw - or continue.
 			$this->throwCodeException( trim( $httpMessage ), $code );
 
 			if ( $this->isFlag( 'IS_SOAP' ) && ! $this->isFlag( 'ALLOW_PARSE_SOAP' ) ) {

@@ -118,7 +118,7 @@ class extendedTest extends TestCase {
 			$errorCode    = $e->getCode();
 
 			if ( preg_match( '/this when not in object context/i', $errorMessage ) ) {
-				static::markTestIncomplete( 'This test might not support chaining: ' . $errorMessage );
+				static::markTestSkipped( 'This test might not support chaining: ' . $errorMessage );
 
 				return;
 			}
@@ -155,7 +155,7 @@ class extendedTest extends TestCase {
 			$errorCode    = $e->getCode();
 
 			if ( preg_match( '/this when not in object context/i', $errorMessage ) ) {
-				static::markTestIncomplete( 'This test might not support chaining: ' . $errorMessage );
+				static::markTestSkipped( 'This test might not support chaining: ' . $errorMessage );
 
 				return;
 			}
@@ -214,7 +214,7 @@ class extendedTest extends TestCase {
 			$errorCode    = $e->getCode();
 
 			if ( preg_match( '/this when not in object context/i', $errorMessage ) ) {
-				static::markTestIncomplete( 'This test might not support chaining: ' . $errorMessage );
+				static::markTestSkipped( 'This test might not support chaining: ' . $errorMessage );
 
 				return;
 			}

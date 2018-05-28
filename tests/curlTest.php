@@ -428,7 +428,7 @@ class curlTest extends TestCase {
 	 */
 	function getXmlSerializer() {
 		if ( ! class_exists( 'XML_Serializer' ) ) {
-			static::markTestIncomplete( 'XML_Serializer test can not run without XML_Serializer' );
+			static::markTestSkipped( 'XML_Serializer test can not run without XML_Serializer' );
 
 			return;
 		}
@@ -473,7 +473,7 @@ class curlTest extends TestCase {
 	function getSimpleDomChain() {
 
 		if (version_compare(PHP_VERSION, '5.4.0', '<')) {
-			static::markTestIncomplete( 'Chaining PHP is not available in PHP version under 5.4 (This is ' . PHP_VERSION . ')' );
+			static::markTestSkipped( 'Chaining PHP is not available in PHP version under 5.4 (This is ' . PHP_VERSION . ')' );
 			return;
 		}
 
@@ -483,7 +483,7 @@ class curlTest extends TestCase {
 			$parsed = $getRequest->getParsed();
 			$dom    = $getRequest->getDomById();
 		} else {
-			static::markTestIncomplete( "For some reason $getRequest->getParsed() does not exist (PHP " . PHP_VERSION . ")" );
+			static::markTestSkipped( "$getRequest->getParsed() does not exist (PHP " . PHP_VERSION . ")" );
 
 			return;
 		}
@@ -652,7 +652,7 @@ class curlTest extends TestCase {
 	 */
 	function followRedirectDisabledFlagEnabled() {
 		if ( version_compare( PHP_VERSION, '5.4.0', '<' ) ) {
-			static::markTestIncomplete( 'Internal URL following may cause problems in PHP versions lower than 5.4 (' . PHP_VERSION . ')' );
+			static::markTestSkipped( 'Internal URL following may cause problems in PHP versions lower than 5.4 (' . PHP_VERSION . ')' );
 
 			return;
 		}
@@ -808,7 +808,7 @@ class curlTest extends TestCase {
 		if ( version_compare( PHP_VERSION, '5.4.0', '>=' ) ) {
 			static::assertTrue( is_object( $Chainer->doGet( \TESTURLS::getUrlSimpleJson() )->getParsedResponse() ) );
 		} else {
-			static::markTestIncomplete( "Chaining can't be tested from PHP " . PHP_VERSION );
+			static::markTestSkipped( "Chaining can't be tested from PHP " . PHP_VERSION );
 		}
 	}
 
@@ -1005,7 +1005,7 @@ class curlTest extends TestCase {
 			static::assertTrue( isset( $content['divElement'] ) );
 			$this->CURL->setParseHtml( false );
 		} else {
-			static::markTestIncomplete( "getDomById is unreachable (PHP v" . PHP_VERSION . ")" );
+			static::markTestSkipped( "getDomById is unreachable (PHP v" . PHP_VERSION . ")" );
 		}
 	}
 
@@ -1076,7 +1076,7 @@ class curlTest extends TestCase {
 	 */
 	function multiCallsSwitchingBetweenRegularAndSoap() {
 		if ( version_compare( PHP_VERSION, '5.4.0', '<' ) ) {
-			static::markTestIncomplete( "Multicall switching test is not compliant with PHP 5.3 - however, the function switching itself is supported" );
+			static::markTestSkipped( "Multicall switching test is not compliant with PHP 5.3 - however, the function switching itself is supported" );
 
 			return;
 		}

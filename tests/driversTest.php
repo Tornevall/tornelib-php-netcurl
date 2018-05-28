@@ -131,7 +131,7 @@ class driversTest extends TestCase {
 			$requestContent = $php53AntiChain->getParsedResponse();
 			static::assertTrue( is_object( $requestContent ) && isset( $requestContent->ip ) );
 		} else {
-			static::markTestIncomplete( "This test is disabled as most of the testing is based on chaining, which is not available from PHP 5.3 (" . PHP_VERSION . ")" );
+			static::markTestSkipped( "This test is disabled as most of the testing is based on chaining, which is not available from PHP 5.3 (" . PHP_VERSION . ")" );
 		}
 	}
 

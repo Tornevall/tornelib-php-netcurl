@@ -471,8 +471,26 @@ if ( ! class_exists( 'MODULE_NETWORK' ) && ! class_exists( 'TorneLIB\MODULE_NETW
 		 * @since 6.0.15
 		 */
 		public static function getCurrentServerProtocol( $returnProtocol = false ) {
-			/** @noinspection PhpDynamicAsStaticMethodCallInspection */
-			return self::getProtocol( $returnProtocol );
+			if ( isset( $_SERVER['HTTPS'] ) ) {
+				if ( $_SERVER['HTTPS'] == "on" ) {
+					if ( ! $returnProtocol ) {
+						return true;
+					} else {
+						return "https";
+					}
+				} else {
+					if ( ! $returnProtocol ) {
+						return false;
+					} else {
+						return "http";
+					}
+				}
+			}
+			if ( ! $returnProtocol ) {
+				return false;
+			} else {
+				return "http";
+			}
 		}
 
 		/**

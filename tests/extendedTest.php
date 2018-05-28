@@ -25,6 +25,7 @@ class extendedTest extends TestCase {
 	private $wsdl = "https://test.resurs.com/ecommerce-test/ws/V4/SimplifiedShopFlowService?wsdl";
 
 	function setUp() {
+		error_reporting(E_ALL);
 		$this->CURL = new MODULE_CURL();
 	}
 
@@ -234,20 +235,7 @@ class extendedTest extends TestCase {
 		}
 	}
 
-	/**
-	 * @test Go back to basics with NOSOAPCHAIN, since we as of 6.0.20 simplify get wsdl calls
-	 * @throws \Exception
-	 */
-	function rbSoapBackToNoChain() {
-		$this->disableSslVerifyByPhpVersions();
-		$this->CURL->setAuthentication( $this->username, $this->password );
-		try {
-			$wsdlResponse = $this->CURL->doGet( $this->wsdl )->getPaymentMethods();
-			static::assertTrue( is_array( $this->CURL->getParsed( $wsdlResponse ) ) && count( $this->CURL->getParsed( $wsdlResponse ) ) > 1 );
-		} catch ( \Exception $e ) {
-			static::markTestSkipped( __FUNCTION__ . ": " . $e->getMessage() );
-		}
-	}
+	// Deprecated: rbSoapBackToNoChain
 
 	/**
 	 * @test

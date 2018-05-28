@@ -31,6 +31,8 @@ class curlTest extends TestCase {
 
 	//function tearDown() {}
 	function setUp() {
+		error_reporting(E_ALL);
+
 		//$this->setDebug(true);
 		$this->StartErrorReporting = error_reporting();
 		$this->NETWORK             = new MODULE_NETWORK();

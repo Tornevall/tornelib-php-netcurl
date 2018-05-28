@@ -21,6 +21,7 @@ class skippablePhpTest extends TestCase {
 	private $TorSetupType = 4;      /* CURLPROXY_SOCKS4*/
 
 	function setUp() {
+		error_reporting(E_ALL);
 		$this->CURL = new MODULE_CURL();
 		$this->NETWORK = new MODULE_NETWORK();
 	}

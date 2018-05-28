@@ -20,6 +20,7 @@ class networkTest extends TestCase {
 	private $NET;
 
 	function setUp() {
+		error_reporting(E_ALL);
 		$this->NET = new MODULE_NETWORK();
 	}
 

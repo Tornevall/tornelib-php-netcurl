@@ -1127,6 +1127,11 @@ class curlTest extends TestCase {
 		// If we still want to see "oldstyle"-data, we can always call the core object directly
 		$urlGetCode = $this->CURL->getCode();
 
+		if (is_array($curlobject)) {
+			// PHP 5.3 is unchained and gives different responses.
+			static::assertTrue( is_array( $curlobject ) && is_object( $responseobject ) && isset( $responseobject->ip ) && is_string( $callWithBody ) && $urlGetCode == "200" );
+			return;
+		}
 		static::assertTrue( get_class( $curlobject ) == 'TorneLIB\MODULE_CURL' && is_object( $responseobject ) && isset( $responseobject->ip ) && is_string( $callWithBody ) && $urlGetCode == "200" );
 	}
 
@@ -1136,6 +1141,10 @@ class curlTest extends TestCase {
 	 * @throws \Exception
 	 */
 	function soapIoParse() {
+		if (version_compare(PHP_VERSION, '5.4.0', '<=')) {
+			static::markTestSkipped( "Test might fail in PHP 5.3 and lower, due to incompatibility" );
+			return;
+		}
 		if ( ! class_exists( 'TorneLIB\MODULE_IO' ) ) {
 			static::markTestSkipped( "MODULE_IO is missing, this test is skipped" );
 

@@ -16,7 +16,9 @@
  * limitations under the License.
  *
  * Tornevall Networks netCurl library - Yet another http- and network communicator library
- * Each class in this library has its own version numbering to keep track of where the changes are. However, there is a major version too.
+ * Each class in this library has its own version numbering to keep track of where the changes are. However, there is a
+ * major version too.
+ *
  * @package TorneLIB
  */
 
@@ -26,8 +28,8 @@ if ( ! class_exists( 'NETCURL_ENVIRONMENT' ) && ! class_exists( 'TorneLIB\NETCUR
 	/**
 	 * Class NETCURL_ENVIRONMENT Unittest helping class
 	 *
-	 * @package TorneLIB
-	 * @since 6.0.0
+	 * @package    TorneLIB
+	 * @since      6.0.0
 	 * @deprecated 6.0.20 Not in use
 	 */
 	abstract class NETCURL_ENVIRONMENT {
@@ -39,9 +41,10 @@ if ( ! class_exists( 'NETCURL_ENVIRONMENT' ) && ! class_exists( 'TorneLIB\NETCUR
 if ( ! class_exists( 'TORNELIB_CURL_ENVIRONMENT' ) && ! class_exists( 'TorneLIB\TORNELIB_CURL_ENVIRONMENT' ) ) {
 	/**
 	 * Class TORNELIB_CURL_ENVIRONMENT
-	 * @package TorneLIB
+	 *
+	 * @package    TorneLIB
 	 * @deprecated Use NETCURL_ENVIRONMENT
-	 * @since 6.0.0
+	 * @since      6.0.0
 	 * @deprecated 6.0.20 Not in use
 	 */
 	abstract class TORNELIB_CURL_ENVIRONMENT extends NETCURL_ENVIRONMENT {

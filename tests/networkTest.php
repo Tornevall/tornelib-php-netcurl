@@ -20,7 +20,7 @@ class networkTest extends TestCase {
 	private $NET;
 
 	function setUp() {
-		error_reporting(E_ALL);
+		error_reporting( E_ALL );
 		$this->NET = new MODULE_NETWORK();
 	}
 
@@ -200,8 +200,8 @@ class networkTest extends TestCase {
 		$localNetwork->setAlwaysResolveHostvalidation( true );
 		try {
 			$urlData = $localNetwork->getUrlDomain( "http://failing.domain/" );
-		} catch (\Exception $e) {
-			static::assertTrue($e->getCode() == NETCURL_EXCEPTIONS::NETCURL_HOSTVALIDATION_FAIL);
+		} catch ( \Exception $e ) {
+			static::assertTrue( $e->getCode() == NETCURL_EXCEPTIONS::NETCURL_HOSTVALIDATION_FAIL );
 		}
 	}
 
@@ -240,6 +240,7 @@ class networkTest extends TestCase {
 			</html>
 		';
 
-		static::assertCount(16, $this->NET->getUrlsFromHtml($html));
+		static::assertCount( 16, $this->NET->getUrlsFromHtml( $html ) );
 	}
+
 }

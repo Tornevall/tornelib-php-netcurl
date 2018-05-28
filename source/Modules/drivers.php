@@ -16,7 +16,9 @@
  * limitations under the License.
  *
  * Tornevall Networks netCurl library - Yet another http- and network communicator library
- * Each class in this library has its own version numbering to keep track of where the changes are. However, there is a major version too.
+ * Each class in this library has its own version numbering to keep track of where the changes are. However, there is a
+ * major version too.
+ *
  * @package TorneLIB
  */
 
@@ -27,7 +29,7 @@ if ( ! class_exists( 'NETCURL_DRIVER_CONTROLLER' ) && ! class_exists( 'TorneLIB\
 	 * Class NETCURL_DRIVERS Network communications driver detection
 	 *
 	 * @package TorneLIB
-	 * @since 6.0.20
+	 * @since   6.0.20
 	 */
 	class NETCURL_DRIVER_CONTROLLER {
 
@@ -40,6 +42,7 @@ if ( ! class_exists( 'NETCURL_DRIVER_CONTROLLER' ) && ! class_exists( 'TorneLIB\
 
 		/**
 		 * Class drivers supported by NETCURL
+		 *
 		 * @var array
 		 */
 		private $DRIVERS_SUPPORTED = array(
@@ -216,7 +219,7 @@ if ( ! class_exists( 'NETCURL_DRIVER_CONTROLLER' ) && ! class_exists( 'TorneLIB\
 		/**
 		 * Set up driver by class name
 		 *
-		 * @param int $driverId
+		 * @param int   $driverId
 		 * @param array $parameters
 		 *
 		 * @return NETCURL_DRIVERS_INTERFACE
@@ -289,7 +292,7 @@ if ( ! class_exists( 'NETCURL_DRIVER_CONTROLLER' ) && ! class_exists( 'TorneLIB\
 		/**
 		 * Initialize driver
 		 *
-		 * @param int $netDriver
+		 * @param int  $netDriver
 		 * @param null $parameters
 		 * @param null $ownClass
 		 *
@@ -303,7 +306,7 @@ if ( ! class_exists( 'NETCURL_DRIVER_CONTROLLER' ) && ! class_exists( 'TorneLIB\
 		}
 
 		/**
-		 * @param int $netDriver
+		 * @param int  $netDriver
 		 * @param null $parameters
 		 * @param null $ownClass
 		 *

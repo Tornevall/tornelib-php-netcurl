@@ -16,7 +16,9 @@
  * limitations under the License.
  *
  * Tornevall Networks netCurl library - Yet another http- and network communicator library
- * Each class in this library has its own version numbering to keep track of where the changes are. However, there is a major version too.
+ * Each class in this library has its own version numbering to keep track of where the changes are. However, there is a
+ * major version too.
+ *
  * @package TorneLIB
  */
 
@@ -25,8 +27,9 @@ namespace TorneLIB;
 if ( ! class_exists( 'NETCURL_IP_PROTOCOLS' ) && ! class_exists( 'TorneLIB\NETCURL_IP_PROTOCOLS' ) ) {
 	/**
 	 * Class NETCURL_IP_PROTOCOLS IP Address Types class
+	 *
 	 * @package TorneLIB
-	 * @since 6.0.20
+	 * @since   6.0.20
 	 */
 	abstract class NETCURL_IP_PROTOCOLS {
 		const PROTOCOL_NONE = 0;
@@ -38,7 +41,8 @@ if ( ! class_exists( 'NETCURL_IP_PROTOCOLS' ) && ! class_exists( 'TorneLIB\NETCU
 if ( ! class_exists( 'TorneLIB_Network_IP' ) && ! class_exists( 'TorneLIB\TorneLIB_Network_IP' ) ) {
 	/**
 	 * Class TorneLIB_Network_IP
-	 * @package TorneLIB
+	 *
+	 * @package    TorneLIB
 	 * @deprecated 6.0.20 Use NETCURL_IP_PROTOCOLS
 	 */
 	abstract class TorneLIB_Network_IP extends NETCURL_IP_PROTOCOLS {
@@ -51,7 +55,8 @@ if ( ! class_exists( 'TorneLIB_Network_IP' ) && ! class_exists( 'TorneLIB\TorneL
 if ( ! class_exists( 'TorneLIB_Network_IP_Protocols' ) && ! class_exists( 'TorneLIB\TorneLIB_Network_IP_Protocols' ) ) {
 	/**
 	 * Class TorneLIB_Network_IP_Protocols
-	 * @package TorneLIB
+	 *
+	 * @package    TorneLIB
 	 * @deprecated 6.0.20 Use NETCURL_IP_PROTOCOLS
 	 */
 	abstract class TorneLIB_Network_IP_Protocols extends TorneLIB_Network_IP {

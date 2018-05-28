@@ -16,7 +16,9 @@
  * limitations under the License.
  *
  * Tornevall Networks netCurl library - Yet another http- and network communicator library
- * Each class in this library has its own version numbering to keep track of where the changes are. However, there is a major version too.
+ * Each class in this library has its own version numbering to keep track of where the changes are. However, there is a
+ * major version too.
+ *
  * @package TorneLIB
  */
 
@@ -25,6 +27,7 @@ namespace TorneLIB;
 if ( ! class_exists( 'TorneLIB_NETCURL_EXCEPTIONS' ) && ! class_exists( 'TorneLIB\TorneLIB_NETCURL_EXCEPTIONS' ) ) {
 	/**
 	 * Class NETCURL_EXCEPTIONS
+	 *
 	 * @package TorneLIB
 	 */
 	abstract class NETCURL_EXCEPTIONS {
@@ -78,7 +81,8 @@ if ( ! class_exists( 'TorneLIB_NETCURL_EXCEPTIONS' ) && ! class_exists( 'TorneLI
 if ( ! class_exists( 'TorneLIB_NETCURL_EXCEPTIONS' ) && ! class_exists( 'TorneLIB\TorneLIB_NETCURL_EXCEPTIONS' ) ) {
 	/**
 	 * Class TORNELIB_NETCURL_EXCEPTIONS
-	 * @package TorneLIB
+	 *
+	 * @package    TorneLIB
 	 * @deprecated Use NETCURL_EXCEPTIONS
 	 */
 	abstract class TORNELIB_NETCURL_EXCEPTIONS extends NETCURL_EXCEPTIONS {

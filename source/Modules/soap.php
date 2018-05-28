@@ -16,7 +16,9 @@
  * limitations under the License.
  *
  * Tornevall Networks netCurl library - Yet another http- and network communicator library
- * Each class in this library has its own version numbering to keep track of where the changes are. However, there is a major version too.
+ * Each class in this library has its own version numbering to keep track of where the changes are. However, there is a
+ * major version too.
+ *
  * @package TorneLIB
  * @version 6.0.6
  */
@@ -41,7 +43,7 @@ if ( ! class_exists( 'MODULE_SOAP' ) && ! class_exists( 'TorneLIB\MODULE_SOAP' )
 	 * Making no difference of a SOAP call and a regular GET/POST
 	 *
 	 * @package TorneLIB
-	 * @since 6.0.20
+	 * @since   6.0.20
 	 */
 	class MODULE_SOAP extends MODULE_CURL {
 		protected $soapClient;
@@ -75,7 +77,7 @@ if ( ! class_exists( 'MODULE_SOAP' ) && ! class_exists( 'TorneLIB\MODULE_SOAP' )
 		/**
 		 * MODULE_SOAP constructor.
 		 *
-		 * @param $Url
+		 * @param      $Url
 		 * @param null $that
 		 *
 		 * @throws \Exception
@@ -385,7 +387,7 @@ if ( ! class_exists( 'MODULE_SOAP' ) && ! class_exists( 'TorneLIB\MODULE_SOAP' )
 		 * Get the SOAP response independently on exceptions or successes
 		 *
 		 * @return mixed
-		 * @since 5.0.0
+		 * @since      5.0.0
 		 * @deprecated 6.0.5 Use getSoapResponse()
 		 */
 		public function getLibResponse() {
@@ -425,7 +427,8 @@ if ( ! class_exists( 'MODULE_SOAP' ) && ! class_exists( 'TorneLIB\MODULE_SOAP' )
 	if ( ! class_exists( 'Tornevall_SimpleSoap' ) && ! class_exists( 'TorneLIB\Tornevall_SimpleSoap' ) ) {
 		/**
 		 * Class MODULE_CURL
-		 * @package TorneLIB
+		 *
+		 * @package    TorneLIB
 		 * @deprecated 6.0.20 Use MODULE_SOAP
 		 */
 		class Tornevall_SimpleSoap extends MODULE_SOAP {

@@ -31,7 +31,7 @@ class curlTest extends TestCase {
 
 	//function tearDown() {}
 	function setUp() {
-		error_reporting(E_ALL);
+		error_reporting( E_ALL );
 
 		//$this->setDebug(true);
 		$this->StartErrorReporting = error_reporting();
@@ -67,6 +67,7 @@ class curlTest extends TestCase {
 
 	/**
 	 * iproute2 ifconfig
+	 *
 	 * @return mixed
 	 */
 	private function getIpListByIpRoute() {
@@ -385,7 +386,8 @@ class curlTest extends TestCase {
 
 	/**
 	 * @test
-	 * @testdox Test that initially allows unverified ssl certificates should make netcurl to first call the url in a correct way and then, if this fails, make a quite risky failover into unverified mode - silently.
+	 * @testdox Test that initially allows unverified ssl certificates should make netcurl to first call the url in a
+	 *          correct way and then, if this fails, make a quite risky failover into unverified mode - silently.
 	 */
 	function sslSelfSignedUnverifyOnRun() {
 		$this->pemDefault();
@@ -472,8 +474,9 @@ class curlTest extends TestCase {
 	 */
 	function getSimpleDomChain() {
 
-		if (version_compare(PHP_VERSION, '5.4.0', '<')) {
+		if ( version_compare( PHP_VERSION, '5.4.0', '<' ) ) {
 			static::markTestSkipped( 'Chaining PHP is not available in PHP version under 5.4 (This is ' . PHP_VERSION . ')' );
+
 			return;
 		}
 
@@ -549,7 +552,8 @@ class curlTest extends TestCase {
 
 	/**
 	 * @test
-	 * @testdox SSL Certificates are missing and certificate location is mismatching. Expected Result: Failing the url call
+	 * @testdox SSL Certificates are missing and certificate location is mismatching. Expected Result: Failing the url
+	 *          call
 	 */
 	function failingSsl() {
 		$successfulVerification = true;
@@ -680,7 +684,8 @@ class curlTest extends TestCase {
 
 	/**
 	 * @test
-	 * @testdox Tests the overriding function setEnforceFollowLocation and the setCurlOpt-overrider. The expected result is to have setEnforceFollowLocation to be top prioritized over setCurlOpt here.
+	 * @testdox Tests the overriding function setEnforceFollowLocation and the setCurlOpt-overrider. The expected
+	 *          result is to have setEnforceFollowLocation to be top prioritized over setCurlOpt here.
 	 */
 	function followRedirectManualEnableWithSetCurlOptEnforcingToFalse() {
 		$this->pemDefault();
@@ -948,7 +953,8 @@ class curlTest extends TestCase {
 
 	/**
 	 * @test
-	 * @testdox Safe mode and basepath cechking without paramters - in our environment, open_basedir is empty and safe_mode is off
+	 * @testdox Safe mode and basepath cechking without paramters - in our environment, open_basedir is empty and
+	 *          safe_mode is off
 	 */
 	function getSafePermissionFull() {
 		static::assertFalse( $this->CURL->getIsSecure() );
@@ -1035,7 +1041,8 @@ class curlTest extends TestCase {
 
 	/**
 	 * @test
-	 * @testdox Set own temporary directory (remove it first so tests gives correct responses) - also testing directory creation
+	 * @testdox Set own temporary directory (remove it first so tests gives correct responses) - also testing directory
+	 *          creation
 	 * @throws \Exception
 	 */
 	public function enableLocalCookiesSelfLocated() {
@@ -1072,7 +1079,8 @@ class curlTest extends TestCase {
 
 	/**
 	 * @test
-	 * @testdox Testing that switching between driverse (SOAP) works - when SOAP is not used, NetCURL should switch back to the regular driver
+	 * @testdox Testing that switching between driverse (SOAP) works - when SOAP is not used, NetCURL should switch
+	 *          back to the regular driver
 	 */
 	function multiCallsSwitchingBetweenRegularAndSoap() {
 		if ( version_compare( PHP_VERSION, '5.4.0', '<' ) ) {
@@ -1127,9 +1135,10 @@ class curlTest extends TestCase {
 		// If we still want to see "oldstyle"-data, we can always call the core object directly
 		$urlGetCode = $this->CURL->getCode();
 
-		if (is_array($curlobject)) {
+		if ( is_array( $curlobject ) ) {
 			// PHP 5.3 is unchained and gives different responses.
 			static::assertTrue( is_array( $curlobject ) && is_object( $responseobject ) && isset( $responseobject->ip ) && is_string( $callWithBody ) && $urlGetCode == "200" );
+
 			return;
 		}
 		static::assertTrue( get_class( $curlobject ) == 'TorneLIB\MODULE_CURL' && is_object( $responseobject ) && isset( $responseobject->ip ) && is_string( $callWithBody ) && $urlGetCode == "200" );
@@ -1141,8 +1150,9 @@ class curlTest extends TestCase {
 	 * @throws \Exception
 	 */
 	function soapIoParse() {
-		if (version_compare(PHP_VERSION, '5.4.0', '<=')) {
+		if ( version_compare( PHP_VERSION, '5.4.0', '<=' ) ) {
 			static::markTestSkipped( "Test might fail in PHP 5.3 and lower, due to incompatibility" );
+
 			return;
 		}
 		if ( ! class_exists( 'TorneLIB\MODULE_IO' ) ) {
@@ -1155,11 +1165,11 @@ class curlTest extends TestCase {
 			$this->CURL->setAuthentication( 'atest', 'atest' );
 			$php53UnChainified = $this->CURL->doGet( 'https://test.resurs.com/ecommerce-test/ws/V4/SimplifiedShopFlowService?wsdl' );
 			$php53UnChainified->getPaymentMethods();
-			$IO  = new MODULE_IO();
+			$IO = new MODULE_IO();
 			// Chaining this might segfaultify something
 			$php53Bodified = $this->CURL->getBody();
-			$XML = $IO->getFromXml( $php53Bodified, true );
-			$id  = ( isset( $XML[0] ) && isset( $XML[0]->id ) ? $XML[0]->id : null );
+			$XML           = $IO->getFromXml( $php53Bodified, true );
+			$id            = ( isset( $XML[0] ) && isset( $XML[0]->id ) ? $XML[0]->id : null );
 			$this->assertTrue( strlen( $id ) > 0 ? true : false );
 		} catch ( \Exception $e ) {
 			if ( $e->getCode() < 3 ) {

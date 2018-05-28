@@ -2,13 +2,14 @@
 
 namespace TorneLIB;
 
-require_once (__DIR__ . "/../vendor/autoload.php");
-require_once(__DIR__ . '/testurls.php');
+require_once( __DIR__ . "/../vendor/autoload.php" );
+require_once( __DIR__ . '/testurls.php' );
 
 use PHPUnit\Framework\TestCase;
 
 /**
  * Class skippablePhpTest Tests that requires special conditions and is normally not tested
+ *
  * @package TorneLIB
  */
 class skippablePhpTest extends TestCase {
@@ -21,8 +22,8 @@ class skippablePhpTest extends TestCase {
 	private $TorSetupType = 4;      /* CURLPROXY_SOCKS4*/
 
 	function setUp() {
-		error_reporting(E_ALL);
-		$this->CURL = new MODULE_CURL();
+		error_reporting( E_ALL );
+		$this->CURL    = new MODULE_CURL();
 		$this->NETWORK = new MODULE_NETWORK();
 	}
 
@@ -51,7 +52,7 @@ class skippablePhpTest extends TestCase {
 	/**
 	 * @test
 	 * @testdox Test proxy by using Tor Network (Requires Tor)
-	 * @link https://www.torproject.org/ Required application
+	 * @link    https://www.torproject.org/ Required application
 	 */
 	function torNetwork() {
 		exec( "service tor status", $ubuntuService );

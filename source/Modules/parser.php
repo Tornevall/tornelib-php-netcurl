@@ -16,7 +16,9 @@
  * limitations under the License.
  *
  * Tornevall Networks netCurl library - Yet another http- and network communicator library
- * Each class in this library has its own version numbering to keep track of where the changes are. However, there is a major version too.
+ * Each class in this library has its own version numbering to keep track of where the changes are. However, there is a
+ * major version too.
+ *
  * @package TorneLIB
  * @version 6.0.2
  */
@@ -152,9 +154,10 @@ if ( ! class_exists( 'NETCURL_PARSER' ) && ! class_exists( 'TorneLIB\NETCURL_PAR
 		 * @since 6.0.0
 		 */
 		private function getNull( $testData = '' ) {
-			if (is_array($testData) || is_object($testData)) {
+			if ( is_array( $testData ) || is_object( $testData ) ) {
 				return $testData;
 			}
+
 			return empty( $testData ) ? null : $testData;
 		}
 
@@ -185,7 +188,7 @@ if ( ! class_exists( 'NETCURL_PARSER' ) && ! class_exists( 'TorneLIB\NETCURL_PAR
 		/**
 		 * Experimental: Convert DOMDocument to an array
 		 *
-		 * @param array $childNode
+		 * @param array  $childNode
 		 * @param string $getAs
 		 *
 		 * @return array

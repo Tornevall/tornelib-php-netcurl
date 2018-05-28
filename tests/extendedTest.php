@@ -25,7 +25,7 @@ class extendedTest extends TestCase {
 	private $wsdl = "https://test.resurs.com/ecommerce-test/ws/V4/SimplifiedShopFlowService?wsdl";
 
 	function setUp() {
-		error_reporting(E_ALL);
+		error_reporting( E_ALL );
 		$this->CURL = new MODULE_CURL();
 	}
 
@@ -45,7 +45,8 @@ class extendedTest extends TestCase {
 
 	/**
 	 * @test
-	 * @testdox Testing an error type that comes from this specific service - testing if we can catch previous error instead of the current
+	 * @testdox Testing an error type that comes from this specific service - testing if we can catch previous error
+	 *          instead of the current
 	 * @throws \Exception
 	 */
 	function soapFaultstring() {

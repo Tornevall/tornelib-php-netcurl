@@ -12,7 +12,7 @@ class guzzleTest extends TestCase {
 	private $CURL;
 
 	function setUp() {
-		error_reporting(E_ALL);
+		error_reporting( E_ALL );
 		$this->CURL = new MODULE_CURL();
 	}
 
@@ -92,7 +92,7 @@ class guzzleTest extends TestCase {
 			} else {
 				static::markTestSkipped( "Can not test guzzle driver without guzzle" );
 			}
-		} catch (\Exception $e) {
+		} catch ( \Exception $e ) {
 			if ( $e->getCode() < 3 ) {
 				static::markTestSkipped( 'Getting exception codes below 3 here, might indicate that your cacerts is not installed properly or the connection to the server is not responding' );
 
@@ -117,4 +117,5 @@ class guzzleTest extends TestCase {
 			static::markTestSkipped( "Can not test guzzle driver without guzzle" );
 		}
 	}
+
 }

@@ -16,7 +16,9 @@
  * limitations under the License.
  *
  * Tornevall Networks netCurl library - Yet another http- and network communicator library
- * Each class in this library has its own version numbering to keep track of where the changes are. However, there is a major version too.
+ * Each class in this library has its own version numbering to keep track of where the changes are. However, there is a
+ * major version too.
+ *
  * @package TorneLIB
  * @version 6.0.0
  */
@@ -37,6 +39,7 @@ if ( ! class_exists( 'MODULE_SSL' ) && ! class_exists( 'TorneLIB\MODULE_SSL' ) )
 
 	/**
 	 * Class MODULE_SSL SSL Helper class
+	 *
 	 * @package TorneLIB
 	 */
 	class MODULE_SSL {
@@ -116,6 +119,7 @@ if ( ! class_exists( 'MODULE_SSL' ) && ! class_exists( 'TorneLIB\MODULE_SSL' ) )
 
 		/**
 		 * Returns true if no errors occured in the control
+		 *
 		 * @return bool
 		 */
 		public static function hasSsl() {
@@ -130,7 +134,7 @@ if ( ! class_exists( 'MODULE_SSL' ) && ! class_exists( 'TorneLIB\MODULE_SSL' ) )
 		 * Make sure that we are allowed to do things
 		 *
 		 * @param bool $checkSafeMode If true, we will also check if safe_mode is active
-		 * @param bool $mockSafeMode If true, NetCurl will pretend safe_mode is true (for testing)
+		 * @param bool $mockSafeMode  If true, NetCurl will pretend safe_mode is true (for testing)
 		 *
 		 * @return bool If true, PHP is in secure mode and won't allow things like follow-redirects and setting up different paths for certificates, etc
 		 * @since 6.0.20

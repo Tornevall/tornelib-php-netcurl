@@ -22,7 +22,7 @@
 
 namespace TorneLIB;
 
-if ( ! class_exists( 'NETCURL_DRIVER_GUZZLEHTTP' ) && ! class_exists( 'TorneLIB\NETCURL_DRIVER_GUZZLEHTTPINTERFACE' ) ) {
+if ( ! class_exists( 'NETCURL_DRIVER_GUZZLEHTTP' ) && ! class_exists( 'TorneLIB\NETCURL_DRIVER_GUZZLEHTTP' ) ) {
 	/**
 	 * Class NETCURL_DRIVER_GUZZLEHTTP Network communications driver detection
 	 *

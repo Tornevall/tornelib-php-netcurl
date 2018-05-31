@@ -20,7 +20,7 @@
  * major version too.
  *
  * @package TorneLIB
- * @version 6.0.2
+ * @version 6.0.3
  */
 
 namespace TorneLIB;
@@ -42,6 +42,14 @@ if ( ! class_exists( 'NETCURL_PARSER' ) && ! class_exists( 'TorneLIB\NETCURL_PAR
 		 */
 		private $NETCURL_CONTENT_IS_DOMCONTENT = false;
 
+		/**
+		 * Do not include Dom content in the basic parser (default = true, as it might destroy output data in legacy products)
+		 *
+		 * @var bool $NETCURL_PROHIBIT_DOMCONTENT_PARSE
+		 * @since 6.0.3
+		 */
+		private $NETCURL_PROHIBIT_DOMCONTENT_PARSE = true;
+
 
 		/** @var MODULE_IO $IO */
 		private $IO;
@@ -54,13 +62,19 @@ if ( ! class_exists( 'NETCURL_PARSER' ) && ! class_exists( 'TorneLIB\NETCURL_PAR
 		 *
 		 * @param string $htmlContent
 		 * @param string $contentType
+		 * @param array  $flags
 		 *
 		 * @throws \Exception
 		 * @since 6.0.0
 		 */
-		public function __construct( $htmlContent = '', $contentType = '' ) {
+		public function __construct( $htmlContent = '', $contentType = '', $flags = array() ) {
 			$this->NETWORK = new MODULE_NETWORK();
 			$this->IO      = new MODULE_IO();
+
+			if (isset($flags['NETCURL_PROHIBIT_DOMCONTENT_PARSE'])) {
+				$this->NETCURL_PROHIBIT_DOMCONTENT_PARSE = $flags['NETCURL_PROHIBIT_DOMCONTENT_PARSE'];
+			}
+
 			/*if (is_null($this->IO)) {
 				throw new \Exception( NETCURL_CURL_CLIENTNAME . " is missing MODULE_IO for rendering post data content", $this->NETWORK->getExceptionCode( 'NETCURL_PARSE_XML_FAILURE' ) );
 			}*/
@@ -85,6 +99,27 @@ if ( ! class_exists( 'NETCURL_PARSER' ) && ! class_exists( 'TorneLIB\NETCURL_PAR
 			}
 
 			return null;
+		}
+
+		/**
+		 * Enable/disable the parsing of Dom content
+		 *
+		 * @param bool $domContentProhibit
+		 *
+		 * @since 6.0.3
+		 */
+		public function setDomContentParser( $domContentProhibit = false ) {
+			$this->NETCURL_PROHIBIT_DOMCONTENT_PARSE = $domContentProhibit;
+		}
+
+		/**
+		 * Get the status of dom content parser mode
+		 *
+		 * @return bool
+		 * @since 6.0.3
+		 */
+		public function getDomContentParser() {
+			return $this->NETCURL_PROHIBIT_DOMCONTENT_PARSE;
 		}
 
 		/**
@@ -177,7 +212,7 @@ if ( ! class_exists( 'NETCURL_PARSER' ) && ! class_exists( 'TorneLIB\NETCURL_PAR
 				$returnNonNullValue = $respond;
 			} else if ( ! is_null( $respond = $this->getContentByYaml() ) ) {
 				$returnNonNullValue = $respond;
-			} else if ( ! is_null( $response = $this->getDomElements() ) ) {
+			} else if ( ! $this->NETCURL_PROHIBIT_DOMCONTENT_PARSE && ! is_null( $response = $this->getDomElements() ) ) {
 				return $response;
 			}
 

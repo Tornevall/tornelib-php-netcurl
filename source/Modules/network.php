@@ -81,7 +81,7 @@ if ( ! class_exists( 'MODULE_NETWORK' ) && ! class_exists( 'TorneLIB\MODULE_NETW
 		function __construct() {
 			// Initiate and get client headers.
 			$this->renderProxyHeaders();
-			$this->BIT = new TorneLIB_NetBits();
+			$this->BIT = new MODULE_NETBITS();
 		}
 
 		/**
@@ -137,15 +137,15 @@ if ( ! class_exists( 'MODULE_NETWORK' ) && ! class_exists( 'TorneLIB\MODULE_NETW
 			// Clean up all user auth data in URL if exists
 			$gitUrl = preg_replace( "/\/\/(.*?)@/", '//', $gitUrl );
 			/** @var $CURL Tornevall_cURL */
-			$CURL = new Tornevall_cURL();
+			$CURL = new MODULE_CURL();
 
 			/** @noinspection PhpUnusedLocalVariableInspection */
 			$code             = 0;
 			$exceptionMessage = "";
 			try {
 				$gitGet  = $CURL->doGet( $gitUrl );
-				$code    = intval( $CURL->getResponseCode() );
-				$gitBody = $CURL->getResponseBody( $gitGet );
+				$code    = intval( $CURL->getCode() );
+				$gitBody = $CURL->getBody( $gitGet );
 				if ( $code >= 200 && $code <= 299 && ! empty( $gitBody ) ) {
 					$fetchFail = false;
 					preg_match_all( "/refs\/tags\/(.*?)\n/s", $gitBody, $tagMatches );
@@ -287,7 +287,6 @@ if ( ! class_exists( 'MODULE_NETWORK' ) && ! class_exists( 'TorneLIB\MODULE_NETW
 		 */
 		public function getUrlsFromHtml( $stringWithUrls, $offset = - 1, $urlLimit = - 1, $protocols = array( "http" ), $preventDuplicates = true ) {
 			$returnArray = array();
-			$urls        = array();
 
 			// Pick up all urls by protocol (adding http will include https too)
 			foreach ( $protocols as $protocol ) {

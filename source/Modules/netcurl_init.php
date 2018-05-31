@@ -20,17 +20,17 @@
  * major version too.
  *
  * @package TorneLIB
- * @version 6.0.21
+ * @version 6.0.22
  */
 
 namespace TorneLIB;
 
 // Library Release Information
 if ( ! defined( 'NETCURL_RELEASE' ) ) {
-	define( 'NETCURL_RELEASE', '6.0.21' );
+	define( 'NETCURL_RELEASE', '6.0.22' );
 }
 if ( ! defined( 'NETCURL_MODIFY' ) ) {
-	define( 'NETCURL_MODIFY', '20180525' );
+	define( 'NETCURL_MODIFY', '20180528' );
 }
 if ( ! defined( 'TORNELIB_NETCURL_RELEASE' ) ) {
 	// Compatibility constant

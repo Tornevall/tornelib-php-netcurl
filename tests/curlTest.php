@@ -45,11 +45,7 @@ class curlTest extends TestCase {
 			$this->CurlVersion  = $CurlVersionRequest['version'];
 		}
 
-		/*
-		 * Enable test mode
-		 */
-		$this->CURL->setTestEnabled();
-		$this->CURL->setSslUnverified( false );
+		$this->CURL->setSslStrictFallback( false );
 	}
 
 	private function disableSslVerifyByPhpVersions( $always = false ) {
@@ -373,7 +369,7 @@ class curlTest extends TestCase {
 	 */
 	function sslSelfSignedIgnore() {
 		try {
-			$this->CURL->setStrictFallback( true );
+			$this->CURL->setSslStrictFallback( true );
 			$this->CURL->setSslVerify( true, true );
 			$container = $this->CURL->getParsed( $this->CURL->doGet( \TESTURLS::getUrlSelfSigned() . "/tests/tornevall_network/index.php?o=json&bool" ) );
 			if ( is_object( $container ) ) {
@@ -457,6 +453,7 @@ class curlTest extends TestCase {
 	 */
 	function getSimpleDom() {
 		$this->pemDefault();
+		$this->CURL->setDomContentParser( false );
 		// setParseHtml is no longer necessary
 		//$this->CURL->setParseHtml( true );
 		$container = null;
@@ -479,6 +476,8 @@ class curlTest extends TestCase {
 
 			return;
 		}
+
+		$this->CURL->setDomContentParser(false);
 
 		/** @var MODULE_CURL $getRequest */
 		$getRequest = $this->urlGet( "ssl&bool&o=xml&method=get&using=SimpleXMLElement", null, "simple.html" );
@@ -559,7 +558,7 @@ class curlTest extends TestCase {
 		$successfulVerification = true;
 		try {
 			$this->CURL->setSslVerify( true );
-			$this->CURL->setStrictFallback( false );
+			$this->CURL->setSslStrictFallback( false );
 			$this->CURL->doGet( \TESTURLS::getUrlMismatching() );
 		} catch ( \Exception $e ) {
 			$successfulVerification = false;
@@ -621,7 +620,7 @@ class curlTest extends TestCase {
 					}
 				}
 			} else {
-				$this->markTestSkipped( "ip address array is too short to be tested (" . print_R( $ipArray, true ) . ")" );
+				$this->markTestSkipped( "ip address array is too short to be tested (" . print_r( $ipArray, true ) . ")" );
 			}
 		}
 		static::assertTrue( count( $responses ) === count( $ipArray ) );
@@ -1003,13 +1002,12 @@ class curlTest extends TestCase {
 	 * @test
 	 */
 	public function getParsedDom() {
-		$this->CURL->setParseHtml( true );
 		/** @var MODULE_CURL $content */
+		$this->CURL->setDomContentParser(false);
 		$phpAntiChain = $this->urlGet( "ssl&bool&o=xml&method=get&using=SimpleXMLElement", null, "simple.html" );  // PHP 5.3 compliant
 		if ( method_exists( $phpAntiChain, 'getDomById' ) ) {
 			$content = $phpAntiChain->getDomById();
 			static::assertTrue( isset( $content['divElement'] ) );
-			$this->CURL->setParseHtml( false );
 		} else {
 			static::markTestSkipped( "getDomById is unreachable (PHP v" . PHP_VERSION . ")" );
 		}

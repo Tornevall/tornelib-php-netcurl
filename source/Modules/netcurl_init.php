@@ -30,7 +30,7 @@ if ( ! defined( 'NETCURL_RELEASE' ) ) {
 	define( 'NETCURL_RELEASE', '6.0.22' );
 }
 if ( ! defined( 'NETCURL_MODIFY' ) ) {
-	define( 'NETCURL_MODIFY', '20180528' );
+	define( 'NETCURL_MODIFY', '20180606' );
 }
 if ( ! defined( 'TORNELIB_NETCURL_RELEASE' ) ) {
 	// Compatibility constant

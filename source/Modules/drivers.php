@@ -57,9 +57,9 @@ if ( ! class_exists( 'NETCURL_DRIVER_CONTROLLER' ) && ! class_exists( 'TorneLIB\
 			'WP_Http'                          => 'NETCURL_DRIVER_WORDPRESS'
 		);
 
-		private $DRIVERS_STREAMABLE = array(
+/*		private $DRIVERS_STREAMABLE = array(
 			'GuzzleHttp\Handler\StreamHandler' => 'NETCURL_DRIVER_GUZZLEHTTP'
-		);
+		);*/
 
 		/** @var array $DRIVERS_AVAILABLE */
 		private $DRIVERS_AVAILABLE = array();
@@ -72,10 +72,6 @@ if ( ! class_exists( 'NETCURL_DRIVER_CONTROLLER' ) && ! class_exists( 'TorneLIB\
 
 		/** @var int $DRIVER_ID */
 		private $DRIVER_ID = 0;
-
-		private $URL = array(
-			'drivers' => 'https://docs.tornevall.net/x/CYBiAQ#Module:NetCurl-Internaldrivers'
-		);
 
 		/**
 		 * @var MODULE_NETWORK $NETWORK Handles exceptions
@@ -175,6 +171,10 @@ if ( ! class_exists( 'NETCURL_DRIVER_CONTROLLER' ) && ! class_exists( 'TorneLIB\
 			}
 		}
 
+        /**
+         * @return int|NETCURL_DRIVERS_INTERFACE
+         * @throws \Exception
+         */
 		public static function setAutoDetect() {
 			return self::getStatic()->getAutodetectedDriver();
 		}
@@ -216,14 +216,15 @@ if ( ! class_exists( 'NETCURL_DRIVER_CONTROLLER' ) && ! class_exists( 'TorneLIB\
 			return false;
 		}
 
-		/**
-		 * Set up driver by class name
-		 *
-		 * @param int   $driverId
-		 * @param array $parameters
-		 *
-		 * @return NETCURL_DRIVERS_INTERFACE
-		 */
+        /**
+         * Set up driver by class name
+         *
+         * @param int   $driverId
+         * @param array $parameters
+         * @param null  $ownClass Defines own class to use
+         *
+         * @return NETCURL_DRIVERS_INTERFACE
+         */
 		private function getDriverByClass( $driverId = NETCURL_NETWORK_DRIVERS::DRIVER_NOT_SET, $parameters = null, $ownClass = null ) {
 			$driverClass = isset( $this->DRIVERS_AVAILABLE[ $driverId ] ) ? $this->DRIVERS_AVAILABLE[ $driverId ] : null;
 			/** @var NETCURL_DRIVERS_INTERFACE $newDriver */

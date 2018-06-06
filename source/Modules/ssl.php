@@ -43,11 +43,6 @@ if ( ! class_exists( 'MODULE_SSL' ) && ! class_exists( 'TorneLIB\MODULE_SSL' ) )
 	 * @package TorneLIB
 	 */
 	class MODULE_SSL {
-		/** @var bool Do not test certificates on older PHP-version (< 5.6.0) if this is false */
-		private $sslDriverError = array();
-		/** @var bool If SSL has been compiled in CURL, this will transform to true */
-		private $sslCurlDriver = false;
-
 		/** @var array Default paths to the certificates we are looking for */
 		private $sslPemLocations = array( '/etc/ssl/certs' );
 		/** @var array Files to look for in sslPemLocations */
@@ -101,7 +96,6 @@ if ( ! class_exists( 'MODULE_SSL' ) && ! class_exists( 'TorneLIB\MODULE_SSL' ) )
 
 			if ( function_exists( 'curl_version' ) ) {
 				$curlVersionRequest = curl_version();
-				$curlVersion        = $curlVersionRequest['version'];
 				if ( defined( 'CURL_VERSION_SSL' ) ) {
 					if ( isset( $curlVersionRequest['features'] ) ) {
 						$CURL_SSL_AVAILABLE = ( $curlVersionRequest['features'] & CURL_VERSION_SSL ? true : false );
@@ -154,8 +148,6 @@ if ( ! class_exists( 'MODULE_SSL' ) && ! class_exists( 'TorneLIB\MODULE_SSL' ) )
 
 				return true;
 			}
-
-			return false;
 		}
 
 		/**
@@ -178,16 +170,17 @@ if ( ! class_exists( 'MODULE_SSL' ) && ! class_exists( 'TorneLIB\MODULE_SSL' ) )
 			return ( filter_var( ini_get( 'safe_mode' ), FILTER_VALIDATE_BOOLEAN ) );
 		}
 
-		/**
-		 * openssl_guess rewrite
-		 *
-		 * @return string
-		 * @since 6.0.0
-		 */
+        /**
+         * openssl_guess rewrite
+         *
+         * @param bool $forceChecking
+         * @return string
+         * @since 6.0.0
+         */
 		public function getSslCertificateBundle( $forceChecking = false ) {
 			// Assume that sysadmins can handle this, if open_basedir is set as things will fail if we proceed here
 			if ( $this->getIsSecure( false ) && ! $forceChecking ) {
-				return;
+				return null;
 			}
 
 			foreach ( $this->sslPemLocations as $filePath ) {

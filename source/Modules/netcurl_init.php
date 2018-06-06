@@ -48,6 +48,6 @@ if ( defined( 'NETCURL_REQUIRE' ) ) {
 	}
 }
 
-if ( file_exists( __DIR__ . '/../vendor/autoload.php' ) && ( defined( 'NETCURL_ALLOW_AUTOLOAD' ) && NETCURL_ALLOW_AUTOLOAD === true ) ) {
-	require_once( __DIR__ . '/../vendor/autoload.php' );
+if ( file_exists( __DIR__ . '/../../vendor/autoload.php' ) && ( defined( 'NETCURL_ALLOW_AUTOLOAD' ) && NETCURL_ALLOW_AUTOLOAD === true ) ) {
+	require_once( __DIR__ . '/../../vendor/autoload.php' );
 }

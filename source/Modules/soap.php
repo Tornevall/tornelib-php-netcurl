@@ -53,7 +53,6 @@ if ( ! class_exists( 'MODULE_SOAP' ) && ! class_exists( 'TorneLIB\MODULE_SOAP' )
 			'trace'      => true,
 			'cache_wsdl' => 0       // Replacing WSDL_CACHE_NONE (WSDL_CACHE_BOTH = 3)
 		);
-		private $simpleSoapVersion = NETCURL_SIMPLESOAP_RELEASE;
 		private $soapUrl;
 		private $AuthData;
 		private $soapRequest;
@@ -62,12 +61,10 @@ if ( ! class_exists( 'MODULE_SOAP' ) && ! class_exists( 'TorneLIB\MODULE_SOAP' )
 		private $soapResponseHeaders;
 		private $libResponse;
 		private $canThrowSoapFaults = true;
-		private $CUSTOM_USER_AGENT;
 		private $soapFaultExceptionObject;
 		/** @var MODULE_CURL */
 		private $PARENT;
 
-		private $sslopt = array();
 		private $SoapFaultString = null;
 		private $SoapFaultCode = 0;
 		private $SoapTryOnce = true;
@@ -156,6 +153,11 @@ if ( ! class_exists( 'MODULE_SOAP' ) && ! class_exists( 'TorneLIB\MODULE_SOAP' )
 		 */
 		public function getSoap() {
 			$this->soapClient = null;
+            $throwErrorMessage = null;
+            $throwErrorCode    = null;
+            $throwBackCurrent  = null;
+            $soapFaultOnInit = false;
+            //$throwPrevious     = null;
 			$sslOpt           = $this->getSslOpt();
 			//$optionsStream    = $this->sslGetOptionsStream();
 			$optionsStream = $this->PARENT->sslGetOptionsStream();
@@ -174,12 +176,6 @@ if ( ! class_exists( 'MODULE_SOAP' ) && ! class_exists( 'TorneLIB\MODULE_SOAP' )
 
 			$this->soapOptions['exceptions'] = true;
 			$this->soapOptions['trace']      = true;
-
-			$throwErrorMessage = null;
-			$throwErrorCode    = null;
-			$throwBackCurrent  = null;
-			//$throwPrevious     = null;
-			$soapFaultOnInit = false;
 
 			$parentFlags = $this->PARENT->getFlags();
 			foreach ( $parentFlags as $flagKey => $flagValue ) {
@@ -232,7 +228,7 @@ if ( ! class_exists( 'MODULE_SOAP' ) && ! class_exists( 'TorneLIB\MODULE_SOAP' )
 											if ( ! isset( $parentFlags['SOAPWARNINGS_EXTEND'] ) ) {
 												unset( $throwErrorMessage );
 											}
-											$throwErrorMessage = "HTTP-Request exception (" . $throwErrorCode . "): " . $httpSplitError[1] . " " . trim( $httpSplitError[2] ) . "\n" . $throwErrorMessage;
+                                            $throwErrorMessage = "HTTP-Request exception (" . $throwErrorCode . "): " . $httpSplitError[1] . " " . trim($httpSplitError[2]) . (isset($throwErrorMessage) ? ("\n" . $throwErrorMessage) : null);
 										}
 									}
 								}
@@ -291,6 +287,13 @@ if ( ! class_exists( 'MODULE_SOAP' ) && ! class_exists( 'TorneLIB\MODULE_SOAP' )
 			return $this->SoapTryOnce;
 		}
 
+        /**
+         * @param $name
+         * @param $arguments
+         *
+         * @return array|null
+         * @throws \Exception
+         */
 		function __call( $name, $arguments ) {
 			$returnResponse = array(
 				'header' => array( 'info' => null, 'full' => null ),
@@ -305,7 +308,7 @@ if ( ! class_exists( 'MODULE_SOAP' ) && ! class_exists( 'TorneLIB\MODULE_SOAP' )
 				} else {
 					$SoapClientResponse = $this->soapClient->$name();
 				}
-			} catch ( \SoapFault $e ) {
+			} catch ( \Exception $e ) {
 				/** @noinspection PhpUndefinedMethodInspection */
 				$this->soapRequest = $this->soapClient->__getLastRequest();
 				/** @noinspection PhpUndefinedMethodInspection */

@@ -83,10 +83,12 @@ if ( ! class_exists( 'NETCURL_PARSER' ) && ! class_exists( 'TorneLIB\NETCURL_PAR
 			$this->PARSE_CONTENT_OUTPUT = $this->getContentByTest();
 		}
 
-		/**
-		 * @return null|string
-		 * @since 6.0.0
-		 */
+        /**
+         * @param bool $returnAsIs
+         *
+         * @return null|string
+         * @since 6.0.0
+         */
 		public function getContentByJson( $returnAsIs = false ) {
 			try {
 				if ( $returnAsIs ) {
@@ -196,11 +198,11 @@ if ( ! class_exists( 'NETCURL_PARSER' ) && ! class_exists( 'TorneLIB\NETCURL_PAR
 			return empty( $testData ) ? null : $testData;
 		}
 
-		/**
-		 * @return null|void
-		 * @throws \Exception
-		 * @since 6.0.0
-		 */
+        /**
+         * @return array|null|string
+         * @throws \Exception
+         * @since 6.0.0
+         */
 		private function getContentByTest() {
 			$returnNonNullValue = null;
 
@@ -235,13 +237,14 @@ if ( ! class_exists( 'NETCURL_PARSER' ) && ! class_exists( 'TorneLIB\NETCURL_PAR
 			$childIdArray        = array();
 			$returnContext       = "";
 			if ( is_object( $childNode ) ) {
-				/** @var \DOMNodeList $nodeItem */
-				foreach ( $childNode as $nodeItem ) {
+				/** @var \DOMElement $nodeItem */
+                foreach ( $childNode as $nodeItem ) {
 					if ( is_object( $nodeItem ) ) {
 						if ( isset( $nodeItem->tagName ) ) {
 							if ( strtolower( $nodeItem->tagName ) == "title" ) {
 								$elementData['pageTitle'] = $nodeItem->nodeValue;
 							}
+
 							$elementData            = array( 'tagName' => $nodeItem->tagName );
 							$elementData['id']      = $nodeItem->getAttribute( 'id' );
 							$elementData['name']    = $nodeItem->getAttribute( 'name' );

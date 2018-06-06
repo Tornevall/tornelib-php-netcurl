@@ -275,13 +275,6 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 		 * @deprecated 6.0.20
 		 */
 		public $CurlAutoParse = true;
-		/**
-		 * Allow parsing of content bodies (tags)
-		 *
-		 * @var bool
-		 * @deprecated 6.0.20
-		 */
-		private $allowParseHtml = false;
 		private $NETCURL_RETURN_RESPONSE_TYPE = NETCURL_RESPONSETYPE::RESPONSETYPE_ARRAY;
 		/** @var array Authentication */
 		private $AuthData = array(
@@ -1992,14 +1985,13 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 			return array();
 		}
 
-		/**
-		 * @param string $rawInput
-		 * @param bool   $internalRaw
-		 *
-		 * @return $this|array|NETCURL_HTTP_OBJECT
-		 * @throws \Exception
-		 * @todo Can this be split up?
-		 */
+        /**
+         * @param null $rawInput
+         * @param bool $internalRaw
+         *
+         * @return $this|array|null|NETCURL_HTTP_OBJECT
+         * @throws \Exception
+         */
 		public function netcurl_split_raw( $rawInput = null, $internalRaw = false ) {
 			$rawDataTest = $this->getRaw();
 			if ( $internalRaw && is_null( $rawInput ) && ! empty( $rawDataTest ) ) {

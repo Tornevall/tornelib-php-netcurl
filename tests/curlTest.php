@@ -1393,4 +1393,35 @@ class curlTest extends TestCase
             throw new \Exception($e->getMessage(), $e->getCode(), $e);
         }
     }
+
+    /**
+     * @test
+     * @testdox Packagist content-type test
+     */
+    function uff() {
+        $packagistUsername = "";
+        $packagistToken = "";
+        $repoUrl = '';
+
+        if (empty($packagistUsername) || empty($packagistToken) || empty($repoUrl)) {
+            static::markTestSkipped("This test is written to check packagist content-type errors, so you need to set up a username, token and git repo url above to make it work properly");
+        }
+
+        $packagistUrl = 'https://packagist.org/api/bitbucket?username='.$packagistUsername.'&apiToken=' . $packagistToken;
+        $postData = json_decode('{"repository":{"url":"'.$repoUrl.'"}}', true);
+        $initCurl = new MODULE_CURL();
+        $initialError = 0;
+        try {
+            $initCurl->doPost($packagistUrl, $postData, NETCURL_POST_DATATYPES::DATATYPE_JSON);
+        } catch (\Exception $e) {
+            $initialError = $e->getCode();
+        }
+        $initCurl->setContentType("application/json");
+        try {
+            $initCurl->doPost($packagistUrl, $postData, NETCURL_POST_DATATYPES::DATATYPE_JSON)->getBody();
+            static::assertTrue($initCurl->getParsed()->status == "success" && $initialError == 406);
+        } catch (\Exception $e) {
+        }
+    }
+
 }

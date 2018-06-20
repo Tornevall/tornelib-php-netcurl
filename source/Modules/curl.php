@@ -28,10 +28,10 @@ namespace TorneLIB;
 if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' ) ) {
 
 	if ( ! defined( 'NETCURL_CURL_RELEASE' ) ) {
-		define( 'NETCURL_CURL_RELEASE', '6.0.21' );
+		define( 'NETCURL_CURL_RELEASE', '6.0.22' );
 	}
 	if ( ! defined( 'NETCURL_CURL_MODIFY' ) ) {
-		define( 'NETCURL_CURL_MODIFY', '20180606' );
+		define( 'NETCURL_CURL_MODIFY', '20180619' );
 	}
 	if ( ! defined( 'NETCURL_CURL_CLIENTNAME' ) ) {
 		define( 'NETCURL_CURL_CLIENTNAME', 'MODULE_CURL' );
@@ -3012,8 +3012,18 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 				}
 
 				if ( $this->NETCURL_POST_DATA_TYPE == NETCURL_POST_DATATYPES::DATATYPE_JSON ) {
+
+                    // Use standard content type if nothing else is set
+				    $useContentType = "application/json; charset=utf-8";
+				    $testContentType = $this->getContentType();
+				    // Test user input, if setContentType has changed the content type, use this instead, with conditions that
+                    // it is still json. This should patch away a strange "bug" at packagist.org amongst others.
+				    if (preg_match("/json/i", $testContentType)) {
+				        $useContentType = $testContentType;
+                    }
+
 					// Using $jsonRealData to validate the string
-					$this->NETCURL_HEADERS_SYSTEM_DEFINED['Content-Type']   = 'application/json; charset=utf-8';
+					$this->NETCURL_HEADERS_SYSTEM_DEFINED['Content-Type']   = $useContentType;
 					$this->NETCURL_HEADERS_SYSTEM_DEFINED['Content-Length'] = strlen( $this->POST_DATA_HANDLED );
 					$this->setCurlOpt( CURLOPT_POSTFIELDS, $this->POST_DATA_HANDLED );  // overwrite old
 				} else if ( ( $this->NETCURL_POST_DATA_TYPE == NETCURL_POST_DATATYPES::DATATYPE_XML || $this->NETCURL_POST_DATA_TYPE == NETCURL_POST_DATATYPES::DATATYPE_SOAP_XML ) ) {

@@ -27,10 +27,10 @@ namespace TorneLIB;
 
 // Library Release Information
 if ( ! defined( 'NETCURL_RELEASE' ) ) {
-	define( 'NETCURL_RELEASE', '6.0.22' );
+	define( 'NETCURL_RELEASE', '6.0.23' );
 }
 if ( ! defined( 'NETCURL_MODIFY' ) ) {
-	define( 'NETCURL_MODIFY', '20180606' );
+	define( 'NETCURL_MODIFY', '20180619' );
 }
 if ( ! defined( 'TORNELIB_NETCURL_RELEASE' ) ) {
 	// Compatibility constant

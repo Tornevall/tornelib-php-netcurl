@@ -1215,48 +1215,6 @@ class curlTest extends TestCase
 
     /**
      * @test
-     * @testdox Activation of storing cookies locally
-     */
-    public function enableLocalCookiesInSysTemp()
-    {
-        $this->CURL->setLocalCookies(true);
-        try {
-            $this->CURL->setFlag('NETCURL_COOKIE_TEMP_LOCATION', true);
-        } catch (\Exception $e) {
-
-        }
-        // For Linux based systems, we go through /tmp
-        static::assertStringStartsWith("/tmp/netcurl", $this->CURL->getCookiePath());
-    }
-
-    /**
-     * @test
-     * @throws \Exception
-     */
-    public function enableLocalCookiesInSysTempProhibited()
-    {
-        $this->CURL->setLocalCookies(true);
-        static::assertEquals('', $this->CURL->getCookiePath());
-    }
-
-    /**
-     * @test
-     * @testdox Set own temporary directory (remove it first so tests gives correct responses) - also testing directory
-     *          creation
-     * @throws \Exception
-     */
-    public function enableLocalCookiesSelfLocated()
-    {
-        $this->CURL->setLocalCookies(true);
-        @rmdir("/tmp/netcurl_self");
-        $this->CURL->setFlag('NETCURL_COOKIE_LOCATION', '/tmp/netcurl_self');
-        // For Linux based systems, we go through /tmp
-        static::assertStringStartsWith("/tmp/netcurl_self", $this->CURL->getCookiePath());
-        @rmdir("/tmp/netcurl_self");
-    }
-
-    /**
-     * @test
      * @throws \Exception
      */
     function responseTypeHttpObject()
@@ -1398,7 +1356,7 @@ class curlTest extends TestCase
      * @test
      * @testdox Packagist content-type test
      */
-    function uff() {
+    function packagistContentTypeFailures() {
         $packagistUsername = "";
         $packagistToken = "";
         $repoUrl = '';

@@ -33,6 +33,8 @@ if ( ! class_exists( 'TorneLIB_NETCURL_EXCEPTIONS' ) && ! class_exists( 'TorneLI
 	abstract class NETCURL_EXCEPTIONS {
 		const NETCURL_NO_ERROR = 0;
 		const NETCURL_EXCEPTION_IT_WORKS = 1;
+        const NETCURL_EXCEPTION_IT_DOESNT_WORK = 500;
+
 
 		/**
 		 * @deprecated

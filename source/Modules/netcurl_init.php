@@ -20,7 +20,7 @@
  * major version too.
  *
  * @package TorneLIB
- * @version 6.0.22
+ * @version 6.0.23
  */
 
 namespace TorneLIB;

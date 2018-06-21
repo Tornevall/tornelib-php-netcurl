@@ -20,7 +20,7 @@
  * All since-markings are based on the major release of NetCurl.
  *
  * @package TorneLIB
- * @version 6.0.21
+ * @version 6.0.22
  */
 
 namespace TorneLIB;

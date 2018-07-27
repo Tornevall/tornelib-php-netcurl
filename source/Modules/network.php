@@ -136,7 +136,7 @@ if ( ! class_exists( 'MODULE_NETWORK' ) && ! class_exists( 'TorneLIB\MODULE_NETW
 			$gitUrl    .= "/info/refs?service=git-upload-pack";
 			// Clean up all user auth data in URL if exists
 			$gitUrl = preg_replace( "/\/\/(.*?)@/", '//', $gitUrl );
-			/** @var $CURL Tornevall_cURL */
+			/** @var $CURL MODULE_CURL */
 			$CURL = new MODULE_CURL();
 
 			/** @noinspection PhpUnusedLocalVariableInspection */

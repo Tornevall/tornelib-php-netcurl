@@ -3043,9 +3043,9 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 		 */
 		private function internal_curl_configure_timeouts() {
 			// Self set timeouts, making sure the timeout set in the public is an integer over 0. Otherwise this falls back to the curldefauls.
-			if ( isset( $this->NETCURL_CURL_TIMEOUT ) && $this->NETCURL_CURL_TIMEOUT > 0 ) {
-				$this->setCurlOptInternal( CURLOPT_CONNECTTIMEOUT, ceil( $this->NETCURL_CURL_TIMEOUT / 2 ) );
-				$this->setCurlOptInternal( CURLOPT_TIMEOUT, ceil( $this->NETCURL_CURL_TIMEOUT ) );
+            if (isset($this->NETCURL_CURL_TIMEOUT) && $this->NETCURL_CURL_TIMEOUT > 0) {
+				$this->setCurlOpt( CURLOPT_CONNECTTIMEOUT, ceil( $this->NETCURL_CURL_TIMEOUT / 2 ) );
+				$this->setCurlOpt( CURLOPT_TIMEOUT, ceil( $this->NETCURL_CURL_TIMEOUT ) );
 			}
 		}
 

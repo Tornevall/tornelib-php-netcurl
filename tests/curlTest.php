@@ -14,6 +14,7 @@ if (file_exists(__DIR__ . "/../tornelib.php")) {
 require_once(__DIR__ . '/testurls.php');
 
 use PHPUnit\Framework\TestCase;
+use \Exception;
 
 ini_set('memory_limit', -1);    // Free memory limit, some tests requires more memory (like ip-range handling)
 
@@ -37,7 +38,7 @@ class curlTest extends TestCase
     //function tearDown() {}
 
     /**
-     * @throws \Exception
+     * @throws Exception
      */
     function setUp()
     {
@@ -88,7 +89,7 @@ class curlTest extends TestCase
     }
 
     /**
-     * @throws \Exception
+     * @throws Exception
      */
     private function pemDefault()
     {
@@ -111,7 +112,7 @@ class curlTest extends TestCase
 
     /**
      * @return array|null|string|MODULE_CURL|NETCURL_HTTP_OBJECT
-     * @throws \Exception
+     * @throws Exception
      */
     private function simpleGet()
     {
@@ -140,7 +141,7 @@ class curlTest extends TestCase
      * @param string $indexFile
      *
      * @return array|null|string|MODULE_CURL|NETCURL_HTTP_OBJECT
-     * @throws \Exception
+     * @throws Exception
      */
     private function urlGet($parameters = '', $protocol = "http", $indexFile = 'index.php')
     {
@@ -156,7 +157,7 @@ class curlTest extends TestCase
      * @param string $indexFile
      *
      * @return array|null|string|MODULE_CURL|NETCURL_HTTP_OBJECT
-     * @throws \Exception
+     * @throws Exception
      */
     private function urlPost($parameters = array(), $protocol = "http", $indexFile = 'index.php')
     {
@@ -259,7 +260,7 @@ class curlTest extends TestCase
     /**
      * @test
      * @testdox Runs a simple test to see if there is a container as it should
-     * @throws \Exception
+     * @throws Exception
      */
     function simpleGetUrl()
     {
@@ -271,7 +272,7 @@ class curlTest extends TestCase
     /**
      * @test
      * @testdox Fetch a response and immediately pick up the parsed response, from the internally stored last response
-     * @throws \Exception
+     * @throws Exception
      */
     function getParsedSelf()
     {
@@ -284,7 +285,7 @@ class curlTest extends TestCase
     /**
      * @test
      * @testdox Make a direct call to the curl library
-     * @throws \Exception
+     * @throws Exception
      */
     function quickInitParsed()
     {
@@ -295,7 +296,7 @@ class curlTest extends TestCase
     /**
      * @test
      * @testdox Make a direct call to the curl library and get the response code
-     * @throws \Exception
+     * @throws Exception
      */
     function quickInitResponseCode()
     {
@@ -306,7 +307,7 @@ class curlTest extends TestCase
     /**
      * @test
      * @testdox Make a direct call to the curl library and get the content of the body
-     * @throws \Exception
+     * @throws Exception
      */
     function quickInitResponseBody()
     {
@@ -318,7 +319,7 @@ class curlTest extends TestCase
     /**
      * @test
      * @testdox Fetch a response and immediately pick up the parsed response, from own content
-     * @throws \Exception
+     * @throws Exception
      */
     function getParsedFromResponse()
     {
@@ -331,7 +332,7 @@ class curlTest extends TestCase
     /**
      * @test
      * @testdox Request a specific value from a parsed response
-     * @throws \Exception
+     * @throws Exception
      */
     function getParsedValue()
     {
@@ -345,7 +346,7 @@ class curlTest extends TestCase
     /**
      * @test
      * @testdox Request a nested value from a parsed response
-     * @throws \Exception
+     * @throws Exception
      */
     function getParsedSubValue()
     {
@@ -358,7 +359,7 @@ class curlTest extends TestCase
     /**
      * @test
      * @testdox Request a value by sending wrong value into the parser (crash test)
-     * @throws \Exception
+     * @throws Exception
      */
     function getParsedSubValueNoArray()
     {
@@ -371,7 +372,7 @@ class curlTest extends TestCase
     /**
      * @test
      * @testdox Request a value that does not exist in a parsed response (Receive an exception)
-     * @throws \Exception
+     * @throws Exception
      */
     function getParsedSubValueFail()
     {
@@ -389,7 +390,7 @@ class curlTest extends TestCase
     /**
      * @test
      * @testdox Test if a web request has a valid body
-     * @throws \Exception
+     * @throws Exception
      */
     function getValidBody()
     {
@@ -402,7 +403,7 @@ class curlTest extends TestCase
     /**
      * @test
      * @testdox Receive a standard 200 code
-     * @throws \Exception
+     * @throws Exception
      */
     function getSimple200()
     {
@@ -414,7 +415,7 @@ class curlTest extends TestCase
     /**
      * @test
      * @testdox Test SSL based web request
-     * @throws \Exception
+     * @throws Exception
      */
     function getSslUrl()
     {
@@ -427,7 +428,7 @@ class curlTest extends TestCase
     /**
      * @test
      * @testdox Get exception on self signed certifications (we get error code 60)
-     * @throws \Exception
+     * @throws Exception
      */
     function getSslSelfSignedException()
     {
@@ -446,7 +447,7 @@ class curlTest extends TestCase
     /**
      * @test
      * @testdox Get exception on mismatching certificates (host != certifcate host)
-     * @throws \Exception
+     * @throws Exception
      */
     function sslMismatching()
     {
@@ -482,7 +483,7 @@ class curlTest extends TestCase
      * @test
      * @testdox Test that initially allows unverified ssl certificates should make netcurl to first call the url in a
      *          correct way and then, if this fails, make a quite risky failover into unverified mode - silently.
-     * @throws \Exception
+     * @throws Exception
      */
     function sslSelfSignedUnverifyOnRun()
     {
@@ -502,7 +503,7 @@ class curlTest extends TestCase
     /**
      * @test
      * @testdox Test parsed json response
-     * @throws \Exception
+     * @throws Exception
      */
     function getJson()
     {
@@ -514,7 +515,7 @@ class curlTest extends TestCase
     /**
      * @test
      * @testdox Check if we can parse a serialized response
-     * @throws \Exception
+     * @throws Exception
      */
     function getSerialize()
     {
@@ -527,7 +528,7 @@ class curlTest extends TestCase
     /**
      * @test
      * @testdox Test if XML/Serializer are parsed correctly
-     * @throws \Exception
+     * @throws Exception
      */
     function getXmlSerializer()
     {
@@ -545,7 +546,7 @@ class curlTest extends TestCase
     /**
      * @test
      * @testdox Test if SimpleXml are parsed correctly
-     * @throws \Exception
+     * @throws Exception
      */
     function getSimpleXml()
     {
@@ -558,7 +559,7 @@ class curlTest extends TestCase
     /**
      * @test
      * @testdox Test if a html response are converted to a proper array
-     * @throws \Exception
+     * @throws Exception
      */
     function getSimpleDom()
     {
@@ -579,7 +580,7 @@ class curlTest extends TestCase
 
     /**
      * @test
-     * @throws \Exception
+     * @throws Exception
      */
     function getSimpleDomChain()
     {
@@ -612,7 +613,7 @@ class curlTest extends TestCase
     /**
      * @test
      * @testdox SSL Certificates at custom location. Expected Result: Successful lookup with verified peer
-     * @throws \Exception
+     * @throws Exception
      */
     function sslCertLocation()
     {
@@ -628,7 +629,7 @@ class curlTest extends TestCase
 
     /**
      * @test
-     * @throws \Exception
+     * @throws Exception
      */
     function setInternalPemLocation()
     {
@@ -640,7 +641,7 @@ class curlTest extends TestCase
 
     /**
      * @test
-     * @throws \Exception
+     * @throws Exception
      */
     function setInternalPemLocationBadFormat()
     {
@@ -653,7 +654,7 @@ class curlTest extends TestCase
 
     /**
      * @test
-     * @throws \Exception
+     * @throws Exception
      */
     function unExistentCertificateBundle()
     {
@@ -693,7 +694,7 @@ class curlTest extends TestCase
     /**
      * @test
      * @testdox Test the customized ip address
-     * @throws \Exception
+     * @throws Exception
      */
     function customIpAddrSimple()
     {
@@ -719,7 +720,7 @@ class curlTest extends TestCase
     /**
      * @test
      * @testdox Test custom ip address setup (if more than one ip is set on the interface)
-     * @throws \Exception
+     * @throws Exception
      */
     function customIpAddrAllString()
     {
@@ -760,7 +761,7 @@ class curlTest extends TestCase
     /**
      * @test
      * @testdox Run in default mode, when follows are enabled
-     * @throws \Exception
+     * @throws Exception
      */
     function followRedirectEnabled()
     {
@@ -773,7 +774,7 @@ class curlTest extends TestCase
     /**
      * @test
      * @testdox Run with redirect follows disabled
-     * @throws \Exception
+     * @throws Exception
      */
     function followRedirectDisabled()
     {
@@ -788,7 +789,7 @@ class curlTest extends TestCase
     /**
      * @test
      * @testdox Activating the flag FOLLOWLOCATION_INTERNAL will make NetCurl make its own follow recursion
-     * @throws \Exception
+     * @throws Exception
      */
     function followRedirectDisabledFlagEnabled()
     {
@@ -811,7 +812,7 @@ class curlTest extends TestCase
 
     /**
      * @test
-     * @throws \Exception
+     * @throws Exception
      */
     function followRedirectManualDisable()
     {
@@ -827,7 +828,7 @@ class curlTest extends TestCase
      * @test
      * @testdox Tests the overriding function setEnforceFollowLocation and the setCurlOpt-overrider. The expected
      *          result is to have setEnforceFollowLocation to be top prioritized over setCurlOpt here.
-     * @throws \Exception
+     * @throws Exception
      */
     function followRedirectManualEnableWithSetCurlOptEnforcingToFalse()
     {
@@ -843,7 +844,7 @@ class curlTest extends TestCase
     /**
      * @test
      * @testdox Test SoapClient by making a standard doGet()
-     * @throws \Exception
+     * @throws Exception
      */
     function wsdlSoapClient()
     {
@@ -869,7 +870,7 @@ class curlTest extends TestCase
     /**
      * @test
      * @testdox Test Soap by internal controllers
-     * @throws \Exception
+     * @throws Exception
      */
     function hasSoap()
     {
@@ -878,7 +879,7 @@ class curlTest extends TestCase
 
     /**
      * @test
-     * @throws \Exception
+     * @throws Exception
      */
     function throwableHttpCodes()
     {
@@ -895,7 +896,7 @@ class curlTest extends TestCase
 
     /**
      * @test
-     * @throws \Exception
+     * @throws Exception
      */
     function failUrl()
     {
@@ -909,7 +910,7 @@ class curlTest extends TestCase
 
     /**
      * @test
-     * @throws \Exception
+     * @throws Exception
      */
     public function setCurlOpt()
     {
@@ -921,7 +922,7 @@ class curlTest extends TestCase
 
     /**
      * @test
-     * @throws \Exception
+     * @throws Exception
      */
     public function getCurlOpt()
     {
@@ -931,7 +932,7 @@ class curlTest extends TestCase
 
     /**
      * @test
-     * @throws \Exception
+     * @throws Exception
      */
     function unsetFlag()
     {
@@ -943,7 +944,7 @@ class curlTest extends TestCase
 
     /**
      * @test
-     * @throws \Exception
+     * @throws Exception
      */
     function chainGet()
     {
@@ -958,7 +959,7 @@ class curlTest extends TestCase
 
     /**
      * @test
-     * @throws \Exception
+     * @throws Exception
      */
     function tlagEmptyKey()
     {
@@ -971,7 +972,7 @@ class curlTest extends TestCase
 
     /**
      * @test
-     * @throws \Exception
+     * @throws Exception
      */
     function chainByInit()
     {
@@ -985,7 +986,7 @@ class curlTest extends TestCase
 
     /**
      * @test
-     * @throws \Exception
+     * @throws Exception
      */
     function chainGetFail()
     {
@@ -995,23 +996,7 @@ class curlTest extends TestCase
 
     /**
      * @test
-     * @throws \Exception
-     */
-    function getGitInfo()
-    {
-        try {
-            $NetCurl   = $this->NETWORK->getGitTagsByUrl("https://userCredentialsBanned@" . $this->bitBucketUrl);
-            $GuzzleLIB = $this->NETWORK->getGitTagsByUrl("https://github.com/guzzle/guzzle.git");
-            //$GuzzleLIBNonNumerics = $this->NETWORK->getGitTagsByUrl("https://github.com/guzzle/guzzle.git", true, true);
-            static::assertTrue(count($NetCurl) >= 0 && count($GuzzleLIB) >= 0);
-        } catch (\Exception $e) {
-
-        }
-    }
-
-    /**
-     * @test
-     * @throws \Exception
+     * @throws Exception
      */
     function getGitIsTooOld()
     {
@@ -1021,7 +1006,7 @@ class curlTest extends TestCase
 
     /**
      * @test
-     * @throws \Exception
+     * @throws Exception
      */
     function getGitCurrentOrNewer()
     {
@@ -1038,7 +1023,7 @@ class curlTest extends TestCase
 
     /**
      * @test
-     * @throws \Exception
+     * @throws Exception
      */
     function timeoutChecking()
     {
@@ -1050,7 +1035,7 @@ class curlTest extends TestCase
 
     /**
      * @test
-     * @throws \Exception
+     * @throws Exception
      */
     function internalException()
     {
@@ -1067,7 +1052,7 @@ class curlTest extends TestCase
 
     /**
      * @test
-     * @throws \Exception
+     * @throws Exception
      */
     function driverControlList()
     {
@@ -1105,7 +1090,7 @@ class curlTest extends TestCase
 
     /**
      * @test
-     * @throws \Exception
+     * @throws Exception
      */
     function getSupportedDrivers()
     {
@@ -1114,7 +1099,7 @@ class curlTest extends TestCase
 
     /**
      * @test
-     * @throws \Exception
+     * @throws Exception
      */
     function setAutoDriver()
     {
@@ -1124,7 +1109,7 @@ class curlTest extends TestCase
 
     /**
      * @test
-     * @throws \Exception
+     * @throws Exception
      */
     function getJsonByConstructor()
     {
@@ -1135,7 +1120,7 @@ class curlTest extends TestCase
 
     /**
      * @test
-     * @throws \Exception
+     * @throws Exception
      */
     function extractDomainIsGetUrlDomain()
     {
@@ -1197,7 +1182,7 @@ class curlTest extends TestCase
 
     /**
      * @test
-     * @throws \Exception
+     * @throws Exception
      */
     public function getParsedDom()
     {
@@ -1215,7 +1200,7 @@ class curlTest extends TestCase
 
     /**
      * @test
-     * @throws \Exception
+     * @throws Exception
      */
     function responseTypeHttpObject()
     {
@@ -1229,7 +1214,7 @@ class curlTest extends TestCase
     /**
      * @test
      * @testdox Request urls with NETCURL_HTTP_OBJECT
-     * @throws \Exception
+     * @throws Exception
      */
     function responseTypeHttpObjectChain()
     {
@@ -1243,7 +1228,7 @@ class curlTest extends TestCase
      * @test
      * @testdox Testing that switching between driverse (SOAP) works - when SOAP is not used, NetCURL should switch
      *          back to the regular driver
-     * @throws \Exception
+     * @throws Exception
      */
     function multiCallsSwitchingBetweenRegularAndSoap()
     {
@@ -1283,14 +1268,14 @@ class curlTest extends TestCase
             } elseif ($e->getCode() >= 500) {
                 static::markTestSkipped("Got errors (" . $e->getCode() . ") on URL call, can't complete request: " . $e->getMessage());
             }
-            throw new \Exception($e->getMessage(), $e->getCode(), $e);
+            throw new Exception($e->getMessage(), $e->getCode(), $e);
         }
     }
 
     /**
      * @test
      * @testdox Make sure that simplified responses returns proper data immediately on call
-     * @throws \Exception
+     * @throws Exception
      */
     function setSimplifiedResponse()
     {
@@ -1314,7 +1299,7 @@ class curlTest extends TestCase
     /**
      * @test
      * @testdox Another way to extract stuff on
-     * @throws \Exception
+     * @throws Exception
      */
     function soapIoParse()
     {
@@ -1348,8 +1333,23 @@ class curlTest extends TestCase
             } elseif ($e->getCode() >= 500) {
                 static::markTestSkipped("Got errors (" . $e->getCode() . ") on URL call, can't complete request: " . $e->getMessage());
             }
-            throw new \Exception($e->getMessage(), $e->getCode(), $e);
+            throw new Exception($e->getMessage(), $e->getCode(), $e);
         }
+    }
+
+    /**
+     * @test
+     * @throws Exception
+     */
+    function setTimeout() {
+        $this->CURL = new MODULE_CURL();
+        $this->CURL->setTimeout(1);
+        $startTime = time();
+        try {
+            print_R($this->CURL->doGet("imap://failing:account@imap.tornevall.net")->getHeader());
+        } catch (\Exception $e) {}
+        $timeWasted = time()-$startTime;
+        static::assertLessThan(5, $timeWasted);
     }
 
     /**

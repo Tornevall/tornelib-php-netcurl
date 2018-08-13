@@ -27,10 +27,10 @@ namespace TorneLIB;
 
 if ( ! class_exists( 'MODULE_NETWORK' ) && ! class_exists( 'TorneLIB\MODULE_NETWORK' ) ) {
 	if ( ! defined( 'NETCURL_NETWORK_RELEASE' ) ) {
-		define( 'NETCURL_NETWORK_RELEASE', '6.0.6' );
+		define( 'NETCURL_NETWORK_RELEASE', '6.0.7' );
 	}
 	if ( ! defined( 'NETCURL_NETWORK_MODIFY' ) ) {
-		define( 'NETCURL_NETWORK_MODIFY', '20180325' );
+		define( 'NETCURL_NETWORK_MODIFY', '20180813' );
 	}
 
 	/**
@@ -120,6 +120,30 @@ if ( ! class_exists( 'MODULE_NETWORK' ) && ! class_exists( 'TorneLIB\MODULE_NETW
 		}
 
         /**
+         * Uses version_compare with the operators >= (from) and <= (to) to pick up the right version range form a git repository tag list
+         * @param $gitUrl
+         * @param $fromVersionCompare
+         * @param $toVersionCompare
+         * @param bool $cleanNonNumerics
+         * @param bool $sanitizeNumerics
+         * @param bool $keepCredentials
+         * @return array
+         * @throws \Exception
+         */
+		public function getGitTagsByVersion($gitUrl, $fromVersionCompare, $toVersionCompare, $cleanNonNumerics = false, $sanitizeNumerics = false, $keepCredentials = true ) {
+		    $return = array();
+            $versionList = $this->getGitTagsByUrl($gitUrl, $cleanNonNumerics, $sanitizeNumerics, $keepCredentials);
+            if (is_array($versionList) && count($versionList)) {
+                foreach ($versionList as $versionNum) {
+                    if (version_compare($versionNum, $fromVersionCompare, '>=') && version_compare($versionNum, $toVersionCompare, '<=') && !in_array($versionNum, $return)) {
+                        $return[] = $versionNum;
+                    }
+                }
+            }
+            return $return;
+        }
+
+        /**
          * Try to fetch git tags from git URLS
          * @param string $gitUrl
          * @param bool $cleanNonNumerics Normally you do not want to strip anything. This boolean however, decides if we will include non numerical version data in the returned array
@@ -129,7 +153,7 @@ if ( ! class_exists( 'MODULE_NETWORK' ) && ! class_exists( 'TorneLIB\MODULE_NETW
          * @throws \Exception
          * @since 6.0.4
          */
-		public function getGitTagsByUrl( $gitUrl = '', $cleanNonNumerics = false, $sanitizeNumerics = false, $keepCredentials = true ) {
+		public function getGitTagsByUrl($gitUrl, $cleanNonNumerics = false, $sanitizeNumerics = false, $keepCredentials = true ) {
 			$fetchFail = true;
 			$tagArray  = array();
 			$gitUrl    .= "/info/refs?service=git-upload-pack";

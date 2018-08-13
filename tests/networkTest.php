@@ -287,6 +287,28 @@ class networkTest extends TestCase
     /**
      * @test
      */
+    function getGitVersion()
+    {
+        try {
+            // Using Guzzle in this test means that we need to clean up the tags from non numeric content, as they
+            // use mixed tags like: v2.x, v3.x, 1.x, etc.
+            $GuzzleLIB = $this->NET->getGitTagsByVersion("https://github.com/guzzle/guzzle.git", '2.0', '3.0', true, true);
+            $fullSerie = 0;
+            $onlyTwo = 0;
+            foreach ($GuzzleLIB as $v) {
+                $fullSerie++;
+                if (preg_match("/^2./", $v)) {
+                    $onlyTwo++;
+                }
+            }
+            static::assertTrue($fullSerie === $onlyTwo);
+        } catch (\Exception $e) {
+        }
+    }
+
+    /**
+     * @test
+     */
     function getUrlsFromHtml()
     {
         $html = '

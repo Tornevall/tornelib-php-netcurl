@@ -249,6 +249,27 @@ class networkTest extends TestCase
 
     /**
      * @test
+     * @throws \Exception
+     */
+    function getGitTagsGuest( ){
+        $tags = $this->NET->getGitTagsByUrl("https://bitbucket.tornevall.net/scm/misc/netcurl-test.git");
+        static::assertGreaterThan(1,$tags);
+    }
+
+    /**
+     * @test
+     * @throws \Exception
+     */
+    function getGitTagsCredentials()
+    {
+        $tags = $this->NET->getGitTagsByUrl(
+            "https://test:test123@bitbucket.tornevall.net/scm/misc/netcurl-test.git"
+        );
+        static::assertGreaterThan(1, $tags);
+    }
+
+    /**
+     * @test
      */
     function getUrlsFromHtml()
     {

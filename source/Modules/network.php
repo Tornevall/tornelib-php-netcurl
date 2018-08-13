@@ -119,23 +119,24 @@ if ( ! class_exists( 'MODULE_NETWORK' ) && ! class_exists( 'TorneLIB\MODULE_NETW
 			}
 		}
 
-		/**
-		 * Try to fetch git tags from git URLS
-		 *
-		 * @param string $gitUrl
-		 * @param bool   $cleanNonNumerics Normally you do not want to strip anything. This boolean however, decides if we will include non numerical version data in the returned array
-		 * @param bool   $sanitizeNumerics If we decide to not include non numeric values from the version tag array (by $cleanNonNumerics), the tags will be sanitized in a preg_replace filter that will the keep numerics in the content only (with $cleanNonNumerics set to false, this boolen will have no effect)
-		 *
-		 * @return array
-		 * @throws \Exception
-		 * @since 6.0.4
-		 */
-		public function getGitTagsByUrl( $gitUrl = '', $cleanNonNumerics = false, $sanitizeNumerics = false ) {
+        /**
+         * Try to fetch git tags from git URLS
+         * @param string $gitUrl
+         * @param bool $cleanNonNumerics Normally you do not want to strip anything. This boolean however, decides if we will include non numerical version data in the returned array
+         * @param bool $sanitizeNumerics If we decide to not include non numeric values from the version tag array (by $cleanNonNumerics), the tags will be sanitized in a preg_replace filter that will the keep numerics in the content only (with $cleanNonNumerics set to false, this boolen will have no effect)
+         * @param $keepCredentials
+         * @return array
+         * @throws \Exception
+         * @since 6.0.4
+         */
+		public function getGitTagsByUrl( $gitUrl = '', $cleanNonNumerics = false, $sanitizeNumerics = false, $keepCredentials = true ) {
 			$fetchFail = true;
 			$tagArray  = array();
 			$gitUrl    .= "/info/refs?service=git-upload-pack";
 			// Clean up all user auth data in URL if exists
-			$gitUrl = preg_replace( "/\/\/(.*?)@/", '//', $gitUrl );
+            if (!$keepCredentials) {
+                $gitUrl = preg_replace("/\/\/(.*?)@/", '//', $gitUrl);
+            }
 			/** @var $CURL MODULE_CURL */
 			$CURL = new MODULE_CURL();
 
@@ -153,14 +154,14 @@ if ( ! class_exists( 'MODULE_NETWORK' ) && ! class_exists( 'TorneLIB\MODULE_NETW
 						$tagList = $tagMatches[1];
 						foreach ( $tagList as $tag ) {
 							if ( ! preg_match( "/\^/", $tag ) ) {
-								if ( $cleanNonNumerics ) {
+								if ( (bool)$cleanNonNumerics ) {
 									$exTag              = explode( ".", $tag );
 									$tagArrayUncombined = array();
 									foreach ( $exTag as $val ) {
 										if ( is_numeric( $val ) ) {
 											$tagArrayUncombined[] = $val;
 										} else {
-											if ( $sanitizeNumerics ) {
+											if ( (bool)$sanitizeNumerics ) {
 												$vNum                 = preg_replace( "/[^0-9$]/is", '', $val );
 												$tagArrayUncombined[] = $vNum;
 											}

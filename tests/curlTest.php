@@ -144,6 +144,22 @@ class curlTest extends TestCase
     }
 
     /**
+     * Make sure we always get a protocol
+     * @param string $protocol
+     * @return string
+     */
+    private function getProtocol($protocol = 'http')
+    {
+        if (empty($protocol)) {
+            $protocol = "http";
+        }
+
+        return $protocol;
+    }
+
+    /** @noinspection PhpUnusedPrivateMethodInspection */
+
+    /**
      * @test
      * @testdox Make a direct call to the curl library
      * @throws Exception
@@ -153,8 +169,6 @@ class curlTest extends TestCase
         $tempCurl = new MODULE_CURL("https://identifier.tornevall.net/index.php?json");
         static::assertTrue(is_object($tempCurl->getParsed()));
     }
-
-    /** @noinspection PhpUnusedPrivateMethodInspection */
 
     /**
      * @test
@@ -190,20 +204,6 @@ class curlTest extends TestCase
         $container = $this->urlGet("ssl&bool&o=json&method=get");
         $ParsedResponse = $this->CURL->getParsed($container);
         static::assertTrue(is_object($ParsedResponse));
-    }
-
-    /**
-     * @test
-     * @testdox Request a specific value from a parsed response
-     * @throws Exception
-     */
-    function getParsedValue()
-    {
-        $this->pemDefault();
-        $this->urlGet("ssl&bool&o=json&method=get");
-        //$this->CURL->getParsed();
-        $ValueFrom = $this->CURL->getValue('methods');
-        static::assertTrue(is_object($ValueFrom->_REQUEST));
     }
 
     /*function testSimpleGetProxy() {
@@ -244,6 +244,20 @@ class curlTest extends TestCase
             }
             $this->markTestSkipped( "I can't test this simpleGetProxy since there are no tor service installed" );
         }*/
+
+    /**
+     * @test
+     * @testdox Request a specific value from a parsed response
+     * @throws Exception
+     */
+    function getParsedValue()
+    {
+        $this->pemDefault();
+        $this->urlGet("ssl&bool&o=json&method=get");
+        //$this->CURL->getParsed();
+        $ValueFrom = $this->CURL->getValue('methods');
+        static::assertTrue(is_object($ValueFrom->_REQUEST));
+    }
 
     /**
      * @test
@@ -601,6 +615,10 @@ class curlTest extends TestCase
         }
     }
 
+    /***************
+     *  SSL TESTS  *
+     **************/
+
     /**
      * @test
      * @testdox SSL Certificates are missing and certificate location is mismatching. Expected Result: Failing the url
@@ -618,10 +636,6 @@ class curlTest extends TestCase
         }
         static::assertFalse($successfulVerification);
     }
-
-    /***************
-     *  SSL TESTS  *
-     **************/
 
     /**
      * @test
@@ -1362,20 +1376,6 @@ class curlTest extends TestCase
         $theUrl = $this->getProtocol($protocol) . "://" . \TESTURLS::getUrlTests() . $indexFile;
 
         return $this->CURL->doPost($theUrl, $parameters);
-    }
-
-    /**
-     * Make sure we always get a protocol
-     * @param string $protocol
-     * @return string
-     */
-    private function getProtocol($protocol = 'http')
-    {
-        if (empty($protocol)) {
-            $protocol = "http";
-        }
-
-        return $protocol;
     }
 
 }

@@ -15,7 +15,7 @@ use PHPUnit\Framework\TestCase;
 
 ini_set('memory_limit', -1);    // Free memory limit, some tests requires more memory (like ip-range handling)
 
-class extendedTest extends TestCase
+class extendedManual extends TestCase
 {
     /**
      * @var MODULE_CURL $CURL
@@ -48,7 +48,7 @@ class extendedTest extends TestCase
 
                 return;
             } elseif ($e->getCode() >= 500) {
-                static::markTestSkipped(
+                static::fail(
                     "Got errors (" . $e->getCode() . ") on URL call, can't complete request: " . $e->getMessage()
                 );
             }
@@ -154,7 +154,7 @@ class extendedTest extends TestCase
 
                 return;
             } elseif ($errorCode >= 500) {
-                static::markTestSkipped(
+                static::fail(
                     "Got errors (" . $e->getCode() . ") on URL call, can't complete request: " . $e->getMessage()
                 );
             }
@@ -200,7 +200,7 @@ class extendedTest extends TestCase
 
                 return;
             } elseif ($errorCode >= 500) {
-                static::markTestSkipped(
+                static::fail(
                     "Got errors (" . $e->getCode() . ") on URL call, can't complete request: " . $e->getMessage()
                 );
             }
@@ -270,7 +270,7 @@ class extendedTest extends TestCase
 
                 return;
             } elseif ($errorCode >= 500) {
-                static::markTestSkipped(
+                static::fail(
                     "Got errors (" . $e->getCode() . ") on URL call, can't complete request: " . $e->getMessage()
                 );
             }

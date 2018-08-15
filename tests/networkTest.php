@@ -21,6 +21,11 @@ class networkTest extends TestCase
     /** @var MODULE_NETWORK $NET */
     private $NET;
 
+    /**
+     * @var string $bitBucketUrl Bitbucket URL without scheme
+     */
+    private $bitBucketUrl = 'bitbucket.tornevall.net/scm/lib/tornelib-php-netcurl.git';
+
     function setUp()
     {
         error_reporting(E_ALL);
@@ -278,7 +283,6 @@ class networkTest extends TestCase
             // Old way of clearing out misconfigured credentials
             $NetCurl   = $this->NET->getGitTagsByUrl("https://userCredentialsBanned@" . $this->bitBucketUrl, false, false, false);
             $GuzzleLIB = $this->NET->getGitTagsByUrl("https://github.com/guzzle/guzzle.git");
-            //$GuzzleLIBNonNumerics = $this->NETWORK->getGitTagsByUrl("https://github.com/guzzle/guzzle.git", true, true);
             static::assertTrue(count($NetCurl) >= 0 && count($GuzzleLIB) >= 0);
         } catch (\Exception $e) {
         }

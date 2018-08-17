@@ -20,14 +20,14 @@
  * major version too.
  *
  * @package TorneLIB
- * @version 6.0.6
+ * @version 6.0.7RC1
  */
 
 namespace TorneLIB;
 
 if ( ! class_exists( 'MODULE_NETWORK' ) && ! class_exists( 'TorneLIB\MODULE_NETWORK' ) ) {
 	if ( ! defined( 'NETCURL_NETWORK_RELEASE' ) ) {
-		define( 'NETCURL_NETWORK_RELEASE', '6.0.7' );
+		define( 'NETCURL_NETWORK_RELEASE', '6.0.7RC1' );
 	}
 	if ( ! defined( 'NETCURL_NETWORK_MODIFY' ) ) {
 		define( 'NETCURL_NETWORK_MODIFY', '20180813' );

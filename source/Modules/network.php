@@ -25,12 +25,12 @@
 
 namespace TorneLIB;
 
-if ( ! class_exists( 'MODULE_NETWORK' ) && ! class_exists( 'TorneLIB\MODULE_NETWORK' ) ) {
+if ( ! class_exists( 'MODULE_NETWORK', NETCURL_CLASS_EXISTS_AUTOLOAD ) && ! class_exists( 'TorneLIB\MODULE_NETWORK', NETCURL_CLASS_EXISTS_AUTOLOAD ) ) {
 	if ( ! defined( 'NETCURL_NETWORK_RELEASE' ) ) {
 		define( 'NETCURL_NETWORK_RELEASE', '6.0.7RC1' );
 	}
 	if ( ! defined( 'NETCURL_NETWORK_MODIFY' ) ) {
-		define( 'NETCURL_NETWORK_MODIFY', '20180813' );
+		define( 'NETCURL_NETWORK_MODIFY', '20180822' );
 	}
 
 	/**
@@ -99,7 +99,7 @@ if ( ! class_exists( 'MODULE_NETWORK' ) && ! class_exists( 'TorneLIB\MODULE_NETW
 				if ( empty( $exceptionConstantName ) ) {
 					$exceptionConstantName = 'NETCURL_NO_ERROR';
 				}
-				if ( ! class_exists( 'TorneLIB\TORNELIB_NETCURL_EXCEPTIONS' ) ) {
+				if ( ! class_exists( 'TorneLIB\TORNELIB_NETCURL_EXCEPTIONS', NETCURL_CLASS_EXISTS_AUTOLOAD ) ) {
 					if ( $exceptionConstantName == 'NETCURL_NO_ERROR' ) {
 						return 0;
 					} else {
@@ -713,7 +713,7 @@ if ( ! class_exists( 'MODULE_NETWORK' ) && ! class_exists( 'TorneLIB\MODULE_NETW
 	}
 }
 
-if ( ! class_exists( 'TorneLIB_Network' ) && ! class_exists( 'TorneLIB\TorneLIB_Network' ) ) {
+if ( ! class_exists( 'TorneLIB_Network', NETCURL_CLASS_EXISTS_AUTOLOAD ) && ! class_exists( 'TorneLIB\TorneLIB_Network', NETCURL_CLASS_EXISTS_AUTOLOAD ) ) {
 	/**
 	 * Class MODULE_CURL
 	 *

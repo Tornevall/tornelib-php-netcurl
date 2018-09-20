@@ -25,13 +25,12 @@
 
 namespace TorneLIB;
 
-if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' ) ) {
-
+if (! class_exists( 'MODULE_CURL', NETCURL_CLASS_EXISTS_AUTOLOAD) && ! class_exists( 'TorneLIB\MODULE_CURL', NETCURL_CLASS_EXISTS_AUTOLOAD ) ) {
 	if ( ! defined( 'NETCURL_CURL_RELEASE' ) ) {
 		define( 'NETCURL_CURL_RELEASE', '6.0.23RC1' );
 	}
 	if ( ! defined( 'NETCURL_CURL_MODIFY' ) ) {
-		define( 'NETCURL_CURL_MODIFY', '20180813' );
+		define( 'NETCURL_CURL_MODIFY', '20180822' );
 	}
 	if ( ! defined( 'NETCURL_CURL_CLIENTNAME' ) ) {
 		define( 'NETCURL_CURL_CLIENTNAME', 'MODULE_CURL' );
@@ -412,7 +411,7 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 
 			$this->NETWORK = new MODULE_NETWORK();
 			$this->DRIVER  = new NETCURL_DRIVER_CONTROLLER();
-			if ( class_exists( 'TorneLIB\MODULE_IO' ) ) {
+			if ( class_exists( 'TorneLIB\MODULE_IO', NETCURL_CLASS_EXISTS_AUTOLOAD ) ) {
 				$this->IO = new MODULE_IO();
 			}
 			$this->setConstantsContainer();
@@ -3613,7 +3612,7 @@ if ( ! class_exists( 'MODULE_CURL' ) && ! class_exists( 'TorneLIB\MODULE_CURL' )
 
 	}
 
-	if ( ! class_exists( 'Tornevall_cURL' ) && ! class_exists( 'TorneLIB\Tornevall_cURL' ) ) {
+	if ( ! class_exists( 'Tornevall_cURL', NETCURL_CLASS_EXISTS_AUTOLOAD ) && ! class_exists( 'TorneLIB\Tornevall_cURL', NETCURL_CLASS_EXISTS_AUTOLOAD ) ) {
 		/**
 		 * Class MODULE_CURL
 		 *

@@ -25,7 +25,7 @@
 
 namespace TorneLIB;
 
-if ( ! class_exists( 'MODULE_SSL' ) && ! class_exists( 'TorneLIB\MODULE_SSL' ) ) {
+if ( ! class_exists( 'MODULE_SSL', NETCURL_CLASS_EXISTS_AUTOLOAD ) && ! class_exists( 'TorneLIB\MODULE_SSL', NETCURL_CLASS_EXISTS_AUTOLOAD ) ) {
 
 	if ( ! defined( 'NETCURL_SSL_RELEASE' ) ) {
 		define( 'NETCURL_SSL_RELEASE', '6.0.0' );

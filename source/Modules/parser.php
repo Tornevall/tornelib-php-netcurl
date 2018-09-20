@@ -25,7 +25,7 @@
 
 namespace TorneLIB;
 
-if ( ! class_exists( 'NETCURL_PARSER' ) && ! class_exists( 'TorneLIB\NETCURL_PARSER' ) ) {
+if ( ! class_exists( 'NETCURL_PARSER', NETCURL_CLASS_EXISTS_AUTOLOAD ) && ! class_exists( 'TorneLIB\NETCURL_PARSER', NETCURL_CLASS_EXISTS_AUTOLOAD ) ) {
 	/**
 	 * Class NETCURL_PARSER Network communications driver detection
 	 *
@@ -316,7 +316,7 @@ if ( ! class_exists( 'NETCURL_PARSER' ) && ! class_exists( 'TorneLIB\NETCURL_PAR
 			$domContent['ByClosestTag'] = array();
 			$domContent['ById']         = array();
 			$hasContent                 = false;
-			if ( class_exists( 'DOMDocument' ) ) {
+			if ( class_exists( 'DOMDocument', NETCURL_CLASS_EXISTS_AUTOLOAD ) ) {
 				if ( ! empty( $this->PARSE_CONTAINER ) ) {
 					$DOM = new \DOMDocument();
 					libxml_use_internal_errors( true );

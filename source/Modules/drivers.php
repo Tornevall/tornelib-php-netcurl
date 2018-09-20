@@ -24,7 +24,7 @@
 
 namespace TorneLIB;
 
-if ( ! class_exists( 'NETCURL_DRIVER_CONTROLLER' ) && ! class_exists( 'TorneLIB\NETCURL_DRIVER_CONTROLLER' ) ) {
+if ( ! class_exists( 'NETCURL_DRIVER_CONTROLLER', NETCURL_CLASS_EXISTS_AUTOLOAD ) && ! class_exists( 'TorneLIB\NETCURL_DRIVER_CONTROLLER', NETCURL_CLASS_EXISTS_AUTOLOAD ) ) {
 	/**
 	 * Class NETCURL_DRIVERS Network communications driver detection
 	 *
@@ -133,7 +133,7 @@ if ( ! class_exists( 'NETCURL_DRIVER_CONTROLLER' ) && ! class_exists( 'TorneLIB\
 		private function getAvailableClasses() {
 			$DRIVERS_AVAILABLE = array();
 			foreach ( $this->DRIVERS_SUPPORTED as $driverClass => $driverClassId ) {
-				if ( class_exists( $driverClass ) ) {
+				if ( class_exists( $driverClass, NETCURL_CLASS_EXISTS_AUTOLOAD ) ) {
 					$DRIVERS_AVAILABLE[ $driverClassId ] = $driverClass;
 					// Guzzle supports both curl and stream so include it here
 					if ( $driverClassId == NETCURL_NETWORK_DRIVERS::DRIVER_GUZZLEHTTP ) {
@@ -237,7 +237,7 @@ if ( ! class_exists( 'NETCURL_DRIVER_CONTROLLER' ) && ! class_exists( 'TorneLIB\
 				$driverId = NETCURL_NETWORK_DRIVERS::DRIVER_GUZZLEHTTP_STREAM;
 			}
 
-			if ( ! is_null( $ownClass ) && class_exists( $ownClass ) ) {
+			if ( ! is_null( $ownClass ) && class_exists( $ownClass, NETCURL_CLASS_EXISTS_AUTOLOAD ) ) {
 				if ( is_null( $parameters ) ) {
 					$newDriver = new $ownClass();
 				} else {
@@ -247,11 +247,11 @@ if ( ! class_exists( 'NETCURL_DRIVER_CONTROLLER' ) && ! class_exists( 'TorneLIB\
 				return $newDriver;
 			}
 
-			if ( class_exists( $driverClass ) ) {
+			if ( class_exists( $driverClass, NETCURL_CLASS_EXISTS_AUTOLOAD ) ) {
 				if ( isset( $this->DRIVERS_BRIDGED[ $driverClass ] ) ) {
-					if ( class_exists( $this->DRIVERS_BRIDGED[ $driverClass ] ) ) {
+					if ( class_exists( $this->DRIVERS_BRIDGED[ $driverClass ], NETCURL_CLASS_EXISTS_AUTOLOAD ) ) {
 						$bridgeClassName = $this->DRIVERS_BRIDGED[ $driverClass ];
-					} else if ( class_exists( '\\TorneLIB\\' . $this->DRIVERS_BRIDGED[ $driverClass ] ) ) {
+					} else if ( class_exists( '\\TorneLIB\\' . $this->DRIVERS_BRIDGED[ $driverClass ], NETCURL_CLASS_EXISTS_AUTOLOAD ) ) {
 						$bridgeClassName = '\\TorneLIB\\' . $this->DRIVERS_BRIDGED[ $driverClass ];
 					}
 					if ( is_null( $parameters ) ) {
@@ -320,7 +320,7 @@ if ( ! class_exists( 'NETCURL_DRIVER_CONTROLLER' ) && ! class_exists( 'TorneLIB\
 				return $this->DRIVER;
 			}
 
-			if ( ! is_null( $ownClass ) && class_exists( $ownClass ) ) {
+			if ( ! is_null( $ownClass ) && class_exists( $ownClass, NETCURL_CLASS_EXISTS_AUTOLOAD ) ) {
 				$this->DRIVER    = $this->getDriverByClass( $netDriver, $parameters, $ownClass );
 				$this->DRIVER_ID = $netDriver;
 
@@ -367,7 +367,7 @@ if ( ! class_exists( 'NETCURL_DRIVER_CONTROLLER' ) && ! class_exists( 'TorneLIB\
 		 */
 		public function hasSoap( $extendedSearch = false ) {
 			$soapClassBoolean = false;
-			if ( ( class_exists( 'SoapClient' ) || class_exists( '\SoapClient' ) ) ) {
+			if ( ( class_exists( 'SoapClient', NETCURL_CLASS_EXISTS_AUTOLOAD ) || class_exists( '\SoapClient', NETCURL_CLASS_EXISTS_AUTOLOAD ) ) ) {
 				$soapClassBoolean = true;
 			}
 			$sysConst = get_defined_constants();

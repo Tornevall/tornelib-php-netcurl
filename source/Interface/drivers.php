@@ -2,7 +2,7 @@
 
 namespace TorneLIB;
 
-if (!interface_exists('NETCURL_DRIVERS_INTERFACE') && !interface_exists('TorneLIB\NETCURL_DRIVERS_INTERFACE')) {
+if (!interface_exists('NETCURL_DRIVERS_INTERFACE', NETCURL_CLASS_EXISTS_AUTOLOAD) && !interface_exists('TorneLIB\NETCURL_DRIVERS_INTERFACE', NETCURL_CLASS_EXISTS_AUTOLOAD)) {
 	interface NETCURL_DRIVERS_INTERFACE {
 
 		public function __construct( $parameters = null );

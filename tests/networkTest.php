@@ -26,7 +26,7 @@ class networkTest extends TestCase
      */
     private $bitBucketUrl = 'bitbucket.tornevall.net/scm/lib/tornelib-php-netcurl.git';
 
-    function setUp()
+    public function setUp()
     {
         error_reporting(E_ALL);
         $this->NET = new MODULE_NETWORK();
@@ -35,7 +35,7 @@ class networkTest extends TestCase
     /**
      * @test
      */
-    function getArpaLocalhost4()
+    public function getArpaLocalhost4()
     {
         static::assertTrue($this->NET->getArpaFromIpv4("127.0.0.1") === "1.0.0.127");
     }
@@ -43,7 +43,7 @@ class networkTest extends TestCase
     /**
      * @test
      */
-    function getArpaLocalhost6()
+    public function getArpaLocalhost6()
     {
         static::assertTrue($this->NET->getArpaFromIpv6("::1") === "1.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0");
     }
@@ -51,7 +51,7 @@ class networkTest extends TestCase
     /**
      * @test
      */
-    function getArpaLocalhost4Second()
+    public function getArpaLocalhost4Second()
     {
         static::assertTrue($this->NET->getArpaFromIpv4("192.168.12.36") === "36.12.168.192");
     }
@@ -59,7 +59,7 @@ class networkTest extends TestCase
     /**
      * @test
      */
-    function getArpaLocalhost6Second()
+    public function getArpaLocalhost6Second()
     {
         static::assertTrue($this->NET->getArpaFromIpv6("2a01:299:a0:ff:10:128:255:2") === "2.0.0.0.5.5.2.0.8.2.1.0.0.1.0.0.f.f.0.0.0.a.0.0.9.9.2.0.1.0.a.2");
     }
@@ -67,7 +67,7 @@ class networkTest extends TestCase
     /**
      * @test
      */
-    function getArpaLocalhost4Nulled()
+    public function getArpaLocalhost4Nulled()
     {
         static::assertEmpty($this->NET->getArpaFromIpv4(null));
     }
@@ -75,7 +75,7 @@ class networkTest extends TestCase
     /**
      * @test
      */
-    function getArpaLocalhost6Nulled()
+    public function getArpaLocalhost6Nulled()
     {
         static::assertEmpty($this->NET->getArpaFromIpv6(null));
     }
@@ -83,7 +83,7 @@ class networkTest extends TestCase
     /**
      * @test
      */
-    function getArpaLocalhost4String()
+    public function getArpaLocalhost4String()
     {
         static::assertEmpty($this->NET->getArpaFromIpv4("fail here"));
     }
@@ -91,7 +91,7 @@ class networkTest extends TestCase
     /**
      * @test
      */
-    function getArpaLocalhost6String()
+    public function getArpaLocalhost6String()
     {
         static::assertEmpty($this->NET->getArpaFromIpv6("fail here"));
     }
@@ -99,7 +99,7 @@ class networkTest extends TestCase
     /**
      * @test
      */
-    function getArpaLocalhost6CorruptString1()
+    public function getArpaLocalhost6CorruptString1()
     {
         static::assertEmpty($this->NET->getArpaFromIpv6("a : b \\"));
     }
@@ -107,7 +107,7 @@ class networkTest extends TestCase
     /**
      * @test
      */
-    function getArpaLocalhost6CorruptString2()
+    public function getArpaLocalhost6CorruptString2()
     {
         $badString = "";
         for ($i = 0; $i < 255; $i++) {
@@ -119,7 +119,7 @@ class networkTest extends TestCase
     /**
      * @test
      */
-    function octetV6()
+    public function octetV6()
     {
         static::assertTrue($this->NET->getIpv6FromOctets("2.0.0.0.5.5.2.0.8.2.1.0.0.1.0.0.f.f.0.0.0.a.0.0.9.9.2.0.1.0.a.2") === "2a01:299:a0:ff:10:128:255:2");
     }
@@ -127,7 +127,7 @@ class networkTest extends TestCase
     /**
      * @test
      */
-    function getArpaAuto4()
+    public function getArpaAuto4()
     {
         static::assertTrue($this->NET->getArpaFromAddr("172.16.12.3") === "3.12.16.172");
     }
@@ -135,7 +135,7 @@ class networkTest extends TestCase
     /**
      * @test
      */
-    function getArpaAuto6()
+    public function getArpaAuto6()
     {
         static::assertTrue($this->NET->getArpaFromAddr("2a00:1450:400f:802::200e") === "e.0.0.2.0.0.0.0.0.0.0.0.0.0.0.0.2.0.8.0.f.0.0.4.0.5.4.1.0.0.a.2");
     }
@@ -143,7 +143,7 @@ class networkTest extends TestCase
     /**
      * @test
      */
-    function getIpType4()
+    public function getIpType4()
     {
         static::assertTrue($this->NET->getArpaFromAddr("172.22.1.83",
                 true) === NETCURL_IP_PROTOCOLS::PROTOCOL_IPV4);
@@ -152,7 +152,7 @@ class networkTest extends TestCase
     /**
      * @test
      */
-    function getIpType6()
+    public function getIpType6()
     {
         static::assertTrue($this->NET->getArpaFromAddr("2a03:2880:f113:83:face:b00c:0:25de",
                 true) === NETCURL_IP_PROTOCOLS::PROTOCOL_IPV6);
@@ -161,7 +161,7 @@ class networkTest extends TestCase
     /**
      * @test
      */
-    function getIpTypeFail()
+    public function getIpTypeFail()
     {
         static::assertTrue($this->NET->getArpaFromAddr("This.Aint.An.Address",
                 true) === NETCURL_IP_PROTOCOLS::PROTOCOL_NONE);
@@ -170,7 +170,7 @@ class networkTest extends TestCase
     /**
      * @test
      */
-    function maskRangeArray24()
+    public function maskRangeArray24()
     {
         static::assertCount(255, $this->NET->getRangeFromMask("192.168.1.0/24"));
     }
@@ -178,7 +178,7 @@ class networkTest extends TestCase
     /**
      * @test
      */
-    function maskRangeArray16()
+    public function maskRangeArray16()
     {
         static::assertCount(65535, $this->NET->getRangeFromMask("192.168.0.0/16"));
     }
@@ -186,7 +186,7 @@ class networkTest extends TestCase
     /**
      * @test
      */
-    function maskRange24()
+    public function maskRange24()
     {
         static::assertTrue($this->NET->isIpInRange("192.168.1.55", "192.168.1.0/24"));
     }
@@ -194,7 +194,7 @@ class networkTest extends TestCase
     /**
      * @test
      */
-    function maskRange24Fail()
+    public function maskRange24Fail()
     {
         static::assertFalse($this->NET->isIpInRange("192.168.2.55", "192.168.1.0/24"));
     }
@@ -202,7 +202,7 @@ class networkTest extends TestCase
     /**
      * @test
      */
-    function maskRange16()
+    public function maskRange16()
     {
         static::assertTrue($this->NET->isIpInRange("192.168.2.55", "192.168.0.0/16"));
     }
@@ -210,7 +210,7 @@ class networkTest extends TestCase
     /**
      * @test
      */
-    function maskRange8()
+    public function maskRange8()
     {
         static::assertTrue($this->NET->isIpInRange("172.213.9.3", "172.0.0.0/8"));
     }
@@ -219,7 +219,7 @@ class networkTest extends TestCase
      * @test
      * @throws \Exception
      */
-    function hostResolveValidationSuccess()
+    public function hostResolveValidationSuccess()
     {
         $localNetwork = new MODULE_NETWORK();
         $localNetwork->setAlwaysResolveHostvalidation(true);
@@ -230,7 +230,7 @@ class networkTest extends TestCase
     /**
      * @test
      */
-    function hostResolveValidationFail()
+    public function hostResolveValidationFail()
     {
         $localNetwork = new MODULE_NETWORK();
         $localNetwork->setAlwaysResolveHostvalidation(true);
@@ -245,10 +245,10 @@ class networkTest extends TestCase
      * @test
      * @throws \Exception
      */
-    function hostValidationNoResolve()
+    public function hostValidationNoResolve()
     {
         $localNetwork = new MODULE_NETWORK();
-        $urlData      = $localNetwork->getUrlDomain("http://failing.domain/");
+        $urlData = $localNetwork->getUrlDomain("http://failing.domain/");
         static::assertTrue($urlData[0] == "failing.domain");
     }
 
@@ -256,16 +256,17 @@ class networkTest extends TestCase
      * @test
      * @throws \Exception
      */
-    function getGitTagsGuest( ){
-        $tags = $this->NET->getGitTagsByUrl("https://bitbucket.tornevall.net/scm/misc/netcurl-test.git");
-        static::assertGreaterThan(1,$tags);
+    public function getGitTagsGuest()
+    {
+        $tags = $this->NET->getGitTagsByUrl("https://bitbucket.tornevall.net/scm/lib/tornelib-php-netcurl.git");
+        static::assertGreaterThan(1, $tags);
     }
 
     /**
      * @test
      * @throws \Exception
      */
-    function getGitTagsCredentials()
+    public function getGitTagsCredentials()
     {
         $tags = $this->NET->getGitTagsByUrl(
             "https://test:test123@bitbucket.tornevall.net/scm/misc/netcurl-test.git"
@@ -277,11 +278,12 @@ class networkTest extends TestCase
      * @test
      * @throws Exception
      */
-    function getGitInfo()
+    public function getGitInfo()
     {
         try {
             // Old way of clearing out misconfigured credentials
-            $NetCurl   = $this->NET->getGitTagsByUrl("https://userCredentialsBanned@" . $this->bitBucketUrl, false, false, false);
+            $NetCurl = $this->NET->getGitTagsByUrl("https://userCredentialsBanned@" . $this->bitBucketUrl, false, false,
+                false);
             $GuzzleLIB = $this->NET->getGitTagsByUrl("https://github.com/guzzle/guzzle.git");
             static::assertTrue(count($NetCurl) >= 0 && count($GuzzleLIB) >= 0);
         } catch (\Exception $e) {
@@ -291,12 +293,13 @@ class networkTest extends TestCase
     /**
      * @test
      */
-    function getGitVersion()
+    public function getGitVersion()
     {
         try {
             // Using Guzzle in this test means that we need to clean up the tags from non numeric content, as they
             // use mixed tags like: v2.x, v3.x, 1.x, etc.
-            $GuzzleLIB = $this->NET->getGitTagsByVersion("https://github.com/guzzle/guzzle.git", '2.0', '3.0', true, true);
+            $GuzzleLIB = $this->NET->getGitTagsByVersion("https://github.com/guzzle/guzzle.git", '2.0', '3.0', true,
+                true);
             $fullSerie = 0;
             $onlyTwo = 0;
             foreach ($GuzzleLIB as $v) {
@@ -313,7 +316,7 @@ class networkTest extends TestCase
     /**
      * @test
      */
-    function getUrlsFromHtml()
+    public function getUrlsFromHtml()
     {
         $html = '
 		<html>

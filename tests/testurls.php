@@ -6,9 +6,9 @@ abstract class TESTURLS
     private static $Urls = array(
         'simple'      => 'identifier.tornevall.net/',
         'simplejson'  => 'identifier.tornevall.net/?json',
-        'tests'       => 'developer.tornevall.net/tests/tornevall_network/',
-        'httpcode'    => 'developer.tornevall.net/tests/tornevall_network/http.php',
-        'soap'        => 'developer.tornevall.net/tests/tornevall_network/index.wsdl?wsdl',
+        'tests'       => 'tests.netcurl.org/tornevall_network/',
+        'httpcode'    => 'tests.netcurl.org/tornevall_network/http.php',
+        'soap'        => 'tests.netcurl.org/tornevall_network/index.wsdl?wsdl',
         'selfsigned'  => 'https://dev-ssl-self.tornevall.nu',
         'mismatching' => 'https://dev-ssl-mismatch.tornevall.nu',
     );

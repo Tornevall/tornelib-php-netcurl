@@ -724,7 +724,7 @@ class curlTest extends TestCase
     function followRedirectEnabled()
     {
         $this->pemDefault();
-        $redirectResponse = $this->CURL->doGet("http://developer.tornevall.net/tests/tornevall_network/redirect.php?run");
+        $redirectResponse = $this->CURL->doGet("http://tests.netcurl.org/tornevall_network/redirect.php?run");
         $redirectedUrls = $this->CURL->getRedirectedUrls();
         static::assertTrue(intval($this->CURL->getCode($redirectResponse)) >= 300 && intval($this->CURL->getCode($redirectResponse)) <= 350 && count($redirectedUrls));
     }
@@ -738,7 +738,7 @@ class curlTest extends TestCase
     {
         $this->pemDefault();
         $this->CURL->setEnforceFollowLocation(false);
-        $redirectResponse = $this->CURL->doGet("http://developer.tornevall.net/tests/tornevall_network/redirect.php?run");
+        $redirectResponse = $this->CURL->doGet("http://tests.netcurl.org/tornevall_network/redirect.php?run");
         $redirectedUrls = $this->CURL->getRedirectedUrls();
         static::assertTrue($this->CURL->getCode($redirectResponse) >= 300 && $this->CURL->getCode($redirectResponse) <= 350 && !preg_match("/rerun/i",
                 $this->CURL->getBody($redirectResponse)) && count($redirectedUrls));
@@ -760,7 +760,7 @@ class curlTest extends TestCase
         $this->CURL->setFlag('FOLLOWLOCATION_INTERNAL');
         $this->CURL->setEnforceFollowLocation(false);
         /** @var MODULE_CURL $redirectResponse */
-        $redirectResponse = $this->CURL->doGet("http://developer.tornevall.net/tests/tornevall_network/redirect.php?run");
+        $redirectResponse = $this->CURL->doGet("http://tests.netcurl.org/tornevall_network/redirect.php?run");
         $redirectedUrls = $this->CURL->getRedirectedUrls();
         $responseCode = $this->CURL->getCode($redirectResponse);
         $curlBody = $this->CURL->getBody();
@@ -776,7 +776,7 @@ class curlTest extends TestCase
     {
         $this->pemDefault();
         $this->CURL->setEnforceFollowLocation(false);
-        $redirectResponse = $this->CURL->doGet("http://developer.tornevall.net/tests/tornevall_network/redirect.php?run");
+        $redirectResponse = $this->CURL->doGet("http://tests.netcurl.org/tornevall_network/redirect.php?run");
         $redirectedUrls = $this->CURL->getRedirectedUrls();
         static::assertTrue($this->CURL->getCode($redirectResponse) >= 300 && $this->CURL->getCode($redirectResponse) <= 350 && !preg_match("/rerun/i",
                 $this->CURL->getBody($redirectResponse)) && count($redirectedUrls));
@@ -794,7 +794,7 @@ class curlTest extends TestCase
         $this->CURL->setEnforceFollowLocation(true);
         $this->CURL->setCurlOpt(CURLOPT_FOLLOWLOCATION,
             false);  // This is the doer since there are internal protection against the above enforcer
-        $redirectResponse = $this->CURL->doGet("http://developer.tornevall.net/tests/tornevall_network/redirect.php?run");
+        $redirectResponse = $this->CURL->doGet("http://tests.netcurl.org/tornevall_network/redirect.php?run");
         $redirectedUrls = $this->CURL->getRedirectedUrls();
         static::assertTrue($this->CURL->getCode($redirectResponse) >= 300 && $this->CURL->getCode($redirectResponse) <= 350 && count($redirectedUrls));
     }
@@ -844,7 +844,7 @@ class curlTest extends TestCase
         $this->pemDefault();
         $this->CURL->setThrowableHttpCodes();
         try {
-            $this->CURL->doGet("https://developer.tornevall.net/tests/tornevall_network/http.php?code=503");
+            $this->CURL->doGet("https://tests.netcurl.org/tornevall_network/http.php?code=503");
         } catch (\Exception $e) {
             static::assertTrue($e->getCode() == 503);
 
@@ -1249,7 +1249,7 @@ class curlTest extends TestCase
         $curlobject = $this->CURL->doGet("http://identifier.tornevall.net/?json");
         $this->CURL->setSimplifiedResponse();
         $responseobject = $this->CURL->doGet("http://identifier.tornevall.net/?json");
-        $callWithBody = $this->CURL->doGet("https://developer.tornevall.net/tests/tornevall_network/simple.html");
+        $callWithBody = $this->CURL->doGet("https://tests.netcurl.org/tornevall_network/simple.html");
 
         // If we still want to see "oldstyle"-data, we can always call the core object directly
         $urlGetCode = $this->CURL->getCode();

@@ -47,7 +47,7 @@ class skippablePhpTest extends TestCase
         }
         if (filter_var(ini_get('safe_mode'), FILTER_VALIDATE_BOOLEAN) === true) {
             //$this->pemDefault();
-            $redirectResponse = $this->CURL->doGet("http://developer.tornevall.net/tests/tornevall_network/redirect.php?run");
+            $redirectResponse = $this->CURL->doGet("http://tests.netcurl.org/tornevall_network/redirect.php?run");
             $redirectedUrls   = $this->CURL->getRedirectedUrls();
             static::assertTrue($this->CURL->getCode($redirectResponse) >= 300 && $this->CURL->getCode($redirectResponse) <= 350 && ! preg_match("/rerun/i",
                     $this->CURL->getBody($redirectResponse)) && count($redirectedUrls));

@@ -1686,7 +1686,6 @@ if (! class_exists( 'MODULE_CURL', NETCURL_CLASS_EXISTS_AUTOLOAD) && ! class_exi
 		 *
 		 * @return array
 		 * @throws \Exception
-		 * @link  http://developer.tornevall.net/apigen/TorneLIB-5.0/class-TorneLIB.Tornevall_cURL.html sslGetOptionsStream() is a part of TorneLIB 5.0, described here
 		 * @since 6.0
 		 */
 		public function sslGetOptionsStream( $optionsArray = array(), $addonContextData = array() ) {

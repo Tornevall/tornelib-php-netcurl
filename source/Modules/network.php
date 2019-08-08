@@ -796,4 +796,3 @@ if (!class_exists('MODULE_NETWORK', NETCURL_CLASS_EXISTS_AUTOLOAD) &&
         }
     }
 }
-

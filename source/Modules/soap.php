@@ -26,10 +26,8 @@
 namespace TorneLIB;
 
 if (!class_exists('MODULE_SOAP', NETCURL_CLASS_EXISTS_AUTOLOAD) &&
-    !class_exists('TorneLIB\MODULE_SOAP',
-        NETCURL_CLASS_EXISTS_AUTOLOAD)
+    !class_exists('TorneLIB\MODULE_SOAP', NETCURL_CLASS_EXISTS_AUTOLOAD)
 ) {
-
     if (!defined('NETCURL_SIMPLESOAP_RELEASE')) {
         define('NETCURL_SIMPLESOAP_RELEASE', '6.0.6');
     }
@@ -460,24 +458,6 @@ if (!class_exists('MODULE_SOAP', NETCURL_CLASS_EXISTS_AUTOLOAD) &&
         public function getSoapFault()
         {
             return $this->soapFaultExceptionObject;
-        }
-    }
-
-    if (!class_exists('Tornevall_SimpleSoap', NETCURL_CLASS_EXISTS_AUTOLOAD) &&
-        !class_exists('TorneLIB\Tornevall_SimpleSoap', NETCURL_CLASS_EXISTS_AUTOLOAD)
-    ) {
-        /**
-         * Class MODULE_CURL
-         *
-         * @package    TorneLIB
-         * @deprecated 6.0.20 Use MODULE_SOAP
-         */
-        class Tornevall_SimpleSoap extends MODULE_SOAP
-        {
-            function __construct(string $Url, $that = null)
-            {
-                parent::__construct($Url, $that);
-            }
         }
     }
 }

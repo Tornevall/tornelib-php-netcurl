@@ -37,7 +37,8 @@
       "source/Model/Type/responses.php",
       "source/Modules/network.php",
       "source/Modules/curl.php",
-      "source/Modules/soap.php"
+      "source/Modules/soap.php",
+      "source/Modules/soap_dep.php"
     ],
     "psr-4": {
       "TorneLIB\\": "source"

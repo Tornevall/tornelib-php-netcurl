@@ -25,8 +25,9 @@
 
 namespace TorneLIB;
 
-if (!class_exists('MODULE_CURL', NETCURL_CLASS_EXISTS_AUTOLOAD) && !class_exists('TorneLIB\MODULE_CURL',
-        NETCURL_CLASS_EXISTS_AUTOLOAD)) {
+if (!class_exists('MODULE_CURL', NETCURL_CLASS_EXISTS_AUTOLOAD) &&
+    !class_exists('TorneLIB\MODULE_CURL', NETCURL_CLASS_EXISTS_AUTOLOAD)
+) {
     if (!defined('NETCURL_CURL_RELEASE')) {
         define('NETCURL_CURL_RELEASE', '6.0.23RC1');
     }
@@ -54,8 +55,9 @@ if (!class_exists('MODULE_CURL', NETCURL_CLASS_EXISTS_AUTOLOAD) && !class_exists
         /**
          * Default settings when initializing our curlsession.
          *
-         * Since v6.0.2 no urls are followed by default, it is set internally by first checking PHP security before setting this up.
-         * The reason of the change is not only the security, it is also about inheritage of options to SOAPClient.
+         * Since v6.0.2 no urls are followed by default, it is set internally by first checking PHP security before
+         * setting this up. The reason of the change is not only the security, it is also about inheritage of options
+         * to SOAPClient.
          *
          * @var array
          */
@@ -132,7 +134,8 @@ if (!class_exists('MODULE_CURL', NETCURL_CLASS_EXISTS_AUTOLOAD) && !class_exists
         protected $NETCURL_SIMPLIFY_DOMCONTENT = false;
 
         /**
-         * Do not include Dom content in the basic parser (default = true, as it might destroy output data in legacy products)
+         * Do not include DOMContent in the basic parser.
+         * Default = true, as it might destroy output data in legacy products.
          *
          * @var bool $NETCURL_PROHIBIT_DOMCONTENT_PARSE
          * @since 6.0.22
@@ -486,7 +489,9 @@ if (!class_exists('MODULE_CURL', NETCURL_CLASS_EXISTS_AUTOLOAD) && !class_exists
             if (!$this->isFlag('NOTHROWABLES')) {
                 $this->setThrowableHttpCodes();
             }
-            if (!is_object($this->DRIVER->getDriver()) && $this->DRIVER->getDriver() == NETCURL_NETWORK_DRIVERS::DRIVER_CURL) {
+            if (!is_object($this->DRIVER->getDriver()) &&
+                $this->DRIVER->getDriver() == NETCURL_NETWORK_DRIVERS::DRIVER_CURL
+            ) {
                 $this->initCurl();
             }
 
@@ -525,8 +530,11 @@ if (!class_exists('MODULE_CURL', NETCURL_CLASS_EXISTS_AUTOLOAD) && !class_exists
         {
             $authFlags = $this->getFlag('auth');
             if (is_array($authFlags) && isset($authFlags['username']) && isset($authFlags['password'])) {
-                $this->setAuthentication($authFlags['username'], $authFlags['password'],
-                    isset($authFlags['type']) ? $authFlags['type'] : NETCURL_AUTH_TYPES::AUTHTYPE_BASIC);
+                $this->setAuthentication(
+                    $authFlags['username'],
+                    $authFlags['password'],
+                    isset($authFlags['type']) ? $authFlags['type'] : NETCURL_AUTH_TYPES::AUTHTYPE_BASIC
+                );
             }
         }
 
@@ -547,7 +555,8 @@ if (!class_exists('MODULE_CURL', NETCURL_CLASS_EXISTS_AUTOLOAD) && !class_exists
         }
 
         /**
-         * Ask this module whether there are available modules for use with http calls or not. Can also be set up to return a complete list of modules
+         * Ask this module whether there are available modules for use with http calls or not.
+         * Can also be set up to return a complete list of modules.
          *
          * @return bool|array
          * @since      6.0.14
@@ -581,18 +590,20 @@ if (!class_exists('MODULE_CURL', NETCURL_CLASS_EXISTS_AUTOLOAD) && !class_exists
         private function isCurl()
         {
             try {
-                if (!is_object($this->DRIVER->getDriver()) && $this->DRIVER->getDriver() == NETCURL_NETWORK_DRIVERS::DRIVER_CURL) {
+                if (!is_object($this->DRIVER->getDriver()) &&
+                    $this->DRIVER->getDriver() == NETCURL_NETWORK_DRIVERS::DRIVER_CURL
+                ) {
                     return true;
                 }
             } catch (\Exception $e) {
-
             }
 
             return false;
         }
 
         /**
-         * Automatically find the best suited driver for communication IF curl does not exist. If curl exists, internal driver will always be picked as first option
+         * Automatically find the best suited driver for communication IF curl does not exist.
+         * If curl exists, internal driver will always be picked as first option.
          *
          * @return int|null|string
          * @throws \Exception
@@ -653,7 +664,8 @@ if (!class_exists('MODULE_CURL', NETCURL_CLASS_EXISTS_AUTOLOAD) && !class_exists
         /**
          * Enable or disable the ability to let netcurl throw exceptions on places where it is not always necessary.
          *
-         * This function has minor effects on newer netcurls since throwing exxceptions should be considered necessary in many situations to handle errors.
+         * This function has minor effects on newer netcurls since throwing exxceptions should be considered necessary
+         * in many situations to handle errors.
          *
          * @param bool $netCurlCanThrow
          *
@@ -678,7 +690,9 @@ if (!class_exists('MODULE_CURL', NETCURL_CLASS_EXISTS_AUTOLOAD) && !class_exists
         /**
          * When you just need responses and nothing else (except for exceptions)
          *
-         * Activation means you will always get a proper response back, on http requests (defaults to parsed content, but if the parse is empty, we will fall back on the body parts and if bodyparts is empty netcurl will fall back to an array called simplifiedContainer).
+         * Activation means you will always get a proper response back, on http requests.
+         * Defaults to parsed content, but if the parse is empty, we will fall back on the body parts and if bodyparts
+         * is empty netcurl will fall back to an array called simplifiedContainer.
          *
          * @param bool $simplifyResponses
          * @param bool $allowDomTree
@@ -729,7 +743,7 @@ if (!class_exists('MODULE_CURL', NETCURL_CLASS_EXISTS_AUTOLOAD) && !class_exists
          * @return bool
          * @since 6.0
          */
-        function isAssoc(array $arrayData)
+        public function isAssoc(array $arrayData)
         {
             if ([] === $arrayData) {
                 return false;
@@ -946,7 +960,6 @@ if (!class_exists('MODULE_CURL', NETCURL_CLASS_EXISTS_AUTOLOAD) && !class_exists
 
                 return false;
             }
-
         }
 
         /**
@@ -999,8 +1012,10 @@ if (!class_exists('MODULE_CURL', NETCURL_CLASS_EXISTS_AUTOLOAD) && !class_exists
 
                 return true;
             }
-            throw new \Exception("Flags can not be empty",
-                $this->NETWORK->getExceptionCode('NETCURL_SETFLAG_KEY_EMPTY'));
+            throw new \Exception(
+                "Flags can not be empty",
+                $this->NETWORK->getExceptionCode('NETCURL_SETFLAG_KEY_EMPTY')
+            );
         }
 
         /**
@@ -1153,7 +1168,7 @@ if (!class_exists('MODULE_CURL', NETCURL_CLASS_EXISTS_AUTOLOAD) && !class_exists
         //// SESSION
 
         /**
-         * Returns an ongoing cUrl session - Normally you may get this from initSession (and normally you don't need this at all)
+         * Returns an ongoing cUrl session - Normally you may get this from initSession (and normally you don't need this at all).
          *
          * @return null
          * @since 6.0
@@ -1469,8 +1484,10 @@ if (!class_exists('MODULE_CURL', NETCURL_CLASS_EXISTS_AUTOLOAD) && !class_exists
             }
 
             // NETCURL_CURL_CLIENTNAME . '-' . NETCURL_RELEASE . "/" . __CLASS__ . "-" . NETCURL_CURL_RELEASE
-            $this->HTTP_USER_AGENT = implode(" ",
-                    $this->CUSTOM_USER_AGENT) . " +TorneLIB-NETCURL-" . NETCURL_RELEASE . " +" . NETCURL_CURL_CLIENTNAME . "-" . NETCURL_CURL_RELEASE . " (" . $this->netCurlUrl . ")";
+            $this->HTTP_USER_AGENT = implode(
+                    " ",
+                    $this->CUSTOM_USER_AGENT
+                ) . " +TorneLIB-NETCURL-" . NETCURL_RELEASE . " +" . NETCURL_CURL_CLIENTNAME . "-" . NETCURL_CURL_RELEASE . " (" . $this->netCurlUrl . ")";
         }
 
         /**
@@ -1539,7 +1556,7 @@ if (!class_exists('MODULE_CURL', NETCURL_CLASS_EXISTS_AUTOLOAD) && !class_exists
          * Customize the curlopt configuration
          *
          * @param array|string $curlOptArrayOrKey If arrayed, there will be multiple options at once
-         * @param null $curlOptValue If not null, and the first parameter is not an array, this is taken as a single update value
+         * @param null $curlOptValue If not null, and the first parameter is not an array, this is taken as a single update value.
          *
          * @throws \Exception
          * @since 6.0
@@ -1676,8 +1693,10 @@ if (!class_exists('MODULE_CURL', NETCURL_CLASS_EXISTS_AUTOLOAD) && !class_exists
             if ($this->isFlag('NETCURL_ALLOW_VERSION_REQUESTS')) {
                 return NETCURL_CURL_RELEASE . "," . NETCURL_CURL_MODIFY;
             }
-            throw new \Exception(NETCURL_CURL_CLIENTNAME . " internalReleaseException [" . __CLASS__ . "]: Version requests are not allowed in current state (permissions required)",
-                403);
+            throw new \Exception(
+                NETCURL_CURL_CLIENTNAME . " internalReleaseException [" . __CLASS__ . "]: Version requests are not allowed in current state (permissions required)",
+                403
+            );
         }
 
         /**
@@ -2028,8 +2047,10 @@ if (!class_exists('MODULE_CURL', NETCURL_CLASS_EXISTS_AUTOLOAD) && !class_exists
             if ($ipType == "0") {
                 // If the ip type is 0 and it shows up there is something defined here, throw an exception.
                 if (!empty($UseIp)) {
-                    throw new \Exception(NETCURL_CURL_CLIENTNAME . " " . __FUNCTION__ . " exception: " . $UseIp . " is not a valid ip-address",
-                        $this->NETWORK->getExceptionCode('NETCURL_IPCONFIG_NOT_VALID'));
+                    throw new \Exception(
+                        NETCURL_CURL_CLIENTNAME . " " . __FUNCTION__ . " exception: " . $UseIp . " is not a valid ip-address",
+                        $this->NETWORK->getExceptionCode('NETCURL_IPCONFIG_NOT_VALID')
+                    );
                 }
             } else {
                 $this->CURL_IP_ADDRESS = $UseIp;
@@ -2225,9 +2246,14 @@ if (!class_exists('MODULE_CURL', NETCURL_CLASS_EXISTS_AUTOLOAD) && !class_exists
 
 
             if ($this->NETCURL_RETURN_RESPONSE_TYPE == NETCURL_RESPONSETYPE::RESPONSETYPE_OBJECT) {
-                return new NETCURL_HTTP_OBJECT($arrayedResponse['header'], $arrayedResponse['body'],
-                    $arrayedResponse['code'], $arrayedResponse['parsed'], $this->CURL_STORED_URL,
-                    $this->CURL_IP_ADDRESS);
+                return new NETCURL_HTTP_OBJECT(
+                    $arrayedResponse['header'],
+                    $arrayedResponse['body'],
+                    $arrayedResponse['code'],
+                    $arrayedResponse['parsed'],
+                    $this->CURL_STORED_URL,
+                    $this->CURL_IP_ADDRESS
+                );
             }
 
             if ($this->NETCURL_SIMPLIFY_RESPONSES) {
@@ -2407,8 +2433,10 @@ if (!class_exists('MODULE_CURL', NETCURL_CLASS_EXISTS_AUTOLOAD) && !class_exists
             // If the input response is an array and contains the deprecated editon of an error code
             if (is_array($inputResponse)) {
                 if (isset($inputResponse['code']) && $inputResponse['code'] >= 400) {
-                    throw new \Exception(NETCURL_CURL_CLIENTNAME . " parseResponse exception - Unexpected response code from server: " . $inputResponse['code'],
-                        $inputResponse['code']);
+                    throw new \Exception(
+                        NETCURL_CURL_CLIENTNAME . " parseResponse exception - Unexpected response code from server: " . $inputResponse['code'],
+                        $inputResponse['code']
+                    );
                 }
             }
 
@@ -2644,8 +2672,10 @@ if (!class_exists('MODULE_CURL', NETCURL_CLASS_EXISTS_AUTOLOAD) && !class_exists
                     if ($hasRecursion) {
                         return $Parsed;
                     } else {
-                        throw new \Exception(NETCURL_CURL_CLIENTNAME . " getParsedValue exception: Requested key was not found in parsed response",
-                            $this->NETWORK->getExceptionCode('NETCURL_GETPARSEDVALUE_KEY_NOT_FOUND'));
+                        throw new \Exception(
+                            NETCURL_CURL_CLIENTNAME . " getParsedValue exception: Requested key was not found in parsed response",
+                            $this->NETWORK->getExceptionCode('NETCURL_GETPARSEDVALUE_KEY_NOT_FOUND')
+                        );
                     }
                 }
             }
@@ -2744,7 +2774,7 @@ if (!class_exists('MODULE_CURL', NETCURL_CLASS_EXISTS_AUTOLOAD) && !class_exists
          * @throws \Exception
          * @since 6.0.20
          */
-        function doRepeat()
+        public function doRepeat()
         {
             if ($this->NETCURL_POST_METHOD == NETCURL_POST_METHODS::METHOD_POST) {
                 return $this->doPost($this->CURL_STORED_URL, $this->POST_DATA_REAL, $this->NETCURL_POST_DATA_TYPE);
@@ -2753,8 +2783,11 @@ if (!class_exists('MODULE_CURL', NETCURL_CLASS_EXISTS_AUTOLOAD) && !class_exists
                     return $this->doPost($this->CURL_STORED_URL, $this->POST_DATA_REAL, $this->NETCURL_POST_DATA_TYPE);
                 } else {
                     if ($this->NETCURL_POST_METHOD == NETCURL_POST_METHODS::METHOD_DELETE) {
-                        return $this->doPost($this->CURL_STORED_URL, $this->POST_DATA_REAL,
-                            $this->NETCURL_POST_DATA_TYPE);
+                        return $this->doPost(
+                            $this->CURL_STORED_URL,
+                            $this->POST_DATA_REAL,
+                            $this->NETCURL_POST_DATA_TYPE
+                        );
                     } else {
                         // Go GET by deault ($this->NETCURL_POST_METHOD == NETCURL_POST_METHODS::METHOD_GET)
                         return $this->doGet($this->CURL_STORED_URL, $this->NETCURL_POST_DATA_TYPE);
@@ -2949,7 +2982,9 @@ if (!class_exists('MODULE_CURL', NETCURL_CLASS_EXISTS_AUTOLOAD) && !class_exists
             if ($POST_AS_DATATYPE == NETCURL_POST_DATATYPES::DATATYPE_JSON) {
                 $parsedPostData = $this->transformPostDataJson();
             } else {
-                if (($POST_AS_DATATYPE == NETCURL_POST_DATATYPES::DATATYPE_XML || $POST_AS_DATATYPE == NETCURL_POST_DATATYPES::DATATYPE_SOAP_XML)) {
+                if (($POST_AS_DATATYPE == NETCURL_POST_DATATYPES::DATATYPE_XML ||
+                    $POST_AS_DATATYPE == NETCURL_POST_DATATYPES::DATATYPE_SOAP_XML)
+                ) {
                     $parsedPostData = $this->transformPostDataXml();
                 }
             }
@@ -3195,8 +3230,9 @@ if (!class_exists('MODULE_CURL', NETCURL_CLASS_EXISTS_AUTOLOAD) && !class_exists
             if (!$this->getIsSecure(true)) {
                 // To disable the default behaviour of this function, use setEnforceFollowLocation([bool]).
                 if ($this->FOLLOW_LOCATION_ENABLE) {
-                    // Since setCurlOptInternal is not an overrider, using the overrider here, will have no effect on the curlopt setting
-                    // as it has already been set from our top defaults. This has to be pushed in, by force.
+                    // Since setCurlOptInternal is not an overrider, using the overrider here, will have no effect on
+                    // the curlopt setting as it has already been set from our top defaults. This has to be pushed in,
+                    // by force.
                     $this->setCurlOpt(CURLOPT_FOLLOWLOCATION, $this->FOLLOW_LOCATION_ENABLE);
                 }
             }
@@ -3216,7 +3252,10 @@ if (!class_exists('MODULE_CURL', NETCURL_CLASS_EXISTS_AUTOLOAD) && !class_exists
             if (!empty($this->POSTDATACONTAINER)) {
                 $this->setCurlOpt(CURLOPT_POSTFIELDS, $this->POSTDATACONTAINER);
             }
-            if ($this->NETCURL_POST_METHOD == NETCURL_POST_METHODS::METHOD_POST || $this->NETCURL_POST_METHOD == NETCURL_POST_METHODS::METHOD_PUT || $this->NETCURL_POST_METHOD == NETCURL_POST_METHODS::METHOD_DELETE) {
+            if ($this->NETCURL_POST_METHOD == NETCURL_POST_METHODS::METHOD_POST ||
+                $this->NETCURL_POST_METHOD == NETCURL_POST_METHODS::METHOD_PUT ||
+                $this->NETCURL_POST_METHOD == NETCURL_POST_METHODS::METHOD_DELETE
+            ) {
                 if ($this->NETCURL_POST_METHOD == NETCURL_POST_METHODS::METHOD_PUT) {
                     $this->setCurlOpt(CURLOPT_CUSTOMREQUEST, 'PUT');
                 } else {
@@ -3243,7 +3282,10 @@ if (!class_exists('MODULE_CURL', NETCURL_CLASS_EXISTS_AUTOLOAD) && !class_exists
                     $this->NETCURL_HEADERS_SYSTEM_DEFINED['Content-Length'] = strlen($this->POST_DATA_HANDLED);
                     $this->setCurlOpt(CURLOPT_POSTFIELDS, $this->POST_DATA_HANDLED);  // overwrite old
                 } else {
-                    if (($this->NETCURL_POST_DATA_TYPE == NETCURL_POST_DATATYPES::DATATYPE_XML || $this->NETCURL_POST_DATA_TYPE == NETCURL_POST_DATATYPES::DATATYPE_SOAP_XML)) {
+                    if ((
+                        $this->NETCURL_POST_DATA_TYPE == NETCURL_POST_DATATYPES::DATATYPE_XML ||
+                        $this->NETCURL_POST_DATA_TYPE == NETCURL_POST_DATATYPES::DATATYPE_SOAP_XML)
+                    ) {
                         $this->NETCURL_HEADERS_SYSTEM_DEFINED['Content-Type'] = 'text/xml'; // ; charset=utf-8
                         $this->NETCURL_HEADERS_SYSTEM_DEFINED['Content-Length'] = is_string($this->NETCURL_POST_DATA) ? strlen($this->NETCURL_POST_DATA) : 0;
                         $this->setCurlOpt(CURLOPT_CUSTOMREQUEST, 'POST');
@@ -3261,7 +3303,8 @@ if (!class_exists('MODULE_CURL', NETCURL_CLASS_EXISTS_AUTOLOAD) && !class_exists
          */
         private function internal_curl_configure_timeouts()
         {
-            // Self set timeouts, making sure the timeout set in the public is an integer over 0. Otherwise this falls back to the curldefauls.
+            // Self set timeouts, making sure the timeout set in the public is an integer over 0.
+            // Otherwise this falls back to the curldefauls.
             if (isset($this->NETCURL_CURL_TIMEOUT) && $this->NETCURL_CURL_TIMEOUT > 0) {
                 $this->setCurlOpt(CURLOPT_CONNECTTIMEOUT, ceil($this->NETCURL_CURL_TIMEOUT / 2));
                 $this->setCurlOpt(CURLOPT_TIMEOUT, ceil($this->NETCURL_CURL_TIMEOUT));
@@ -3581,7 +3624,7 @@ if (!class_exists('MODULE_CURL', NETCURL_CLASS_EXISTS_AUTOLOAD) && !class_exists
                 $isSoapRequest = true;
             }
 
-            // SOAP HANDLER: Override with SoapClient just before the real curl_exec is the most proper way to handle inheritages
+            // SOAP HANDLER: Override with SoapClient just before the real curl_exec is the most proper way to handle inheritages.
             if ($isSoapRequest) {
                 if (!$this->hasSoap()) {
                     throw new \Exception(NETCURL_CURL_CLIENTNAME . " " . __FUNCTION__ . " exception: SoapClient is not available in this system",
@@ -3740,8 +3783,10 @@ if (!class_exists('MODULE_CURL', NETCURL_CLASS_EXISTS_AUTOLOAD) && !class_exists
 
                 switch ($getSoapResponseException->getCode()) {
                     default:
-                        throw new \Exception(NETCURL_CURL_CLIENTNAME . " exception from SoapClient: [" . $getSoapResponseException->getCode() . "] " . $getSoapResponseException->getMessage(),
-                            $getSoapResponseException->getCode());
+                        throw new \Exception(
+                            NETCURL_CURL_CLIENTNAME . " exception from SoapClient: [" . $getSoapResponseException->getCode() . "] " . $getSoapResponseException->getMessage(),
+                            $getSoapResponseException->getCode()
+                        );
                 }
 
             }
@@ -3873,8 +3918,10 @@ if (!class_exists('MODULE_CURL', NETCURL_CLASS_EXISTS_AUTOLOAD) && !class_exists
 
     }
 
-    if (!class_exists('Tornevall_cURL', NETCURL_CLASS_EXISTS_AUTOLOAD) && !class_exists('TorneLIB\Tornevall_cURL',
-            NETCURL_CLASS_EXISTS_AUTOLOAD)) {
+    if (!class_exists('Tornevall_cURL', NETCURL_CLASS_EXISTS_AUTOLOAD) &&
+        !class_exists('TorneLIB\Tornevall_cURL',
+            NETCURL_CLASS_EXISTS_AUTOLOAD)
+    ) {
         /**
          * Class MODULE_CURL
          *

@@ -4,8 +4,9 @@
     "minimum-stability": "stable",
     "license": "Apache-2.0",
     "require": {
-        "php": ">=5.3",
-        "tornevall/tornelib-php-crypto": "^6.0"
+        "php": ">=5.4",
+        "tornevall/tornelib-php-crypto": "^6.0",
+        "zendframework/zend-http": "^2.9"
     },
     "authors": [
         {

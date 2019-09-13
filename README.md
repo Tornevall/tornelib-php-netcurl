@@ -1,19 +1,15 @@
-# NETCURL 6.1-series
+# NETCURL 6.1
 
 [Full documents are located here](https://docs.tornevall.net/x/KwCy)
 
 
 ## Compatibility span (Supported PHP versions)
 
-This library is compatible with PHP releases up to PHP 7.3. However, it is no longer entire clear on how far back in history we actually reach. PHP 5.3 has been confirmed, but there are no longer any guarantee for anything to work with PHP-releases where the official support has been expired for several years.
-
-## Self compatibility
-
-This library should (or probably must) be compatible with NetCURL 6.0 - NetCURL 6.1 is just a better cleaned up release of 6.0 as I'm convinced that data can be picked up differently and faster than in the prior version. Besides of this, there's a need of far better way handling customized ip interfaces since this module will be part of the upcoming project NETFILTER and a anti proxy scanner.
+This library is compatible with PHP releases from version 5.4 up to PHP 7.3 (because of the old grumpy developer coding syntax). Since the whole PHP 5 series are going obsolete you should however consider upgrading if not already done. It has also been built with NETCURL 6.0 in mind, where older engines may be replaced without any breaks.
 
 ### Requirements and dependencies
 
-In its initial state, there shoule not be any requirement as this module should find its own way out on the internet. Prior versions of NETCURL had basic requirements in CURL (that's why it's called NETCURL). However, CURL support should not actually be required as there are fallbacks to internal PHP functions where it is necessary.
+In its initial state, there are basically no requirements as this module tries to pick the best available driver when running. The prior version (6.0) has a basic CURL requirement (that's why it's called NETCURL) with some kind of unstated fallback to other drivers.
 
 ### What NETCURL should support
 
@@ -76,6 +72,15 @@ This is the recommended way (and only officially supported) of installing the pa
 
 * [This document and furthermore information](https://docs.tornevall.net/x/CYBiAQ).
 * [MODULE_CURL](https://docs.tornevall.net/x/EoBiAQ)
+
+
+# Changes
+
+Version 6.1 follows the standard of what's written in 6.0 - there is a primary module that handles all actions regardless of which driver installed. However, 6.0 is built on a curl-only-core with only halfway fixed PSR-supported code. For example, autoloading has a few workarounds to properly work with platforms that requires PSR-based code. In the prior release the class_exists-control rather generates a lot of warning rather than "doing it right". In 6.1 the order of behaviour is changed and all curl-only-based code has been restructured.
+
+## Breaking changes?
+
+As far as I see it, 6.1 is built to not break systems that runs on 6.0 except for possibly if someone is using PHP 5.3 which is highly obsolete as of a load of years back in time.
 
 
 # Deprecations

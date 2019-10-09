@@ -20,7 +20,7 @@
  * All since-markings are based on the major release of NetCurl.
  *
  * @package TorneLIB
- * @version 6.0.23RC1
+ * @version 6.0.24
  */
 
 namespace TorneLIB;
@@ -29,7 +29,7 @@ if (!class_exists('MODULE_CURL', NETCURL_CLASS_EXISTS_AUTOLOAD) &&
     !class_exists('TorneLIB\MODULE_CURL', NETCURL_CLASS_EXISTS_AUTOLOAD)
 ) {
     if (!defined('NETCURL_CURL_RELEASE')) {
-        define('NETCURL_CURL_RELEASE', '6.0.23RC1');
+        define('NETCURL_CURL_RELEASE', '6.0.24');
     }
     if (!defined('NETCURL_CURL_MODIFY')) {
         define('NETCURL_CURL_MODIFY', '20180822');
@@ -431,23 +431,18 @@ if (!class_exists('MODULE_CURL', NETCURL_CLASS_EXISTS_AUTOLOAD) &&
             $this->getSslDriver();
 
             $this->HTTP_USER_AGENT = $this->userAgents['Mozilla'] . ' ' . NETCURL_CURL_CLIENTNAME . '-' . NETCURL_RELEASE . "/" . __CLASS__ . "-" . NETCURL_CURL_RELEASE . ' (' . $this->netCurlUrl . ')';
+
             if (!empty($requestUrl)) {
                 $this->CURL_STORED_URL = $requestUrl;
                 $InstantResponse = null;
                 if ($requestPostMethod == NETCURL_POST_METHODS::METHOD_GET) {
                     $InstantResponse = $this->doGet($requestUrl);
-                } else {
-                    if ($requestPostMethod == NETCURL_POST_METHODS::METHOD_POST) {
-                        $InstantResponse = $this->doPost($requestUrl, $requestPostData);
-                    } else {
-                        if ($requestPostMethod == NETCURL_POST_METHODS::METHOD_PUT) {
-                            $InstantResponse = $this->doPut($requestUrl, $requestPostData);
-                        } else {
-                            if ($requestPostMethod == NETCURL_POST_METHODS::METHOD_DELETE) {
-                                $InstantResponse = $this->doDelete($requestUrl, $requestPostData);
-                            }
-                        }
-                    }
+                } elseif ($requestPostMethod == NETCURL_POST_METHODS::METHOD_POST) {
+                    $InstantResponse = $this->doPost($requestUrl, $requestPostData);
+                } elseif ($requestPostMethod == NETCURL_POST_METHODS::METHOD_PUT) {
+                    $InstantResponse = $this->doPut($requestUrl, $requestPostData);
+                } elseif ($requestPostMethod == NETCURL_POST_METHODS::METHOD_DELETE) {
+                    $InstantResponse = $this->doDelete($requestUrl, $requestPostData);
                 }
 
                 return $InstantResponse;
@@ -589,16 +584,17 @@ if (!class_exists('MODULE_CURL', NETCURL_CLASS_EXISTS_AUTOLOAD) &&
          */
         private function isCurl()
         {
+            $return = false;
             try {
                 if (!is_object($this->DRIVER->getDriver()) &&
                     $this->DRIVER->getDriver() == NETCURL_NETWORK_DRIVERS::DRIVER_CURL
                 ) {
-                    return true;
+                    $return = true;
                 }
             } catch (\Exception $e) {
             }
 
-            return false;
+            return $return;
         }
 
         /**
@@ -756,7 +752,6 @@ if (!class_exists('MODULE_CURL', NETCURL_CLASS_EXISTS_AUTOLOAD) &&
          * Set multiple flags
          *
          * @param array $flags
-         *
          * @throws \Exception
          * @since 6.0.10
          */
@@ -780,7 +775,6 @@ if (!class_exists('MODULE_CURL', NETCURL_CLASS_EXISTS_AUTOLOAD) &&
          * Return all flags
          *
          * @return array
-         *
          * @since 6.0.10
          */
         public function getFlags()
@@ -799,6 +793,7 @@ if (!class_exists('MODULE_CURL', NETCURL_CLASS_EXISTS_AUTOLOAD) &&
         }
 
         /**
+         * @return string
          * @since 6.0.17
          */
         public function getContentType()
@@ -810,7 +805,6 @@ if (!class_exists('MODULE_CURL', NETCURL_CLASS_EXISTS_AUTOLOAD) &&
          * @param int $driverId
          * @param array $parameters
          * @param null $ownClass
-         *
          * @return int|NETCURL_DRIVERS_INTERFACE
          * @throws \Exception
          * @since 6.0.20
@@ -827,7 +821,6 @@ if (!class_exists('MODULE_CURL', NETCURL_CLASS_EXISTS_AUTOLOAD) &&
          * Returns current chosen driver (if none is preset and curl exists, we're trying to use internals)
          *
          * @param bool $byId
-         *
          * @return int|NETCURL_DRIVERS_INTERFACE
          * @throws \Exception
          * @since 6.0.15
@@ -929,7 +922,6 @@ if (!class_exists('MODULE_CURL', NETCURL_CLASS_EXISTS_AUTOLOAD) &&
                 }
 
                 return $this->setCookiePathBySystem();
-
             } catch (\Exception $e) {
                 // Something happened, so we won't try this again
                 return false;
@@ -980,7 +972,6 @@ if (!class_exists('MODULE_CURL', NETCURL_CLASS_EXISTS_AUTOLOAD) &&
                             if (is_dir($sysTempDir . "/netcurl/")) {
                                 $this->COOKIE_PATH = $sysTempDir . "/netcurl/";
                             }
-
                             return true;
                         } else {
                             return false;
@@ -2025,21 +2016,17 @@ if (!class_exists('MODULE_CURL', NETCURL_CLASS_EXISTS_AUTOLOAD) &&
             if (is_array($this->IpAddr)) {
                 if (count($this->IpAddr) == 1) {
                     $UseIp = (isset($this->IpAddr[0]) && !empty($this->IpAddr[0]) ? $this->IpAddr[0] : null);
-                } else {
-                    if (count($this->IpAddr) > 1) {
-                        if (!$this->IpAddrRandom) {
-                            // If we have multiple ip addresses in the list, but the randomizer is not active, always use the first address in the list.
-                            $UseIp = (isset($this->IpAddr[0]) && !empty($this->IpAddr[0]) ? $this->IpAddr[0] : null);
-                        } else {
-                            $IpAddrNum = rand(0, count($this->IpAddr) - 1);
-                            $UseIp = $this->IpAddr[$IpAddrNum];
-                        }
+                } elseif (count($this->IpAddr) > 1) {
+                    if (!$this->IpAddrRandom) {
+                        // If we have multiple ip addresses in the list, but the randomizer is not active, always use the first address in the list.
+                        $UseIp = (isset($this->IpAddr[0]) && !empty($this->IpAddr[0]) ? $this->IpAddr[0] : null);
+                    } else {
+                        $IpAddrNum = rand(0, count($this->IpAddr) - 1);
+                        $UseIp = $this->IpAddr[$IpAddrNum];
                     }
                 }
-            } else {
-                if (!empty($this->IpAddr)) {
-                    $UseIp = $this->IpAddr;
-                }
+            } elseif (!empty($this->IpAddr)) {
+                $UseIp = $this->IpAddr;
             }
 
             $ipType = $this->NETWORK->getArpaFromAddr($UseIp, true);
@@ -2241,7 +2228,6 @@ if (!class_exists('MODULE_CURL', NETCURL_CLASS_EXISTS_AUTOLOAD) &&
             $parsedContent = $NCP->getParsedResponse();
             $arrayedResponse['parsed'] = $parsedContent;
             $this->NETCURL_RESPONSE_CONTAINER_PARSED = $parsedContent;
-
             $this->NETCURL_CONTENT_IS_DOMCONTENT = $NCP->getIsDomContent();
 
 
@@ -2398,7 +2384,6 @@ if (!class_exists('MODULE_CURL', NETCURL_CLASS_EXISTS_AUTOLOAD) &&
         public function getParsed($inputResponse = null)
         {
             $returnThis = null;
-
             $this->getParsedExceptionCheck($inputResponse);
 
             // When curl is disabled or missing, this might be returned chained
@@ -2410,10 +2395,8 @@ if (!class_exists('MODULE_CURL', NETCURL_CLASS_EXISTS_AUTOLOAD) &&
             }
             if (is_null($inputResponse) && !empty($this->NETCURL_RESPONSE_CONTAINER_PARSED)) {
                 return $this->NETCURL_RESPONSE_CONTAINER_PARSED;
-            } else {
-                if (is_array($inputResponse)) {
-                    return $this->getParsedByDeprecated($inputResponse);
-                }
+            } elseif (is_array($inputResponse)) {
+                return $this->getParsedByDeprecated($inputResponse);
             }
 
             $returnThis = $this->getParsedUntouched($inputResponse);
@@ -2453,10 +2436,8 @@ if (!class_exists('MODULE_CURL', NETCURL_CLASS_EXISTS_AUTOLOAD) &&
         {
             if (method_exists($inputResponse, "getParsedResponse")) {
                 return $inputResponse->getParsedResponse();
-            } else {
-                if (isset($inputResponse->NETCURL_RESPONSE_CONTAINER_PARSED)) {
-                    return $inputResponse->NETCURL_RESPONSE_CONTAINER_PARSED;
-                }
+            } elseif (isset($inputResponse->NETCURL_RESPONSE_CONTAINER_PARSED)) {
+                return $inputResponse->NETCURL_RESPONSE_CONTAINER_PARSED;
             }
 
             return null;
@@ -2489,11 +2470,9 @@ if (!class_exists('MODULE_CURL', NETCURL_CLASS_EXISTS_AUTOLOAD) &&
             if (is_array($inputResponse)) {
                 // This might already be parsed, if the array reaches this point
                 return $inputResponse;
-            } else {
-                if (is_object($inputResponse)) {
-                    // This is an object. Either it is ourselves or it is an already parsed object
-                    return $inputResponse;
-                }
+            } elseif (is_object($inputResponse)) {
+                // This is an object. Either it is ourselves or it is an already parsed object
+                return $inputResponse;
             }
 
             return null;
@@ -2513,10 +2492,8 @@ if (!class_exists('MODULE_CURL', NETCURL_CLASS_EXISTS_AUTOLOAD) &&
 
             if (is_null($ResponseContent) && !empty($this->NETCURL_RESPONSE_CONTAINER_CODE)) {
                 return (int)$this->NETCURL_RESPONSE_CONTAINER_CODE;
-            } else {
-                if (isset($ResponseContent['code'])) {
-                    return (int)$ResponseContent['code'];
-                }
+            } elseif (isset($ResponseContent['code'])) {
+                return (int)$ResponseContent['code'];
             }
 
             return 0;
@@ -2556,10 +2533,8 @@ if (!class_exists('MODULE_CURL', NETCURL_CLASS_EXISTS_AUTOLOAD) &&
 
             if (is_null($ResponseContent) && !empty($this->NETCURL_RESPONSE_CONTAINER_BODY)) {
                 return $this->NETCURL_RESPONSE_CONTAINER_BODY;
-            } else {
-                if (isset($ResponseContent['body'])) {
-                    return $ResponseContent['body'];
-                }
+            } elseif (isset($ResponseContent['body'])) {
+                return $ResponseContent['body'];
             }
 
             return null;
@@ -2597,10 +2572,8 @@ if (!class_exists('MODULE_CURL', NETCURL_CLASS_EXISTS_AUTOLOAD) &&
 
             if (is_null($ResponseContent) && !empty($this->CURL_STORED_URL)) {
                 return $this->CURL_STORED_URL;
-            } else {
-                if (isset($ResponseContent['URL'])) {
-                    return $ResponseContent['URL'];
-                }
+            } elseif (isset($ResponseContent['URL'])) {
+                return $ResponseContent['URL'];
             }
 
             return '';
@@ -2661,6 +2634,7 @@ if (!class_exists('MODULE_CURL', NETCURL_CLASS_EXISTS_AUTOLOAD) &&
                                 break;
                             }
                         }
+
                         if ($hasRecursion) {
                             $Parsed = $this->getValue($CurrentKey, ['parsed' => $Parsed]);
                             // Break if this was the last one
@@ -2774,25 +2748,32 @@ if (!class_exists('MODULE_CURL', NETCURL_CLASS_EXISTS_AUTOLOAD) &&
          * @throws \Exception
          * @since 6.0.20
          */
-        public function doRepeat()
+        function doRepeat()
         {
             if ($this->NETCURL_POST_METHOD == NETCURL_POST_METHODS::METHOD_POST) {
-                return $this->doPost($this->CURL_STORED_URL, $this->POST_DATA_REAL, $this->NETCURL_POST_DATA_TYPE);
+                return $this->doPost(
+                    $this->CURL_STORED_URL,
+                    $this->POST_DATA_REAL,
+                    $this->NETCURL_POST_DATA_TYPE
+                );
+            } elseif ($this->NETCURL_POST_METHOD == NETCURL_POST_METHODS::METHOD_PUT) {
+                return $this->doPost(
+                    $this->CURL_STORED_URL,
+                    $this->POST_DATA_REAL,
+                    $this->NETCURL_POST_DATA_TYPE
+                );
+            } elseif ($this->NETCURL_POST_METHOD == NETCURL_POST_METHODS::METHOD_DELETE) {
+                return $this->doPost(
+                    $this->CURL_STORED_URL,
+                    $this->POST_DATA_REAL,
+                    $this->NETCURL_POST_DATA_TYPE
+                );
             } else {
-                if ($this->NETCURL_POST_METHOD == NETCURL_POST_METHODS::METHOD_PUT) {
-                    return $this->doPost($this->CURL_STORED_URL, $this->POST_DATA_REAL, $this->NETCURL_POST_DATA_TYPE);
-                } else {
-                    if ($this->NETCURL_POST_METHOD == NETCURL_POST_METHODS::METHOD_DELETE) {
-                        return $this->doPost(
-                            $this->CURL_STORED_URL,
-                            $this->POST_DATA_REAL,
-                            $this->NETCURL_POST_DATA_TYPE
-                        );
-                    } else {
-                        // Go GET by deault ($this->NETCURL_POST_METHOD == NETCURL_POST_METHODS::METHOD_GET)
-                        return $this->doGet($this->CURL_STORED_URL, $this->NETCURL_POST_DATA_TYPE);
-                    }
-                }
+                // Go GET by deault ($this->NETCURL_POST_METHOD == NETCURL_POST_METHODS::METHOD_GET)
+                return $this->doGet(
+                    $this->CURL_STORED_URL,
+                    $this->NETCURL_POST_DATA_TYPE
+                );
             }
         }
 
@@ -2921,10 +2902,8 @@ if (!class_exists('MODULE_CURL', NETCURL_CLASS_EXISTS_AUTOLOAD) &&
                     $testHead = explode(":", $headerValue, 2);
                     if (isset($testHead[1])) {
                         $this->NETCURL_HTTP_HEADERS[] = $headerValue;
-                    } else {
-                        if (!is_numeric($headerKey)) {
-                            $this->NETCURL_HTTP_HEADERS[] = $headerKey . ": " . $headerValue;
-                        }
+                    } elseif (!is_numeric($headerKey)) {
+                        $this->NETCURL_HTTP_HEADERS[] = $headerKey . ": " . $headerValue;
                     }
                 }
             }
@@ -2981,12 +2960,10 @@ if (!class_exists('MODULE_CURL', NETCURL_CLASS_EXISTS_AUTOLOAD) &&
 
             if ($POST_AS_DATATYPE == NETCURL_POST_DATATYPES::DATATYPE_JSON) {
                 $parsedPostData = $this->transformPostDataJson();
-            } else {
-                if (($POST_AS_DATATYPE == NETCURL_POST_DATATYPES::DATATYPE_XML ||
-                    $POST_AS_DATATYPE == NETCURL_POST_DATATYPES::DATATYPE_SOAP_XML)
-                ) {
-                    $parsedPostData = $this->transformPostDataXml();
-                }
+            } elseif (($POST_AS_DATATYPE == NETCURL_POST_DATATYPES::DATATYPE_XML ||
+                $POST_AS_DATATYPE == NETCURL_POST_DATATYPES::DATATYPE_SOAP_XML
+            )) {
+                $parsedPostData = $this->transformPostDataXml();
             }
 
             $this->POST_DATA_HANDLED = $parsedPostData;
@@ -3068,7 +3045,6 @@ if (!class_exists('MODULE_CURL', NETCURL_CLASS_EXISTS_AUTOLOAD) &&
 
                 return true;
             }
-
         }
 
         /**
@@ -3256,14 +3232,13 @@ if (!class_exists('MODULE_CURL', NETCURL_CLASS_EXISTS_AUTOLOAD) &&
                 $this->NETCURL_POST_METHOD == NETCURL_POST_METHODS::METHOD_PUT ||
                 $this->NETCURL_POST_METHOD == NETCURL_POST_METHODS::METHOD_DELETE
             ) {
+
                 if ($this->NETCURL_POST_METHOD == NETCURL_POST_METHODS::METHOD_PUT) {
                     $this->setCurlOpt(CURLOPT_CUSTOMREQUEST, 'PUT');
+                } elseif ($this->NETCURL_POST_METHOD == NETCURL_POST_METHODS::METHOD_DELETE) {
+                    $this->setCurlOpt(CURLOPT_CUSTOMREQUEST, 'DELETE');
                 } else {
-                    if ($this->NETCURL_POST_METHOD == NETCURL_POST_METHODS::METHOD_DELETE) {
-                        $this->setCurlOpt(CURLOPT_CUSTOMREQUEST, 'DELETE');
-                    } else {
-                        $this->setCurlOpt(CURLOPT_POST, true);
-                    }
+                    $this->setCurlOpt(CURLOPT_POST, true);
                 }
 
                 if ($this->NETCURL_POST_DATA_TYPE == NETCURL_POST_DATATYPES::DATATYPE_JSON) {
@@ -3281,16 +3256,11 @@ if (!class_exists('MODULE_CURL', NETCURL_CLASS_EXISTS_AUTOLOAD) &&
                     $this->NETCURL_HEADERS_SYSTEM_DEFINED['Content-Type'] = $useContentType;
                     $this->NETCURL_HEADERS_SYSTEM_DEFINED['Content-Length'] = strlen($this->POST_DATA_HANDLED);
                     $this->setCurlOpt(CURLOPT_POSTFIELDS, $this->POST_DATA_HANDLED);  // overwrite old
-                } else {
-                    if ((
-                        $this->NETCURL_POST_DATA_TYPE == NETCURL_POST_DATATYPES::DATATYPE_XML ||
-                        $this->NETCURL_POST_DATA_TYPE == NETCURL_POST_DATATYPES::DATATYPE_SOAP_XML)
-                    ) {
-                        $this->NETCURL_HEADERS_SYSTEM_DEFINED['Content-Type'] = 'text/xml'; // ; charset=utf-8
-                        $this->NETCURL_HEADERS_SYSTEM_DEFINED['Content-Length'] = is_string($this->NETCURL_POST_DATA) ? strlen($this->NETCURL_POST_DATA) : 0;
-                        $this->setCurlOpt(CURLOPT_CUSTOMREQUEST, 'POST');
-                        $this->setCurlOpt(CURLOPT_POSTFIELDS, $this->POST_DATA_HANDLED);
-                    }
+                } elseif (($this->NETCURL_POST_DATA_TYPE == NETCURL_POST_DATATYPES::DATATYPE_XML || $this->NETCURL_POST_DATA_TYPE == NETCURL_POST_DATATYPES::DATATYPE_SOAP_XML)) {
+                    $this->NETCURL_HEADERS_SYSTEM_DEFINED['Content-Type'] = 'text/xml'; // ; charset=utf-8
+                    $this->NETCURL_HEADERS_SYSTEM_DEFINED['Content-Length'] = is_string($this->NETCURL_POST_DATA) ? strlen($this->NETCURL_POST_DATA) : 0;
+                    $this->setCurlOpt(CURLOPT_CUSTOMREQUEST, 'POST');
+                    $this->setCurlOpt(CURLOPT_POSTFIELDS, $this->POST_DATA_HANDLED);
                 }
             }
         }
@@ -3498,7 +3468,6 @@ if (!class_exists('MODULE_CURL', NETCURL_CLASS_EXISTS_AUTOLOAD) &&
         /**
          * @param $errorCode
          * @param $errorMessage
-         *
          * @since 6.0.20
          */
         private function internal_curl_error_resolver($errorCode, $errorMessage)
@@ -3510,14 +3479,12 @@ if (!class_exists('MODULE_CURL', NETCURL_CLASS_EXISTS_AUTOLOAD) &&
                 if ($this->CURL_IP_ADDRESS_TYPE == 6) {
                     $this->setCurlResolve(NETCURL_RESOLVER::RESOLVER_IPV4);
                     $this->CURL_IP_ADDRESS_TYPE = 4;
+                } elseif ($this->CURL_IP_ADDRESS_TYPE == 4) {
+                    $this->setCurlResolve(NETCURL_RESOLVER::RESOLVER_IPV6);
+                    $this->CURL_IP_ADDRESS_TYPE = 6;
                 } else {
-                    if ($this->CURL_IP_ADDRESS_TYPE == 4) {
-                        $this->setCurlResolve(NETCURL_RESOLVER::RESOLVER_IPV6);
-                        $this->CURL_IP_ADDRESS_TYPE = 6;
-                    } else {
-                        $this->CURL_IP_ADDRESS_TYPE = 4;
-                        $this->setCurlResolve(NETCURL_RESOLVER::RESOLVER_IPV4);
-                    }
+                    $this->CURL_IP_ADDRESS_TYPE = 4;
+                    $this->setCurlResolve(NETCURL_RESOLVER::RESOLVER_IPV4);
                 }
                 if ($this->CURL_RETRY_TYPES['resolve'] <= 2) {
                     $this->NETCURL_ERRORHANDLER_RERUN = true;
@@ -3647,7 +3614,6 @@ if (!class_exists('MODULE_CURL', NETCURL_CLASS_EXISTS_AUTOLOAD) &&
             }
 
             return null;
-
         }
 
         /**
@@ -3792,7 +3758,6 @@ if (!class_exists('MODULE_CURL', NETCURL_CLASS_EXISTS_AUTOLOAD) &&
             }
 
             return $getSoapResponse;
-
         }
 
 

@@ -35,12 +35,10 @@ class curlTest extends TestCase
      */
     private $bitBucketUrl = 'bitbucket.tornevall.net/scm/lib/tornelib-php-netcurl.git';
 
-    //function tearDown() {}
-
     /**
      * @throws Exception
      */
-    function setUp()
+    protected function setUp()
     {
         error_reporting(E_ALL);
 
@@ -60,7 +58,7 @@ class curlTest extends TestCase
         $this->CURL->setSslStrictFallback(false);
     }
 
-    function tearDown()
+    protected function tearDown()
     {
         // DebugData collects stats about the curled session.
         // $debugData = $this->CURL->getDebugData();
@@ -71,7 +69,7 @@ class curlTest extends TestCase
      * @testdox Runs a simple test to see if there is a container as it should
      * @throws Exception
      */
-    function simpleGetUrl()
+    public function simpleGetUrl()
     {
         $this->pemDefault();
         $container = $this->simpleGet();
@@ -121,7 +119,7 @@ class curlTest extends TestCase
      * @testdox Fetch a response and immediately pick up the parsed response, from the internally stored last response
      * @throws Exception
      */
-    function getParsedSelf()
+    public function getParsedSelf()
     {
         $this->pemDefault();
         $this->urlGet("ssl&bool&o=json&method=get");
@@ -145,6 +143,7 @@ class curlTest extends TestCase
 
     /**
      * Make sure we always get a protocol
+     *
      * @param string $protocol
      * @return string
      */
@@ -164,7 +163,7 @@ class curlTest extends TestCase
      * @testdox Make a direct call to the curl library
      * @throws Exception
      */
-    function quickInitParsed()
+    public function quickInitParsed()
     {
         $tempCurl = new MODULE_CURL("https://identifier.tornevall.net/index.php?json");
         static::assertTrue(is_object($tempCurl->getParsed()));
@@ -175,7 +174,7 @@ class curlTest extends TestCase
      * @testdox Make a direct call to the curl library and get the response code
      * @throws Exception
      */
-    function quickInitResponseCode()
+    public function quickInitResponseCode()
     {
         $tempCurl = new MODULE_CURL("https://identifier.tornevall.net/?json");
         static::assertTrue($tempCurl->getCode() == 200);
@@ -186,7 +185,7 @@ class curlTest extends TestCase
      * @testdox Make a direct call to the curl library and get the content of the body
      * @throws Exception
      */
-    function quickInitResponseBody()
+    public function quickInitResponseBody()
     {
         $tempCurl = new MODULE_CURL("https://identifier.tornevall.net/?json");
         // Some content must exists in the body
@@ -198,7 +197,7 @@ class curlTest extends TestCase
      * @testdox Fetch a response and immediately pick up the parsed response, from own content
      * @throws Exception
      */
-    function getParsedFromResponse()
+    public function getParsedFromResponse()
     {
         $this->pemDefault();
         $container = $this->urlGet("ssl&bool&o=json&method=get");
@@ -206,7 +205,7 @@ class curlTest extends TestCase
         static::assertTrue(is_object($ParsedResponse));
     }
 
-    /*function testSimpleGetProxy() {
+    /*public function testSimpleGetProxy() {
         $this->pemDefault();
         exec( "service tor status", $ubuntuService );
         $serviceFound = false;
@@ -227,7 +226,7 @@ class curlTest extends TestCase
         $this->markTestSkipped( "I can't test this simpleGetProxy since there are no tor service installed" );
     }*/
 
-    /*	function testSimpleGetWsdlProxy() {
+    /*	public function testSimpleGetWsdlProxy() {
             $this->pemDefault();
             exec( "service tor status", $ubuntuService );
             $serviceFound = false;
@@ -250,7 +249,7 @@ class curlTest extends TestCase
      * @testdox Request a specific value from a parsed response
      * @throws Exception
      */
-    function getParsedValue()
+    public function getParsedValue()
     {
         $this->pemDefault();
         $this->urlGet("ssl&bool&o=json&method=get");
@@ -264,11 +263,11 @@ class curlTest extends TestCase
      * @testdox Request a nested value from a parsed response
      * @throws Exception
      */
-    function getParsedSubValue()
+    public function getParsedSubValue()
     {
         $this->pemDefault();
         $this->urlGet("ssl&bool&o=json&method=get");
-        $ValueFrom = $this->CURL->getValue(array('nesting', 'subarr4', 'child4'));
+        $ValueFrom = $this->CURL->getValue(['nesting', 'subarr4', 'child4']);
         static::assertTrue(count($ValueFrom) === 3);
     }
 
@@ -277,7 +276,7 @@ class curlTest extends TestCase
      * @testdox Request a value by sending wrong value into the parser (crash test)
      * @throws Exception
      */
-    function getParsedSubValueNoArray()
+    public function getParsedSubValueNoArray()
     {
         $this->pemDefault();
         $this->urlGet("ssl&bool&o=json&method=get");
@@ -290,13 +289,13 @@ class curlTest extends TestCase
      * @testdox Request a value that does not exist in a parsed response (Receive an exception)
      * @throws Exception
      */
-    function getParsedSubValueFail()
+    public function getParsedSubValueFail()
     {
         $this->pemDefault();
         $this->urlGet("ssl&bool&o=json&method=get");
         $ExpectFailure = false;
         try {
-            $this->CURL->getValue(array('nesting', 'subarrfail'));
+            $this->CURL->getValue(['nesting', 'subarrfail']);
         } catch (\Exception $parseException) {
             $ExpectFailure = true;
         }
@@ -308,7 +307,7 @@ class curlTest extends TestCase
      * @testdox Test if a web request has a valid body
      * @throws Exception
      */
-    function getValidBody()
+    public function getValidBody()
     {
         $this->pemDefault();
         $container = $this->simpleGet();
@@ -334,7 +333,7 @@ class curlTest extends TestCase
      * @testdox Receive a standard 200 code
      * @throws Exception
      */
-    function getSimple200()
+    public function getSimple200()
     {
         $this->pemDefault();
         $this->simpleGet();
@@ -346,7 +345,7 @@ class curlTest extends TestCase
      * @testdox Test SSL based web request
      * @throws Exception
      */
-    function getSslUrl()
+    public function getSslUrl()
     {
         $this->pemDefault();
         $container = $this->urlGet("ssl&bool", "https");
@@ -359,7 +358,7 @@ class curlTest extends TestCase
      * @testdox Get exception on self signed certifications (we get error code 60)
      * @throws Exception
      */
-    function getSslSelfSignedException()
+    public function getSslSelfSignedException()
     {
         $this->pemDefault();
         try {
@@ -378,7 +377,7 @@ class curlTest extends TestCase
      * @testdox Get exception on mismatching certificates (host != certifcate host)
      * @throws Exception
      */
-    function sslMismatching()
+    public function sslMismatching()
     {
         $this->pemDefault();
         try {
@@ -394,7 +393,7 @@ class curlTest extends TestCase
     /**
      * @test
      */
-    function sslSelfSignedIgnore()
+    public function sslSelfSignedIgnore()
     {
         try {
             $this->CURL->setSslStrictFallback(true);
@@ -414,7 +413,7 @@ class curlTest extends TestCase
      *          correct way and then, if this fails, make a quite risky failover into unverified mode - silently.
      * @throws Exception
      */
-    function sslSelfSignedUnverifyOnRun()
+    public function sslSelfSignedUnverifyOnRun()
     {
         $this->pemDefault();
         try {
@@ -434,7 +433,7 @@ class curlTest extends TestCase
      * @testdox Test parsed json response
      * @throws Exception
      */
-    function getJson()
+    public function getJson()
     {
         $this->pemDefault();
         $this->urlGet("ssl&bool&o=json&method=get");
@@ -446,7 +445,7 @@ class curlTest extends TestCase
      * @testdox Check if we can parse a serialized response
      * @throws Exception
      */
-    function getSerialize()
+    public function getSerialize()
     {
         $this->pemDefault();
         $container = $this->urlGet("ssl&bool&o=serialize&method=get");
@@ -459,7 +458,7 @@ class curlTest extends TestCase
      * @testdox Test if XML/Serializer are parsed correctly
      * @throws Exception
      */
-    function getXmlSerializer()
+    public function getXmlSerializer()
     {
         if (!class_exists('XML_Serializer')) {
             static::markTestSkipped('XML_Serializer test can not run without XML_Serializer');
@@ -494,7 +493,7 @@ class curlTest extends TestCase
      * @testdox Test if SimpleXml are parsed correctly
      * @throws Exception
      */
-    function getSimpleXml()
+    public function getSimpleXml()
     {
         $this->pemDefault();
         // SimpleXMLElement
@@ -507,7 +506,7 @@ class curlTest extends TestCase
      * @testdox Test if a html response are converted to a proper array
      * @throws Exception
      */
-    function getSimpleDom()
+    public function getSimpleDom()
     {
         $this->pemDefault();
         $this->CURL->setDomContentParser(false);
@@ -528,7 +527,7 @@ class curlTest extends TestCase
      * @test
      * @throws Exception
      */
-    function getSimpleDomChain()
+    public function getSimpleDomChain()
     {
 
         if (version_compare(PHP_VERSION, '5.4.0', '<')) {
@@ -557,11 +556,11 @@ class curlTest extends TestCase
      * @testdox SSL Certificates at custom location. Expected Result: Successful lookup with verified peer
      * @throws Exception
      */
-    function sslCertLocation()
+    public function sslCertLocation()
     {
         $successfulVerification = false;
         try {
-            $this->CURL->setSslPemLocations(array(__DIR__ . "/ca-certificates.crt"));
+            $this->CURL->setSslPemLocations([__DIR__ . "/ca-certificates.crt"]);
             $this->getParsed($this->urlGet("ssl&bool&o=json", "https"));
             $successfulVerification = true;
         } catch (\Exception $e) {
@@ -573,10 +572,10 @@ class curlTest extends TestCase
      * @test
      * @throws Exception
      */
-    function setInternalPemLocation()
+    public function setInternalPemLocation()
     {
         try {
-            static::assertTrue($this->CURL->setSslPemLocations(array(__DIR__ . "/ca-certificates.crt")));
+            static::assertTrue($this->CURL->setSslPemLocations([__DIR__ . "/ca-certificates.crt"]));
         } catch (\Exception $e) {
         }
     }
@@ -585,10 +584,10 @@ class curlTest extends TestCase
      * @test
      * @throws Exception
      */
-    function setInternalPemLocationBadFormat()
+    public function setInternalPemLocationBadFormat()
     {
         try {
-            $this->CURL->setSslPemLocations(array(__DIR__ . "/"));
+            $this->CURL->setSslPemLocations([__DIR__ . "/"]);
         } catch (\Exception $e) {
             static::assertTrue($e->getCode() == NETCURL_EXCEPTIONS::NETCURL_PEMLOCATIONDATA_FORMAT_ERROR);
         }
@@ -598,7 +597,7 @@ class curlTest extends TestCase
      * @test
      * @throws Exception
      */
-    function unExistentCertificateBundle()
+    public function unExistentCertificateBundle()
     {
         $this->CURL->setFlag('OVERRIDE_CERTIFICATE_BUNDLE', '/failCertBundle');
         $this->CURL->setTrustedSslBundles(true);
@@ -624,7 +623,7 @@ class curlTest extends TestCase
      * @testdox SSL Certificates are missing and certificate location is mismatching. Expected Result: Failing the url
      *          call
      */
-    function failingSsl()
+    public function failingSsl()
     {
         $successfulVerification = true;
         try {
@@ -642,18 +641,21 @@ class curlTest extends TestCase
      * @testdox Test the customized ip address
      * @throws Exception
      */
-    function customIpAddrSimple()
+    public function customIpAddrSimple()
     {
         $this->pemDefault();
         $returnedExecResponse = $this->getIpListByIpRoute();
         // Probably a bad shortcut for some systems, but it works for us in tests
         if (!empty($returnedExecResponse) && is_array($returnedExecResponse)) {
             $NETWORK = new MODULE_NETWORK();
-            $ipArray = array();
+            $ipArray = [];
             foreach ($returnedExecResponse as $ip) {
                 // Making sure this test is running safely with non locals only
-                if (!in_array($ip, $ipArray) && $NETWORK->getArpaFromAddr($ip, true) > 0 && !preg_match("/^10\./",
-                        $ip) && !preg_match("/^172\./", $ip) && !preg_match("/^192\./", $ip)) {
+                if (!in_array($ip, $ipArray) &&
+                    $NETWORK->getArpaFromAddr($ip, true) > 0 &&
+                    !preg_match("/^10\./", $ip) &&
+                    !preg_match("/^172\./", $ip) && !preg_match("/^192\./", $ip)
+                ) {
                     $ipArray[] = $ip;
                 }
             }
@@ -665,6 +667,7 @@ class curlTest extends TestCase
 
     /**
      * iproute2 ifconfig
+     *
      * @return mixed
      */
     private function getIpListByIpRoute()
@@ -680,19 +683,23 @@ class curlTest extends TestCase
      * @testdox Test custom ip address setup (if more than one ip is set on the interface)
      * @throws Exception
      */
-    function customIpAddrAllString()
+    public function customIpAddrAllString()
     {
         $this->pemDefault();
-        $ipArray = array();
-        $responses = array();
+        $ipArray = [];
+        $responses = [];
         $returnedExecResponse = $this->getIpListByIpRoute();
         if (!empty($returnedExecResponse) && is_array($returnedExecResponse)) {
             $NETWORK = new MODULE_NETWORK();
             $lastValidIp = null;
             foreach ($returnedExecResponse as $ip) {
                 // Making sure this test is running safely with non locals only
-                if (!in_array($ip, $ipArray) && $NETWORK->getArpaFromAddr($ip, true) > 0 && !preg_match("/^10\./",
-                        $ip) && !preg_match("/^172\./", $ip) && !preg_match("/^192\./", $ip)) {
+                if (!in_array($ip, $ipArray) &&
+                    $NETWORK->getArpaFromAddr($ip, true) > 0 &&
+                    !preg_match("/^10\./", $ip) &&
+                    !preg_match("/^172\./", $ip) &&
+                    !preg_match("/^192\./", $ip)
+                ) {
                     $ipArray[] = $ip;
                 }
             }
@@ -702,10 +709,13 @@ class curlTest extends TestCase
                     try {
                         $this->CURL->doGet(\TESTURLS::getUrlSimpleJson());
                     } catch (\Exception $e) {
-
                     }
-                    if (isset($this->CURL->getParsed()->ip) && $this->NETWORK->getArpaFromAddr($this->CURL->getParsed()->ip,
-                            true) > 0) {
+                    if (isset($this->CURL->getParsed()->ip) &&
+                        $this->NETWORK->getArpaFromAddr(
+                            $this->CURL->getParsed()->ip,
+                            true
+                        ) > 0
+                    ) {
                         $responses[$ip] = $this->CURL->getParsed()->ip;
                     }
                 }
@@ -721,12 +731,16 @@ class curlTest extends TestCase
      * @testdox Run in default mode, when follows are enabled
      * @throws Exception
      */
-    function followRedirectEnabled()
+    public function followRedirectEnabled()
     {
         $this->pemDefault();
         $redirectResponse = $this->CURL->doGet("http://tests.netcurl.org/tornevall_network/redirect.php?run");
         $redirectedUrls = $this->CURL->getRedirectedUrls();
-        static::assertTrue(intval($this->CURL->getCode($redirectResponse)) >= 300 && intval($this->CURL->getCode($redirectResponse)) <= 350 && count($redirectedUrls));
+        static::assertTrue(
+            intval($this->CURL->getCode($redirectResponse)) >= 300 &&
+            intval($this->CURL->getCode($redirectResponse)) <= 350 &&
+            count($redirectedUrls)
+        );
     }
 
     /**
@@ -734,14 +748,18 @@ class curlTest extends TestCase
      * @testdox Run with redirect follows disabled
      * @throws Exception
      */
-    function followRedirectDisabled()
+    public function followRedirectDisabled()
     {
         $this->pemDefault();
         $this->CURL->setEnforceFollowLocation(false);
         $redirectResponse = $this->CURL->doGet("http://tests.netcurl.org/tornevall_network/redirect.php?run");
         $redirectedUrls = $this->CURL->getRedirectedUrls();
-        static::assertTrue($this->CURL->getCode($redirectResponse) >= 300 && $this->CURL->getCode($redirectResponse) <= 350 && !preg_match("/rerun/i",
-                $this->CURL->getBody($redirectResponse)) && count($redirectedUrls));
+        static::assertTrue(
+            $this->CURL->getCode($redirectResponse) >= 300 &&
+            $this->CURL->getCode($redirectResponse) <= 350 &&
+            !preg_match("/rerun/i", $this->CURL->getBody($redirectResponse)) &&
+            count($redirectedUrls)
+        );
     }
 
     /**
@@ -749,7 +767,7 @@ class curlTest extends TestCase
      * @testdox Activating the flag FOLLOWLOCATION_INTERNAL will make NetCurl make its own follow recursion
      * @throws Exception
      */
-    function followRedirectDisabledFlagEnabled()
+    public function followRedirectDisabledFlagEnabled()
     {
         if (version_compare(PHP_VERSION, '5.4.0', '<')) {
             static::markTestSkipped('Internal URL following may cause problems in PHP versions lower than 5.4 (' . PHP_VERSION . ')');
@@ -764,22 +782,30 @@ class curlTest extends TestCase
         $redirectedUrls = $this->CURL->getRedirectedUrls();
         $responseCode = $this->CURL->getCode($redirectResponse);
         $curlBody = $this->CURL->getBody();
-        static::assertTrue(intval($responseCode) >= 200 && intval($responseCode) <= 300 && count($redirectedUrls) && preg_match("/rerun/i",
-                $curlBody));
+        static::assertTrue(
+            intval($responseCode) >= 200 &&
+            intval($responseCode) <= 300 &&
+            count($redirectedUrls) &&
+            preg_match("/rerun/i", $curlBody)
+        );
     }
 
     /**
      * @test
      * @throws Exception
      */
-    function followRedirectManualDisable()
+    public function followRedirectManualDisable()
     {
         $this->pemDefault();
         $this->CURL->setEnforceFollowLocation(false);
         $redirectResponse = $this->CURL->doGet("http://tests.netcurl.org/tornevall_network/redirect.php?run");
         $redirectedUrls = $this->CURL->getRedirectedUrls();
-        static::assertTrue($this->CURL->getCode($redirectResponse) >= 300 && $this->CURL->getCode($redirectResponse) <= 350 && !preg_match("/rerun/i",
-                $this->CURL->getBody($redirectResponse)) && count($redirectedUrls));
+        static::assertTrue(
+            $this->CURL->getCode($redirectResponse) >= 300 &&
+            $this->CURL->getCode($redirectResponse) <= 350 &&
+            !preg_match("/rerun/i", $this->CURL->getBody($redirectResponse)) &&
+            count($redirectedUrls)
+        );
     }
 
     /**
@@ -788,15 +814,21 @@ class curlTest extends TestCase
      *          result is to have setEnforceFollowLocation to be top prioritized over setCurlOpt here.
      * @throws Exception
      */
-    function followRedirectManualEnableWithSetCurlOptEnforcingToFalse()
+    public function followRedirectManualEnableWithSetCurlOptEnforcingToFalse()
     {
         $this->pemDefault();
         $this->CURL->setEnforceFollowLocation(true);
-        $this->CURL->setCurlOpt(CURLOPT_FOLLOWLOCATION,
-            false);  // This is the doer since there are internal protection against the above enforcer
+        $this->CURL->setCurlOpt(
+            CURLOPT_FOLLOWLOCATION,
+            false
+        );  // This is the doer since there are internal protection against the above enforcer
         $redirectResponse = $this->CURL->doGet("http://tests.netcurl.org/tornevall_network/redirect.php?run");
         $redirectedUrls = $this->CURL->getRedirectedUrls();
-        static::assertTrue($this->CURL->getCode($redirectResponse) >= 300 && $this->CURL->getCode($redirectResponse) <= 350 && count($redirectedUrls));
+        static::assertTrue(
+            $this->CURL->getCode($redirectResponse) >= 300 &&
+            $this->CURL->getCode($redirectResponse) <= 350 &&
+            count($redirectedUrls)
+        );
     }
 
     /**
@@ -804,7 +836,7 @@ class curlTest extends TestCase
      * @testdox Test SoapClient by making a standard doGet()
      * @throws Exception
      */
-    function wsdlSoapClient()
+    public function wsdlSoapClient()
     {
         $assertThis = true;
         try {
@@ -830,7 +862,7 @@ class curlTest extends TestCase
      * @testdox Test Soap by internal controllers
      * @throws Exception
      */
-    function hasSoap()
+    public function hasSoap()
     {
         static::assertTrue($this->CURL->hasSoap());
     }
@@ -839,7 +871,7 @@ class curlTest extends TestCase
      * @test
      * @throws Exception
      */
-    function throwableHttpCodes()
+    public function throwableHttpCodes()
     {
         $this->pemDefault();
         $this->CURL->setThrowableHttpCodes();
@@ -856,7 +888,7 @@ class curlTest extends TestCase
      * @test
      * @throws Exception
      */
-    function failUrl()
+    public function failUrl()
     {
         try {
             $this->CURL->doGet("http://" . sha1(microtime(true)));
@@ -873,7 +905,7 @@ class curlTest extends TestCase
     public function setCurlOpt()
     {
         $oldCurl = $this->CURL->getCurlOpt();
-        $this->CURL->setCurlOpt(array(CURLOPT_CONNECTTIMEOUT => 10));
+        $this->CURL->setCurlOpt([CURLOPT_CONNECTTIMEOUT => 10]);
         $newCurl = $this->CURL->getCurlOpt();
         static::assertTrue($oldCurl[CURLOPT_CONNECTTIMEOUT] != $newCurl[CURLOPT_CONNECTTIMEOUT]);
     }
@@ -892,7 +924,7 @@ class curlTest extends TestCase
      * @test
      * @throws Exception
      */
-    function unsetFlag()
+    public function unsetFlag()
     {
         $first = $this->CURL->setFlag("CHAIN", true);
         $this->CURL->unsetFlag("CHAIN");
@@ -904,7 +936,7 @@ class curlTest extends TestCase
      * @test
      * @throws Exception
      */
-    function chainGet()
+    public function chainGet()
     {
         if (version_compare(PHP_VERSION, '5.4.0', '>=')) {
             $this->CURL->setFlag("CHAIN");
@@ -919,7 +951,7 @@ class curlTest extends TestCase
      * @test
      * @throws Exception
      */
-    function tlagEmptyKey()
+    public function tlagEmptyKey()
     {
         try {
             $this->CURL->setFlag();
@@ -932,9 +964,9 @@ class curlTest extends TestCase
      * @test
      * @throws Exception
      */
-    function chainByInit()
+    public function chainByInit()
     {
-        $Chainer = new MODULE_CURL(null, null, null, array("CHAIN"));
+        $Chainer = new MODULE_CURL(null, null, null, ["CHAIN"]);
         if (version_compare(PHP_VERSION, '5.4.0', '>=')) {
             static::assertTrue(is_object($Chainer->doGet(\TESTURLS::getUrlSimpleJson())->getParsed()));
         } else {
@@ -946,7 +978,7 @@ class curlTest extends TestCase
      * @test
      * @throws Exception
      */
-    function chainGetFail()
+    public function chainGetFail()
     {
         $this->CURL->unsetFlag("CHAIN");
         static::assertFalse(method_exists($this->CURL->doGet(\TESTURLS::getUrlSimpleJson()), 'getParsedResponse'));
@@ -956,7 +988,7 @@ class curlTest extends TestCase
      * @test
      * @throws Exception
      */
-    function getGitIsTooOld()
+    public function getGitIsTooOld()
     {
         // curl module for netcurl will probably always be lower than the netcurl-version, so this is a good way of testing
         static::assertTrue($this->NETWORK->getVersionTooOld("1.0.0", "https://" . $this->bitBucketUrl));
@@ -966,7 +998,7 @@ class curlTest extends TestCase
      * @test
      * @throws Exception
      */
-    function getGitCurrentOrNewer()
+    public function getGitCurrentOrNewer()
     {
         // curl module for netcurl will probably always be lower than the netcurl-version, so this is a good way of testing
         $tags = $this->NETWORK->getGitTagsByUrl("https://" . $this->bitBucketUrl);
@@ -983,7 +1015,7 @@ class curlTest extends TestCase
      * @test
      * @throws Exception
      */
-    function timeoutChecking()
+    public function timeoutChecking()
     {
         $def = $this->CURL->getTimeout();
         $this->CURL->setTimeout(6);
@@ -995,7 +1027,7 @@ class curlTest extends TestCase
      * @test
      * @throws Exception
      */
-    function internalException()
+    public function internalException()
     {
         static::assertTrue($this->NETWORK->getExceptionCode('NETCURL_EXCEPTION_IT_WORKS') == 1);
     }
@@ -1003,7 +1035,7 @@ class curlTest extends TestCase
     /**
      * @test
      */
-    function internalExceptionNoExists()
+    public function internalExceptionNoExists()
     {
         static::assertTrue($this->NETWORK->getExceptionCode('NETCURL_EXCEPTION_IT_DOESNT_WORK') == 500);
     }
@@ -1012,9 +1044,9 @@ class curlTest extends TestCase
      * @test
      * @throws Exception
      */
-    function driverControlList()
+    public function driverControlList()
     {
-        $driverList = array();
+        $driverList = [];
         try {
             $driverList = $this->DRIVER->getSystemWideDrivers();
         } catch (\Exception $e) {
@@ -1026,7 +1058,7 @@ class curlTest extends TestCase
     /**
      * @test
      */
-    function driverControlNoList()
+    public function driverControlNoList()
     {
         $driverList = false;
         try {
@@ -1050,7 +1082,7 @@ class curlTest extends TestCase
      * @test
      * @throws Exception
      */
-    function getSupportedDrivers()
+    public function getSupportedDrivers()
     {
         static::assertTrue(count($this->DRIVER->getSystemWideDrivers()) > 0);
     }
@@ -1059,7 +1091,7 @@ class curlTest extends TestCase
      * @test
      * @throws Exception
      */
-    function setAutoDriver()
+    public function setAutoDriver()
     {
         $driverset = $this->CURL->setDriverAuto();
         static::assertTrue($driverset > 0);
@@ -1069,7 +1101,7 @@ class curlTest extends TestCase
      * @test
      * @throws Exception
      */
-    function getJsonByConstructor()
+    public function getJsonByConstructor()
     {
         $quickCurl = new MODULE_CURL(\TESTURLS::getUrlSimpleJson());
         $identifierByJson = $quickCurl->getParsed();
@@ -1080,7 +1112,7 @@ class curlTest extends TestCase
      * @test
      * @throws Exception
      */
-    function extractDomainIsGetUrlDomain()
+    public function extractDomainIsGetUrlDomain()
     {
         static::assertCount(3, $this->NETWORK->getUrlDomain("https://www.aftonbladet.se/uri/is/here"));
     }
@@ -1090,7 +1122,7 @@ class curlTest extends TestCase
      * @testdox Safe mode and basepath cechking without paramters - in our environment, open_basedir is empty and
      *          safe_mode is off
      */
-    function getSafePermissionFull()
+    public function getSafePermissionFull()
     {
         static::assertFalse($this->CURL->getIsSecure());
     }
@@ -1099,7 +1131,7 @@ class curlTest extends TestCase
      * @test
      * @testdox Open_basedir is secured and (at least in our environment) safe_mode is disabled
      */
-    function getSafePermissionFullMocked()
+    public function getSafePermissionFullMocked()
     {
         ini_set('open_basedir', "/");
         static::assertTrue($this->CURL->getIsSecure());
@@ -1111,7 +1143,7 @@ class curlTest extends TestCase
      * @test
      * @testdox open_basedir is safe and safe_mode-checking will be skipped
      */
-    function getSafePermissionFullMockedNoSafeMode()
+    public function getSafePermissionFullMockedNoSafeMode()
     {
         ini_set('open_basedir', "/");
         static::assertTrue($this->CURL->getIsSecure(false));
@@ -1123,7 +1155,7 @@ class curlTest extends TestCase
      * @test
      * @testdox open_basedir is unsafe and safe_mode is mocked-active
      */
-    function getSafePermissionFullMockedSafeMode()
+    public function getSafePermissionFullMockedSafeMode()
     {
         ini_set('open_basedir', "");
         static::assertTrue($this->CURL->getIsSecure(true, true));
@@ -1133,7 +1165,7 @@ class curlTest extends TestCase
      * @test
      * @testdox LIB-212
      */
-    function hasSsl()
+    public function hasSsl()
     {
         static::assertTrue($this->CURL->hasSsl());
     }
@@ -1146,8 +1178,11 @@ class curlTest extends TestCase
     {
         /** @var MODULE_CURL $content */
         $this->CURL->setDomContentParser(false);
-        $phpAntiChain = $this->urlGet("ssl&bool&o=xml&method=get&using=SimpleXMLElement", null,
-            "simple.html");  // PHP 5.3 compliant
+        $phpAntiChain = $this->urlGet(
+            "ssl&bool&o=xml&method=get&using=SimpleXMLElement",
+            null,
+            "simple.html"
+        );  // PHP 5.3 compliant
         if (method_exists($phpAntiChain, 'getDomById')) {
             $content = $phpAntiChain->getDomById();
             static::assertTrue(isset($content['divElement']));
@@ -1160,13 +1195,16 @@ class curlTest extends TestCase
      * @test
      * @throws Exception
      */
-    function responseTypeHttpObject()
+    public function responseTypeHttpObject()
     {
         $this->CURL->setResponseType(NETCURL_RESPONSETYPE::RESPONSETYPE_OBJECT);
         /** @var NETCURL_HTTP_OBJECT $request */
         $request = $this->CURL->doGet(\TESTURLS::getUrlSimpleJson());
         $parsed = $request->getParsed();
-        static::assertTrue(get_class($request) == 'TorneLIB\NETCURL_HTTP_OBJECT' && is_object($parsed) && isset($parsed->ip));
+        static::assertTrue(
+            get_class($request) == 'TorneLIB\NETCURL_HTTP_OBJECT' &&
+            is_object($parsed) && isset($parsed->ip)
+        );
     }
 
     /**
@@ -1174,9 +1212,11 @@ class curlTest extends TestCase
      * @testdox Request urls with NETCURL_HTTP_OBJECT
      * @throws Exception
      */
-    function responseTypeHttpObjectChain()
+    public function responseTypeHttpObjectChain()
     {
-        $this->CURL->setResponseType(NETCURL_RESPONSETYPE::RESPONSETYPE_OBJECT);
+        $this->CURL->setResponseType(
+            NETCURL_RESPONSETYPE::RESPONSETYPE_OBJECT
+        );
         /** @var NETCURL_HTTP_OBJECT $request */
         $request = $this->CURL->doGet(\TESTURLS::getUrlSimpleJson())->getParsed();
         static::assertTrue(is_object($request) && isset($request->ip));
@@ -1188,7 +1228,7 @@ class curlTest extends TestCase
      *          back to the regular driver
      * @throws Exception
      */
-    function multiCallsSwitchingBetweenRegularAndSoap()
+    public function multiCallsSwitchingBetweenRegularAndSoap()
     {
         if (version_compare(PHP_VERSION, '5.4.0', '<')) {
             static::markTestSkipped("Multicall switching test is not compliant with PHP 5.3 - however, the function switching itself is supported");
@@ -1196,10 +1236,10 @@ class curlTest extends TestCase
             return;
         }
 
-        $driversUsed = array(
+        $driversUsed = [
             '1' => 0,
-            '2' => 0
-        );
+            '2' => 0,
+        ];
 
         $this->disableSslVerifyByPhpVersions(true);
         try {
@@ -1207,12 +1247,16 @@ class curlTest extends TestCase
             $this->CURL->doGet("http://identifier.tornevall.net/?json")->getParsed();
             $driversUsed[$this->CURL->getDriverById()]++;
             /** @noinspection PhpUndefinedMethodInspection */
-            $this->CURL->doGet('https://test.resurs.com/ecommerce-test/ws/V4/SimplifiedShopFlowService?wsdl')->getPaymentMethods();
+            $this->CURL->doGet(
+                'https://test.resurs.com/ecommerce-test/ws/V4/SimplifiedShopFlowService?wsdl'
+            )->getPaymentMethods();
             $driversUsed[$this->CURL->getDriverById()]++;
             $this->CURL->doGet("http://identifier.tornevall.net/?json")->getParsed();
             $driversUsed[$this->CURL->getDriverById()]++;
             /** @noinspection PhpUndefinedMethodInspection */
-            $this->CURL->doGet('https://test.resurs.com/ecommerce-test/ws/V4/SimplifiedShopFlowService?wsdl')->getPaymentMethods();
+            $this->CURL->doGet(
+                'https://test.resurs.com/ecommerce-test/ws/V4/SimplifiedShopFlowService?wsdl'
+            )->getPaymentMethods();
             $driversUsed[$this->CURL->getDriverById()]++;
             $this->CURL->doGet("http://identifier.tornevall.net/?json")->getParsed();
             $driversUsed[$this->CURL->getDriverById()]++;
@@ -1244,7 +1288,7 @@ class curlTest extends TestCase
      * @testdox Make sure that simplified responses returns proper data immediately on call
      * @throws Exception
      */
-    function setSimplifiedResponse()
+    public function setSimplifiedResponse()
     {
         $curlobject = $this->CURL->doGet("http://identifier.tornevall.net/?json");
         $this->CURL->setSimplifiedResponse();
@@ -1256,11 +1300,23 @@ class curlTest extends TestCase
 
         if (is_array($curlobject)) {
             // PHP 5.3 is unchained and gives different responses.
-            static::assertTrue(is_array($curlobject) && is_object($responseobject) && isset($responseobject->ip) && is_string($callWithBody) && $urlGetCode == "200");
+            static::assertTrue(
+                is_array($curlobject) &&
+                is_object($responseobject) &&
+                isset($responseobject->ip) &&
+                is_string($callWithBody) &&
+                $urlGetCode == "200"
+            );
 
             return;
         }
-        static::assertTrue(get_class($curlobject) == 'TorneLIB\MODULE_CURL' && is_object($responseobject) && isset($responseobject->ip) && is_string($callWithBody) && $urlGetCode == "200");
+        static::assertTrue(
+            get_class($curlobject) == 'TorneLIB\MODULE_CURL' &&
+            is_object($responseobject) &&
+            isset($responseobject->ip) &&
+            is_string($callWithBody) &&
+            $urlGetCode == "200"
+        );
     }
 
     /**
@@ -1268,7 +1324,7 @@ class curlTest extends TestCase
      * @testdox Another way to extract stuff on
      * @throws Exception
      */
-    function soapIoParse()
+    public function soapIoParse()
     {
         if (version_compare(PHP_VERSION, '5.4.0', '<=')) {
             static::markTestSkipped("Test might fail in PHP 5.3 and lower, due to incompatibility");
@@ -1283,7 +1339,9 @@ class curlTest extends TestCase
         try {
             $this->disableSslVerifyByPhpVersions(true);
             $this->CURL->setAuthentication('atest', 'atest');
-            $php53UnChainified = $this->CURL->doGet('https://test.resurs.com/ecommerce-test/ws/V4/SimplifiedShopFlowService?wsdl');
+            $php53UnChainified = $this->CURL->doGet(
+                'https://test.resurs.com/ecommerce-test/ws/V4/SimplifiedShopFlowService?wsdl'
+            );
             /** @noinspection PhpUndefinedMethodInspection */
             $php53UnChainified->getPaymentMethods();
             $IO = new MODULE_IO();
@@ -1308,7 +1366,7 @@ class curlTest extends TestCase
      * @test
      * @throws Exception
      */
-    function setTimeout()
+    public function setTimeout()
     {
         $this->CURL = new MODULE_CURL();
         $this->CURL->setTimeout(1);
@@ -1325,7 +1383,7 @@ class curlTest extends TestCase
      * @test
      * @testdox Packagist content-type test
      */
-    function packagistContentTypeFailures()
+    public function packagistContentTypeFailures()
     {
         $packagistUsername = "";
         $packagistToken = "";
@@ -1371,7 +1429,7 @@ class curlTest extends TestCase
      * @return array|null|string|MODULE_CURL|NETCURL_HTTP_OBJECT
      * @throws Exception
      */
-    private function urlPost($parameters = array(), $protocol = "http", $indexFile = 'index.php')
+    private function urlPost($parameters = [], $protocol = "http", $indexFile = 'index.php')
     {
         $theUrl = $this->getProtocol($protocol) . "://" . \TESTURLS::getUrlTests() . $indexFile;
 

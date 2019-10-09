@@ -10,7 +10,7 @@ pipelines:
         caches:
           - composer
         script:
-          - apt-get update && apt-get install -y unzip libxml2-dev git
+          - apt-get update && apt-get install -y unzip libxml2-dev git iproute2
           - docker-php-ext-install soap
           - docker-php-ext-enable soap
           - curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
@@ -28,7 +28,7 @@ pipelines:
           - docker-php-ext-enable soap
           - curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
           - composer install
-          - composer require phpunit/phpunit
+          - composer require phpunit/phpunit ^7.5
           - vendor/bin/phpunit --configuration ./phpunit.xml
     - step:
         name: NetCURL 6.0/PHP 7.1

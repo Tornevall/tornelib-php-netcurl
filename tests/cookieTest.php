@@ -23,7 +23,7 @@ class cookieTest extends TestCase
     private $CURL;
     private $NETWORK;
 
-    public function setUp()/* The :void return type declaration that should be here would cause a BC issue */
+    function setUp()/* The :void return type declaration that should be here would cause a BC issue */
     {
         parent::setUp();
         $this->CURL = new MODULE_CURL();

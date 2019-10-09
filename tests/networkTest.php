@@ -26,7 +26,7 @@ class networkTest extends TestCase
      */
     private $bitBucketUrl = 'bitbucket.tornevall.net/scm/lib/tornelib-php-netcurl.git';
 
-    public function setUp()
+    function setUp()
     {
         error_reporting(E_ALL);
         $this->NET = new MODULE_NETWORK();

@@ -38,7 +38,7 @@ class curlTest extends TestCase
     /**
      * @throws Exception
      */
-    public function setUp()
+    function setUp()
     {
         error_reporting(E_ALL);
 

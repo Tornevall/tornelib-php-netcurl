@@ -12,7 +12,7 @@ class sslTest extends TestCase
     /** @var MODULE_SSL */
     private $SSL;
 
-    public function setUp()
+    function setUp()
     {
         error_reporting(E_ALL);
         $this->SSL = new MODULE_SSL();

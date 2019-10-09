@@ -2748,7 +2748,7 @@ if (!class_exists('MODULE_CURL', NETCURL_CLASS_EXISTS_AUTOLOAD) &&
          * @throws \Exception
          * @since 6.0.20
          */
-        function doRepeat()
+        public function doRepeat()
         {
             if ($this->NETCURL_POST_METHOD == NETCURL_POST_METHODS::METHOD_POST) {
                 return $this->doPost(
@@ -3256,7 +3256,10 @@ if (!class_exists('MODULE_CURL', NETCURL_CLASS_EXISTS_AUTOLOAD) &&
                     $this->NETCURL_HEADERS_SYSTEM_DEFINED['Content-Type'] = $useContentType;
                     $this->NETCURL_HEADERS_SYSTEM_DEFINED['Content-Length'] = strlen($this->POST_DATA_HANDLED);
                     $this->setCurlOpt(CURLOPT_POSTFIELDS, $this->POST_DATA_HANDLED);  // overwrite old
-                } elseif (($this->NETCURL_POST_DATA_TYPE == NETCURL_POST_DATATYPES::DATATYPE_XML || $this->NETCURL_POST_DATA_TYPE == NETCURL_POST_DATATYPES::DATATYPE_SOAP_XML)) {
+                } elseif ((
+                    $this->NETCURL_POST_DATA_TYPE == NETCURL_POST_DATATYPES::DATATYPE_XML ||
+                    $this->NETCURL_POST_DATA_TYPE == NETCURL_POST_DATATYPES::DATATYPE_SOAP_XML)
+                ) {
                     $this->NETCURL_HEADERS_SYSTEM_DEFINED['Content-Type'] = 'text/xml'; // ; charset=utf-8
                     $this->NETCURL_HEADERS_SYSTEM_DEFINED['Content-Length'] = is_string($this->NETCURL_POST_DATA) ? strlen($this->NETCURL_POST_DATA) : 0;
                     $this->setCurlOpt(CURLOPT_CUSTOMREQUEST, 'POST');

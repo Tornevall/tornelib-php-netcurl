@@ -19,7 +19,7 @@ class driversTest extends TestCase
     /** @var MODULE_CURL $CURL */
     private $CURL;
 
-    protected function setUp()
+    public function setUp()
     {
         error_reporting(E_ALL);
         $this->DRIVERCLASS = new NETCURL_DRIVER_CONTROLLER();

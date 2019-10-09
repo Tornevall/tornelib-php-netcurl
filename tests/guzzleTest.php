@@ -15,7 +15,7 @@ class guzzleTest extends TestCase
     /**
      * @throws \Exception
      */
-    protected function setUp()
+    public function setUp()
     {
         error_reporting(E_ALL);
         $this->CURL = new MODULE_CURL();

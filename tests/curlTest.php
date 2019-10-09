@@ -38,7 +38,7 @@ class curlTest extends TestCase
     /**
      * @throws Exception
      */
-    protected function setUp()
+    public function setUp()
     {
         error_reporting(E_ALL);
 
@@ -58,7 +58,7 @@ class curlTest extends TestCase
         $this->CURL->setSslStrictFallback(false);
     }
 
-    protected function tearDown()
+    public function tearDown()
     {
         // DebugData collects stats about the curled session.
         // $debugData = $this->CURL->getDebugData();

@@ -341,5 +341,4 @@ class extendedManual extends TestCase
         error_reporting(E_ALL);
         $this->CURL = new MODULE_CURL();
     }
-
 }

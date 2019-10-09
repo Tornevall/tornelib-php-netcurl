@@ -25,10 +25,10 @@ class skippablePhpTest extends TestCase
     /**
      * @throws \Exception
      */
-    function setUp()
+    protected function setUp()
     {
         error_reporting(E_ALL);
-        $this->CURL    = new MODULE_CURL();
+        $this->CURL = new MODULE_CURL();
         $this->NETWORK = new MODULE_NETWORK();
     }
 
@@ -37,7 +37,7 @@ class skippablePhpTest extends TestCase
      * @testdox Run in a platform (deprecated) and make sure follows are disabled per default
      * @throws \Exception
      */
-    function followRedirectSafeMode()
+    public function followRedirectSafeMode()
     {
         // http://php.net/manual/en/ini.sect.safe-mode.php
         if (version_compare(PHP_VERSION, "5.4.0", ">=")) {
@@ -48,9 +48,13 @@ class skippablePhpTest extends TestCase
         if (filter_var(ini_get('safe_mode'), FILTER_VALIDATE_BOOLEAN) === true) {
             //$this->pemDefault();
             $redirectResponse = $this->CURL->doGet("http://tests.netcurl.org/tornevall_network/redirect.php?run");
-            $redirectedUrls   = $this->CURL->getRedirectedUrls();
-            static::assertTrue($this->CURL->getCode($redirectResponse) >= 300 && $this->CURL->getCode($redirectResponse) <= 350 && ! preg_match("/rerun/i",
-                    $this->CURL->getBody($redirectResponse)) && count($redirectedUrls));
+            $redirectedUrls = $this->CURL->getRedirectedUrls();
+            static::assertTrue(
+                $this->CURL->getCode($redirectResponse) >= 300 &&
+                $this->CURL->getCode($redirectResponse) <= 350 &&
+                !preg_match("/rerun/i", $this->CURL->getBody($redirectResponse)) &&
+                count($redirectedUrls)
+            );
 
             return;
         }
@@ -63,7 +67,7 @@ class skippablePhpTest extends TestCase
      * @link    https://www.torproject.org/ Required application
      * @throws \Exception
      */
-    function torNetwork()
+    public function torNetwork()
     {
         exec("service tor status", $ubuntuService);
         $serviceFound = false;
@@ -73,7 +77,7 @@ class skippablePhpTest extends TestCase
                 $serviceFound = true;
             }
         }
-        if ( ! $serviceFound) {
+        if (!$serviceFound) {
             static::markTestSkipped("Skip TOR Network tests: TOR Service not found in the current control");
         } else {
             $this->CURL->setProxy($this->TorSetupAddress, $this->TorSetupType);
@@ -82,5 +86,4 @@ class skippablePhpTest extends TestCase
             static::assertTrue($parsedIp > 0);
         }
     }
-
 }

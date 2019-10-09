@@ -26,7 +26,7 @@ class networkTest extends TestCase
      */
     private $bitBucketUrl = 'bitbucket.tornevall.net/scm/lib/tornelib-php-netcurl.git';
 
-    public function setUp()
+    protected function setUp()
     {
         error_reporting(E_ALL);
         $this->NET = new MODULE_NETWORK();
@@ -145,8 +145,9 @@ class networkTest extends TestCase
      */
     public function getIpType4()
     {
-        static::assertTrue($this->NET->getArpaFromAddr("172.22.1.83",
-                true) === NETCURL_IP_PROTOCOLS::PROTOCOL_IPV4);
+        static::assertTrue(
+            $this->NET->getArpaFromAddr("172.22.1.83", true) === NETCURL_IP_PROTOCOLS::PROTOCOL_IPV4
+        );
     }
 
     /**
@@ -154,8 +155,12 @@ class networkTest extends TestCase
      */
     public function getIpType6()
     {
-        static::assertTrue($this->NET->getArpaFromAddr("2a03:2880:f113:83:face:b00c:0:25de",
-                true) === NETCURL_IP_PROTOCOLS::PROTOCOL_IPV6);
+        static::assertTrue(
+            $this->NET->getArpaFromAddr(
+                "2a03:2880:f113:83:face:b00c:0:25de",
+                true
+            ) === NETCURL_IP_PROTOCOLS::PROTOCOL_IPV6
+        );
     }
 
     /**
@@ -163,8 +168,12 @@ class networkTest extends TestCase
      */
     public function getIpTypeFail()
     {
-        static::assertTrue($this->NET->getArpaFromAddr("This.Aint.An.Address",
-                true) === NETCURL_IP_PROTOCOLS::PROTOCOL_NONE);
+        static::assertTrue(
+            $this->NET->getArpaFromAddr(
+                "This.Aint.An.Address",
+                true
+            ) === NETCURL_IP_PROTOCOLS::PROTOCOL_NONE
+        );
     }
 
     /**
@@ -282,8 +291,12 @@ class networkTest extends TestCase
     {
         try {
             // Old way of clearing out misconfigured credentials
-            $NetCurl = $this->NET->getGitTagsByUrl("https://userCredentialsBanned@" . $this->bitBucketUrl, false, false,
-                false);
+            $NetCurl = $this->NET->getGitTagsByUrl(
+                "https://userCredentialsBanned@" . $this->bitBucketUrl,
+                false,
+                false,
+                false
+            );
             $GuzzleLIB = $this->NET->getGitTagsByUrl("https://github.com/guzzle/guzzle.git");
             static::assertTrue(count($NetCurl) >= 0 && count($GuzzleLIB) >= 0);
         } catch (\Exception $e) {
@@ -298,8 +311,11 @@ class networkTest extends TestCase
         try {
             // Using Guzzle in this test means that we need to clean up the tags from non numeric content, as they
             // use mixed tags like: v2.x, v3.x, 1.x, etc.
-            $GuzzleLIB = $this->NET->getGitTagsByVersion("https://github.com/guzzle/guzzle.git", '2.0', '3.0', true,
-                true);
+            $GuzzleLIB = $this->NET->getGitTagsByVersion(
+                "https://github.com/guzzle/guzzle.git", '2.0', '3.0',
+                true,
+                true
+            );
             $fullSerie = 0;
             $onlyTwo = 0;
             foreach ($GuzzleLIB as $v) {
@@ -342,5 +358,4 @@ class networkTest extends TestCase
 
         static::assertCount(16, $this->NET->getUrlsFromHtml($html));
     }
-
 }

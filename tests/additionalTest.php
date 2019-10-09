@@ -7,7 +7,6 @@ if (file_exists(__DIR__ . '/../vendor/autoload.php')) {
 }
 
 use PHPUnit\Framework\TestCase;
-use TorneLIB\MODULE_CURL;
 
 /**
  * Class additionalTest Class for testing additional protocols (currently: imap)
@@ -22,7 +21,7 @@ class additionalTest extends TestCase
     /** @var string Change this */
     private $ACCOUNT = "imap://user:password@imap.server";
 
-    function setUp()/* The :void return type declaration that should be here would cause a BC issue */
+    protected function setUp()/* The :void return type declaration that should be here would cause a BC issue */
     {
         parent::setUp();
 
@@ -32,7 +31,8 @@ class additionalTest extends TestCase
     /**
      * @test
      */
-    function testImap() {
+    public function testImap()
+    {
         if (preg_match("/user\:password/", $this->ACCOUNT)) {
             static::markTestSkipped("Testing imap connectivity requires proper user login data");
             return;

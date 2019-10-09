@@ -19,7 +19,7 @@ class driversTest extends TestCase
     /** @var MODULE_CURL $CURL */
     private $CURL;
 
-    function setUp()
+    protected function setUp()
     {
         error_reporting(E_ALL);
         $this->DRIVERCLASS = new NETCURL_DRIVER_CONTROLLER();
@@ -32,7 +32,7 @@ class driversTest extends TestCase
     /**
      * @test
      */
-    function getSystemWideDrivers()
+    public function getSystemWideDrivers()
     {
         if ($this->DRIVERCLASS->getSystemWideDrivers()) {
             static::assertTrue(count($this->DRIVERCLASS->getSystemWideDrivers()) >= 1 ? true : false);
@@ -44,7 +44,7 @@ class driversTest extends TestCase
     /**
      * @test
      */
-    function getDisabledFunctions()
+    public function getDisabledFunctions()
     {
         static::assertTrue(is_array($this->DRIVERCLASS->getDisabledFunctions()));
     }
@@ -52,11 +52,11 @@ class driversTest extends TestCase
     /**
      * @test
      */
-    function getIsDisabled()
+    public function getIsDisabled()
     {
         $UPPERCASE = $this->DRIVERCLASS->getIsDisabled('CURL_INIT, CURL_EXEC');
-        $simple    = $this->DRIVERCLASS->getIsDisabled('curl_init');
-        $array     = $this->DRIVERCLASS->getIsDisabled(array('curl_init', 'curl_exec'));
+        $simple = $this->DRIVERCLASS->getIsDisabled('curl_init');
+        $array = $this->DRIVERCLASS->getIsDisabled(['curl_init', 'curl_exec']);
         if ($UPPERCASE && $simple && $array) {
             static::assertTrue($UPPERCASE && $simple && $array);
         } else {
@@ -67,7 +67,7 @@ class driversTest extends TestCase
     /**
      * @test
      */
-    function getStaticCurl()
+    public function getStaticCurl()
     {
         static::assertTrue(NETCURL_DRIVER_CONTROLLER::getCurl());
     }
@@ -75,7 +75,7 @@ class driversTest extends TestCase
     /**
      * @test
      */
-    function getDriverAvailable()
+    public function getDriverAvailable()
     {
         static::assertTrue($this->DRIVERCLASS->getIsDriver(NETCURL_NETWORK_DRIVERS::DRIVER_CURL));
     }
@@ -84,9 +84,9 @@ class driversTest extends TestCase
      * @test
      * @throws \Exception
      */
-    function getGuzzleDriver()
+    public function getGuzzleDriver()
     {
-        if ( ! $this->DRIVERCLASS->getIsDriver(NETCURL_NETWORK_DRIVERS::DRIVER_GUZZLEHTTP)) {
+        if (!$this->DRIVERCLASS->getIsDriver(NETCURL_NETWORK_DRIVERS::DRIVER_GUZZLEHTTP)) {
             static::markTestSkipped("Guzzle is unavailable for this test");
 
             return;
@@ -98,7 +98,7 @@ class driversTest extends TestCase
      * @test
      * @throws \Exception
      */
-    function getDriverGuzzle()
+    public function getDriverGuzzle()
     {
         if ($this->DRIVERCLASS->getIsDriver(NETCURL_NETWORK_DRIVERS::DRIVER_GUZZLEHTTP)) {
             $this->CURL->setDriver(NETCURL_NETWORK_DRIVERS::DRIVER_GUZZLEHTTP);
@@ -114,7 +114,7 @@ class driversTest extends TestCase
      * @testdox Auto detection of drivers (choose "next available")
      * @throws \Exception
      */
-    function autoDetect()
+    public function autoDetect()
     {
         $this->CURL->setDriverAuto();
         $driverIdentification = $this->CURL->getDriver();
@@ -129,7 +129,7 @@ class driversTest extends TestCase
      * @test
      * @throws \Exception
      */
-    function setGuzzle()
+    public function setGuzzle()
     {
         if ($this->DRIVERCLASS->getIsDriver(NETCURL_NETWORK_DRIVERS::DRIVER_GUZZLEHTTP) || $this->DRIVERCLASS->getIsDriver(NETCURL_NETWORK_DRIVERS::DRIVER_GUZZLEHTTP_STREAM)) {
             $this->CURL->setDriver(NETCURL_NETWORK_DRIVERS::DRIVER_GUZZLEHTTP_STREAM);
@@ -143,7 +143,7 @@ class driversTest extends TestCase
      * @test
      * @throws \Exception
      */
-    function doCurl()
+    public function doCurl()
     {
         $php53AntiChain = $this->CURL->doGet("https://identifier.tornevall.net/?json");
         if (method_exists($php53AntiChain, 'getParsedResponse')) {
@@ -154,5 +154,4 @@ class driversTest extends TestCase
             static::markTestSkipped("This test is disabled as most of the testing is based on chaining, which is not available from PHP 5.3 (" . PHP_VERSION . ")");
         }
     }
-
 }

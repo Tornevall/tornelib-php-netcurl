@@ -23,7 +23,7 @@ class cookieTest extends TestCase
     private $CURL;
     private $NETWORK;
 
-    function setUp()/* The :void return type declaration that should be here would cause a BC issue */
+    protected function setUp()/* The :void return type declaration that should be here would cause a BC issue */
     {
         parent::setUp();
         $this->CURL = new MODULE_CURL();
@@ -40,7 +40,6 @@ class cookieTest extends TestCase
         try {
             $this->CURL->setFlag('NETCURL_COOKIE_TEMP_LOCATION', true);
         } catch (\Exception $e) {
-
         }
         // For Linux based systems, we go through /tmp
         static::assertStringStartsWith("/tmp/netcurl", $this->CURL->getCookiePath());
@@ -73,5 +72,4 @@ class cookieTest extends TestCase
         static::assertStringStartsWith("/tmp/netcurl_self", $this->CURL->getCookiePath());
         @rmdir("/tmp/netcurl_self");
     }
-
 }

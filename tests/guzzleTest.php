@@ -15,7 +15,7 @@ class guzzleTest extends TestCase
     /**
      * @throws \Exception
      */
-    function setUp()
+    protected function setUp()
     {
         error_reporting(E_ALL);
         $this->CURL = new MODULE_CURL();
@@ -30,7 +30,7 @@ class guzzleTest extends TestCase
     {
         $returnThis = null;
         try {
-            if ( ! $useStream) {
+            if (!$useStream) {
                 $returnThis = is_object($this->CURL->setDriver(NETCURL_NETWORK_DRIVERS::DRIVER_GUZZLEHTTP)) ? true : false;
             } else {
                 $returnThis = is_object($this->CURL->setDriver(NETCURL_NETWORK_DRIVERS::DRIVER_GUZZLEHTTP_STREAM)) ? true : false;
@@ -48,11 +48,11 @@ class guzzleTest extends TestCase
      * @test
      * @throws \Exception
      */
-    function enableGuzzle()
+    public function enableGuzzle()
     {
         if ($this->hasGuzzle()) {
             $info = $this->CURL->doPost("https://" . \TESTURLS::getUrlTests() . "?o=json&getjson=true&var1=HasVar1",
-                array('var2' => 'HasPostVar1'))->getParsed();
+                ['var2' => 'HasPostVar1'])->getParsed();
             //$this->CURL->getExternalDriverResponse();
             //$parsed = $this->CURL->getParsedResponse( $info );
             static::assertTrue($info->methods->_REQUEST->var1 === "HasVar1");
@@ -65,14 +65,14 @@ class guzzleTest extends TestCase
      * @test
      * @throws \Exception
      */
-    function enableGuzzleStream()
+    public function enableGuzzleStream()
     {
         if ($this->hasGuzzle(true)) {
             $info = $this->CURL->doPost("https://" . \TESTURLS::getUrlTests() . "?o=json&getjson=true&getVar=true",
-                array(
-                    'var1'    => 'HasVar1',
-                    'postVar' => "true"
-                ))->getParsed();
+                [
+                    'var1' => 'HasVar1',
+                    'postVar' => "true",
+                ])->getParsed();
             //$parsed = $this->CURL->getParsedResponse( $info );
             static::assertTrue($info->methods->_REQUEST->var1 === "HasVar1");
         } else {
@@ -84,15 +84,15 @@ class guzzleTest extends TestCase
      * @test
      * @throws \Exception
      */
-    function enableGuzzleStreamJson()
+    public function enableGuzzleStreamJson()
     {
         if ($this->hasGuzzle(true)) {
             $info = $this->CURL->doPost("https://" . \TESTURLS::getUrlTests() . "?o=json&getjson=true&getVar=true",
-                array(
-                    'var1'    => 'HasVar1',
+                [
+                    'var1' => 'HasVar1',
                     'postVar' => "true",
-                    'asJson'  => 'true'
-                ), NETCURL_POST_DATATYPES::DATATYPE_JSON)->getParsed();
+                    'asJson' => 'true',
+                ], NETCURL_POST_DATATYPES::DATATYPE_JSON)->getParsed();
             //$parsed = $this->CURL->getParsedResponse( $info );
             static::assertTrue($info->methods->_REQUEST->var1 === "HasVar1");
         } else {
@@ -103,7 +103,7 @@ class guzzleTest extends TestCase
     /**
      * @test
      */
-    function enableGuzzleWsdl()
+    public function enableGuzzleWsdl()
     {
         try {
             if ($this->hasGuzzle()) {
@@ -127,11 +127,11 @@ class guzzleTest extends TestCase
     /**
      * @test
      */
-    function enableGuzzleErrors()
+    public function enableGuzzleErrors()
     {
         if ($this->hasGuzzle()) {
             try {
-                $this->CURL->doPost(\TESTURLS::getUrlTests() . "&o=json&getjson=true", array('var1' => 'HasVar1'));
+                $this->CURL->doPost(\TESTURLS::getUrlTests() . "&o=json&getjson=true", ['var1' => 'HasVar1']);
             } catch (\Exception $wrapError) {
                 static::assertTrue($wrapError->getCode() == 404);
             }
@@ -139,5 +139,4 @@ class guzzleTest extends TestCase
             static::markTestSkipped("Can not test guzzle driver without guzzle");
         }
     }
-
 }

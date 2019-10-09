@@ -12,7 +12,7 @@ class sslTest extends TestCase
     /** @var MODULE_SSL */
     private $SSL;
 
-    function setUp()
+    protected function setUp()
     {
         error_reporting(E_ALL);
         $this->SSL = new MODULE_SSL();
@@ -75,10 +75,9 @@ class sslTest extends TestCase
      * @test
      * @testdox Get a generated context stream prepared for the SSL configuration
      */
-    function sslStream()
+    public function sslStream()
     {
         $streamContext = $this->SSL->getSslStream();
         static::assertTrue(is_resource($streamContext['stream_context']));
     }
-
 }

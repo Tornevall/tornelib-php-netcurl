@@ -680,7 +680,6 @@ class curlTest extends TestCase
     }
 
     /**
-     * @test
      * @testdox Test custom ip address setup (if more than one ip is set on the interface)
      * @throws Exception
      */

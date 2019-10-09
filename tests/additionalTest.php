@@ -21,7 +21,8 @@ class additionalTest extends TestCase
     /** @var string Change this */
     private $ACCOUNT = "imap://user:password@imap.server";
 
-    function setUp()/* The :void return type declaration that should be here would cause a BC issue */
+    /* The :void return type declaration that should be here would cause a BC issue */
+    function setUp()
     {
         parent::setUp();
 

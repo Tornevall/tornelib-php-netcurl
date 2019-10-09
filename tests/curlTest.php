@@ -654,7 +654,8 @@ class curlTest extends TestCase
                 if (!in_array($ip, $ipArray) &&
                     $NETWORK->getArpaFromAddr($ip, true) > 0 &&
                     !preg_match("/^10\./", $ip) &&
-                    !preg_match("/^172\./", $ip) && !preg_match("/^192\./", $ip)
+                    !preg_match("/^172\./", $ip) &&
+                    !preg_match("/^192\./", $ip)
                 ) {
                     $ipArray[] = $ip;
                 }

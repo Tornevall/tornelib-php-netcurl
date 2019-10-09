@@ -32,7 +32,7 @@ if (!class_exists('MODULE_CURL', NETCURL_CLASS_EXISTS_AUTOLOAD) &&
         define('NETCURL_CURL_RELEASE', '6.0.24');
     }
     if (!defined('NETCURL_CURL_MODIFY')) {
-        define('NETCURL_CURL_MODIFY', '20180822');
+        define('NETCURL_CURL_MODIFY', '20191009');
     }
     if (!defined('NETCURL_CURL_CLIENTNAME')) {
         define('NETCURL_CURL_CLIENTNAME', 'MODULE_CURL');
@@ -1458,7 +1458,14 @@ if (!class_exists('MODULE_CURL', NETCURL_CLASS_EXISTS_AUTOLOAD) &&
             if (!empty($CustomUserAgent)) {
                 $this->mergeUserAgent($CustomUserAgent);
             } else {
-                $this->HTTP_USER_AGENT = $this->userAgents['Mozilla'] . ' +TorneLIB-NetCURL-' . NETCURL_RELEASE . " +" . NETCURL_CURL_CLIENTNAME . "+-" . NETCURL_CURL_RELEASE . ' (' . $this->netCurlUrl . ')';
+                $this->HTTP_USER_AGENT = sprintf(
+                    '%s +TorneLIB-NetCURL-%s +%s +%s (%s)',
+                    $this->userAgents['Mozilla'],
+                    NETCURL_RELEASE,
+                    NETCURL_CURL_CLIENTNAME,
+                    NETCURL_CURL_RELEASE,
+                    $this->netCurlUrl
+                );
             }
         }
 
@@ -1475,10 +1482,17 @@ if (!class_exists('MODULE_CURL', NETCURL_CLASS_EXISTS_AUTOLOAD) &&
             }
 
             // NETCURL_CURL_CLIENTNAME . '-' . NETCURL_RELEASE . "/" . __CLASS__ . "-" . NETCURL_CURL_RELEASE
-            $this->HTTP_USER_AGENT = implode(
+            $this->HTTP_USER_AGENT = sprintf(
+                '%s +TorneLIB-NETCURL-%s +%s-%s (%s)',
+                implode(
                     " ",
                     $this->CUSTOM_USER_AGENT
-                ) . " +TorneLIB-NETCURL-" . NETCURL_RELEASE . " +" . NETCURL_CURL_CLIENTNAME . "-" . NETCURL_CURL_RELEASE . " (" . $this->netCurlUrl . ")";
+                ),
+                NETCURL_RELEASE,
+                NETCURL_CURL_CLIENTNAME,
+                NETCURL_CURL_RELEASE,
+                $this->netCurlUrl
+            );
         }
 
         /**

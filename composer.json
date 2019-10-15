@@ -38,6 +38,7 @@
       "source/Modules/network.php",
       "source/Modules/network_dep.php",
       "source/Modules/curl.php",
+      "source/Modules/curl_dep.php",
       "source/Modules/soap.php",
       "source/Modules/soap_dep.php"
     ],

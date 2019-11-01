@@ -2,12 +2,14 @@
 
 namespace TorneLIB\Module\Network\Wrappers;
 
+use TorneLIB\Module\Network\Model\Wrapper;
+
 /**
  * Class CurlWrapper
  *
  * @package TorneLIB\Module\Network\Wrappers
  */
-class CurlWrapper
+class CurlWrapper implements Wrapper
 {
     /**
      * @var resource cURL simple handle
@@ -28,6 +30,10 @@ class CurlWrapper
     }
 
     public function __get($name)
+    {
+    }
+
+    public function request()
     {
     }
 }

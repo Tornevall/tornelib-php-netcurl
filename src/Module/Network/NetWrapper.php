@@ -2,18 +2,18 @@
 
 namespace TorneLIB\Module\Network;
 
-use TorneLIB\Module\Network\Wrappers\Curlwrapper;
-use TorneLIB\Module\Network\Wrappers\Soapclientwrapper;
-use TorneLIB\Module\Network\Wrappers\Streamwrapper;
+use TorneLIB\Module\Network\Wrappers\CurlWrapper;
+use TorneLIB\Module\Network\Wrappers\SoapClientWrapper;
+use TorneLIB\Module\Network\Wrappers\StreamWrapper;
 
 /**
- * Class Netwrapper
+ * Class NetWrapper
  *
  * Module bridge.
  *
  * @package TorneLIB\Module\Network
  */
-class Netwrapper
+class NetWrapper
 {
     private $wrappers;
 
@@ -24,10 +24,10 @@ class Netwrapper
 
     private function getInternalWrappers()
     {
-        $this->wrappers[] = new Curlwrapper();
-        $this->wrappers[] = new Streamwrapper();
+        $this->wrappers[] = new CurlWrapper();
+        $this->wrappers[] = new StreamWrapper();
         if (class_exists('SoapClient')) {
-            $this->wrappers[] = new Soapclientwrapper();
+            $this->wrappers[] = new SoapClientWrapper();
         }
     }
 
@@ -39,14 +39,22 @@ class Netwrapper
     {
     }
 
+    /**
+     * @param $name
+     * @param $arguments
+     * @return mixed
+     * @throws \Exception
+     */
     public function __call($name, $arguments)
     {
         switch ($name) {
             case 'setAuth':
                 // Abbreviation for setAuthentication.
-                return call_user_func_array(array($this, 'setAuthentication'), $arguments);
+                return call_user_func_array([$this, 'setAuthentication'], $arguments);
             default:
-                throw new \Exception(sprintf('Undefined function: %s', $name));
+                throw new \Exception(
+                    sprintf('Undefined function: %s', $name)
+                );
                 break;
         }
     }

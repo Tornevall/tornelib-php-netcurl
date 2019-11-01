@@ -2,6 +2,12 @@
 
 [Full documents are located here](https://docs.tornevall.net/x/KwCy)
 
+## Note to self
+
+Adding stuff to composer.
+
+   "zendframework/zend-http": "^2.9"
+
 
 ## Compatibility span (Supported PHP versions)
 
@@ -29,7 +35,8 @@ In its initial state, there are basically no requirements as this module tries t
 If there's traces of the below drivers, NETCURL tries to pick them up on demand, to use them:
 
 * Guzzle
-* Wordpress 
+* Wordpress
+* Zend Framework
 
 ## Installation
 
@@ -81,12 +88,3 @@ Version 6.1 follows the standard of what's written in 6.0 - there is a primary m
 ## Breaking changes?
 
 As far as I see it, 6.1 is built to not break systems that runs on 6.0 except for possibly if someone is using PHP 5.3 which is highly obsolete as of a load of years back in time.
-
-
-# Deprecations
-
-## Auto detection of communicators
-
-Using this call before running calls will try to prepare for a proper communications driver. If curl is available, the internal functions will be prioritized before others as this used to be best practice. However, if curl is missing, this might help you find a proper driver automatically.
-
-    $LIB->setDriverAuto();

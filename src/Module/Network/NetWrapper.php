@@ -40,6 +40,12 @@ class NetWrapper
     }
 
     /**
+     * Register a new wrapper/module/communicator.
+     */
+    public function register() {
+    }
+
+    /**
      * @param $name
      * @param $arguments
      * @return mixed

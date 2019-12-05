@@ -3,11 +3,14 @@
 namespace TorneLIB\Module\Network\Wrappers;
 
 /**
- * Class Streamwrapper
+ * Class SoapClientWrapper
  *
  * @package TorneLIB\Module\Network\Wrappers
  */
-class Streamwrapper {
+class SoapClientWrapper
+{
+    private $SOAP;
+
     public function __construct()
     {
     }

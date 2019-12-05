@@ -3,12 +3,14 @@
 namespace TorneLIB\Module\Network\Wrappers;
 
 /**
- * Class Curlwrapper
+ * Class StreamWrapper
  *
  * @package TorneLIB\Module\Network\Wrappers
  */
-class Curlwrapper
+class StreamWrapper
 {
+    private $STREAMS;
+
     public function __construct()
     {
     }

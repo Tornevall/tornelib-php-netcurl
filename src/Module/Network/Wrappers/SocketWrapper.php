@@ -3,13 +3,14 @@
 namespace TorneLIB\Module\Network\Wrappers;
 
 /**
- * Class Socketwrapper
+ * Class SocketWrapper
  *
  * @package TorneLIB\Module\Network\Wrappers
- * @todo Fix it.
  */
-class Sockerwrapper
+class SocketWrapper
 {
+    private $SOCKET;
+
     public function __construct()
     {
     }

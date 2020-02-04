@@ -5,9 +5,11 @@
     "license": "Apache-2.0",
     "require": {
         "php": ">=5.4",
+        "tornevall/tornelib-php-errorhandler": "dev-master",
         "tornevall/tornelib-php-network": "dev-develop/6.1",
         "tornevall/tornelib-php-crypto": "dev-develop/6.1",
-        "tornevall/tornelib-php-io": "dev-develop/6.1"
+        "tornevall/tornelib-php-io": "dev-develop/6.1",
+        "phpunit/phpunit": "^7.5"
     },
     "authors": [
         {

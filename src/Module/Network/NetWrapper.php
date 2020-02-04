@@ -17,18 +17,41 @@ class NetWrapper
 {
     private $wrappers;
 
+    /**
+     * @var array $internalWrapperList What we support internally.
+     */
+    private $internalWrapperList = [
+        'TorneLIB\Module\Network\Wrappers\CurlWrapper',
+        'TorneLIB\Module\Network\Wrappers\StreamWrapper',
+        'TorneLIB\Module\Network\Wrappers\SoapClientWrapper',
+    ];
+
     public function __construct()
     {
-        $this->getInternalWrappers();
+        $this->initializeWrappers();
     }
 
-    private function getInternalWrappers()
+    /**
+     * @throws \TorneLIB\Exception\ExceptionHandler
+     */
+    private function initializeWrappers()
     {
-        $this->wrappers[] = new CurlWrapper();
-        $this->wrappers[] = new StreamWrapper();
-        if (class_exists('SoapClient')) {
-            $this->wrappers[] = new SoapClientWrapper();
+        foreach ($this->internalWrapperList as $wrapperClass) {
+            try {
+                $this->wrappers[] = new $wrapperClass();
+            } catch (\Exception $wrapperLoadException) {
+            }
         }
+
+        return $this->wrappers;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getWrappers()
+    {
+        return $this->wrappers;
     }
 
     /**
@@ -42,7 +65,8 @@ class NetWrapper
     /**
      * Register a new wrapper/module/communicator.
      */
-    public function register() {
+    public function register()
+    {
     }
 
     /**

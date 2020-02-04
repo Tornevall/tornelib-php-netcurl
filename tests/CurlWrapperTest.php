@@ -3,6 +3,8 @@
 use TorneLIB\Module\Network\Wrappers\CurlWrapper;
 use PHPUnit\Framework\TestCase;
 
+define('LIB_ERROR_HTTP', true);
+
 class CurlWrapperTest extends TestCase
 {
     private $curlWrapper;
@@ -14,11 +16,24 @@ class CurlWrapperTest extends TestCase
 
     /**
      * @test
+     * @testdox Test the primary wrapper controller.
+     */
+    public function majorWrapperControl()
+    {
+        $netWrap = new \TorneLIB\Module\Network\NetWrapper();
+        static::assertTrue(count($netWrap->getWrappers()) ? true : false);
+    }
+
+    /**
+     * @test
      */
     public function curlWrapper()
     {
-        $this->curlWrapper = new CurlWrapper();
-        print_r($this->curlWrapper);
+        try {
+            $this->curlWrapper = new CurlWrapper();
+        } catch (\Exception $e) {
+            echo $e->getCode();
+        }
     }
 
 }

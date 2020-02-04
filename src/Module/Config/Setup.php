@@ -11,5 +11,4 @@ namespace Module\Config;
  */
 class Setup
 {
-
 }

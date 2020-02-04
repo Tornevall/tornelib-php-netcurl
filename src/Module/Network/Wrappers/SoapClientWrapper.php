@@ -13,5 +13,20 @@ class SoapClientWrapper
 
     public function __construct()
     {
+        if (!class_exists('SoapClient')) {
+            throw new ExceptionHandler('SOAP unavailable: SoapClient is missing.');
+        }
+    }
+
+    public function __call($name, $arguments)
+    {
+    }
+
+    public function __get($name)
+    {
+    }
+
+    public function request()
+    {
     }
 }

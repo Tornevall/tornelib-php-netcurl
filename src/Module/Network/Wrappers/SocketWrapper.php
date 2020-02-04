@@ -14,4 +14,16 @@ class SocketWrapper
     public function __construct()
     {
     }
+
+    public function __call($name, $arguments)
+    {
+    }
+
+    public function __get($name)
+    {
+    }
+
+    public function request()
+    {
+    }
 }

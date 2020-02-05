@@ -27,7 +27,7 @@ class CurlWrapper implements Wrapper
 
     public function __construct()
     {
-        // Make sure our wrapper exists before using it.
+        // Make sure there are available drivers before using the wrapper.
         if (!function_exists('curl_init') || !function_exists('curl_exec')) {
             throw new ExceptionHandler('curl unavailable: curl_init and/or curl_exec not found');
         }

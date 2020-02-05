@@ -24,7 +24,7 @@ class NetWrapper
         'TorneLIB\Module\Network\Wrappers\CurlWrapper',
         'TorneLIB\Module\Network\Wrappers\StreamWrapper',
         'TorneLIB\Module\Network\Wrappers\SoapClientWrapper',
-        'TorneLIB\Module\Network\Wrappers\ZendWrapper',
+	    'TorneLIB\Module\Network\Wrappers\GuzzleWrapper',
     ];
 
     public function __construct()

@@ -1,7 +1,7 @@
 <?php
 
 namespace TorneLIB\Module\Network\Wrappers;
-use GuzzleHttp\Client
+use GuzzleHttp\Client;
 use GuzzleHttp\Handler\StreamHandler;
 
 class GuzzleWrapper

@@ -1,6 +1,7 @@
 # NETCURL 6.1
 
-[Full documents are located here](https://docs.tornevall.net/x/KwCy)
+Full documents for v6.0 is located [here](https://docs.tornevall.net/x/KwCy).
+For v6.1 -- please hold.
 
 ## Note to self
 

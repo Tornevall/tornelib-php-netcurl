@@ -33,10 +33,9 @@ class CurlWrapperTest extends TestCase
     public function curlWrapper()
     {
         try {
-            $this->curlWrapper = new CurlWrapper();
+            $this->curlWrapper = new CurlWrapper('https://identifier.tornevall.net', []);
         } catch (\Exception $e) {
             echo $e->getCode();
         }
     }
-
 }

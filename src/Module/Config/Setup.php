@@ -1,6 +1,6 @@
 <?php
 
-namespace Module\Config;
+namespace TorneLIB\Module\Config;
 
 /**
  * Class Setup
@@ -11,5 +11,4 @@ namespace Module\Config;
  */
 class Setup
 {
-
 }

@@ -3,7 +3,7 @@
 namespace TorneLIB;
 
 use TorneLIB\Module\Network\NetWrapper;
-use Zend\Http\Client;
+//use Zend\Http\Client;
 
 /**
  * Class MODULE_CURL
@@ -14,20 +14,20 @@ use Zend\Http\Client;
  */
 class MODULE_CURL
 {
-    private $module;
+	private $module;
 
-    public function __construct()
-    {
-        $this->module = new NetWrapper();
-        $cli = new Client('http://identifier.tornevall.net');
-        echo $cli->send();
-    }
+	public function __construct()
+	{
+		$this->module = new NetWrapper();
+		//$cli = new Client('http://identifier.tornevall.net');
+		//echo $cli->send();
+	}
 
-    public function __get($name)
-    {
-    }
+	public function __get($name)
+	{
+	}
 
-    public function __call($name, $arguments)
-    {
-    }
+	public function __call($name, $arguments)
+	{
+	}
 }

@@ -6,6 +6,7 @@ interface Wrapper {
 
     public function __construct();
 
-    public function request();
+    public function getConfig();
 
+    public function request();
 }

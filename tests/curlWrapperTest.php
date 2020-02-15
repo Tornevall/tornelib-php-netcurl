@@ -9,7 +9,7 @@ define('LIB_ERROR_HTTP', true);
 
 require_once(__DIR__ . '/../vendor/autoload.php');
 
-class CurlWrapperTest extends TestCase
+class curlWrapperTest extends TestCase
 {
 	private $curlWrapper;
 

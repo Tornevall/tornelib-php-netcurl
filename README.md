@@ -100,3 +100,4 @@ No. Version 6.1 is written to reach highest compatibility with v6.1 as possible.
         "zendframework/zend-http": "^2.11",
         "guzzlehttp/guzzle": "^6.5"
         "zendframework/zend-http": "^2.9"
+

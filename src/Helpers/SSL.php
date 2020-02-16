@@ -4,6 +4,11 @@ namespace TorneLIB\Helpers;
 
 use TorneLIB\Flags;
 
+/**
+ * Class SSL Imports and facelifts from MODULE_SSH v6.0
+ * @package TorneLIB\Helpers
+ * @version 6.1.0
+ */
 class SSL
 {
 	public function __construct()
@@ -11,6 +16,15 @@ class SSL
 		return $this;
 	}
 
+	/**
+	 * Checks if system has SSL capabilities.
+	 *
+	 * Replaces getCurlSslAvailable from v6.0 where everything is checked in the same method.
+	 *
+	 * @return $this
+	 * @throws \Exception
+	 * @since 6.1.0
+	 */
 	public function getSslCapabilities() {
 
 		if (!$this->setSslCapabilities()) {

@@ -60,4 +60,17 @@ class curlWrapperTest extends TestCase
 			) ? true : false
 		);
 	}
+
+	/**
+	 * @test
+	 */
+	public function safeMode()
+	{
+		$security = new \TorneLIB\Utils\Security();
+		if (version_compare(PHP_VERSION, '5.4.0', '>=')) {
+			static::assertFalse($security->getSafeMode());
+		} else {
+			static::assertTrue($security->getSafeMode());
+		}
+	}
 }

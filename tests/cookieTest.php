@@ -23,9 +23,8 @@ class cookieTest extends TestCase
     private $CURL;
     private $NETWORK;
 
-    function setUp()/* The :void return type declaration that should be here would cause a BC issue */
+    function __setUp()
     {
-        parent::setUp();
         $this->CURL = new MODULE_CURL();
         $this->NETWORK = new MODULE_NETWORK();
     }
@@ -36,6 +35,7 @@ class cookieTest extends TestCase
      */
     public function enableLocalCookiesInSysTemp()
     {
+        $this->__setUp();
         $this->CURL->setLocalCookies(true);
         try {
             $this->CURL->setFlag('NETCURL_COOKIE_TEMP_LOCATION', true);
@@ -51,6 +51,7 @@ class cookieTest extends TestCase
      */
     public function enableLocalCookiesInSysTempProhibited()
     {
+        $this->__setUp();
         $this->CURL->setLocalCookies(true);
         static::assertEquals('', $this->CURL->getCookiePath());
     }
@@ -63,6 +64,7 @@ class cookieTest extends TestCase
      */
     public function enableLocalCookiesSelfLocated()
     {
+        $this->__setUp();
         $this->CURL->setLocalCookies(true);
         if (file_exists("/tmp/netcurl_self")) {
             @rmdir("/tmp/netcurl_self");

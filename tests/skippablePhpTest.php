@@ -25,8 +25,7 @@ class skippablePhpTest extends TestCase
     /**
      * @throws \Exception
      */
-    function setUp()
-    {
+    function __setUp() {
         error_reporting(E_ALL);
         $this->CURL = new MODULE_CURL();
         $this->NETWORK = new MODULE_NETWORK();
@@ -45,6 +44,7 @@ class skippablePhpTest extends TestCase
 
             return;
         }
+        $this->__setUp();
         if (filter_var(ini_get('safe_mode'), FILTER_VALIDATE_BOOLEAN) === true) {
             //$this->pemDefault();
             $redirectResponse = $this->CURL->doGet("http://tests.netcurl.org/tornevall_network/redirect.php?run");
@@ -69,6 +69,7 @@ class skippablePhpTest extends TestCase
      */
     public function torNetwork()
     {
+        $this->__setUp();
         exec("service tor status", $ubuntuService);
         $serviceFound = false;
         foreach ($ubuntuService as $row) {

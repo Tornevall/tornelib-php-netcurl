@@ -15,8 +15,7 @@ class guzzleTest extends TestCase
     /**
      * @throws \Exception
      */
-    function setUp()
-    {
+    function __setUp() {
         error_reporting(E_ALL);
         $this->CURL = new MODULE_CURL();
     }
@@ -25,6 +24,7 @@ class guzzleTest extends TestCase
      * @param bool $useStream
      *
      * @return bool
+     * @throws \Exception
      */
     private function hasGuzzle($useStream = false)
     {
@@ -50,6 +50,7 @@ class guzzleTest extends TestCase
      */
     public function enableGuzzle()
     {
+        $this->__setUp();
         if ($this->hasGuzzle()) {
             $info = $this->CURL->doPost("https://" . \TESTURLS::getUrlTests() . "?o=json&getjson=true&var1=HasVar1",
                 ['var2' => 'HasPostVar1'])->getParsed();
@@ -67,6 +68,7 @@ class guzzleTest extends TestCase
      */
     public function enableGuzzleStream()
     {
+        $this->__setUp();
         if ($this->hasGuzzle(true)) {
             $info = $this->CURL->doPost("https://" . \TESTURLS::getUrlTests() . "?o=json&getjson=true&getVar=true",
                 [
@@ -86,6 +88,7 @@ class guzzleTest extends TestCase
      */
     public function enableGuzzleStreamJson()
     {
+        $this->__setUp();
         if ($this->hasGuzzle(true)) {
             $info = $this->CURL->doPost("https://" . \TESTURLS::getUrlTests() . "?o=json&getjson=true&getVar=true",
                 [
@@ -105,6 +108,7 @@ class guzzleTest extends TestCase
      */
     public function enableGuzzleWsdl()
     {
+        $this->__setUp();
         try {
             if ($this->hasGuzzle()) {
                 // Currently, this one will fail over to SimpleSoap
@@ -129,6 +133,7 @@ class guzzleTest extends TestCase
      */
     public function enableGuzzleErrors()
     {
+        $this->__setUp();
         if ($this->hasGuzzle()) {
             try {
                 $this->CURL->doPost(\TESTURLS::getUrlTests() . "&o=json&getjson=true", ['var1' => 'HasVar1']);

@@ -41,15 +41,14 @@ class curlTest extends TestCase
     protected $DRIVER;
     protected $CurlVersion = null;
 
-    public function setUp() {
+    private function __setUp()
+    {
         error_reporting(E_ALL);
 
-        //$this->setDebug(true);
         $this->StartErrorReporting = error_reporting();
         $this->NETWORK = new MODULE_NETWORK();
         $this->CURL = new MODULE_CURL();
         $this->DRIVER = new NETCURL_DRIVER_CONTROLLER();
-        //$this->CURL->setTimeout( 6 );
         $this->CURL->setUserAgent("PHPUNIT");
 
         if (function_exists('curl_version')) {
@@ -82,6 +81,7 @@ class curlTest extends TestCase
      */
     protected function pemDefault()
     {
+        $this->__setUp();
         $this->CURL->setFlag('_DEBUG_TCURL_UNSET_LOCAL_PEM_LOCATION', false);
         $this->CURL->setSslVerify(true);
     }
@@ -92,6 +92,7 @@ class curlTest extends TestCase
      */
     protected function simpleGet()
     {
+        $this->__setUp();
         return $this->CURL->doGet(\TESTURLS::getUrlSimple());
     }
 
@@ -103,6 +104,7 @@ class curlTest extends TestCase
      */
     protected function hasBody($container)
     {
+        $this->__setUp();
         if (is_array($container) && isset($container['body'])) {
             return true;
         }
@@ -166,6 +168,7 @@ class curlTest extends TestCase
      */
     public function quickInitParsed()
     {
+        $this->__setUp();
         $tempCurl = new MODULE_CURL("https://identifier.tornevall.net/index.php?json");
         static::assertTrue(is_object($tempCurl->getParsed()));
     }
@@ -177,6 +180,7 @@ class curlTest extends TestCase
      */
     public function quickInitResponseCode()
     {
+        $this->__setUp();
         $tempCurl = new MODULE_CURL("https://identifier.tornevall.net/?json");
         static::assertTrue($tempCurl->getCode() == 200);
     }
@@ -188,6 +192,7 @@ class curlTest extends TestCase
      */
     public function quickInitResponseBody()
     {
+        $this->__setUp();
         $tempCurl = new MODULE_CURL("https://identifier.tornevall.net/?json");
         // Some content must exists in the body
         static::assertTrue(strlen($tempCurl->getBody()) >= 10);
@@ -322,6 +327,7 @@ class curlTest extends TestCase
      */
     protected function getBody($container)
     {
+        $this->__setUp();
         if (is_object($container) && method_exists($container, 'getBody')) {
             return $container->getBody();
         }
@@ -396,6 +402,7 @@ class curlTest extends TestCase
      */
     public function sslSelfSignedIgnore()
     {
+        $this->__setUp();
         try {
             $this->CURL->setSslStrictFallback(true);
             $this->CURL->setSslVerify(true, true);
@@ -478,6 +485,7 @@ class curlTest extends TestCase
      */
     protected function getParsed($container)
     {
+        $this->__setUp();
         if ($this->hasBody($container)) {
             if (is_object($container) && method_exists($container, 'getParsed')) {
                 return $container->getParsed();
@@ -515,8 +523,11 @@ class curlTest extends TestCase
         //$this->CURL->setParseHtml( true );
         $container = null;
         try {
-            $container = $this->getParsed($this->urlGet("ssl&bool&o=xml&method=get&using=SimpleXMLElement", null,
-                "simple.html"));
+            $container = $this->getParsed(
+                $this->urlGet("ssl&bool&o=xml&method=get&using=SimpleXMLElement",
+                    null,
+                    "simple.html")
+            );
         } catch (\Exception $e) {
 
         }
@@ -530,6 +541,7 @@ class curlTest extends TestCase
      */
     public function getSimpleDomChain()
     {
+        $this->__setUp();
 
         if (version_compare(PHP_VERSION, '5.4.0', '<')) {
             static::markTestSkipped('Chaining PHP is not available in PHP version under 5.4 (This is ' . PHP_VERSION . ')');
@@ -559,6 +571,7 @@ class curlTest extends TestCase
      */
     public function sslCertLocation()
     {
+        $this->__setUp();
         $successfulVerification = false;
         try {
             $this->CURL->setSslPemLocations([__DIR__ . "/ca-certificates.crt"]);
@@ -575,6 +588,7 @@ class curlTest extends TestCase
      */
     public function setInternalPemLocation()
     {
+        $this->__setUp();
         try {
             static::assertTrue($this->CURL->setSslPemLocations([__DIR__ . "/ca-certificates.crt"]));
         } catch (\Exception $e) {
@@ -587,6 +601,7 @@ class curlTest extends TestCase
      */
     public function setInternalPemLocationBadFormat()
     {
+        $this->__setUp();
         try {
             $this->CURL->setSslPemLocations([__DIR__ . "/"]);
         } catch (\Exception $e) {
@@ -600,6 +615,7 @@ class curlTest extends TestCase
      */
     public function unExistentCertificateBundle()
     {
+        $this->__setUp();
         $this->CURL->setFlag('OVERRIDE_CERTIFICATE_BUNDLE', '/failCertBundle');
         $this->CURL->setTrustedSslBundles(true);
         try {
@@ -626,6 +642,7 @@ class curlTest extends TestCase
      */
     public function failingSsl()
     {
+        $this->__setUp();
         $successfulVerification = true;
         try {
             $this->CURL->setSslVerify(true);
@@ -839,6 +856,7 @@ class curlTest extends TestCase
      */
     public function wsdlSoapClient()
     {
+        $this->__setUp();
         $assertThis = true;
         try {
             $this->CURL->setUserAgent(" +UnitSoapAgent");
@@ -865,6 +883,7 @@ class curlTest extends TestCase
      */
     public function hasSoap()
     {
+        $this->__setUp();
         static::assertTrue($this->CURL->hasSoap());
     }
 
@@ -891,6 +910,7 @@ class curlTest extends TestCase
      */
     public function failUrl()
     {
+        $this->__setUp();
         try {
             $this->CURL->doGet("http://" . sha1(microtime(true)));
         } catch (\Exception $e) {
@@ -905,6 +925,7 @@ class curlTest extends TestCase
      */
     public function setCurlOpt()
     {
+        $this->__setUp();
         $oldCurl = $this->CURL->getCurlOpt();
         $this->CURL->setCurlOpt([CURLOPT_CONNECTTIMEOUT => 10]);
         $newCurl = $this->CURL->getCurlOpt();
@@ -917,6 +938,7 @@ class curlTest extends TestCase
      */
     public function getCurlOpt()
     {
+        $this->__setUp();
         $newCurl = $this->CURL->getCurlOptByKeys();
         static::assertTrue(isset($newCurl['CURLOPT_CONNECTTIMEOUT']));
     }
@@ -927,6 +949,7 @@ class curlTest extends TestCase
      */
     public function unsetFlag()
     {
+        $this->__setUp();
         $first = $this->CURL->setFlag("CHAIN", true);
         $this->CURL->unsetFlag("CHAIN");
         $second = $this->CURL->hasFlag("CHAIN");
@@ -939,6 +962,7 @@ class curlTest extends TestCase
      */
     public function chainGet()
     {
+        $this->__setUp();
         if (version_compare(PHP_VERSION, '5.4.0', '>=')) {
             $this->CURL->setFlag("CHAIN");
             static::assertTrue(method_exists($this->CURL->doGet(\TESTURLS::getUrlSimpleJson()), 'getParsedResponse'));
@@ -954,6 +978,7 @@ class curlTest extends TestCase
      */
     public function tlagEmptyKey()
     {
+        $this->__setUp();
         try {
             $this->CURL->setFlag();
         } catch (\Exception $setFlagException) {
@@ -981,6 +1006,7 @@ class curlTest extends TestCase
      */
     public function chainGetFail()
     {
+        $this->__setUp();
         $this->CURL->unsetFlag("CHAIN");
         static::assertFalse(method_exists($this->CURL->doGet(\TESTURLS::getUrlSimpleJson()), 'getParsedResponse'));
     }
@@ -991,6 +1017,7 @@ class curlTest extends TestCase
      */
     public function getGitIsTooOld()
     {
+        $this->__setUp();
         // curl module for netcurl will probably always be lower than the netcurl-version, so this is a good way of testing
         static::assertTrue($this->NETWORK->getVersionTooOld("1.0.0", "https://" . $this->bitBucketUrl));
     }
@@ -1001,6 +1028,7 @@ class curlTest extends TestCase
      */
     public function getGitCurrentOrNewer()
     {
+        $this->__setUp();
         // curl module for netcurl will probably always be lower than the netcurl-version, so this is a good way of testing
         $tags = $this->NETWORK->getGitTagsByUrl("https://" . $this->bitBucketUrl);
         $lastTag = array_pop($tags);
@@ -1018,6 +1046,7 @@ class curlTest extends TestCase
      */
     public function timeoutChecking()
     {
+        $this->__setUp();
         $def = $this->CURL->getTimeout();
         $this->CURL->setTimeout(6);
         $new = $this->CURL->getTimeout();
@@ -1030,6 +1059,7 @@ class curlTest extends TestCase
      */
     public function internalException()
     {
+        $this->__setUp();
         static::assertTrue($this->NETWORK->getExceptionCode('NETCURL_EXCEPTION_IT_WORKS') == 1);
     }
 
@@ -1038,6 +1068,7 @@ class curlTest extends TestCase
      */
     public function internalExceptionNoExists()
     {
+        $this->__setUp();
         static::assertTrue($this->NETWORK->getExceptionCode('NETCURL_EXCEPTION_IT_DOESNT_WORK') == 500);
     }
 
@@ -1047,6 +1078,7 @@ class curlTest extends TestCase
      */
     public function driverControlList()
     {
+        $this->__setUp();
         $driverList = [];
         try {
             $driverList = $this->DRIVER->getSystemWideDrivers();
@@ -1061,6 +1093,7 @@ class curlTest extends TestCase
      */
     public function driverControlNoList()
     {
+        $this->__setUp();
         $driverList = false;
         try {
             $driverList = $this->DRIVER->getSystemWideDrivers();
@@ -1075,6 +1108,7 @@ class curlTest extends TestCase
      */
     public function getCurrentProtocol()
     {
+        $this->__setUp();
         $oneOfThenm = MODULE_NETWORK::getCurrentServerProtocol(true);
         static::assertTrue($oneOfThenm == "http" || $oneOfThenm == "https");
     }
@@ -1085,6 +1119,7 @@ class curlTest extends TestCase
      */
     public function getSupportedDrivers()
     {
+        $this->__setUp();
         static::assertTrue(count($this->DRIVER->getSystemWideDrivers()) > 0);
     }
 
@@ -1094,6 +1129,7 @@ class curlTest extends TestCase
      */
     public function setAutoDriver()
     {
+        $this->__setUp();
         $driverset = $this->CURL->setDriverAuto();
         static::assertTrue($driverset > 0);
     }
@@ -1115,6 +1151,7 @@ class curlTest extends TestCase
      */
     public function extractDomainIsGetUrlDomain()
     {
+        $this->__setUp();
         static::assertCount(3, $this->NETWORK->getUrlDomain("https://www.aftonbladet.se/uri/is/here"));
     }
 
@@ -1125,6 +1162,7 @@ class curlTest extends TestCase
      */
     public function getSafePermissionFull()
     {
+        $this->__setUp();
         static::assertFalse($this->CURL->getIsSecure());
     }
 
@@ -1134,6 +1172,7 @@ class curlTest extends TestCase
      */
     public function getSafePermissionFullMocked()
     {
+        $this->__setUp();
         ini_set('open_basedir', "/");
         static::assertTrue($this->CURL->getIsSecure());
         // Reset the setting as it is affecting other tests
@@ -1146,6 +1185,7 @@ class curlTest extends TestCase
      */
     public function getSafePermissionFullMockedNoSafeMode()
     {
+        $this->__setUp();
         ini_set('open_basedir', "/");
         static::assertTrue($this->CURL->getIsSecure(false));
         // Reset the setting as it is affecting other tests
@@ -1158,6 +1198,7 @@ class curlTest extends TestCase
      */
     public function getSafePermissionFullMockedSafeMode()
     {
+        $this->__setUp();
         ini_set('open_basedir', "");
         static::assertTrue($this->CURL->getIsSecure(true, true));
     }
@@ -1168,6 +1209,7 @@ class curlTest extends TestCase
      */
     public function hasSsl()
     {
+        $this->__setUp();
         static::assertTrue($this->CURL->hasSsl());
     }
 
@@ -1177,6 +1219,7 @@ class curlTest extends TestCase
      */
     public function getParsedDom()
     {
+        $this->__setUp();
         /** @var MODULE_CURL $content */
         $this->CURL->setDomContentParser(false);
         $phpAntiChain = $this->urlGet(
@@ -1198,6 +1241,7 @@ class curlTest extends TestCase
      */
     public function responseTypeHttpObject()
     {
+        $this->__setUp();
         $this->CURL->setResponseType(NETCURL_RESPONSETYPE::RESPONSETYPE_OBJECT);
         /** @var NETCURL_HTTP_OBJECT $request */
         $request = $this->CURL->doGet(\TESTURLS::getUrlSimpleJson());
@@ -1215,6 +1259,7 @@ class curlTest extends TestCase
      */
     public function responseTypeHttpObjectChain()
     {
+        $this->__setUp();
         $this->CURL->setResponseType(
             NETCURL_RESPONSETYPE::RESPONSETYPE_OBJECT
         );
@@ -1231,6 +1276,7 @@ class curlTest extends TestCase
      */
     public function multiCallsSwitchingBetweenRegularAndSoap()
     {
+        $this->__setUp();
         if (version_compare(PHP_VERSION, '5.4.0', '<')) {
             static::markTestSkipped("Multicall switching test is not compliant with PHP 5.3 - however, the function switching itself is supported");
 
@@ -1277,6 +1323,7 @@ class curlTest extends TestCase
 
     protected function disableSslVerifyByPhpVersions($always = false)
     {
+        $this->__setUp();
         if (version_compare(PHP_VERSION, '5.5.0', '<=')) {
             $this->CURL->setSslVerify(false, false);
         } elseif ($always) {
@@ -1291,6 +1338,7 @@ class curlTest extends TestCase
      */
     public function setSimplifiedResponse()
     {
+        $this->__setUp();
         $curlobject = $this->CURL->doGet("http://identifier.tornevall.net/?json");
         $this->CURL->setSimplifiedResponse();
         $responseobject = $this->CURL->doGet("http://identifier.tornevall.net/?json");
@@ -1337,6 +1385,7 @@ class curlTest extends TestCase
 
             return;
         }
+        $this->__setUp();
         try {
             $this->disableSslVerifyByPhpVersions(true);
             $this->CURL->setAuthentication('atest', 'atest');
@@ -1369,6 +1418,7 @@ class curlTest extends TestCase
      */
     public function setTimeout()
     {
+        $this->__setUp();
         $this->CURL = new MODULE_CURL();
         $this->CURL->setTimeout(1);
         $startTime = time();
@@ -1393,6 +1443,8 @@ class curlTest extends TestCase
         if (empty($packagistUsername) || empty($packagistToken) || empty($repoUrl)) {
             static::markTestSkipped("This test is written to check packagist content-type errors, so you need to set up a username, token and git repo url above to make it work properly");
         }
+
+        $this->__setUp();
 
         $packagistUrl = 'https://packagist.org/api/bitbucket?username=' . $packagistUsername . '&apiToken=' . $packagistToken;
         $postData = json_decode('{"repository":{"url":"' . $repoUrl . '"}}', true);
@@ -1432,6 +1484,7 @@ class curlTest extends TestCase
      */
     protected function urlPost($parameters = [], $protocol = "http", $indexFile = 'index.php')
     {
+        $this->__setUp();
         $theUrl = $this->getProtocol($protocol) . "://" . \TESTURLS::getUrlTests() . $indexFile;
 
         return $this->CURL->doPost($theUrl, $parameters);

@@ -18,28 +18,30 @@ use PHPUnit\Framework\TestCase;
 
 ini_set('memory_limit', -1);    // Free memory limit, some tests requires more memory (like ip-range handling)
 
+/*
+if (version_compare(PHP_VERSION, '7.3.0', '>=')) {
+    printf('PHP version is %s, so we will instatiate a class made for PHP 7.3 or higher.', PHP_VERSION);
+    require_once('php73.php');
+}
+if (version_compare(PHP_VERSION, '7.3.0', '<')) {
+    printf('PHP version is %s, so we will instatiate a class made for PHP 7.2 or lower.', PHP_VERSION);
+    require_once('phpOld.php');
+}
+*/
+
 class curlTest extends TestCase
 {
-    private $StartErrorReporting;
+    protected $StartErrorReporting;
 
     /** @var MODULE_NETWORK */
-    private $NETWORK;
+    protected $NETWORK;
     /** @var MODULE_CURL */
-    private $CURL;
+    protected $CURL;
     /** @var NETCURL_DRIVER_CONTROLLER $DRIVER */
-    private $DRIVER;
-    private $CurlVersion = null;
+    protected $DRIVER;
+    protected $CurlVersion = null;
 
-    /**
-     * @var string $bitBucketUrl Bitbucket URL without scheme
-     */
-    private $bitBucketUrl = 'bitbucket.tornevall.net/scm/lib/tornelib-php-netcurl.git';
-
-    /**
-     * @throws Exception
-     */
-    function setUp()
-    {
+    public function setUp() {
         error_reporting(E_ALL);
 
         //$this->setDebug(true);
@@ -58,11 +60,10 @@ class curlTest extends TestCase
         $this->CURL->setSslStrictFallback(false);
     }
 
-    public function tearDown()
-    {
-        // DebugData collects stats about the curled session.
-        // $debugData = $this->CURL->getDebugData();
-    }
+    /**
+     * @var string $bitBucketUrl Bitbucket URL without scheme
+     */
+    protected $bitBucketUrl = 'bitbucket.tornevall.net/scm/lib/tornelib-php-netcurl.git';
 
     /**
      * @test
@@ -79,7 +80,7 @@ class curlTest extends TestCase
     /**
      * @throws Exception
      */
-    private function pemDefault()
+    protected function pemDefault()
     {
         $this->CURL->setFlag('_DEBUG_TCURL_UNSET_LOCAL_PEM_LOCATION', false);
         $this->CURL->setSslVerify(true);
@@ -89,7 +90,7 @@ class curlTest extends TestCase
      * @return array|null|string|MODULE_CURL|NETCURL_HTTP_OBJECT
      * @throws Exception
      */
-    private function simpleGet()
+    protected function simpleGet()
     {
         return $this->CURL->doGet(\TESTURLS::getUrlSimple());
     }
@@ -100,7 +101,7 @@ class curlTest extends TestCase
      * @param $container
      * @return bool
      */
-    private function hasBody($container)
+    protected function hasBody($container)
     {
         if (is_array($container) && isset($container['body'])) {
             return true;
@@ -134,7 +135,7 @@ class curlTest extends TestCase
      * @return array|null|string|MODULE_CURL|NETCURL_HTTP_OBJECT
      * @throws Exception
      */
-    private function urlGet($parameters = '', $protocol = "http", $indexFile = 'index.php')
+    protected function urlGet($parameters = '', $protocol = "http", $indexFile = 'index.php')
     {
         $theUrl = $this->getProtocol($protocol) . "://" . \TESTURLS::getUrlTests() . $indexFile . "?" . $parameters;
 
@@ -147,7 +148,7 @@ class curlTest extends TestCase
      * @param string $protocol
      * @return string
      */
-    private function getProtocol($protocol = 'http')
+    protected function getProtocol($protocol = 'http')
     {
         if (empty($protocol)) {
             $protocol = "http";
@@ -319,7 +320,7 @@ class curlTest extends TestCase
      * @param $container
      * @return null
      */
-    private function getBody($container)
+    protected function getBody($container)
     {
         if (is_object($container) && method_exists($container, 'getBody')) {
             return $container->getBody();
@@ -475,7 +476,7 @@ class curlTest extends TestCase
      * @param $container
      * @return null
      */
-    private function getParsed($container)
+    protected function getParsed($container)
     {
         if ($this->hasBody($container)) {
             if (is_object($container) && method_exists($container, 'getParsed')) {
@@ -671,7 +672,7 @@ class curlTest extends TestCase
      *
      * @return mixed
      */
-    private function getIpListByIpRoute()
+    protected function getIpListByIpRoute()
     {
         // Don't fetch 127.0.0.1
         exec("ip addr|grep \"inet \"|sed 's/\// /'|awk '{print $2}'|grep -v ^127", $returnedExecResponse);
@@ -1274,7 +1275,7 @@ class curlTest extends TestCase
         }
     }
 
-    private function disableSslVerifyByPhpVersions($always = false)
+    protected function disableSslVerifyByPhpVersions($always = false)
     {
         if (version_compare(PHP_VERSION, '5.5.0', '<=')) {
             $this->CURL->setSslVerify(false, false);
@@ -1413,7 +1414,7 @@ class curlTest extends TestCase
     /**
      * @param bool $setActive
      */
-    private function setDebug($setActive = false)
+    protected function setDebug($setActive = false)
     {
         if (!$setActive) {
             error_reporting(E_ALL);
@@ -1429,11 +1430,10 @@ class curlTest extends TestCase
      * @return array|null|string|MODULE_CURL|NETCURL_HTTP_OBJECT
      * @throws Exception
      */
-    private function urlPost($parameters = [], $protocol = "http", $indexFile = 'index.php')
+    protected function urlPost($parameters = [], $protocol = "http", $indexFile = 'index.php')
     {
         $theUrl = $this->getProtocol($protocol) . "://" . \TESTURLS::getUrlTests() . $indexFile;
 
         return $this->CURL->doPost($theUrl, $parameters);
     }
-
 }

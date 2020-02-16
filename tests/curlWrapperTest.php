@@ -13,11 +13,6 @@ class curlWrapperTest extends TestCase
 {
 	private $curlWrapper;
 
-	protected function setUp()
-	{
-		parent::setUp();
-	}
-
 	/**
 	 * @test
 	 * @testdox Test the primary wrapper controller.

@@ -3,43 +3,37 @@
 Full documents for v6.0 is located [here](https://docs.tornevall.net/x/KwCy).
 For v6.1 -- please hold.
 
-## Note to self
-
-Adding stuff to composer.
-
-   "zendframework/zend-http": "^2.9"
-
 
 ## Compatibility span (Supported PHP versions)
 
-This library is compatible with PHP releases from version 5.4 up to PHP 7.3 (because of the old grumpy developer coding syntax). Since the whole PHP 5 series are going obsolete you should however consider upgrading if not already done. It has also been built with NETCURL 6.0 in mind, where older engines may be replaced without any breaks.
+This library is built to work with PHP 5.6 and higher (I prefer to follow the live updates of PHP with their EOL's - [check it here](https://www.php.net/supported-versions.php)). The [Bamboo-instance](https://bamboo.tornevall.net) used is built in the past, so I'm still able to test the library with older PHP releases too. Even if I think they will fail any time now.
+
+However, it is not that easy. The compatibility span **has** to be lower as the world I'm living in tend to be slow. If this module is built after the bleeding edge-principles, that also means that something will blow up somewhere. It's disussable whether that's something to ignore or not, but I think it's important to be supportive regardless of end of life-restrictions (but not too far). When support ends from software developers point of view, I see a perfect moment to follow that stream. This is very important as 2019 and 2020 seems to be two such years when most of the society is forcing movement forward. 
+
+To keep compatibility with v6.0 the plan is to keep the primary class MODULE_CURL callable from a root position. It will probably be recommended to switch over to a PSR friendly structure from there, but the base will remain in 6.1 and the best way to instantiate the module in future is to call for the same wrapper as the main MODULE_CURL will use - NetWrapper (TorneLIB\Module\Network\NetWrapper) as it is planned to be the primary driver handler.
 
 ### Requirements and dependencies
 
-In its initial state, there are basically no requirements as this module tries to pick the best available driver when running. The prior version (6.0) has a basic CURL requirement (that's why it's called NETCURL) with some kind of unstated fallback to other drivers.
+In its initial state, there are basically no requirements as this module tries to pick the best available driver in runtime.
 
-### What NETCURL should support
+### What NETCURL support
 
-* Streams
-* Sockets
+... or even better, **should** support.
+
 * Curl
-* SOAP
-* Possibly RSS fetching (this will require additional components in composer.json)
-
-#### What if-dependencies
-
-* SOAP: SoapClient and XML-drivers.
-* Secure http requests: openssl or similar ssl drivers is required.
-
-#### What NETCURL picks up
-
-If there's traces of the below drivers, NETCURL tries to pick them up on demand, to use them:
-
 * Guzzle
-* Wordpress
-* Zend Framework
+* RSS feeds
+* SoapClient (dependencies)
+* Sockets
+* Streams
+* Zend
 
-## Installation
+#### Further dependencies on special support
+
+* SSL: OpenSSL or similar.
+* SOAP: SoapClient and XML-drivers.
+
+### Installation
 
 Recommended solution: Composer.
 
@@ -60,26 +54,35 @@ In apt-based systems, extra libraries can be installed with commands such as:
 This is the recommended way (and only officially supported) of installing the package.
 
 * Get composer.
-* Run composer:
+* Run composer.
 
-`composer require tornevall/tornelib-php-netcurl`
+      composer require tornevall/tornelib-php-netcurl
+      
+Or more preferrably either...
+
+      composer require tornevall/tornelib-php-netcurl ^6.1 
+
+or during development...
+      
+      composer require tornevall/tornelib-php-netcurl dev-develop/6.1 
 
 ## Documents
 
-[Exceptions handling](https://docs.tornevall.net/x/EgCNAQ)
+* [Version 6.1](https://docs.tornevall.net/display/TORNEVALL/NETCURLv6.1)
+* [Exceptions handling for v6.0](https://docs.tornevall.net/x/EgCNAQ)
 
 
 # NETCURL IS AND IS NOTS
 
-[Read this document](https://docs.tornevall.net/x/GQCsAQ)
+* [Written for 6.0](https://docs.tornevall.net/x/GQCsAQ)
 
 
 # HOWTOs
 
 ## Getting started
 
-* [This document and furthermore information](https://docs.tornevall.net/x/CYBiAQ).
-* [MODULE_CURL](https://docs.tornevall.net/x/EoBiAQ)
+* [MODULE_CURL 6.1 - coming soon](https://docs.tornevall.net/display/TORNEVALL/NETCURLv6.1)
+* [MODULE_CURL 6.0](https://docs.tornevall.net/x/EoBiAQ)
 
 
 # Changes
@@ -88,4 +91,12 @@ Version 6.1 follows the standard of what's written in 6.0 - there is a primary m
 
 ## Breaking changes?
 
-As far as I see it, 6.1 is built to not break systems that runs on 6.0 except for possibly if someone is using PHP 5.3 which is highly obsolete as of a load of years back in time.
+No. Version 6.1 is written to reach highest compatibility with v6.1 as possible.
+
+
+# Composer addons
+
+        "phpunit/phpunit": "^7.5",
+        "zendframework/zend-http": "^2.11",
+        "guzzlehttp/guzzle": "^6.5"
+        "zendframework/zend-http": "^2.9"

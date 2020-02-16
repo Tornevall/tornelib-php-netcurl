@@ -1,6 +1,7 @@
 <?php
 
 namespace TorneLIB\Module\Network\Wrappers;
+use TorneLIB\Exception\ExceptionHandler;
 use Zend\Http\Client;
 
 class ZendWrapper

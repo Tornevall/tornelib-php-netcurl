@@ -3,6 +3,5 @@ composer.lock
 Makefile
 vendor
 runit.sh
-coverage
-source/build
 **.swp
+merge.sh

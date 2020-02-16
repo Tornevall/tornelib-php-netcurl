@@ -3,6 +3,7 @@
 namespace TorneLIB\Module\Network\Wrappers;
 use GuzzleHttp\Client;
 use GuzzleHttp\Handler\StreamHandler;
+use TorneLIB\Exception\ExceptionHandler;
 
 class GuzzleWrapper
 {

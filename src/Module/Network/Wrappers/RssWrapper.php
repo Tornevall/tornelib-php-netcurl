@@ -1,6 +1,7 @@
 <?php
 
 namespace TorneLIB\Module\Network\Wrappers;
+
 use TorneLIB\Exception\ExceptionHandler;
 
 
@@ -9,6 +10,7 @@ use TorneLIB\Exception\ExceptionHandler;
  *
  * @package TorneLIB\Module\Network\Wrappers
  */
-class RssWrapper implements Wrapper {
+class RssWrapper implements Wrapper
+{
 
 }

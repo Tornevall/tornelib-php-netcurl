@@ -2,7 +2,8 @@
 
 namespace TorneLIB\Module\Network\Model;
 
-interface Wrapper {
+interface Wrapper
+{
 
     public function __construct();
 

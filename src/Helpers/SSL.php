@@ -11,73 +11,74 @@ use TorneLIB\Flags;
  */
 class SSL
 {
-	public function __construct()
-	{
-		return $this;
-	}
+    public function __construct()
+    {
+        return $this;
+    }
 
-	/**
-	 * Checks if system has SSL capabilities.
-	 *
-	 * Replaces getCurlSslAvailable from v6.0 where everything is checked in the same method.
-	 *
-	 * @return $this
-	 * @throws \Exception
-	 * @since 6.1.0
-	 */
-	public function getSslCapabilities() {
+    /**
+     * Checks if system has SSL capabilities.
+     *
+     * Replaces getCurlSslAvailable from v6.0 where everything is checked in the same method.
+     *
+     * @return $this
+     * @throws \Exception
+     * @since 6.1.0
+     */
+    public function getSslCapabilities()
+    {
 
-		if (!$this->setSslCapabilities()) {
-			throw new \Exception('NETCURL Exception: SSL capabilities is missing.', 500);
-		}
+        if (!$this->setSslCapabilities()) {
+            throw new \Exception('NETCURL Exception: SSL capabilities is missing.', 500);
+        }
 
-		return $this;
-	}
+        return $this;
+    }
 
-	private function setSslCapabilities()
-	{
-		if (Flags::isFlag('NETCURL_NOSSL_TEST')) {
-			return false;
-		}
+    private function setSslCapabilities()
+    {
+        if (Flags::isFlag('NETCURL_NOSSL_TEST')) {
+            return false;
+        }
 
-		$sslDriverError = [];
+        $sslDriverError = [];
 
-		if (!$this->getSslStreamWrapper()) {
-			$sslDriverError[] = "SSL Failure: HTTPS wrapper can not be found";
-		}
-		if (!$this->getCurlSsl()) {
-			$sslDriverError[] = 'SSL Failure: Protocol "https" not supported or disabled in libcurl';
-		}
+        if (!$this->getSslStreamWrapper()) {
+            $sslDriverError[] = "SSL Failure: HTTPS wrapper can not be found";
+        }
+        if (!$this->getCurlSsl()) {
+            $sslDriverError[] = 'SSL Failure: Protocol "https" not supported or disabled in libcurl';
+        }
 
-		return $this;
-	}
+        return $this;
+    }
 
-	private function getSslStreamWrapper()
-	{
-		$return = false;
+    private function getSslStreamWrapper()
+    {
+        $return = false;
 
-		$streamWrappers = @stream_get_wrappers();
-		if (!is_array($streamWrappers)) {
-			$streamWrappers = [];
-		}
-		if (in_array('https', array_map("strtolower", $streamWrappers))) {
-			$return = true;
-		}
+        $streamWrappers = @stream_get_wrappers();
+        if (!is_array($streamWrappers)) {
+            $streamWrappers = [];
+        }
+        if (in_array('https', array_map("strtolower", $streamWrappers))) {
+            $return = true;
+        }
 
-		return $return;
-	}
+        return $return;
+    }
 
-	private function getCurlSsl()
-	{
-		$return = false;
-		if (function_exists('curl_version') && defined('CURL_VERSION_SSL')) {
-			$curlVersionRequest = curl_version();
+    private function getCurlSsl()
+    {
+        $return = false;
+        if (function_exists('curl_version') && defined('CURL_VERSION_SSL')) {
+            $curlVersionRequest = curl_version();
 
-			if (isset($curlVersionRequest['features'])) {
-				$return = ($curlVersionRequest['features'] & CURL_VERSION_SSL ? true : false);
-			}
-		}
+            if (isset($curlVersionRequest['features'])) {
+                $return = ($curlVersionRequest['features'] & CURL_VERSION_SSL ? true : false);
+            }
+        }
 
-		return $return;
-	}
+        return $return;
+    }
 }

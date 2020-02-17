@@ -2,6 +2,7 @@
 
 namespace TorneLIB\Module\Config;
 
-abstract class WrapperConstants {
+abstract class WrapperConstants
+{
 
 }

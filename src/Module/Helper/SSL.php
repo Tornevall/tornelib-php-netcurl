@@ -2,7 +2,8 @@
 
 namespace Module\Helper;
 
-class SSL {
+class SSL
+{
 
     private $WRAPPER;
 

@@ -1,6 +1,7 @@
 <?php
 
 namespace TorneLIB\Module\Network\Wrappers;
+
 use TorneLIB\Exception\ExceptionHandler;
 use Zend\Http\Client;
 
@@ -11,6 +12,6 @@ class ZendWrapper
         if (!class_exists('Zend\Http\Client')) {
             throw new ExceptionHandler('zend unavailable: Zend\Http\Client not loaded');
         }
-	    //$cli = new Client('http://identifier.tornevall.net');
+        //$cli = new Client('http://identifier.tornevall.net');
     }
 }

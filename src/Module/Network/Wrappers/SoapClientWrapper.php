@@ -1,6 +1,7 @@
 <?php
 
 namespace TorneLIB\Module\Network\Wrappers;
+
 use TorneLIB\Exception\ExceptionHandler;
 
 /**

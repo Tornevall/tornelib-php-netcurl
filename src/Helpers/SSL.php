@@ -3,6 +3,7 @@
 namespace TorneLIB\Helpers;
 
 use TorneLIB\Flags;
+use TorneLIB\Utils\Security;
 
 /**
  * Class SSL Imports and facelifts from MODULE_SSH v6.0
@@ -11,8 +12,18 @@ use TorneLIB\Flags;
  */
 class SSL
 {
+    private $capable;
+
+    /**
+     * SSL constructor.
+     */
     public function __construct()
     {
+        try {
+            $this->capable = $this->setSslCapabilities();
+        } catch (\Exception $e) {
+            $this->capable = false;
+        }
         return $this;
     }
 
@@ -27,18 +38,23 @@ class SSL
      */
     public function getSslCapabilities()
     {
-
-        if (!$this->setSslCapabilities()) {
+        if (!($return = $this->capable)) {
             throw new \Exception('NETCURL Exception: SSL capabilities is missing.', 500);
         }
 
-        return $this;
+        return $return;
     }
 
+    /**
+     * @return bool
+     * @since 6.1.0
+     */
     private function setSslCapabilities()
     {
+        $return = false;
+
         if (Flags::isFlag('NETCURL_NOSSL_TEST')) {
-            return false;
+            return $return;
         }
 
         $sslDriverError = [];
@@ -50,7 +66,11 @@ class SSL
             $sslDriverError[] = 'SSL Failure: Protocol "https" not supported or disabled in libcurl';
         }
 
-        return $this;
+        if (!count($sslDriverError)) {
+            $return = true;
+        }
+
+        return $return;
     }
 
     private function getSslStreamWrapper()

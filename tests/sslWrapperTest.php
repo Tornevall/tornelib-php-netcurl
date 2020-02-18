@@ -3,10 +3,8 @@
 use PHPUnit\Framework\TestCase;
 use TorneLIB\Flags;
 use TorneLIB\Helpers\SSL;
-
-if (version_compare(PHP_VERSION, '5.4', '<=')) {
-    throw new \Exception('PHP version too old!', 500);
-}
+use TorneLIB\Helpers\Version;
+Version::getRequiredVersion();
 
 require_once(__DIR__ . '/../vendor/autoload.php');
 class sslWrapperTest extends TestCase

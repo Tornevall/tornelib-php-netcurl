@@ -3,8 +3,10 @@
 namespace TorneLIB\Module\Network\Wrappers;
 
 use TorneLIB\Exception\ExceptionHandler;
+use TorneLIB\Helpers\Version;
 use TorneLIB\Module\Config\WrapperConfig;
 use TorneLIB\Module\Network\Model\Wrapper;
+Version::getRequiredVersion();
 
 /**
  * Class CurlWrapper.

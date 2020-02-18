@@ -4,10 +4,8 @@ use PHPUnit\Framework\TestCase;
 use TorneLIB\Flags;
 use TorneLIB\Module\Network\NetWrapper;
 use TorneLIB\Module\Network\Wrappers\CurlWrapper;
-
-if (version_compare(PHP_VERSION, '5.4', '<=')) {
-    throw new \Exception('PHP version too old!', 500);
-}
+use TorneLIB\Helpers\Version;
+Version::getRequiredVersion();
 
 define('LIB_ERROR_HTTP', true);
 require_once(__DIR__ . '/../vendor/autoload.php');

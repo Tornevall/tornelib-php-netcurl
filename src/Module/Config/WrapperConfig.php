@@ -137,7 +137,7 @@ class WrapperConfig
      * @return int
      * @since 6.1.0
      */
-    public function getRequestPostMethod(): int
+    public function getRequestPostMethod()
     {
         return $this->requestPostMethod;
     }
@@ -146,7 +146,7 @@ class WrapperConfig
      * @return array
      * @since 6.1.0
      */
-    public function getRequestFlags(): array
+    public function getRequestFlags()
     {
         return Flags::getAllFlags();
     }
@@ -165,7 +165,7 @@ class WrapperConfig
      * @return array
      * @since 6.1.0
      */
-    public function getOptions(): array
+    public function getOptions()
     {
         return $this->options;
     }

@@ -11,8 +11,45 @@ use TorneLIB\Flags;
  */
 class SSL
 {
+    private $version = '6.1.0';
+
+    /**
+     * @var bool Primary answer from this module if netcurl will be capable to handle SSL based traffic.
+     */
+    private $capable;
+
+    /**
+     * @var array
+     */
+    private $capabilities = [];
+
+    /**
+     * @var array Context of stream.
+     */
+    private $context = [
+        'ssl' => [
+            'verify_peer' => true,
+            'verify_peer_name' => true,
+            'verify_host' => true,
+            'allow_self_signed' => false,
+        ],
+    ];
+
+    private $securityLevelChanges = [];
+
+    /**
+     * SSL constructor.
+     */
     public function __construct()
     {
+        try {
+            $this->capable = $this->setSslCapabilities();
+        } catch (\Exception $e) {
+            $this->capable = false;
+        }
+
+        $this->setContextUserAgent();
+
         return $this;
     }
 
@@ -27,18 +64,23 @@ class SSL
      */
     public function getSslCapabilities()
     {
-
-        if (!$this->setSslCapabilities()) {
+        if (!($return = $this->capable)) {
             throw new \Exception('NETCURL Exception: SSL capabilities is missing.', 500);
         }
 
-        return $this;
+        return $return;
     }
 
+    /**
+     * @return bool
+     * @since 6.1.0
+     */
     private function setSslCapabilities()
     {
+        $return = false;
+
         if (Flags::isFlag('NETCURL_NOSSL_TEST')) {
-            return false;
+            return $return;
         }
 
         $sslDriverError = [];
@@ -50,9 +92,17 @@ class SSL
             $sslDriverError[] = 'SSL Failure: Protocol "https" not supported or disabled in libcurl';
         }
 
-        return $this;
+        if (!count($sslDriverError)) {
+            $return = true;
+        }
+
+        return $return;
     }
 
+    /**
+     * @return bool
+     * @since 6.1.0
+     */
     private function getSslStreamWrapper()
     {
         $return = false;
@@ -60,14 +110,20 @@ class SSL
         $streamWrappers = @stream_get_wrappers();
         if (!is_array($streamWrappers)) {
             $streamWrappers = [];
+            $this->capabilities[] = 'stream';
         }
         if (in_array('https', array_map("strtolower", $streamWrappers))) {
             $return = true;
+            $this->capabilities[] = 'curl';
         }
 
         return $return;
     }
 
+    /**
+     * @return bool
+     * @since 6.1.0
+     */
     private function getCurlSsl()
     {
         $return = false;
@@ -80,5 +136,102 @@ class SSL
         }
 
         return $return;
+    }
+
+    /**
+     * If capable throws an exception for a specific driver, but that driver should not be used anyway, get a list of
+     * working drivers here.
+     *
+     * @return array
+     * @since 6.1.0
+     */
+    public function getCapabilities()
+    {
+        return $this->capabilities;
+    }
+
+    /**
+     * Simplified SSL verification ruleset. Sets peer, peer_name and verify_host to be strictly verified. To change the
+     * values, see getContext() and setContext(). You don't need to run this yourself as it runs on the defaults when
+     * nothing else is set.
+     *
+     * @param bool $verifyBooleanValue Peer verification (default=true, always verify).
+     * @param bool $selfsignedBooleanValue Allow self signed vertificates (default=false, never allow this).
+     * @return mixed
+     * @link https://www.php.net/manual/en/context.ssl.php
+     */
+    public function setStrictVerification($verifyBooleanValue = true, $selfsignedBooleanValue = false)
+    {
+        $this->context['ssl']['verify_peer'] = $verifyBooleanValue;
+        $this->context['ssl']['verify_peer_name'] = $verifyBooleanValue;
+        $this->context['ssl']['verify_host'] = $verifyBooleanValue;
+        $this->context['ssl']['allow_self_signed'] = $selfsignedBooleanValue;
+
+        if (!$verifyBooleanValue || $selfsignedBooleanValue) {
+            $this->securityLevelChanges[microtime(true)] = $this->context;
+        }
+
+        return $this;
+    }
+
+    private function setContextUserAgent()
+    {
+        $this->context['http'] = [
+            'user-agent' => sprintf('NETCURL/SSL-%s', $this->version),
+        ];
+
+        return $this;
+    }
+
+    /**
+     * Get prepared stream context array.
+     *
+     * @return array
+     */
+    public function getSslStreamContext()
+    {
+        // Create the stream with full context.
+        $streamContext = [
+            'stream_context' => stream_context_create($this->context),
+        ];
+
+        return $streamContext;
+    }
+
+    /**
+     * @param $key
+     * @return array
+     */
+    public function getContext($key = null)
+    {
+        $return = $this->context['ssl'];
+
+        if (!is_null($key) && isset($this->context['ssl'][$key])) {
+            $return = $this->context['ssl'][$key];
+        }
+
+        return $return;
+    }
+
+    /**
+     * Configure your own context on fly. Great to use if you need to add your own cafile, etc.
+     *
+     * @param $key
+     * @param $value
+     * @return SSL
+     */
+    public function setContext($key, $value)
+    {
+        $this->context['ssl'][$key] = $value;
+
+        return $this;
+    }
+
+    /**
+     * @return array
+     */
+    public function getSecurityLevelChanges()
+    {
+        return $this->securityLevelChanges;
     }
 }

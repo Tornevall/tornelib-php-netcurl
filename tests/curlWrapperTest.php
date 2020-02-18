@@ -9,6 +9,9 @@ define('LIB_ERROR_HTTP', true);
 
 require_once(__DIR__ . '/../vendor/autoload.php');
 
+/**
+ * Class curlWrapperTest
+ */
 class curlWrapperTest extends TestCase
 {
     private $curlWrapper;
@@ -66,6 +69,19 @@ class curlWrapperTest extends TestCase
             static::assertFalse($security->getSafeMode());
         } else {
             static::assertTrue($security->getSafeMode());
+        }
+    }
+
+    /**
+     * @test
+     */
+    public function secureMode()
+    {
+        $security = new \TorneLIB\Utils\Security();
+        if (version_compare(PHP_VERSION, '5.4.0', '>=')) {
+            static::assertFalse($security->getSecureMode());
+        } else {
+            static::assertTrue($security->getSecureMode());
         }
     }
 }

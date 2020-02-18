@@ -24,12 +24,17 @@ class CurlWrapper implements Wrapper
     /**
      * @var resource cURL simple handle
      */
-    private $CURL;
+    private $curlHandle;
 
     /**
      * @var resource cURL multi handle
      */
-    private $MCURL;
+    private $multiCurlHandle;
+
+    /**
+     * @var string Data that probably should be added to the user-agent.
+     */
+    private $curlVersion;
 
     /**
      * CurlWrapper constructor.
@@ -50,6 +55,9 @@ class CurlWrapper implements Wrapper
 
     private function initCurl()
     {
+        if (function_exists('curl_version')) {
+            $this->curlVersion = curl_version();
+        }
     }
 
     /**

@@ -79,7 +79,7 @@ class SSL
     {
         $return = false;
 
-        if (Flags::isFlag('NETCURL_NOSSL_TEST')) {
+        if (Flags::_isFlag('NETCURL_NOSSL_TEST')) {
             return $return;
         }
 

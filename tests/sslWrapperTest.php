@@ -14,7 +14,7 @@ class sslWrapperTest extends TestCase
      */
     public function noSslWrappers()
     {
-        Flags::setFlag('NETCURL_NOSSL_TEST');
+        Flags::_setFlag('NETCURL_NOSSL_TEST');
         try {
             /** @var SSL $SSL */
             $SSL = new SSL();
@@ -24,7 +24,7 @@ class sslWrapperTest extends TestCase
         }
 
         // Clean up global flags.
-        Flags::clearAllFlags();
+        Flags::_clearAllFlags();
     }
 
     /**

@@ -148,7 +148,7 @@ class WrapperConfig
      */
     public function getRequestFlags()
     {
-        return Flags::getAllFlags();
+        return Flags::_getAllFlags();
     }
 
     /**
@@ -158,7 +158,7 @@ class WrapperConfig
      */
     public function setRequestFlags(array $requestFlags)
     {
-        Flags::setFlags($requestFlags);
+        Flags::_setFlags($requestFlags);
     }
 
     /**

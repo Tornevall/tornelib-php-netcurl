@@ -5,8 +5,11 @@ use TorneLIB\Flags;
 use TorneLIB\Module\Network\NetWrapper;
 use TorneLIB\Module\Network\Wrappers\CurlWrapper;
 
-define('LIB_ERROR_HTTP', true);
+if (version_compare(PHP_VERSION, '5.4', '<=')) {
+    throw new \Exception('PHP version too old!', 500);
+}
 
+define('LIB_ERROR_HTTP', true);
 require_once(__DIR__ . '/../vendor/autoload.php');
 
 /**

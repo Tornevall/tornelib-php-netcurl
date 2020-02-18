@@ -46,7 +46,14 @@ class curlWrapperTest extends TestCase
             $this->curlWrapper = new CurlWrapper();
 
         } catch (\Exception $e) {
-            echo $e->getCode();
+            static::markTestIncomplete(
+                sprintf(
+                    'Skipped test on exception %s: %s',
+                    $e->getCode(),
+                    $e->getMessage()
+                )
+            );
+            return;
         }
 
         static::assertTrue(

@@ -124,7 +124,7 @@ class WrapperConfig
      * @param int $requestPostMethod
      * @since 6.1.0
      */
-    public function setRequestPostMethod(int $requestPostMethod)
+    public function setRequestPostMethod($requestPostMethod)
     {
         if (is_numeric($requestPostMethod)) {
             $this->requestPostMethod = $requestPostMethod;

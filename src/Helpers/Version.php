@@ -6,7 +6,7 @@ class Version
 {
     public static function getRequiredVersion()
     {
-        if (version_compare(PHP_VERSION, '5.5', '<=')) {
+        if (version_compare(PHP_VERSION, '5.4', '<')) {
             throw new \Exception(
                 sprintf(
                     'Your PHP version is way too old (%s)!! It is time to upgrade. ' .

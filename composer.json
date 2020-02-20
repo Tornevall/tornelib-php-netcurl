@@ -1,10 +1,8 @@
 {
   "name": "tornevall/tornelib-php-netcurl",
   "description": "Yet another Curl Library to handling web calls",
-  "minimum-stability": "stable",
   "license": "Apache-2.0",
   "require": {
-    "php": ">=5.3",
     "tornevall/tornelib-php-crypto": "^6.0"
   },
   "authors": [

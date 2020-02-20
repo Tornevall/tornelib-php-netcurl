@@ -1788,6 +1788,7 @@ if (!class_exists('MODULE_CURL', NETCURL_CLASS_EXISTS_AUTOLOAD) &&
          *
          * @return bool
          * @since 6.0.10
+         * @deprecated Removed from 6.1: Replaced with getSecurityLevelChange()
          */
         public function getSslIsUnsafe()
         {

@@ -28,7 +28,8 @@ class extendedManual extends TestCase
     /**
      * @throws \Exception
      */
-    function __setUp() {
+    function __setUp()
+    {
         error_reporting(E_ALL);
         $this->CURL = new MODULE_CURL();
     }

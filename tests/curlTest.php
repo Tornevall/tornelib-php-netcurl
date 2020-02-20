@@ -16,19 +16,6 @@ require_once(__DIR__ . '/testurls.php');
 use Exception;
 use PHPUnit\Framework\TestCase;
 
-ini_set('memory_limit', -1);    // Free memory limit, some tests requires more memory (like ip-range handling)
-
-/*
-if (version_compare(PHP_VERSION, '7.3.0', '>=')) {
-    printf('PHP version is %s, so we will instatiate a class made for PHP 7.3 or higher.', PHP_VERSION);
-    require_once('php73.php');
-}
-if (version_compare(PHP_VERSION, '7.3.0', '<')) {
-    printf('PHP version is %s, so we will instatiate a class made for PHP 7.2 or lower.', PHP_VERSION);
-    require_once('phpOld.php');
-}
-*/
-
 class curlTest extends TestCase
 {
     protected $StartErrorReporting;
@@ -374,14 +361,19 @@ class curlTest extends TestCase
             // CURLE_PEER_FAILED_VERIFICATION = 51
             // CURLE_SSL_CACERT = 60
             /** @noinspection PhpDeprecationInspection */
-            static::assertTrue($e->getCode() == 60 || $e->getCode() == 51 || $e->getCode() == 500 || $e->getCode() === NETCURL_EXCEPTIONS::NETCURL_SETSSLVERIFY_UNVERIFIED_NOT_SET,
-                $e->getCode());
+            static::assertTrue(
+                $e->getCode() == 60 ||
+                $e->getCode() == 51 ||
+                $e->getCode() == 500 ||
+                $e->getCode() === NETCURL_EXCEPTIONS::NETCURL_SETSSLVERIFY_UNVERIFIED_NOT_SET,
+                $e->getCode()
+            );
         }
     }
 
     /**
      * @test
-     * @testdox Get exception on mismatching certificates (host != certifcate host)
+     * @testdox Get exception on mismatching certificates (host != certificate host)
      * @throws Exception
      */
     public function sslMismatching()
@@ -393,7 +385,12 @@ class curlTest extends TestCase
             // CURLE_PEER_FAILED_VERIFICATION = 51
             // CURLE_SSL_CACERT = 60
             /** @noinspection PhpDeprecationInspection */
-            static::assertTrue($e->getCode() == 60 || $e->getCode() == 51 || $e->getCode() == 500 || $e->getCode() === NETCURL_EXCEPTIONS::NETCURL_SETSSLVERIFY_UNVERIFIED_NOT_SET);
+            static::assertTrue(
+                $e->getCode() == 60 ||
+                $e->getCode() == 51 ||
+                $e->getCode() == 500 ||
+                $e->getCode() === NETCURL_EXCEPTIONS::NETCURL_SETSSLVERIFY_UNVERIFIED_NOT_SET
+            );
         }
     }
 
@@ -406,7 +403,9 @@ class curlTest extends TestCase
         try {
             $this->CURL->setSslStrictFallback(true);
             $this->CURL->setSslVerify(true, true);
-            $container = $this->CURL->getParsed($this->CURL->doGet(\TESTURLS::getUrlSelfSigned() . "/tests/tornevall_network/index.php?o=json&bool"));
+            $container = $this->CURL->getParsed(
+                $this->CURL->doGet(\TESTURLS::getUrlSelfSigned() . "/tests/tornevall_network/index.php?o=json&bool")
+            );
             if (is_object($container)) {
                 static::assertTrue(isset($container->methods));
             }
@@ -418,7 +417,7 @@ class curlTest extends TestCase
     /**
      * @test
      * @testdox Test that initially allows unverified ssl certificates should make netcurl to first call the url in a
-     *          correct way and then, if this fails, make a quite risky failover into unverified mode - silently.
+     * correct way and then, if this fails, make a quite risky failover into unverified mode - silently.
      * @throws Exception
      */
     public function sslSelfSignedUnverifyOnRun()
@@ -507,7 +506,11 @@ class curlTest extends TestCase
         $this->pemDefault();
         // SimpleXMLElement
         $container = $this->getParsed($this->urlGet("ssl&bool&o=xml&method=get&using=SimpleXMLElement"));
-        static::assertTrue(isset($container->using) && is_object($container->using) && $container->using == "SimpleXMLElement");
+        static::assertTrue(
+            isset($container->using) &&
+            is_object($container->using) &&
+            $container->using == "SimpleXMLElement"
+        );
     }
 
     /**
@@ -829,7 +832,7 @@ class curlTest extends TestCase
     /**
      * @test
      * @testdox Tests the overriding function setEnforceFollowLocation and the setCurlOpt-overrider. The expected
-     *          result is to have setEnforceFollowLocation to be top prioritized over setCurlOpt here.
+     * result is to have setEnforceFollowLocation to be top prioritized over setCurlOpt here.
      * @throws Exception
      */
     public function followRedirectManualEnableWithSetCurlOptEnforcingToFalse()
@@ -976,7 +979,7 @@ class curlTest extends TestCase
      * @test
      * @throws Exception
      */
-    public function tlagEmptyKey()
+    public function flagEmptyKey()
     {
         $this->__setUp();
         try {
@@ -1157,8 +1160,7 @@ class curlTest extends TestCase
 
     /**
      * @test
-     * @testdox Safe mode and basepath cechking without paramters - in our environment, open_basedir is empty and
-     *          safe_mode is off
+     * @testdox Safe mode and basepath cechking without paramters - in our environment, open_basedir is empty and safe_mode is off
      */
     public function getSafePermissionFull()
     {
@@ -1311,11 +1313,15 @@ class curlTest extends TestCase
             static::assertTrue($driversUsed[1] == 3 && $driversUsed[2] == 2 ? true : false);
         } catch (\Exception $e) {
             if ($e->getCode() < 3) {
-                static::markTestSkipped('Getting exception codes below 3 here, might indicate that your cacerts is not installed properly or the connection to the server is not responding');
+                static::markTestSkipped(
+                    'Getting exception codes below 3 here, might indicate that your cacerts is not installed properly or the connection to the server is not responding'
+                );
 
                 return;
             } elseif ($e->getCode() >= 500) {
-                static::markTestSkipped("Got errors (" . $e->getCode() . ") on URL call, can't complete request: " . $e->getMessage());
+                static::markTestSkipped(
+                    "Got errors (" . $e->getCode() . ") on URL call, can't complete request: " . $e->getMessage()
+                );
             }
             throw new Exception($e->getMessage(), $e->getCode(), $e);
         }

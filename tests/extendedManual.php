@@ -26,6 +26,14 @@ class extendedManual extends TestCase
     private $wsdl = "https://test.resurs.com/ecommerce-test/ws/V4/SimplifiedShopFlowService?wsdl";
 
     /**
+     * @throws \Exception
+     */
+    function __setUp() {
+        error_reporting(E_ALL);
+        $this->CURL = new MODULE_CURL();
+    }
+
+    /**
      * @test
      * @testdox Testing an error type that comes from this specific service - testing if we can catch previous error
      *          instead of the current
@@ -33,6 +41,7 @@ class extendedManual extends TestCase
      */
     public function soapFaultstring()
     {
+        $this->__setUp();
         $this->disableSslVerifyByPhpVersions(true);
         try {
             $wsdl = $this->CURL->doGet($this->wsdl);
@@ -69,10 +78,13 @@ class extendedManual extends TestCase
      * For the tests, where the importance of result is not focused on SSL, we could disable the verification
      * checks if we want to do so. In Bitbucket Pipelines docker environments errors has been discovered on
      * some PHP releases, which we'd like to primary disable.
+     *
      * @param bool $always
+     * @throws \Exception
      */
     private function disableSslVerifyByPhpVersions($always = false)
     {
+        $this->__setUp();
         if (version_compare(PHP_VERSION, '5.5.0', '<=')) {
             $this->CURL->setSslVerify(false, false);
         } elseif ($always) {
@@ -87,6 +99,7 @@ class extendedManual extends TestCase
      */
     public function soapUnauthorizedSoapUnauthorized()
     {
+        $this->__setUp();
         try {
             $this->disableSslVerifyByPhpVersions();
             $wsdl = $this->CURL->doGet($this->wsdl);
@@ -122,6 +135,7 @@ class extendedManual extends TestCase
      */
     public function soapAuthErrorInitialSoapFaultsWsdl()
     {
+        $this->__setUp();
         if (version_compare(PHP_VERSION, '5.4.0', '<')) {
             $this->CURL->setChain(false);
             $this->CURL->setFlag('SOAPCHAIN', false);
@@ -169,6 +183,7 @@ class extendedManual extends TestCase
      */
     public function soapAuthErrorInitialSoapFaultsNoWsdl()
     {
+        $this->__setUp();
         $this->disableSslVerifyByPhpVersions();
         $this->CURL->setSoapTryOnce(false);
         $this->CURL->setAuthentication("fail", "fail");
@@ -216,6 +231,7 @@ class extendedManual extends TestCase
      */
     public function soapAuthErrorWithoutProtectiveFlag()
     {
+        $this->__setUp();
         $this->CURL->setAuthentication("fail", "fail");
         $this->CURL->setFlag("NOSOAPWARNINGS");
         try {
@@ -241,6 +257,7 @@ class extendedManual extends TestCase
      */
     public function soapAuthErrorNoInitialSoapFaultsNoWsdl()
     {
+        $this->__setUp();
         $this->disableSslVerifyByPhpVersions();
         $this->CURL->setAuthentication("fail", "fail");
         try {
@@ -286,6 +303,7 @@ class extendedManual extends TestCase
      */
     public function rbFailSoapChain()
     {
+        $this->__setUp();
         $this->CURL->setFlag("SOAPCHAIN");
         $this->CURL->setAuthentication($this->username, $this->password);
         try {
@@ -305,6 +323,7 @@ class extendedManual extends TestCase
      */
     public function rbSoapChain()
     {
+        $this->__setUp();
         $this->disableSslVerifyByPhpVersions();
         $this->CURL->setFlag("SOAPCHAIN");
         $this->CURL->setAuthentication($this->username, $this->password);
@@ -319,6 +338,7 @@ class extendedManual extends TestCase
 
     public function rbSimpleXml()
     {
+        $this->__setUp();
         try {
             $this->CURL->setAuthentication($this->username, $this->password);
             $this->CURL->setFlag('XMLSOAP', true);
@@ -331,14 +351,5 @@ class extendedManual extends TestCase
         } catch (\Exception $e) {
             static::fail($e->getMessage());
         }
-    }
-
-    /**
-     * @throws \Exception
-     */
-    function setUp()
-    {
-        error_reporting(E_ALL);
-        $this->CURL = new MODULE_CURL();
     }
 }

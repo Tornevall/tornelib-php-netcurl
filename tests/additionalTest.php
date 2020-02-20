@@ -21,11 +21,8 @@ class additionalTest extends TestCase
     /** @var string Change this */
     private $ACCOUNT = "imap://user:password@imap.server";
 
-    /* The :void return type declaration that should be here would cause a BC issue */
-    function setUp()
+    function __setUp()
     {
-        parent::setUp();
-
         $this->CURL = new MODULE_CURL();
     }
 
@@ -34,6 +31,7 @@ class additionalTest extends TestCase
      */
     public function testImap()
     {
+        $this->__setUp();
         if (preg_match("/user\:password/", $this->ACCOUNT)) {
             static::markTestSkipped("Testing imap connectivity requires proper user login data");
             return;

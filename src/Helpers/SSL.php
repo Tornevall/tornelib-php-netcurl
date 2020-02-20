@@ -24,7 +24,7 @@ class SSL
     private $capabilities = [];
 
     /**
-     * @var array Context of stream.
+     * @var array Context of stream. As of PHP 5.6.0 the peer verifications are defaulting to true.
      */
     private $context = [
         'ssl' => [
@@ -32,6 +32,7 @@ class SSL
             'verify_peer_name' => true,
             'verify_host' => true,
             'allow_self_signed' => false,
+            'SNI_enabled' => true,
         ],
     ];
 

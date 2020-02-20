@@ -6,6 +6,8 @@ use TorneLIB\Exception\ExceptionHandler;
 use TorneLIB\Helpers\Version;
 use TorneLIB\Module\Config\WrapperConfig;
 use TorneLIB\Module\Network\Model\Wrapper;
+use TorneLIB\Utils\Security;
+
 Version::getRequiredVersion();
 
 /**
@@ -49,7 +51,14 @@ class CurlWrapper implements Wrapper
         $this->getPriorCompatibilityArguments(func_get_args());
         // Make sure there are available drivers before using the wrapper.
         if (!function_exists('curl_init') || !function_exists('curl_exec')) {
-            throw new ExceptionHandler('curl unavailable: curl_init and/or curl_exec not found');
+            $secCheck = new Security();
+            if ($secCheck->getDisabledFunction(['curl_init', 'curl_exec'])) {
+                throw new ExceptionHandler(
+                    'curl unavailable: It turns out that php.ini has the functions ' .
+                    'curl_init and/or curl_exec disabled. Your should update php.ini and try again.'
+                );
+            }
+            throw new ExceptionHandler('curl unavailable: curl_init and/or curl_exec not found.');
         }
 
         $this->initCurl();

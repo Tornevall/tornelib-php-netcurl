@@ -17,10 +17,24 @@ use TorneLIB\Module\Config\WrapperConstants;
  */
 class WrapperConfig
 {
+    /**
+     * @var string Requested URL.
+     */
     private $requestUrl = '';
+
+    /**
+     * @var array Postdata.
+     */
     private $requestVars = [];
+
+    /**
+     * @var int Default method. Postdata will in the case of GET generate postdata in the link.
+     */
     private $requestPostMethod = postMethod::METHOD_GET;
 
+    /**
+     * @var array Options that sets up each request engine. On curl, it is CURLOPT.
+     */
     private $options = [];
 
     /**

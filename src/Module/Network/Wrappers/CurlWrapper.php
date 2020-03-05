@@ -64,6 +64,14 @@ class CurlWrapper implements Wrapper
         $this->initCurl();
     }
 
+    /**
+     * @param WrapperConfig $config
+     */
+    public function setConfig($config) {
+        /** @var WrapperConfig CONFIG */
+        $this->CONFIG = $config;
+    }
+
     private function initCurl()
     {
         if (function_exists('curl_version')) {

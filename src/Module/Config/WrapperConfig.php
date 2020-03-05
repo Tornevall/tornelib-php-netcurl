@@ -4,6 +4,7 @@ namespace TorneLIB\Module\Config;
 
 use TorneLIB\Config\Flag;
 use TorneLIB\Flags;
+use TorneLIB\Helpers\Browsers;
 use TorneLIB\Model\Type\postMethod;
 use TorneLIB\Module\Config\WrapperConstants;
 
@@ -59,7 +60,7 @@ class WrapperConfig
             'CURLOPT_SSL_VERIFYHOST' => 2,
             'CURLOPT_ENCODING' => 1,
             'CURLOPT_TIMEOUT' => 10,
-            'CURLOPT_USERAGENT' => 'TorneLIB-PHPcURL',
+            'CURLOPT_USERAGENT' => (new Browsers())->getBrowser(),
             'CURLOPT_POST' => true,
             'CURLOPT_SSLVERSION' => 4,
             'CURLOPT_FOLLOWLOCATION' => false,
@@ -162,6 +163,7 @@ class WrapperConfig
      */
     public function getRequestFlags()
     {
+        /** @noinspection PhpUndefinedMethodInspection */
         return Flags::_getAllFlags();
     }
 
@@ -172,6 +174,7 @@ class WrapperConfig
      */
     public function setRequestFlags(array $requestFlags)
     {
+        /** @noinspection PhpUndefinedMethodInspection */
         Flags::_setFlags($requestFlags);
     }
 

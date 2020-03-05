@@ -59,7 +59,7 @@ class SSL
      *
      * Replaces getCurlSslAvailable from v6.0 where everything is checked in the same method.
      *
-     * @return $this
+     * @return bool
      * @throws \Exception
      * @since 6.1.0
      */
@@ -80,6 +80,7 @@ class SSL
     {
         $return = false;
 
+        /** @noinspection PhpUndefinedMethodInspection */
         if (Flags::_isFlag('NETCURL_NOSSL_TEST')) {
             return $return;
         }

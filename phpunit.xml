@@ -4,7 +4,7 @@
          verbose="true"
          stopOnFailure="false">
     <testsuites>
-        <testsuite name="NetCURL with friends">
+        <testsuite name="netcurl-suite">
             <directory>tests</directory>
         </testsuite>
     </testsuites>

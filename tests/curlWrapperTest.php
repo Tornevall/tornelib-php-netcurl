@@ -2,13 +2,20 @@
 
 use PHPUnit\Framework\TestCase;
 use TorneLIB\Flags;
+use TorneLIB\Helpers\Version;
 use TorneLIB\Module\Network\NetWrapper;
 use TorneLIB\Module\Network\Wrappers\CurlWrapper;
-use TorneLIB\Helpers\Version;
+use TorneLIB\Module\Config\WrapperConfig;
+use TorneLIB\Helpers\Browsers;
 
 define('LIB_ERROR_HTTP', true);
 require_once(__DIR__ . '/../vendor/autoload.php');
-Version::getRequiredVersion();
+
+try {
+    Version::getRequiredVersion();
+} catch (Exception $e) {
+    die($e->getMessage());
+}
 
 /**
  * Class curlWrapperTest
@@ -91,5 +98,17 @@ class curlWrapperTest extends TestCase
         } else {
             static::assertTrue($security->getSecureMode());
         }
+    }
+
+    /**
+     * @test
+     */
+    public function browserSet()
+    {
+        // Making sure output lloks the same in both ends.
+        static::assertTrue(
+            preg_match('/^mozilla|^netcurl/i', (new Browsers())->getBrowser()) ? true : false &&
+            preg_match('/^mozilla|^netcurl/i', (new WrapperConfig())->getOptions()['10018'])
+        );
     }
 }

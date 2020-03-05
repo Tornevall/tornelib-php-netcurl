@@ -4,9 +4,15 @@ use PHPUnit\Framework\TestCase;
 use TorneLIB\Flags;
 use TorneLIB\Helpers\SSL;
 use TorneLIB\Helpers\Version;
-Version::getRequiredVersion();
+
+try {
+    Version::getRequiredVersion();
+} catch (Exception $e) {
+    die($e->getMessage());
+}
 
 require_once(__DIR__ . '/../vendor/autoload.php');
+
 class sslWrapperTest extends TestCase
 {
     /**
@@ -15,6 +21,7 @@ class sslWrapperTest extends TestCase
      */
     public function noSslWrappers()
     {
+        /** @noinspection PhpUndefinedMethodInspection */
         Flags::_setFlag('NETCURL_NOSSL_TEST');
         try {
             /** @var SSL $SSL */
@@ -24,8 +31,8 @@ class sslWrapperTest extends TestCase
             static::assertTrue($e->getCode() === 500);
         }
 
-        // Clean up global flags.
-        Flags::_clearAllFlags();
+        /** @noinspection PhpUndefinedMethodInspection */
+        Flags::_clearAllFlags(); // Clean up global flags.
     }
 
     /**

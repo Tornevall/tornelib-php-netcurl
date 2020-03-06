@@ -14,12 +14,16 @@ class Browsers
     ];
 
     /**
+     * Currently returning the name of set NETCURL6.0 useragent. This will change over time.
+     *
      * @return string
      * @todo Randomize.
      */
     public function getBrowser()
     {
-        // Currently returning the name of set NETCURL6.0 useragent. This will change over time.
-        return (string)array_pop(array_reverse($this->userAgents));
+        // PHP Limitation: Only variables should be passed by reference on [...] - code problem below, so it's splitted.
+        // (string)array_pop(array_reverse($this->userAgents)).
+        $reverseAgents = array_reverse($this->userAgents);
+        return (string)array_pop($reverseAgents);
     }
 }

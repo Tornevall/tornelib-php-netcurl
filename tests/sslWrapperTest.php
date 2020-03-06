@@ -5,13 +5,13 @@ use TorneLIB\Flags;
 use TorneLIB\Helpers\SSL;
 use TorneLIB\Helpers\Version;
 
+require_once(__DIR__ . '/../vendor/autoload.php');
+
 try {
     Version::getRequiredVersion();
 } catch (Exception $e) {
     die($e->getMessage());
 }
-
-require_once(__DIR__ . '/../vendor/autoload.php');
 
 class sslWrapperTest extends TestCase
 {

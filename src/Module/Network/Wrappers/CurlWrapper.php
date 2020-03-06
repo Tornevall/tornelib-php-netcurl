@@ -8,7 +8,11 @@ use TorneLIB\Module\Config\WrapperConfig;
 use TorneLIB\Module\Network\Model\Wrapper;
 use TorneLIB\Utils\Security;
 
-Version::getRequiredVersion();
+try {
+    Version::getRequiredVersion();
+} catch (Exception $e) {
+    die($e->getMessage());
+}
 
 /**
  * Class CurlWrapper.

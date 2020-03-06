@@ -6,7 +6,7 @@ For v6.1 -- please hold.
 
 ## Compatibility span (Supported PHP versions)
 
-This library is built to work with PHP 5.6 and higher (I prefer to follow the live updates of PHP with their EOL's - [check it here](https://www.php.net/supported-versions.php)). The [Bamboo-instance](https://bamboo.tornevall.net) used is built in the past, so I'm still able to test the library with older PHP releases too. Even if I think they will fail any time now.
+This library is built to work with PHP 5.6 and higher (I prefer to follow the live updates of PHP with their EOL's - [check it here](https://www.php.net/supported-versions.php)). The [Bamboo-server](https://bamboo.tornevall.net) has a history which makes PHP from 5.4 available on demand. However, autotests tend to fail on older PHP's so as of march 2020 all tests lower than 5.6 is disabled.
 
 However, it is not that easy. The compatibility span **has** to be lower as the world I'm living in tend to be slow. If this module is built after the bleeding edge-principles, that also means that something will blow up somewhere. It's disussable whether that's something to ignore or not, but I think it's important to be supportive regardless of end of life-restrictions (but not too far). When support ends from software developers point of view, I see a perfect moment to follow that stream. This is very important as 2019 and 2020 seems to be two such years when most of the society is forcing movement forward. 
 

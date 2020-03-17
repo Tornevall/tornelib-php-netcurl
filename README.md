@@ -3,7 +3,6 @@
 Full documents for v6.0 is located [here](https://docs.tornevall.net/x/KwCy).
 For v6.1 -- please hold.
 
-
 ## Compatibility span (Supported PHP versions)
 
 This library is built to work with PHP 5.6 and higher (I prefer to follow the live updates of PHP with their EOL's - [check it here](https://www.php.net/supported-versions.php)). The [Bamboo-server](https://bamboo.tornevall.net) has a history which makes PHP from 5.4 available on demand. However, autotests tend to fail on older PHP's so as of march 2020 all tests lower than 5.6 is disabled.

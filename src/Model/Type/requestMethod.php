@@ -2,7 +2,7 @@
 
 namespace TorneLIB\Model\Type;
 
-abstract class postMethod
+abstract class requestMethod
 {
     const METHOD_GET = 0;
     const METHOD_POST = 1;

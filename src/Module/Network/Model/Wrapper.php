@@ -2,6 +2,8 @@
 
 namespace TorneLIB\Module\Network\Model;
 
+use TorneLIB\Model\Type\dataType;
+
 interface Wrapper
 {
 
@@ -9,5 +11,5 @@ interface Wrapper
 
     public function getConfig();
 
-    public function request();
+    public function request($url, $data = [], $method = requestMethod::METHOD_GET, $dataType = dataType::DEFAULT);
 }

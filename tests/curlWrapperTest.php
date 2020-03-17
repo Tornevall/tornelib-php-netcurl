@@ -242,8 +242,6 @@ class curlWrapperTest extends TestCase
      * @test
      *
      * Lowest initializer level, where nothing can be initiated since there is no defined url.
-     *
-     * @throws \TorneLIB\Exception\ExceptionHandler
      */
     public function unInitializedCurlWrapperNoConfig()
     {
@@ -251,7 +249,7 @@ class curlWrapperTest extends TestCase
             $wrapper = new CurlWrapper();
             $wrapper->getCurlRequest();
         } catch (\Exception $e) {
-            static::assertTrue($e->getCode() == 1003);
+            static::assertTrue($e->getCode() == Constants::LIB_EMPTY_URL);
         }
     }
 }

@@ -189,7 +189,7 @@ class curlWrapperTest extends TestCase
 
         static::assertTrue(
             $data->getHeader('content-type', $firstMultiUrl) === 'application/json' &&
-            count(strlen($data->getHeader(null, $secondMultiUrl)) > 1)
+            strlen($data->getHeader(null, $secondMultiUrl)) > 1
         );
     }
 
@@ -251,7 +251,7 @@ class curlWrapperTest extends TestCase
             $wrapper = new CurlWrapper();
             $wrapper->getCurlRequest();
         } catch (\Exception $e) {
-            static::assertTrue($e->getCode() === Constants::LIB_EMPTY_URL);
+            static::assertTrue($e->getCode() == Constants::LIB_EMPTY_URL);
         }
     }
 }

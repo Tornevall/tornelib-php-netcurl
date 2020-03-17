@@ -1,6 +1,7 @@
 <?php
 
 use PHPUnit\Framework\TestCase;
+use TorneLIB\Exception\Constants;
 use TorneLIB\Flags;
 use TorneLIB\Helpers\Browsers;
 use TorneLIB\Helpers\Version;
@@ -177,8 +178,8 @@ class curlWrapperTest extends TestCase
      */
     public function multiGetHeader()
     {
-        $firstMultiUrl = sprintf('https://identifier.tornevall.net/?func=%s', __FUNCTION__);
-        $secondMultiUrl = sprintf('https://identifier.tornevall.net/ip.php?func=%s', __FUNCTION__);
+        $firstMultiUrl = sprintf('https://identifier.tornevall.net/?func=%s&php=%s', __FUNCTION__, PHP_VERSION);
+        $secondMultiUrl = sprintf('https://identifier.tornevall.net/ip.php?func=%s&php=%s', __FUNCTION__, PHP_VERSION);
         $data = (new CurlWrapper())->request(
             [
                 $firstMultiUrl,
@@ -203,7 +204,13 @@ class curlWrapperTest extends TestCase
     public function unInitializedCurlWrapperByConfig()
     {
         $wrapper = new CurlWrapper();
-        $wrapper->getConfig()->setRequestUrl(sprintf('https://identifier.tornevall.net/?func=%s', __FUNCTION__));
+        $wrapper->getConfig()->setRequestUrl(
+            sprintf(
+                'https://identifier.tornevall.net/?func=%s&php=%s',
+                __FUNCTION__,
+                PHP_VERSION
+            )
+        );
         $wrapper->setOptionCurl($wrapper->getCurlHandle(), CURLOPT_USERAGENT, __FUNCTION__);
         $parsed = $wrapper->getCurlRequest()->getParsed();
         if (isset($parsed->ip)) {
@@ -218,7 +225,13 @@ class curlWrapperTest extends TestCase
     public function unInitializedCurlWrapperMinorConfig()
     {
         $wrapper = new CurlWrapper();
-        $wrapper->getConfig()->setRequestUrl(sprintf('https://identifier.tornevall.net/?func=%s', __FUNCTION__));
+        $wrapper->getConfig()->setRequestUrl(
+            sprintf(
+                'https://identifier.tornevall.net/?func=%s&php=%s',
+                __FUNCTION__,
+                PHP_VERSION
+            )
+        );
         $parsed = $wrapper->getCurlRequest()->getParsed();
         if (isset($parsed->ip)) {
             static::assertTrue(filter_var($parsed->ip, FILTER_VALIDATE_IP) ? true : false);
@@ -238,7 +251,7 @@ class curlWrapperTest extends TestCase
             $wrapper = new CurlWrapper();
             $wrapper->getCurlRequest();
         } catch (\Exception $e) {
-            static::assertTrue($e->getCode() === \TorneLIB\Exception\Constants::LIB_EMPTY_URL);
+            static::assertTrue($e->getCode() === Constants::LIB_EMPTY_URL);
         }
     }
 }

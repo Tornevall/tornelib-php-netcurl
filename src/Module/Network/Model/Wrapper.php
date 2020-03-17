@@ -11,5 +11,5 @@ interface Wrapper
 
     public function getConfig();
 
-    public function request($url, $data = [], $method = requestMethod::METHOD_GET, $dataType = dataType::DEFAULT);
+    public function request($url, $data = [], $method = requestMethod::METHOD_GET, $dataType = dataType::NORMAL);
 }

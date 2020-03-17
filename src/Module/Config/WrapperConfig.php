@@ -42,7 +42,7 @@ class WrapperConfig
     /**
      * @var int Datatype to post in (default = uses ?key=value for GET and &key=value in body for POST).
      */
-    private $requestDataType = dataType::DEFAULT;
+    private $requestDataType = dataType::NORMAL;
 
     /**
      * @var array Options that sets up each request engine. On curl, it is CURLOPT.
@@ -139,7 +139,7 @@ class WrapperConfig
         // Return as is on string.
         if (!is_string($return)) {
             switch ($this->requestDataType) {
-                case dataType::DEFAULT:
+                case dataType::NORMAL:
                     $requestQuery = '';
                     if ($this->requestMethod === requestMethod::METHOD_GET) {
                         $requestQuery = '?';

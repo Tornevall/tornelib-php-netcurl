@@ -482,7 +482,7 @@ class CurlWrapper implements Wrapper
      * @throws ExceptionHandler
      * @since 6.1.0
      */
-    public function request($url = '', $data = [], $method = requestMethod::METHOD_GET, $dataType = dataType::DEFAULT)
+    public function request($url = '', $data = [], $method = requestMethod::METHOD_GET, $dataType = dataType::NORMAL)
     {
         if (!empty($url)) {
             $this->CONFIG->setRequestUrl($url);

@@ -5,7 +5,8 @@ namespace TorneLIB\Module\Config;
 use TorneLIB\Config\Flag;
 use TorneLIB\Flags;
 use TorneLIB\Helpers\Browsers;
-use TorneLIB\Model\Type\postMethod;
+use TorneLIB\Model\Type\dataType;
+use TorneLIB\Model\Type\requestMethod;
 use TorneLIB\Module\Config\WrapperConstants;
 
 /**
@@ -26,12 +27,22 @@ class WrapperConfig
     /**
      * @var array Postdata.
      */
-    private $requestVars = [];
+    private $requestData = [];
+
+    /**
+     * @var
+     */
+    private $requestDataContainer;
 
     /**
      * @var int Default method. Postdata will in the case of GET generate postdata in the link.
      */
-    private $requestPostMethod = postMethod::METHOD_GET;
+    private $requestMethod = requestMethod::METHOD_GET;
+
+    /**
+     * @var int Datatype to post in (default = uses ?key=value for GET and &key=value in body for POST).
+     */
+    private $requestDataType = dataType::DEFAULT;
 
     /**
      * @var array Options that sets up each request engine. On curl, it is CURLOPT.
@@ -121,30 +132,46 @@ class WrapperConfig
      * @return array
      * @since 6.1.0
      */
-    public function getRequestVars()
+    public function getRequestData()
     {
-        return $this->requestVars;
+        $return = $this->requestData;
+
+        // Return as is on string.
+        if (!is_string($return)) {
+            switch ($this->requestDataType) {
+                case dataType::DEFAULT:
+                    $requestQuery = '';
+                    if ($this->requestMethod === requestMethod::METHOD_GET) {
+                        $requestQuery = '?';
+                    }
+                    $this->requestDataContainer = $requestQuery . http_build_query($this->requestData);
+                default:
+                    break;
+            }
+        }
+
+        return $return;
     }
 
     /**
-     * @param array $requestVars
+     * @param array $requestData
      * @since 6.1.0
      */
-    public function setRequestVars($requestVars)
+    public function setRequestData($requestData)
     {
-        $this->requestVars = $requestVars;
+        $this->requestData = $requestData;
     }
 
     /**
-     * @param int $requestPostMethod
+     * @param int $requestMethod
      * @since 6.1.0
      */
-    public function setRequestPostMethod($requestPostMethod)
+    public function setRequestMethod($requestMethod)
     {
-        if (is_numeric($requestPostMethod)) {
-            $this->requestPostMethod = $requestPostMethod;
+        if (is_numeric($requestMethod)) {
+            $this->requestMethod = $requestMethod;
         } else {
-            $this->requestPostMethod = postMethod::METHOD_GET;
+            $this->requestMethod = requestMethod::METHOD_GET;
         }
     }
 
@@ -152,9 +179,9 @@ class WrapperConfig
      * @return int
      * @since 6.1.0
      */
-    public function getRequestPostMethod()
+    public function getRequestMethod()
     {
-        return $this->requestPostMethod;
+        return $this->requestMethod;
     }
 
     /**
@@ -194,5 +221,21 @@ class WrapperConfig
     public function setOptions(array $options)
     {
         $this->options = $options;
+    }
+
+    /**
+     * @param int $requestDataType
+     */
+    public function setRequestDataType(int $requestDataType)
+    {
+        $this->requestDataType = $requestDataType;
+    }
+
+    /**
+     * @return int
+     */
+    public function getRequestDataType()
+    {
+        return $this->requestDataType;
     }
 }

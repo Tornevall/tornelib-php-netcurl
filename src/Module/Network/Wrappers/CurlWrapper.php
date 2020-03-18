@@ -285,6 +285,20 @@ class CurlWrapper implements Wrapper
     }
 
     /**
+     * @param $curlHandle
+     * @throws ExceptionHandler
+     * @since 6.1.0
+     */
+    private function getCurlException($curlHandle)
+    {
+        $errorString = curl_error($curlHandle);
+        $errorCode = curl_errno($curlHandle);
+        if ($errorCode) {
+            throw new ExceptionHandler($errorString, $errorCode);
+        }
+    }
+
+    /**
      * The curl_exec part.
      * @return $this
      * @throws ExceptionHandler
@@ -294,6 +308,7 @@ class CurlWrapper implements Wrapper
         if (!$this->isMultiCurl && is_resource($this->getCurlHandle())) {
             $this->curlResponse = curl_exec($this->curlHandle);
             $this->curlHttpCode = curl_getinfo($this->curlHandle, CURLINFO_RESPONSE_CODE);
+            $this->getCurlException($this->curlHandle);
         } elseif (is_resource($this->multiCurlHandle)) {
             $this->curlMultiResponse = $this->getMultiCurlRequest();
         }

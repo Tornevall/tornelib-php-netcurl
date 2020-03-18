@@ -3,42 +3,13 @@
 Full documents for v6.0 is located [here](https://docs.tornevall.net/x/KwCy).
 For v6.1 -- please hold.
 
-## Compatibility span (Supported PHP versions)
-
-This library is built to work with PHP 5.6 and higher (I prefer to follow the live updates of PHP with their EOL's - [check it here](https://www.php.net/supported-versions.php)). The [Bamboo-server](https://bamboo.tornevall.net) has a history which makes PHP from 5.4 available on demand. However, autotests tend to fail on older PHP's so as of march 2020 all tests lower than 5.6 is disabled.
-
-However, it is not that easy. The compatibility span **has** to be lower as the world I'm living in tend to be slow. If this module is built after the bleeding edge-principles, that also means that something will blow up somewhere. It's disussable whether that's something to ignore or not, but I think it's important to be supportive regardless of end of life-restrictions (but not too far). When support ends from software developers point of view, I see a perfect moment to follow that stream. This is very important as 2019 and 2020 seems to be two such years when most of the society is forcing movement forward. 
-
-To keep compatibility with v6.0 the plan is to keep the primary class MODULE_CURL callable from a root position. It will probably be recommended to switch over to a PSR friendly structure from there, but the base will remain in 6.1 and the best way to instantiate the module in future is to call for the same wrapper as the main MODULE_CURL will use - NetWrapper (TorneLIB\Module\Network\NetWrapper) as it is planned to be the primary driver handler.
-
-### Requirements and dependencies
-
-In its initial state, there are basically no requirements as this module tries to pick the best available driver in runtime.
-
-### What NETCURL support
-
-... or even better, **should** support.
-
-* Curl
-* Guzzle
-* RSS feeds
-* SoapClient (dependencies)
-* Sockets
-* Streams
-* Zend
-
-#### Further dependencies on special support
-
-* SSL: OpenSSL or similar.
-* SOAP: SoapClient and XML-drivers.
-
-### Installation
+## Installation
 
 Recommended solution: Composer.
 
 Alternatives: git clone this repo.
 
-#### XML, CURL, SOAP
+### XML, CURL, SOAP
 
 In apt-based systems, extra libraries can be installed with commands such as:
 
@@ -64,6 +35,41 @@ Or more preferrably either...
 or during development...
       
       composer require tornevall/tornelib-php-netcurl dev-develop/6.1 
+
+
+# Module Information
+
+## Compatibility
+
+This library is built to work with PHP 5.6 and higher (I prefer to follow the live updates of PHP with their EOL's - [check it here](https://www.php.net/supported-versions.php)). The [Bamboo-server](https://bamboo.tornevall.net) has a history which makes PHP from 5.4 available on demand. However, autotests tend to fail on older PHP's so as of march 2020 all tests lower than 5.6 is disabled.
+
+However, it is not that easy. The compatibility span **has** to be lower as the world I'm living in tend to be slow. If this module is built after the bleeding edge-principles, that also means that something will blow up somewhere. It's disussable whether that's something to ignore or not, but I think it's important to be supportive regardless of end of life-restrictions (but not too far). When support ends from software developers point of view, I see a perfect moment to follow that stream. This is very important as 2019 and 2020 seems to be two such years when most of the society is forcing movement forward. 
+
+To keep compatibility with v6.0 the plan is to keep the primary class MODULE_CURL callable from a root position. It will probably be recommended to switch over to a PSR friendly structure from there, but the base will remain in 6.1 and the best way to instantiate the module in future is to call for the same wrapper as the main MODULE_CURL will use - NetWrapper (TorneLIB\Module\Network\NetWrapper) as it is planned to be the primary driver handler.
+
+## Requirements and dependencies
+
+In its initial state, there are basically no requirements as this module tries to pick the best available driver in runtime.
+
+### Support
+
+#### Current
+
+* Curl
+
+#### In progress
+
+* (Guzzle)
+* (RSS feeds)
+* (SoapClient (with dependencies))
+* (Zend)
+* (Sockets)
+* (Streams)
+
+#### Further dependencies on special support
+
+* SSL: OpenSSL or similar.
+* SOAP: SoapClient and XML-drivers.
 
 ## Documents
 

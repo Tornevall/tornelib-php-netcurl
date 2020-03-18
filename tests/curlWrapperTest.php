@@ -24,6 +24,9 @@ try {
 class curlWrapperTest extends TestCase
 {
     private $curlWrapper;
+    private $rEcomPipeU = 'ecomphpPipelineTest';
+    private $rEcomPipeP = '4Em4r5ZQ98x3891D6C19L96TQ72HsisD';
+    private $rEcomHost = 'https://omnitest.resurs.com';
 
     /**
      * @test
@@ -42,7 +45,7 @@ class curlWrapperTest extends TestCase
     {
         try {
             $curlWrapperArgs = new CurlWrapper(
-                'https://identifier.tornevall.net',
+                'https://ipv4.netcurl.org',
                 [],
                 \TorneLIB\Model\Type\requestMethod::METHOD_GET,
                 [
@@ -117,8 +120,8 @@ class curlWrapperTest extends TestCase
     public function basicMultiGet()
     {
         $wrapper = (new CurlWrapper())->request([
-            sprintf('https://identifier.tornevall.net/ip.php?func=%s', __FUNCTION__),
-            sprintf('https://identifier.tornevall.net/?func=%s', __FUNCTION__),
+            sprintf('https://ipv4.netcurl.org/ip.php?func=%s', __FUNCTION__),
+            sprintf('https://ipv4.netcurl.org/?func=%s', __FUNCTION__),
         ]);
 
         // This test is relatively inactive.
@@ -133,7 +136,7 @@ class curlWrapperTest extends TestCase
     {
         /** @var CurlWrapper $curlRequest */
         $curlRequest = (new CurlWrapper(
-            sprintf('https://identifier.tornevall.net/?func=%s', __FUNCTION__),
+            sprintf('https://ipv4.netcurl.org/?func=%s', __FUNCTION__),
             [],
             \TorneLIB\Model\Type\requestMethod::METHOD_GET,
             [
@@ -154,7 +157,7 @@ class curlWrapperTest extends TestCase
      */
     public function basicGet()
     {
-        $wrapper = (new CurlWrapper())->request(sprintf('https://identifier.tornevall.net/?func=%s', __FUNCTION__));
+        $wrapper = (new CurlWrapper())->request(sprintf('https://ipv4.netcurl.org/?func=%s', __FUNCTION__));
         $parsed = $wrapper->getCurlRequest()->getParsed();
         if (isset($parsed->ip)) {
             static::assertTrue(filter_var($parsed->ip, FILTER_VALIDATE_IP) ? true : false);
@@ -167,7 +170,7 @@ class curlWrapperTest extends TestCase
      */
     public function basicGetHeader()
     {
-        $data = (new CurlWrapper())->request(sprintf('https://identifier.tornevall.net/?func=%s', __FUNCTION__));
+        $data = (new CurlWrapper())->request(sprintf('https://ipv4.netcurl.org/?func=%s', __FUNCTION__));
 
         static::assertTrue($data->getHeader('content-type') === 'application/json');
     }
@@ -176,10 +179,26 @@ class curlWrapperTest extends TestCase
      * @test
      * @throws \TorneLIB\Exception\ExceptionHandler
      */
+    public function basicGetHeaderUserAgent()
+    {
+        $curlRequest =
+            (new CurlWrapper())
+                ->setConfig((new WrapperConfig())->setOptions([CURLOPT_USERAGENT => 'ExternalClientName']))
+                ->request(
+                    sprintf('https://ipv4.netcurl.org/?func=%s', __FUNCTION__)
+                );
+
+        static::assertTrue($curlRequest->getHeader('content-type') === 'application/json');
+    }
+
+    /**
+     * @test
+     * @throws \TorneLIB\Exception\ExceptionHandler
+     */
     public function multiGetHeader()
     {
-        $firstMultiUrl = sprintf('https://identifier.tornevall.net/?func=%s&php=%s', __FUNCTION__, PHP_VERSION);
-        $secondMultiUrl = sprintf('https://identifier.tornevall.net/ip.php?func=%s&php=%s', __FUNCTION__, PHP_VERSION);
+        $firstMultiUrl = sprintf('https://ipv4.netcurl.org/?func=%s&php=%s', __FUNCTION__, PHP_VERSION);
+        $secondMultiUrl = sprintf('https://ipv4.netcurl.org/ip.php?func=%s&php=%s', __FUNCTION__, PHP_VERSION);
         $data = (new CurlWrapper())->request(
             [
                 $firstMultiUrl,
@@ -206,7 +225,7 @@ class curlWrapperTest extends TestCase
         $wrapper = new CurlWrapper();
         $wrapper->getConfig()->setRequestUrl(
             sprintf(
-                'https://identifier.tornevall.net/?func=%s&php=%s',
+                'https://ipv4.netcurl.org/?func=%s&php=%s',
                 __FUNCTION__,
                 PHP_VERSION
             )
@@ -227,7 +246,7 @@ class curlWrapperTest extends TestCase
         $wrapper = new CurlWrapper();
         $wrapper->getConfig()->setRequestUrl(
             sprintf(
-                'https://identifier.tornevall.net/?func=%s&php=%s',
+                'https://ipv4.netcurl.org/?func=%s&php=%s',
                 __FUNCTION__,
                 PHP_VERSION
             )
@@ -250,6 +269,38 @@ class curlWrapperTest extends TestCase
             $wrapper->getCurlRequest();
         } catch (\Exception $e) {
             static::assertTrue($e->getCode() == Constants::LIB_EMPTY_URL);
+        }
+    }
+
+    /**
+     * @test
+     * Certificate errors like this can obviously render two different kind of errors.
+     */
+    public function sslCurlePeerCert51()
+    {
+        try {
+            (new CurlWrapper('https://dev-ssl-mismatch.tornevall.nu'))->getCurlRequest();
+        } catch (Exception $e) {
+            static::assertTrue(
+                $e->getCode() === CURLE_SSL_PEER_CERTIFICATE ||
+                $e->getCode() === CURLE_SSL_CONNECT_ERROR
+            );
+        }
+    }
+
+    /**
+     * @test
+     * Certificate errors like this can obviously render two different kind of errors.
+     */
+    public function sslCurleCacert60()
+    {
+        try {
+            (new CurlWrapper('https://dev-ssl-self.tornevall.nu'))->getCurlRequest();
+        } catch (Exception $e) {
+            static::assertTrue(
+                $e->getCode() === CURLE_SSL_CACERT ||
+                $e->getCode() === CURLE_SSL_CONNECT_ERROR
+            );
         }
     }
 }

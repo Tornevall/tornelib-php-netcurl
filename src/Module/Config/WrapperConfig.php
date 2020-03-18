@@ -217,10 +217,13 @@ class WrapperConfig
     /**
      * @param array $options
      * @since 6.1.0
+     * @return WrapperConfig
      */
     public function setOptions(array $options)
     {
         $this->options = $options;
+
+        return $this;
     }
 
     /**

@@ -119,11 +119,14 @@ class CurlWrapper implements Wrapper
 
     /**
      * @param WrapperConfig $config
+     * @return CurlWrapper
      */
     public function setConfig($config)
     {
         /** @var WrapperConfig CONFIG */
         $this->CONFIG = $config;
+
+        return $this;
     }
 
     /**
@@ -135,9 +138,21 @@ class CurlWrapper implements Wrapper
      */
     private function setupHandle($curlHandle, $url)
     {
+        $this->setCurlDynamicValues($curlHandle);
         $this->setCurlStaticValues($curlHandle, $url);
 
         return $this;
+    }
+
+    /**
+     * @param $curlHandle
+     * @since 6.1.0
+     */
+    private function setCurlDynamicValues($curlHandle) {
+        foreach ($this->CONFIG->getOptions() as $curlKey => $curlValue)
+        {
+            $this->setOptionCurl($curlHandle, $curlKey, $curlValue);
+        }
     }
 
     /**
@@ -305,6 +320,8 @@ class CurlWrapper implements Wrapper
      */
     public function getCurlRequest()
     {
+        $this->initCurlHandle();
+
         if (!$this->isMultiCurl && is_resource($this->getCurlHandle())) {
             $this->curlResponse = curl_exec($this->curlHandle);
             // Friendly anti-backfire support.
@@ -519,7 +536,6 @@ class CurlWrapper implements Wrapper
             $this->CONFIG->setRequestDataType($dataType);
         }
 
-        $this->initCurlHandle();
         $this->getCurlRequest();
         $this->getCurlParse();
 

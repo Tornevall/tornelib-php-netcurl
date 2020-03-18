@@ -197,8 +197,8 @@ class curlWrapperTest extends TestCase
      */
     public function multiGetHeader()
     {
-        $firstMultiUrl = sprintf('https://ipv4.netcurl.org/?func=%s&php=%s', __FUNCTION__, PHP_VERSION);
-        $secondMultiUrl = sprintf('https://ipv4.netcurl.org/ip.php?func=%s&php=%s', __FUNCTION__, PHP_VERSION);
+        $firstMultiUrl = sprintf('https://ipv4.netcurl.org/?func=%s&php=%s', __FUNCTION__, rawurlencode(PHP_VERSION));
+        $secondMultiUrl = sprintf('https://ipv4.netcurl.org/ip.php?func=%s&php=%s', __FUNCTION__, rawurlencode(PHP_VERSION));
         $data = (new CurlWrapper())->request(
             [
                 $firstMultiUrl,
@@ -227,7 +227,7 @@ class curlWrapperTest extends TestCase
             sprintf(
                 'https://ipv4.netcurl.org/?func=%s&php=%s',
                 __FUNCTION__,
-                PHP_VERSION
+                rawurlencode(PHP_VERSION)
             )
         );
         $wrapper->setOptionCurl($wrapper->getCurlHandle(), CURLOPT_USERAGENT, __FUNCTION__);
@@ -248,7 +248,7 @@ class curlWrapperTest extends TestCase
             sprintf(
                 'https://ipv4.netcurl.org/?func=%s&php=%s',
                 __FUNCTION__,
-                PHP_VERSION
+                rawurlencode(PHP_VERSION)
             )
         );
         $parsed = $wrapper->getCurlRequest()->getParsed();

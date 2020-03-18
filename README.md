@@ -48,14 +48,14 @@ However, it is not that easy. The compatibility span **has** to be lower as the 
 To keep compatibility with v6.0 the plan is to keep the primary class MODULE_CURL callable from a root position. It will probably be recommended to switch over to a PSR friendly structure from there, but the base will remain in 6.1 and the best way to instantiate the module in future is to call for the same wrapper as the main MODULE_CURL will use - NetWrapper (TorneLIB\Module\Network\NetWrapper) as it is planned to be the primary driver handler.
 
 ## Requirements and dependencies
-
+  
 In its initial state, there are basically no requirements as this module tries to pick the best available driver in runtime.
 
 ### Support
 
 #### Current
 
-* Curl
+* curl implementation halfway
 
 #### In progress
 

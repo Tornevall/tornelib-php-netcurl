@@ -289,7 +289,7 @@ class CurlWrapper implements Wrapper
      * @throws ExceptionHandler
      * @since 6.1.0
      */
-    private function getCurlException($curlHandle)
+    private function getCurlException($curlHandle, $httpCode)
     {
         $errorString = curl_error($curlHandle);
         $errorCode = curl_errno($curlHandle);
@@ -307,8 +307,12 @@ class CurlWrapper implements Wrapper
     {
         if (!$this->isMultiCurl && is_resource($this->getCurlHandle())) {
             $this->curlResponse = curl_exec($this->curlHandle);
-            $this->curlHttpCode = curl_getinfo($this->curlHandle, CURLINFO_RESPONSE_CODE);
-            $this->getCurlException($this->curlHandle);
+            // Friendly anti-backfire support.
+            $this->curlHttpCode = curl_getinfo(
+                $this->curlHandle,
+                defined('CURLINFO_RESPONSE_CODE') ? CURLINFO_RESPONSE_CODE : 2097154
+            );
+            $this->getCurlException($this->curlHandle, $this->curlHttpCode);
         } elseif (is_resource($this->multiCurlHandle)) {
             $this->curlMultiResponse = $this->getMultiCurlRequest();
         }

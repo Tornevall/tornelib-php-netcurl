@@ -190,8 +190,23 @@ if (!class_exists('NETCURL_DRIVER_WORDPRESS',
         private function getWp()
         {
             $postThis = ['body' => $this->POST_DATA];
+            $postThis['headers'] = [];
+            $authData = $this->getAuthentication();
+            $hasAuthentication = false;
+            if (isset($authData['Password']) && !empty($authData['Password'])) {
+                $hasAuthentication = true;
+                $wpAuthHeader = [
+                    'Authorization' => sprintf(
+                        'Basic %s',
+                        base64_encode(sprintf('%s:%s', $authData['Username'], $authData['Password']))
+                    ),
+                ];
+
+                $postThis['headers'] = array_merge($postThis['headers'], $wpAuthHeader);
+            }
+
             if ($this->POST_DATA_TYPE == NETCURL_POST_DATATYPES::DATATYPE_JSON) {
-                $postThis['headers'] = ["content-type" => "application-json"];
+                $postThis['headers']['content-type'] = 'application-json';
                 $postThis['body'] = $this->IO->renderJson($this->POST_DATA);
             }
 

@@ -1429,7 +1429,7 @@ class curlTest extends TestCase
         $this->CURL->setTimeout(1);
         $startTime = time();
         try {
-            print_R($this->CURL->doGet("imap://failing:account@imap.tornevall.net")->getHeader());
+            print_r($this->CURL->doGet("imap://failing:account@imap.tornevall.net")->getHeader());
         } catch (\Exception $e) {
         }
         $timeWasted = time() - $startTime;
@@ -1468,6 +1468,24 @@ class curlTest extends TestCase
         } catch (\Exception $e) {
         }
     }
+
+    /**
+     * @test
+     * @throws Exception
+     */
+    public function spoofableUserAgent()
+    {
+        $this->__setUp();
+        $chosenClientName = 'Internal Clientname Only';
+        /** @var NETCURL_HTTP_OBJECT $request */
+        $this->CURL->setUserAgent($chosenClientName, [], true);
+        $request = $this->CURL->doGet(\TESTURLS::getUrlSimple());
+        $parsed = $request->getParsed();
+        static::assertTrue(
+            $parsed->HTTP_USER_AGENT === $chosenClientName
+        );
+    }
+
 
     /**
      * @param bool $setActive

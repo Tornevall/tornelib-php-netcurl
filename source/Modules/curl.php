@@ -3748,8 +3748,17 @@ if (!class_exists('MODULE_CURL', NETCURL_CLASS_EXISTS_AUTOLOAD) &&
                 }
             } else {
                 if (is_object($currentDriver) && method_exists($currentDriver, 'executeNetcurlRequest')) {
-                    $returnContent = $currentDriver->executeNetcurlRequest($this->CURL_STORED_URL,
-                        $this->POST_DATA_HANDLED, $this->NETCURL_POST_METHOD, $this->NETCURL_POST_DATA_TYPE);
+                    if (method_exists($currentDriver, 'setAuthentication') &&
+                        isset($this->AuthData) && isset($this->AuthData['Username']) && isset($this->AuthData['Password'])
+                    ) {
+                        $currentDriver->setAuthentication($this->AuthData['Username'], $this->AuthData['Password']);
+                    }
+                    $returnContent = $currentDriver->executeNetcurlRequest(
+                        $this->CURL_STORED_URL,
+                        $this->POST_DATA_HANDLED,
+                        $this->NETCURL_POST_METHOD,
+                        $this->NETCURL_POST_DATA_TYPE
+                    );
                 }
             }
 

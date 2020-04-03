@@ -5,6 +5,7 @@ namespace TorneLIB\Module\Network\Wrappers;
 use TorneLIB\Exception\Constants;
 use TorneLIB\Exception\ExceptionHandler;
 use TorneLIB\Helpers\Version;
+use TorneLIB\Model\Type\authType;
 use TorneLIB\Model\Type\dataType;
 use TorneLIB\Model\Type\requestMethod;
 use TorneLIB\Module\Config\WrapperConfig;
@@ -78,6 +79,21 @@ class CurlWrapper implements Wrapper
     private $curlVersion;
 
     /**
+     * @var array
+     */
+    private $customPreHeaders = [];
+
+    /**
+     * @var array
+     */
+    private $customHeaders = [];
+
+    /**
+     * @var string Custom content type.
+     */
+    private $contentType = '';
+
+    /**
      * CurlWrapper constructor.
      *
      * @throws ExceptionHandler
@@ -118,18 +134,6 @@ class CurlWrapper implements Wrapper
     }
 
     /**
-     * @param WrapperConfig $config
-     * @return CurlWrapper
-     */
-    public function setConfig($config)
-    {
-        /** @var WrapperConfig CONFIG */
-        $this->CONFIG = $config;
-
-        return $this;
-    }
-
-    /**
      * Major initializer.
      *
      * @param $curlHandle
@@ -138,8 +142,168 @@ class CurlWrapper implements Wrapper
      */
     private function setupHandle($curlHandle, $url)
     {
+        $this->setCurlAuthentication($curlHandle);
         $this->setCurlDynamicValues($curlHandle);
+        $this->setCurlSslValues($curlHandle);
         $this->setCurlStaticValues($curlHandle, $url);
+        $this->setCurlPostData($curlHandle);
+        $this->setCurlRequestMethod($curlHandle);
+        $this->setCurlCustomHeaders($curlHandle);
+        $this->setOptionCurl($curlHandle, CURLOPT_URL, $url);
+
+        return $this;
+    }
+
+    /**
+     * @param $curlHandle
+     */
+    private function setCurlRequestMethod($curlHandle)
+    {
+        switch ($this->CONFIG->getRequestMethod()) {
+            case requestMethod::METHOD_POST:
+                $this->setOptionCurl($curlHandle, CURLOPT_CUSTOMREQUEST, 'POST');
+                break;
+            case requestMethod::METHOD_DELETE:
+                $this->setOptionCurl($curlHandle, CURLOPT_CUSTOMREQUEST, 'DELETE');
+                break;
+            case requestMethod::METHOD_HEAD:
+                $this->setOptionCurl($curlHandle, CURLOPT_CUSTOMREQUEST, 'HEAD');
+                break;
+            case requestMethod::METHOD_PUT:
+                $this->setOptionCurl($curlHandle, CURLOPT_CUSTOMREQUEST, 'PUT');
+                break;
+            case requestMethod::METHOD_REQUEST:
+                $this->setOptionCurl($curlHandle, CURLOPT_CUSTOMREQUEST, 'REQUEST');
+                break;
+            default:
+                // Making sure we send data in proper formatting if there is bad user configuration.
+                // Bad configuration is when both GET+POST data parameters are sent as a GET when the
+                // correct set up in that case is a POST.
+                $this->setOptionCurl($curlHandle, CURLOPT_CUSTOMREQUEST, 'GET');
+                break;
+        }
+    }
+
+    /**
+     * @param $curlHandle
+     * @since 6.1.0
+     * @return CurlWrapper
+     */
+    private function setCurlPostData($curlHandle)
+    {
+        $requestData = $this->CONFIG->getRequestData();
+
+        switch ($this->CONFIG->getRequestDataType()) {
+            case dataType::JSON:
+                $this->setCurlPostJsonHeader($curlHandle, $requestData);
+                break;
+            default:
+                if ($this->CONFIG->getRequestMethod() === requestMethod::METHOD_POST) {
+                    $this->setOptionCurl($curlHandle, CURLOPT_POST, true);
+                }
+                $this->setOptionCurl($curlHandle, CURLOPT_POSTFIELDS, $requestData);
+                break;
+        }
+
+        return $this;
+    }
+
+    /**
+     * @param $curlHandle
+     * @param $requestData
+     * @return $this
+     */
+    private function setCurlPostJsonHeader($curlHandle, $requestData)
+    {
+        $jsonContentType = 'application/json; charset=utf-8';
+
+        $testContentType = $this->getContentType();
+        if (preg_match("/json/i", $testContentType)) {
+            $jsonContentType = $testContentType;
+        }
+
+        $this->customPreHeaders['Content-Type'] = $jsonContentType;
+        $this->customPreHeaders['Content-Length'] = strlen($requestData);
+        $this->setOptionCurl($curlHandle, CURLOPT_POSTFIELDS, $requestData);
+
+        return $this;
+    }
+
+    /**
+     * @param string $setContentTypeString
+     *
+     * @since 6.0.17
+     */
+    public function setContentType($setContentTypeString = 'application/json; charset=utf-8')
+    {
+        $this->contentType = $setContentTypeString;
+    }
+
+    /**
+     * @return string
+     * @since 6.0.17
+     */
+    public function getContentType()
+    {
+        return $this->contentType;
+    }
+
+    /**
+     * @param $curlHandle
+     * @since 6.1.0
+     */
+    private function setCurlCustomHeaders($curlHandle)
+    {
+        $this->setProperCustomerHeader();
+        $this->setupHeaders($curlHandle);
+    }
+
+    /**
+     * @param string $key
+     * @param string $value
+     * @since 6.0
+     */
+    public function setCurlHeader($key = '', $value = '')
+    {
+        if (!empty($key)) {
+            if (!is_array($key)) {
+                $this->customPreHeaders[$key] = $value;
+            } else {
+                foreach ($key as $arrayKey => $arrayValue) {
+                    $this->customPreHeaders[$arrayKey] = $arrayValue;
+                }
+            }
+        }
+    }
+
+    /**
+     * Fix problematic header data by converting them to proper outputs.
+     *
+     * @since 6.1.0
+     */
+    private function setProperCustomerHeader()
+    {
+        foreach ($this->customPreHeaders as $headerKey => $headerValue) {
+            $testHead = explode(":", $headerValue, 2);
+            if (isset($testHead[1])) {
+                $this->customHeaders[] = $headerValue;
+            } elseif (!is_numeric($headerKey)) {
+                $this->customHeaders[] = $headerKey . ": " . $headerValue;
+            }
+            unset($this->customPreHeaders[$headerKey]);
+        }
+    }
+
+    /**
+     * @param $curlHandle
+     * @return $this
+     * @since 6.1.0
+     */
+    private function setupHeaders($curlHandle)
+    {
+        if (count($this->customHeaders)) {
+            $this->setOptionCurl($curlHandle, CURLOPT_HTTPHEADER, $this->customHeaders);
+        }
 
         return $this;
     }
@@ -147,12 +311,68 @@ class CurlWrapper implements Wrapper
     /**
      * @param $curlHandle
      * @since 6.1.0
+     * @return CurlWrapper
      */
-    private function setCurlDynamicValues($curlHandle) {
-        foreach ($this->CONFIG->getOptions() as $curlKey => $curlValue)
-        {
+    private function setCurlDynamicValues($curlHandle)
+    {
+        foreach ($this->CONFIG->getOptions() as $curlKey => $curlValue) {
             $this->setOptionCurl($curlHandle, $curlKey, $curlValue);
         }
+
+        return $this;
+    }
+
+    /**
+     * @param $curlHandle
+     * @return CurlWrapper
+     * @since 6.1.0
+     */
+    private function setCurlSslValues($curlHandle)
+    {
+        if (version_compare(PHP_VERSION, '5.4.11', ">=")) {
+            $this->setOptionCurl($curlHandle, CURLOPT_SSL_VERIFYHOST, 2);
+        } else {
+            $this->setOptionCurl($curlHandle, CURLOPT_SSL_VERIFYHOST, 1);
+        }
+        $this->setOptionCurl($curlHandle, CURLOPT_SSL_VERIFYPEER, 1);
+
+        return $this;
+    }
+
+    /**
+     * Values set here can not be changed via any other part of the wrapper.
+     *
+     * @param $curlHandle
+     * @param $url
+     * @return $this
+     */
+    private function setCurlStaticValues($curlHandle, $url)
+    {
+        $this->setOptionCurl($curlHandle, CURLOPT_RETURNTRANSFER, true);
+        $this->setOptionCurl($curlHandle, CURLOPT_HEADER, false);
+        $this->setOptionCurl($curlHandle, CURLOPT_AUTOREFERER, true);
+        $this->setOptionCurl($curlHandle, CURLINFO_HEADER_OUT, true);
+        $this->setOptionCurl($curlHandle, CURLOPT_HEADERFUNCTION, [$this, 'getCurlHeaderRow']);
+
+        return $this;
+    }
+
+    /**
+     * @param $curlHandle
+     * @return CurlWrapper
+     */
+    private function setCurlAuthentication($curlHandle)
+    {
+        $authData = $this->getAuthentication();
+        if (!empty($authData['password'])) {
+            $this->setOptionCurl($curlHandle, CURLOPT_HTTPAUTH, $authData['type']);
+            $this->setOptionCurl(
+                $curlHandle, CURLOPT_USERPWD,
+                sprintf('%s:%s', $authData['username'], $authData['password'])
+            );
+        }
+
+        return $this;
     }
 
     /**
@@ -163,8 +383,12 @@ class CurlWrapper implements Wrapper
     private function getCurlHeaderRow($curlHandle, $header)
     {
         $headSplit = explode(':', $header, 2);
+        $spacedSplit = explode(' ', $header, 2);
 
         if (count($headSplit) < 2) {
+            if (count($spacedSplit) > 1) {
+                $this->curlResponseHeaders[$spacedSplit[0]][] = trim($spacedSplit[1]);
+            }
             return strlen($header);
         }
         if (!$this->isMultiCurl) {
@@ -181,26 +405,6 @@ class CurlWrapper implements Wrapper
     }
 
     /**
-     * Values set here can not be changed via any other part of the wrapper.
-     *
-     * @param $curlHandle
-     * @param $url
-     * @return $this
-     */
-    private function setCurlStaticValues($curlHandle, $url)
-    {
-        $this->setOptionCurl($curlHandle, CURLOPT_URL, $url);
-        $this->setOptionCurl($curlHandle, CURLOPT_HEADER, false);
-        $this->setOptionCurl($curlHandle, CURLOPT_RETURNTRANSFER, true);
-        $this->setOptionCurl($curlHandle, CURLOPT_AUTOREFERER, true);
-        $this->setOptionCurl($curlHandle, CURLINFO_HEADER_OUT, true);
-
-        curl_setopt($curlHandle, CURLOPT_HEADERFUNCTION, [$this, 'getCurlHeaderRow']);
-
-        return $this;
-    }
-
-    /**
      * Set curloptions.
      *
      * @param $curlHandle
@@ -210,6 +414,7 @@ class CurlWrapper implements Wrapper
      */
     public function setOptionCurl($curlHandle, $curlOpt, $value)
     {
+        $this->CONFIG->setOption($curlOpt, $value);
         return curl_setopt($curlHandle, $curlOpt, $value);
     }
 
@@ -301,6 +506,7 @@ class CurlWrapper implements Wrapper
 
     /**
      * @param $curlHandle
+     * @param $httpCode
      * @throws ExceptionHandler
      * @since 6.1.0
      */
@@ -309,8 +515,21 @@ class CurlWrapper implements Wrapper
         $errorString = curl_error($curlHandle);
         $errorCode = curl_errno($curlHandle);
         if ($errorCode) {
-            throw new ExceptionHandler($errorString, $errorCode);
+            throw new ExceptionHandler(
+                sprintf(
+                    'curl error (%s): %s',
+                    $errorCode,
+                    $errorString
+                ),
+                $errorCode
+            );
         }
+
+        $httpHead = $this->getHeader('http');
+        if (empty($errorString) && !empty($httpHead)) {
+            $errorString = $httpHead;
+        }
+        $this->CONFIG->getHttpException($errorString, $httpCode);
     }
 
     /**
@@ -388,12 +607,47 @@ class CurlWrapper implements Wrapper
     }
 
     /**
+     * @param WrapperConfig $config
+     * @return CurlWrapper
+     */
+    public function setConfig($config)
+    {
+        /** @var WrapperConfig CONFIG */
+        $this->CONFIG = $config;
+
+        return $this;
+    }
+
+    /**
      * @return WrapperConfig
      * @since 6.1.0
      */
     public function getConfig()
     {
         return $this->CONFIG;
+    }
+
+    /**
+     * @param $username
+     * @param $password
+     * @param int $authType
+     * @return CurlWrapper
+     * @since 6.1.0
+     */
+    public function setAuthentication($username, $password, $authType = authType::BASIC)
+    {
+        $this->CONFIG->setAuthentication($username, $password, $authType);
+
+        return $this;
+    }
+
+    /**
+     * @return array
+     * @since 6.1.0
+     */
+    public function getAuthentication()
+    {
+        return $this->CONFIG->getAuthentication();
     }
 
     /**
@@ -455,6 +709,10 @@ class CurlWrapper implements Wrapper
                         $return[] = sprintf("%s: %s", $headKey, array_pop($headArray));
                     } elseif (strtolower($specificKey) === strtolower($headKey)) {
                         $return[] = sprintf("%s", array_pop($headArray));
+                    } elseif (strtolower($specificKey) === 'http') {
+                        if (preg_match('/^http/i', $headKey)) {
+                            $return[] = sprintf("%s", array_pop($headArray));
+                        }
                     }
                 }
             }
@@ -524,7 +782,7 @@ class CurlWrapper implements Wrapper
         if (!empty($url)) {
             $this->CONFIG->setRequestUrl($url);
         }
-        if (is_array($data) && !count($data)) {
+        if (is_array($data) && count($data)) {
             $this->CONFIG->setRequestData($data);
         }
 

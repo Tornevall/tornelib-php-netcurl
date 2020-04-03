@@ -2,12 +2,12 @@
 
 namespace TorneLIB\Module\Config;
 
-use TorneLIB\Config\Flag;
+use TorneLIB\Exception\ExceptionHandler;
 use TorneLIB\Flags;
 use TorneLIB\Helpers\Browsers;
+use TorneLIB\Model\Type\authType;
 use TorneLIB\Model\Type\dataType;
 use TorneLIB\Model\Type\requestMethod;
-use TorneLIB\Module\Config\WrapperConstants;
 
 /**
  * Class WrapperConfig
@@ -50,11 +50,75 @@ class WrapperConfig
     private $options = [];
 
     /**
+     * @var array Authentication data.
+     */
+    private $authData = ['username' => '', 'password' => '', 'type' => 1];
+
+    /** @var array Throwable http codes */
+    private $throwableHttpCodes;
+
+    /**
      * WrapperConfig constructor.
      */
     public function __construct()
     {
+        $this->setThrowableHttpCodes();
         $this->setCurlDefaults();
+    }
+
+    /**
+     * Set up a list of which HTTP error codes that should be throwable (default: >= 400, <= 599)
+     *
+     * @param int $throwableMin Minimum value to throw on (Used with >=)
+     * @param int $throwableMax Maxmimum last value to throw on (Used with <)
+     *
+     * @since 6.0.6 Since netcurl.
+     */
+    public function setThrowableHttpCodes($throwableMin = 400, $throwableMax = 599)
+    {
+        $throwableMin = intval($throwableMin) > 0 ? $throwableMin : 400;
+        $throwableMax = intval($throwableMax) > 0 ? $throwableMax : 599;
+        $this->throwableHttpCodes[] = [$throwableMin, $throwableMax];
+    }
+
+    /**
+     * Throw on any code that matches the store throwableHttpCode (use with setThrowableHttpCodes())
+     *
+     * @param string $httpMessageString
+     * @param string $httpCode
+     *
+     * @throws \Exception
+     * @since 6.0.6
+     */
+    public function getHttpException($httpMessageString = '', $httpCode = '')
+    {
+        if (!is_array($this->throwableHttpCodes)) {
+            $this->throwableHttpCodes = [];
+        }
+        foreach ($this->throwableHttpCodes as $codeListArray => $codeArray) {
+            if (isset($codeArray[1]) && $httpCode >= intval($codeArray[0]) && $httpCode <= intval($codeArray[1])) {
+                throw new \Exception(
+                    sprintf(
+                        'Error %d returned from server: "%s".',
+                        $httpCode,
+                        $httpMessageString
+                    ),
+                    $httpCode
+                );
+            }
+        }
+    }
+
+
+    /**
+     * Return the list of throwable http error codes (if set)
+     *
+     * @return array
+     * @since 6.0.6 Since netcurl.
+     */
+    public function getThrowableHttpCodes()
+    {
+        return $this->throwableHttpCodes;
     }
 
     /**
@@ -72,8 +136,7 @@ class WrapperConfig
             'CURLOPT_ENCODING' => 1,
             'CURLOPT_TIMEOUT' => 10,
             'CURLOPT_USERAGENT' => (new Browsers())->getBrowser(),
-            'CURLOPT_POST' => true,
-            'CURLOPT_SSLVERSION' => 4,
+            'CURLOPT_SSLVERSION' => CURL_SSLVERSION_DEFAULT,
             'CURLOPT_FOLLOWLOCATION' => false,
             'CURLOPT_HTTPHEADER' => ['Accept-Language: en'],
         ]);
@@ -139,12 +202,25 @@ class WrapperConfig
         // Return as is on string.
         if (!is_string($return)) {
             switch ($this->requestDataType) {
+                case dataType::JSON:
+                    $this->requestDataContainer = $this->getJsonData($return);
+                    $return = $this->requestDataContainer;
+                    break;
                 case dataType::NORMAL:
                     $requestQuery = '';
-                    if ($this->requestMethod === requestMethod::METHOD_GET) {
-                        $requestQuery = '?';
+                    if ($this->requestMethod === requestMethod::METHOD_GET && !empty($this->requestData)) {
+                        // Add POST data to request if anything else follows.
+                        $requestQuery = '&';
                     }
-                    $this->requestDataContainer = $requestQuery . http_build_query($this->requestData);
+                    $this->requestDataContainer = $this->requestData;
+                    if (is_array($this->requestData) || is_object($this->requestData)) {
+                        $httpQuery = http_build_query($this->requestData);
+                        if (!empty($httpQuery)) {
+                            $this->requestDataContainer = $requestQuery . $httpQuery;
+                        }
+                    }
+                    $return = $this->requestDataContainer;
+                    break;
                 default:
                     break;
             }
@@ -154,6 +230,28 @@ class WrapperConfig
     }
 
     /**
+     * @param $transformData
+     * @return string
+     * @since 6.1.0
+     */
+    private function getJsonData($transformData) {
+        $return = $transformData;
+
+        if (is_string($transformData)) {
+            $stringTest = json_decode($transformData);
+            if (is_object($stringTest) || is_array($stringTest)) {
+                $return = $transformData;
+            }
+        } else {
+            $return = json_encode($transformData);
+        }
+
+        return (string)$return;
+    }
+
+    /**
+     * User input variables.
+     *
      * @param array $requestData
      * @since 6.1.0
      */
@@ -163,6 +261,8 @@ class WrapperConfig
     }
 
     /**
+     * POST, GET, DELETE, etc
+     *
      * @param int $requestMethod
      * @since 6.1.0
      */
@@ -176,6 +276,8 @@ class WrapperConfig
     }
 
     /**
+     * POST, GET, DELETE, etc
+     *
      * @return int
      * @since 6.1.0
      */
@@ -218,6 +320,7 @@ class WrapperConfig
      * @param array $options
      * @since 6.1.0
      * @return WrapperConfig
+     * @since 6.1.0
      */
     public function setOptions(array $options)
     {
@@ -227,7 +330,40 @@ class WrapperConfig
     }
 
     /**
+     * @param $key
+     * @param $value
+     * @return $this
+     * @since 6.1.0
+     */
+    public function setOption($key, $value)
+    {
+        $this->options[$key] = $value;
+
+        return $this;
+    }
+
+    /**
+     * @param $key
+     * @return mixed
+     * @throws ExceptionHandler
+     * @since 6.1.0
+     */
+    public function getOption($key)
+    {
+        if (isset($this->options[$key])) {
+            return $this->options[$key];
+        }
+
+        throw new ExceptionHandler(
+            sprintf('%s: Option "%s" not set.', __CLASS__, $key),
+            404
+        );
+    }
+
+    /**
+     * Datatype of request (json, etc).
      * @param int $requestDataType
+     * @since 6.1.0
      */
     public function setRequestDataType(int $requestDataType)
     {
@@ -235,10 +371,38 @@ class WrapperConfig
     }
 
     /**
+     * Datatype of request (json, etc).
      * @return int
+     * @since 6.1.0
      */
     public function getRequestDataType()
     {
         return $this->requestDataType;
+    }
+
+    /**
+     * Set authdata.
+     *
+     * @param $username
+     * @param $password
+     * @param int $authType
+     * @since 6.1.0
+     */
+    public function setAuthentication($username, $password, $authType = authType::BASIC)
+    {
+        $this->authData['username'] = $username;
+        $this->authData['password'] = $password;
+        $this->authData['type'] = $authType;
+    }
+
+    /**
+     * Get authdata.
+     *
+     * @return array
+     * @since 6.1.0
+     */
+    public function getAuthentication()
+    {
+        return (array)$this->authData;
     }
 }

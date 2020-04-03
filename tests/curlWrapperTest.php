@@ -65,6 +65,7 @@ class curlWrapperTest extends TestCase
             return;
         }
 
+        /** @noinspection PhpUndefinedMethodInspection */
         static::assertTrue(
             (
                 is_object($curlWrapperArgs) &&
@@ -179,6 +180,55 @@ class curlWrapperTest extends TestCase
      * @test
      * @throws \TorneLIB\Exception\ExceptionHandler
      */
+    public function basicPostWithGetData()
+    {
+        $data = (new CurlWrapper())->request(
+            sprintf('https://ipv4.netcurl.org/?func=%s', __FUNCTION__),
+            ['hello' => 'world'],
+            \TorneLIB\Model\Type\requestMethod::METHOD_POST)
+            ->getParsed();
+
+        static::assertTrue(
+            isset($data->PARAMS_REQUEST->hello) &&
+            isset($data->PARAMS_GET->func) &&
+            $data->PARAMS_GET->func === __FUNCTION__
+        );
+    }
+
+    /**
+     * @test
+     * @throws \TorneLIB\Exception\ExceptionHandler
+     */
+    public function basicGetWithPost()
+    {
+        $data = (new CurlWrapper())->request(
+            sprintf('https://ipv4.netcurl.org/?func=%s', __FUNCTION__),
+            ['hello' => 'world'],
+            \TorneLIB\Model\Type\requestMethod::METHOD_GET)
+            ->getParsed();
+
+        static::assertTrue(!isset($data->PARAMS_REQUEST->hello));
+    }
+
+    /**
+     * @test
+     * @throws \TorneLIB\Exception\ExceptionHandler
+     */
+    public function basicPost()
+    {
+        $data = (new CurlWrapper())->request(
+            sprintf('https://ipv4.netcurl.org/?func=%s', __FUNCTION__),
+            ['hello' => 'world'],
+            \TorneLIB\Model\Type\requestMethod::METHOD_POST)
+            ->getParsed();
+
+        static::assertTrue(isset($data->PARAMS_POST->hello));
+    }
+
+    /**
+     * @test
+     * @throws \TorneLIB\Exception\ExceptionHandler
+     */
     public function basicGetHeaderUserAgent()
     {
         $curlRequest =
@@ -198,7 +248,8 @@ class curlWrapperTest extends TestCase
     public function multiGetHeader()
     {
         $firstMultiUrl = sprintf('https://ipv4.netcurl.org/?func=%s&php=%s', __FUNCTION__, rawurlencode(PHP_VERSION));
-        $secondMultiUrl = sprintf('https://ipv4.netcurl.org/ip.php?func=%s&php=%s', __FUNCTION__, rawurlencode(PHP_VERSION));
+        $secondMultiUrl = sprintf('https://ipv4.netcurl.org/ip.php?func=%s&php=%s', __FUNCTION__,
+            rawurlencode(PHP_VERSION));
         $data = (new CurlWrapper())->request(
             [
                 $firstMultiUrl,
@@ -300,6 +351,33 @@ class curlWrapperTest extends TestCase
             static::assertTrue(
                 $e->getCode() === CURLE_SSL_CACERT ||
                 $e->getCode() === CURLE_SSL_CONNECT_ERROR
+            );
+        }
+    }
+
+    /**
+     * @test
+     * @throws \TorneLIB\Exception\ExceptionHandler
+     */
+    public function getRestWithAuth()
+    {
+        $curlWrapper = new CurlWrapper();
+        try {
+            $curlWrapper->setCurlHeader('X-CurlTest', true);
+            $wrapperRequest = $curlWrapper->setAuthentication('atest', 'atest')->request(
+                sprintf('%s/callbacks', $this->rEcomHost)
+            );
+
+            static::assertTrue(is_array($wrapperRequest->getParsed()));
+        } catch (Exception $e) {
+            // 35 when ssl version set to 4.
+            static::markTestIncomplete(
+                sprintf(
+                    '%s exception %s: %s',
+                    __FUNCTION__,
+                    $e->getCode(),
+                    $e->getMessage()
+                )
             );
         }
     }

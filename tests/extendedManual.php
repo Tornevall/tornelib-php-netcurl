@@ -358,12 +358,11 @@ class extendedManual extends TestCase
      * @test
      * @throws \Exception
      */
-    public function restCb() {
+    public function restCb()
+    {
         $this->__setUp();
         $this->CURL->setAuthentication('atest', 'atest');
         $req = $this->CURL->doGet('https://omnitest.resurs.com/callbacks');
-        $ch = $this->CURL->getCurlSession();
-        $ci = curl_getinfo($ch);
         static::assertTrue(count($req->getParsed()) > 0);
     }
 }

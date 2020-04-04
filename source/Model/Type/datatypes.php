@@ -29,7 +29,6 @@ if (!class_exists('NETCURL_POST_DATATYPES', NETCURL_CLASS_EXISTS_AUTOLOAD) &&
 ) {
     /**
      * Class NETCURL_POST_DATATYPES
-     *
      * Prepared formatting for POST-content in this library (Also available from for example PUT)
      *
      * @package TorneLIB

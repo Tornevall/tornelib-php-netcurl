@@ -169,6 +169,51 @@ class curlWrapperTest extends TestCase
      * @test
      * @throws \TorneLIB\Exception\ExceptionHandler
      */
+    public function basicGetLowTLS()
+    {
+        $tlsResponse = (new CurlWrapper())->
+        setConfig((new WrapperConfig())->setOption(CURLOPT_SSLVERSION, CURL_SSLVERSION_TLSv1_0))->
+        request(
+            sprintf('https://ipv4.netcurl.org/?func=%s',
+                __FUNCTION__
+            )
+        )->getParsed();
+
+
+        if (isset($tlsResponse->ip)) {
+            static::assertTrue(
+                filter_var($tlsResponse->ip, FILTER_VALIDATE_IP) ? true : false &&
+                    $tlsResponse->SSL->SSL_PROTOCOL === 'TLSv1'
+            );
+        }
+    }
+
+    /**
+     * @test
+     * @throws \TorneLIB\Exception\ExceptionHandler
+     */
+    public function basicGetTLS11()
+    {
+        $tlsResponse = (new CurlWrapper())->
+        setConfig((new WrapperConfig())->setOption(CURLOPT_SSLVERSION, CURL_SSLVERSION_TLSv1_1))->
+        request(
+            sprintf('https://ipv4.netcurl.org/?func=%s',
+                __FUNCTION__
+            )
+        )->getParsed();
+
+        if (isset($tlsResponse->ip)) {
+            static::assertTrue(
+                filter_var($tlsResponse->ip, FILTER_VALIDATE_IP) ? true : false &&
+                    $tlsResponse->SSL->SSL_PROTOCOL === 'TLSv1.1'
+            );
+        }
+    }
+
+    /**
+     * @test
+     * @throws \TorneLIB\Exception\ExceptionHandler
+     */
     public function basicGetHeader()
     {
         $data = (new CurlWrapper())->request(sprintf('https://ipv4.netcurl.org/?func=%s', __FUNCTION__));
@@ -362,6 +407,7 @@ class curlWrapperTest extends TestCase
     public function getRestWithAuth()
     {
         $curlWrapper = new CurlWrapper();
+
         try {
             $curlWrapper->setCurlHeader('X-CurlTest', true);
             $wrapperRequest = $curlWrapper->setAuthentication('atest', 'atest')->request(

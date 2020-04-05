@@ -19,7 +19,7 @@ pipelines:
           - vendor/bin/phpunit --configuration ./phpunit.xml
     - step:
         name: NetCURL 6.1/PHP 7.3.12
-        image: php:7.3.12
+        image: php:7.3
         caches:
           - composer
         script:

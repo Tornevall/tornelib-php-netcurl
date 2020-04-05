@@ -234,6 +234,7 @@ class curlWrapperTest extends TestCase
                 }
             } catch (Exception $e) {
                 // Getting connect errors here may indicate that the netcurl server is missing TLS 1.3 support.
+                // TLS 1.3 is supported from Apache 2.4.37
                 // Also be aware of the fact that not all PHP releases support it.
                 if ($e->getCode() === CURLE_SSL_CONNECT_ERROR) {
                     // 14094410

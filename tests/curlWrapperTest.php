@@ -214,6 +214,41 @@ class curlWrapperTest extends TestCase
      * @test
      * @throws \TorneLIB\Exception\ExceptionHandler
      */
+    public function basicGetTLS13()
+    {
+        if (defined('CURL_SSLVERSION_TLSv1_3')) {
+            try {
+                $tlsResponse = (new CurlWrapper())->
+                setConfig((new WrapperConfig())->setOption(CURLOPT_SSLVERSION, CURL_SSLVERSION_TLSv1_3))->
+                request(
+                    sprintf('https://ipv4.netcurl.org/?func=%s',
+                        __FUNCTION__
+                    )
+                )->getParsed();
+
+                if (isset($tlsResponse->ip)) {
+                    static::assertTrue(
+                        filter_var($tlsResponse->ip, FILTER_VALIDATE_IP) ? true : false &&
+                            $tlsResponse->SSL->SSL_PROTOCOL === 'TLSv1.3'
+                    );
+                }
+            } catch (Exception $e) {
+                // Getting connect errors here may indicate that the netcurl server is missing TLS 1.3 support.
+                // Also be aware of the fact that not all PHP releases support it.
+                if ($e->getCode() === CURLE_SSL_CONNECT_ERROR) {
+                    // 14094410
+                    static::markTestSkipped($e->getMessage());
+                }
+            }
+        } else {
+            static::markTestSkipped('TLSv1.3 is not available on this platform.');
+        }
+    }
+
+    /**
+     * @test
+     * @throws \TorneLIB\Exception\ExceptionHandler
+     */
     public function basicGetHeader()
     {
         $data = (new CurlWrapper())->request(sprintf('https://ipv4.netcurl.org/?func=%s', __FUNCTION__));

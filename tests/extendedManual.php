@@ -362,7 +362,22 @@ class extendedManual extends TestCase
     {
         $this->__setUp();
         $this->CURL->setAuthentication('atest', 'atest');
-        $req = $this->CURL->doGet('https://omnitest.resurs.com/callbacks');
-        static::assertTrue(count($req->getParsed()) > 0);
+        $reqUrl = 'https://omnitest.resurs.com/callbacks';
+        try {
+            $req = $this->CURL->doGet($reqUrl);
+            $curlHandle = $this->CURL->getCurlSession();
+            if (null !== $curlHandle) {
+                $curlInfo = curl_getinfo($curlHandle)['request_header'];
+                $debugSession = $this->CURL->getDebugData()['data']['url']['0']['opt']['CURLOPT_URL'];
+
+                static::assertTrue(
+                    count($req->getParsed()) > 0 &&
+                    preg_match('/^GET /', $curlInfo) &&
+                    $debugSession === $reqUrl
+                );
+            }
+        } catch (\Exception $e) {
+            static::markTestSkipped(__FUNCTION__ . ": " . $e->getMessage());
+        }
     }
 }

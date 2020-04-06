@@ -118,6 +118,19 @@ class curlTest extends TestCase
     }
 
     /**
+     * @test
+     * @throws Exception
+     */
+    public function getParsedSslSelf()
+    {
+        $this->pemDefault();
+        $this->urlGet('', 'https');
+        $ParsedResponse = (new MODULE_CURL("https://identifier.tornevall.net/index.php?json"))->getParsed();
+
+        static::assertTrue(is_object($ParsedResponse));
+    }
+
+    /**
      * @param string $parameters
      * @param string $protocol
      * @param string $indexFile
@@ -1248,6 +1261,7 @@ class curlTest extends TestCase
         /** @var NETCURL_HTTP_OBJECT $request */
         $request = $this->CURL->doGet(\TESTURLS::getUrlSimpleJson());
         $parsed = $request->getParsed();
+
         static::assertTrue(
             get_class($request) == 'TorneLIB\NETCURL_HTTP_OBJECT' &&
             is_object($parsed) && isset($parsed->ip)

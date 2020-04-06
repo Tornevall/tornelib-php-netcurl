@@ -68,7 +68,7 @@ if (!class_exists('MODULE_CURL', NETCURL_CLASS_EXISTS_AUTOLOAD) &&
             CURLOPT_TIMEOUT => 10,
             CURLOPT_USERAGENT => 'TorneLIB-PHPcURL',
             CURLOPT_POST => true,
-            CURLOPT_SSLVERSION => 4,
+            CURLOPT_SSLVERSION => CURL_SSLVERSION_DEFAULT,
             CURLOPT_FOLLOWLOCATION => false,
             CURLOPT_HTTPHEADER => ['Accept-Language: en'],
         ];
@@ -3540,12 +3540,16 @@ if (!class_exists('MODULE_CURL', NETCURL_CLASS_EXISTS_AUTOLOAD) &&
         private function internal_curl_execute()
         {
             $returnContent = curl_exec($this->NETCURL_CURL_SESSION);
+
             $this->internal_curl_execute_add_debug($returnContent);
 
             if ($this->internal_curl_errors()) {
                 if ($this->internal_curl_can_rerun()) {
-                    return $this->executeUrlCall($this->CURL_STORED_URL, $this->POST_DATA_HANDLED,
-                        $this->NETCURL_POST_METHOD);
+                    return $this->executeUrlCall(
+                        $this->CURL_STORED_URL,
+                        $this->POST_DATA_HANDLED,
+                        $this->NETCURL_POST_METHOD
+                    );
                 }
             }
 
@@ -3650,6 +3654,7 @@ if (!class_exists('MODULE_CURL', NETCURL_CLASS_EXISTS_AUTOLOAD) &&
                         'opt' => $this->getCurlOptByKeys(),
                         'success' => true,
                         'exception' => null,
+                        'curlinfo' => curl_getinfo($this->NETCURL_CURL_SESSION)
                     ];
                 } catch (\Exception $e) {
                     throw new \Exception(NETCURL_CURL_CLIENTNAME . " exception from PHP/CURL at " . __FUNCTION__ . ": " . $e->getMessage(),

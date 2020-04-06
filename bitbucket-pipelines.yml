@@ -18,8 +18,8 @@ pipelines:
           - composer require phpunit/phpunit ^7.5
           - vendor/bin/phpunit --configuration ./phpunit.xml
     - step:
-        name: NetCURL 6.0/PHP 7.3.12
-        image: php:7.3.12
+        name: NetCURL 6.0/PHP 7.3
+        image: php:7.3
         caches:
           - composer
         script:
@@ -32,7 +32,7 @@ pipelines:
           - vendor/bin/phpunit --configuration ./phpunit.xml
     - step:
         name: NetCURL 6.0/PHP 7.2
-        image: php:7.2.3
+        image: php:7.2
         caches:
           - composer
         script:
@@ -45,7 +45,7 @@ pipelines:
           - vendor/bin/phpunit --configuration ./phpunit.xml
     - step:
         name: NetCURL 6.0/PHP 7.1
-        image: php:7.1.11
+        image: php:7.1
         caches:
           - composer
         script:
@@ -58,7 +58,7 @@ pipelines:
           - vendor/bin/phpunit --configuration ./phpunit.xml
     - step:
         name: NetCURL 6.0/PHP 5.6
-        image: php:5.6.23
+        image: php:5.6
         caches:
           - composer
         script:
@@ -71,7 +71,7 @@ pipelines:
           - vendor/bin/phpunit --configuration ./phpunit.xml
     - step:
         name: NetCURL 6.0/PHP 5.5
-        image: php:5.5.38
+        image: php:5.5
         caches:
           - composer
         script:
@@ -84,7 +84,7 @@ pipelines:
           - vendor/bin/phpunit --configuration ./phpunit.xml
     - step:
         name: NetCURL 6.0/PHP 5.4
-        image: php:5.4.45
+        image: php:5.4
         caches:
           - composer
         script:

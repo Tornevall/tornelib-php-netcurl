@@ -536,7 +536,7 @@ class WrapperConfig
             );
             $this->replaceOption(
                 WrapperCurlOpt::NETCURL_CURLOPT_TIMEOUT,
-                (float)ceil($timeout),
+                ceil($timeout),
                 WrapperCurlOpt::NETCURL_CURLOPT_TIMEOUT_MS
             );
         } else {
@@ -547,7 +547,7 @@ class WrapperConfig
             );
             $this->replaceOption(
                 WrapperCurlOpt::NETCURL_CURLOPT_TIMEOUT_MS,
-                (float)ceil($timeout),
+                ceil($timeout),
                 WrapperCurlOpt::NETCURL_CURLOPT_TIMEOUT
             );
         }

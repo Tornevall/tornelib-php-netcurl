@@ -479,8 +479,8 @@ class curlWrapperTest extends TestCase
         } catch (\TorneLIB\Exception\ExceptionHandler $e) {
             static::assertTrue(
                 $e->getCode() === Constants::LIB_CONFIGWRAPPER_VAR_NOT_SET &&
-                $gTimeout['REQUEST'] === 6 &&
-                $gTimeout['CONNECT'] === 3
+                (int)$gTimeout['REQUEST'] === 6 &&
+                (int)$gTimeout['CONNECT'] === 3
             );
         }
     }
@@ -499,13 +499,12 @@ class curlWrapperTest extends TestCase
             $config->getEmptySetting();
         } catch (\TorneLIB\Exception\ExceptionHandler $e) {
             // The last request will make WrapperConfig throw an exception as getEmptySetting does not exist
-            // in the magics setup. So we'll check the other values from here. In early tests, milliseconds
-            // are returned as floats. To maintain this, WrapperConfig will also cast the millsecond setup
-            // to a float, if this is lacking in any PHP-release.
+            // in the magics setup. So we'll check the other values from here. Floats are returned regardless
+            // of seconds and milliseconds, so we'll cast the values into integers here.
             static::assertTrue(
                 $e->getCode() === Constants::LIB_CONFIGWRAPPER_VAR_NOT_SET &&
-                $gTimeout['REQUEST'] === 100.0 &&
-                $gTimeout['CONNECT'] === 50.0 &&
+                (int)$gTimeout['REQUEST'] === 100 &&
+                (int)$gTimeout['CONNECT'] === 50 &&
                 (bool)$gTimeout['MILLISEC']
             );
         }

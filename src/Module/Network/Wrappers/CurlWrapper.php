@@ -529,7 +529,7 @@ class CurlWrapper implements Wrapper
         if (empty($errorString) && !empty($httpHead)) {
             $errorString = $httpHead;
         }
-        $this->CONFIG->getHttpException($errorString, $httpCode);
+        $this->CONFIG->getHttpException($errorString, $httpCode, $this);
     }
 
     /**

@@ -113,20 +113,24 @@ class WrapperConfig
      * @throws \Exception
      * @since 6.0.6
      */
-    public function getHttpException($httpMessageString = '', $httpCode = '')
+    public function getHttpException($httpMessageString = '', $httpCode = '', $extendException = null)
     {
         if (!is_array($this->throwableHttpCodes)) {
             $this->throwableHttpCodes = [];
         }
         foreach ($this->throwableHttpCodes as $codeListArray => $codeArray) {
             if (isset($codeArray[1]) && $httpCode >= intval($codeArray[0]) && $httpCode <= intval($codeArray[1])) {
-                throw new \Exception(
+                throw new ExceptionHandler(
                     sprintf(
                         'Error %d returned from server: "%s".',
                         $httpCode,
                         $httpMessageString
                     ),
-                    $httpCode
+                    $httpCode,
+                    null,
+                    null,
+                    null,
+                    $extendException
                 );
             }
         }

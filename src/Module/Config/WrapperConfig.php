@@ -263,7 +263,6 @@ class WrapperConfig
      * @param $transformData
      * @return string
      * @since 6.1.0
-     * @todo Move to IO library.
      */
     private function getJsonData($transformData)
     {

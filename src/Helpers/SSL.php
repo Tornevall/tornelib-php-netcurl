@@ -5,7 +5,10 @@ namespace TorneLIB\Helpers;
 use TorneLIB\Flags;
 
 /**
- * Class SSL Imports and facelifts from MODULE_SSH v6.0
+ * Class SSL
+ *
+ * Imports and facelift from MODULE_SSH v6.0 - used for SoapClient and standard streams.
+ *
  * @package TorneLIB\Helpers
  * @version 6.1.0
  */

@@ -2,9 +2,11 @@
 
 namespace TorneLIB\Module\Config;
 
+use TorneLIB\Exception\Constants;
 use TorneLIB\Exception\ExceptionHandler;
 use TorneLIB\Flags;
 use TorneLIB\Helpers\Browsers;
+use TorneLIB\IO\Data\Strings;
 use TorneLIB\Model\Type\authType;
 use TorneLIB\Model\Type\dataType;
 use TorneLIB\Model\Type\requestMethod;
@@ -58,6 +60,11 @@ class WrapperConfig
     private $throwableHttpCodes;
 
     /**
+     * @var array
+     */
+    private $configData = [];
+
+    /**
      * WrapperConfig constructor.
      */
     public function __construct()
@@ -109,7 +116,6 @@ class WrapperConfig
         }
     }
 
-
     /**
      * Return the list of throwable http error codes (if set)
      *
@@ -128,13 +134,12 @@ class WrapperConfig
      */
     private function setCurlDefaults()
     {
-        $this->getCurlConstants([
-            'CURLOPT_CONNECTTIMEOUT' => 6,
+        $this->setTimeout(6);
+        $this->setCurlConstants([
             'CURLOPT_RETURNTRANSFER' => true,
             'CURLOPT_SSL_VERIFYPEER' => 1,
             'CURLOPT_SSL_VERIFYHOST' => 2,
             'CURLOPT_ENCODING' => 1,
-            'CURLOPT_TIMEOUT' => 10,
             'CURLOPT_USERAGENT' => (new Browsers())->getBrowser(),
             'CURLOPT_SSLVERSION' => CURL_SSLVERSION_DEFAULT,
             'CURLOPT_FOLLOWLOCATION' => false,
@@ -159,7 +164,7 @@ class WrapperConfig
      * @param mixed $curlOptConstant
      * @since 6.1.0
      */
-    private function getCurlConstants($curlOptConstant)
+    private function setCurlConstants($curlOptConstant)
     {
         if (is_array($curlOptConstant)) {
             foreach ($curlOptConstant as $curlOptKey => $curlOptValue) {
@@ -234,7 +239,8 @@ class WrapperConfig
      * @return string
      * @since 6.1.0
      */
-    private function getJsonData($transformData) {
+    private function getJsonData($transformData)
+    {
         $return = $transformData;
 
         if (is_string($transformData)) {
@@ -318,8 +324,8 @@ class WrapperConfig
 
     /**
      * @param array $options
-     * @since 6.1.0
      * @return WrapperConfig
+     * @since 6.1.0
      * @since 6.1.0
      */
     public function setOptions(array $options)
@@ -330,6 +336,26 @@ class WrapperConfig
     }
 
     /**
+     * Find out if there is a predefined constant for CURL-options and if the curl library actually exists.
+     * If the constants don't exist, fall back to NETCURL constants so that we can still fetch the setup.
+     *
+     * @param $key
+     * @return mixed|null
+     */
+    private function getOptionCurl($key) {
+        $return = null;
+
+        if (preg_match('/CURL/',$key)) {
+            $constantValue = @constant('TorneLIB\Module\Config\WrapperCurlOpt::NETCURL_' . $key);
+            if (!empty($constantValue)) {
+                $return = $constantValue;
+            }
+        }
+
+        return $return;
+    }
+
+    /**
      * @param $key
      * @param $value
      * @return $this
@@ -337,6 +363,11 @@ class WrapperConfig
      */
     public function setOption($key, $value)
     {
+        $preKey = $this->getOptionCurl($key);
+        if (!empty($preKey)) {
+            $key = $preKey;
+        }
+
         $this->options[$key] = $value;
 
         return $this;
@@ -350,6 +381,11 @@ class WrapperConfig
      */
     public function getOption($key)
     {
+        $preKey = $this->getOptionCurl($key);
+        if (!empty($preKey)) {
+            $key = $preKey;
+        }
+
         if (isset($this->options[$key])) {
             return $this->options[$key];
         }
@@ -404,5 +440,84 @@ class WrapperConfig
     public function getAuthentication()
     {
         return (array)$this->authData;
+    }
+
+    /**
+     * @param int $timeout Defaults to the default connect timeout in curl (300).
+     * @return $this
+     */
+    private function setTimeout($timeout = 300)
+    {
+        // Using internal WrapperCurlOpts if curl is not a present driver. Otherwise, this
+        // setup may be a showstopper that no other driver can use.
+        $this->setOption(WrapperCurlOpt::NETCURL_CURLOPT_CONNECTTIMEOUT, intval($timeout / 2));
+        $this->setOption(WrapperCurlOpt::NETCURL_CURLOPT_TIMEOUT, intval($timeout));
+
+        return $this;
+    }
+
+    /**
+     * @return array
+     */
+    private function getTimeout()
+    {
+        return [
+            'CONNECT' => $this->options[WrapperCurlOpt::NETCURL_CURLOPT_CONNECTTIMEOUT],
+            'REQUEST' => $this->options[WrapperCurlOpt::NETCURL_CURLOPT_TIMEOUT]
+        ];
+    }
+
+    /**
+     * Internal configset magics.
+     *
+     * @param $name
+     * @param $arguments
+     * @return $this|mixed
+     * @throws ExceptionHandler
+     */
+    public function __call($name, $arguments)
+    {
+        $method = substr($name, 0, 3);
+        $methodContent = (new Strings())->getCamelCase(substr($name, 3));
+
+        switch (strtolower($method)) {
+            case 'get':
+                if (method_exists($this, sprintf('get%s', ucfirst($methodContent)))) {
+                    return call_user_func_array(
+                        [
+                            $this,
+                            sprintf(
+                                'get%s',
+                                ucfirst($methodContent)
+                            ),
+                        ],
+                        []
+                    );
+                }
+
+                if (isset($this->configData[$methodContent])) {
+                    return $this->configData[$methodContent];
+                }
+
+                throw new ExceptionHandler('Variable not set.', Constants::LIB_CONFIGWRAPPER_VAR_NOT_SET);
+                break;
+            case 'set':
+                if (method_exists($this, sprintf('set%s', ucfirst($methodContent)))) {
+                    call_user_func_array(
+                        [
+                            $this,
+                            sprintf('set%s', ucfirst($methodContent)),
+                        ],
+                        $arguments
+                    );
+                }
+
+                $this->configData[$methodContent] = array_pop($arguments);
+                break;
+            default:
+                break;
+        }
+
+        return $this;
     }
 }

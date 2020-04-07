@@ -463,4 +463,24 @@ class curlWrapperTest extends TestCase
             );
         }
     }
+
+    /**
+     * @test
+     */
+    public function setConfigData()
+    {
+        $config = new WrapperConfig();
+
+        // No need to pre-set any timeout as WrapperConfig makes sure the timeouts are properly set.
+        $gTimeout = $config->getTimeout();
+        try {
+            $config->getEmptySetting();
+        } catch (\TorneLIB\Exception\ExceptionHandler $e) {
+            static::assertTrue(
+                $e->getCode() === Constants::LIB_CONFIGWRAPPER_VAR_NOT_SET &&
+                $gTimeout['REQUEST'] === 6 &&
+                $gTimeout['CONNECT'] === 3
+            );
+        }
+    }
 }

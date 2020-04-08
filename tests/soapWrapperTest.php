@@ -65,10 +65,16 @@ class soapWrapperTest extends TestCase
         $soapWrapper->setUserAgent('That requesting client');
         $userAgent = $soapWrapper->getUserAgent();
         $soapContext = $soapWrapper->getStreamContext();
-        $soapWrapper->getRandomRequest();
+        $hasErrorOnRandom = false;
+        try {
+            $soapWrapper->getRandomRequest();
+        } catch (Exception $e) {
+            $hasErrorOnRandom = true;
+        }
         static::assertTrue(
             !empty($soapContext['http']) &&
-            $userAgent === 'That requesting client'
+            $userAgent === 'That requesting client' &&
+            $hasErrorOnRandom
         );
     }
 
@@ -157,6 +163,33 @@ class soapWrapperTest extends TestCase
         static::assertTrue(
             is_array($result) &&
             count($result)
+        );
+    }
+
+    /**
+     * @test
+     * @testdox While testing the wsdlcache, we also testing header, body and parser.
+     * @throws ExceptionHandler
+     */
+    public function setWsdlCache()
+    {
+        $wrapper = new SoapClientWrapper($this->wsdl);
+        $wrapper->setWsdlCache(WSDL_CACHE_MEMORY)->setAuthentication(
+            $this->rEcomPipeU,
+            $this->rEcomPipeP
+        )->getPaymentMethods();
+
+        $parsed = $wrapper->getParsed();
+        $body = $wrapper->getBody();
+        $headers = $wrapper->getHeaders(true, true);
+        static::assertTrue(
+            is_array($parsed) && count($parsed) &&
+            is_string($body) && strlen($body) &&
+            (
+                (
+                    is_string($headers) && strlen($headers)
+                ) || is_array($headers)
+            )
         );
     }
 }

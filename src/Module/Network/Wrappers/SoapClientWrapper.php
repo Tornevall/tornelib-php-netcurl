@@ -47,6 +47,13 @@ class SoapClientWrapper implements Wrapper
     ];
 
     /**
+     * The header that the soapResponse are returning, converted to an array.
+     *
+     * @var array $responseHeaderArray
+     */
+    private $responseHeaderArray = [];
+
+    /**
      * @var array $soapWarningException
      */
     private $soapWarningException = ['code' => 0, 'string' => null];
@@ -340,6 +347,233 @@ class SoapClientWrapper implements Wrapper
     }
 
     /**
+     * @param $methodContent
+     * @param $name
+     * @param $arguments
+     * @return mixed
+     * @since 6.1.0
+     */
+    private function getMagicGettableCall($methodContent, $name, $arguments)
+    {
+        $return = null;
+
+        if (isset($this->soapClientContent[$methodContent])) {
+            $return = $this->soapClientContent[$methodContent];
+        } elseif (method_exists($this, $name)) {
+            $return = call_user_func_array(
+                [
+                    $this,
+                    $name,
+                ],
+                $arguments
+            );
+        }
+
+        return $return;
+    }
+
+    /**
+     * @param $name
+     * @param $arguments
+     * @return $this
+     * @since 6.1.0
+     */
+    private function getMagicSettableCall($name, $arguments)
+    {
+        $return = null;
+
+        if (method_exists($this, $name)) {
+            call_user_func_array(
+                [
+                    $this,
+                    $name,
+                ],
+                $arguments
+            );
+
+            $return = $this;
+        } elseif (method_exists($this->CONFIG, $name)) {
+            call_user_func_array(
+                [
+                    $this->CONFIG,
+                    $name,
+                ],
+                $arguments
+            );
+
+            $return = $this;
+        }
+
+        return $return;
+    }
+
+    /**
+     * @param $name
+     * @param $arguments
+     * @return mixed
+     * @since 6.1.0
+     */
+    private function execSoap($name, $arguments)
+    {
+        if (isset($arguments[0])) {
+            $return = $this->soapClient->$name($arguments[0]);
+        } else {
+            $return = $this->soapClient->$name();
+        }
+
+        return $return;
+    }
+
+    /**
+     * Dynamically fetch responses from a soapClientResponse.
+     * @param $soapClientResponse
+     * @return mixed
+     * @since 6.1.0
+     */
+    private function getSoapResponse($soapClientResponse)
+    {
+        if (isset($soapClientResponse->return)) {
+            $return = $soapClientResponse->return;
+        } else {
+            $return = $soapClientResponse;
+        }
+        return $return;
+    }
+
+    /**
+     * @param $name
+     * @param $arguments
+     * @return $this|mixed|null
+     * @since 6.1.0
+     */
+    private function getInternalMagics($name, $arguments)
+    {
+        $return = null;
+
+        $method = substr($name, 0, 3);
+        $methodContent = (new Strings())->getCamelCase(substr($name, 3));
+
+        switch (strtolower($method)) {
+            case 'get':
+                $getResponse = $this->getMagicGettableCall($methodContent, $name, $arguments);
+                if (!is_null($getResponse)) {
+                    return $getResponse;
+                }
+                break;
+            case 'set':
+                $getResponse = $this->getMagicSettableCall($name, $arguments);
+                if (!is_null($getResponse)) {
+                    return $getResponse;
+                }
+                break;
+            default:
+                break;
+        }
+
+        return $return;
+    }
+
+    /**
+     * @return mixed
+     * @since 6.1.0
+     */
+    public function getParsed()
+    {
+        return $this->getSoapResponse($this->soapClientResponse);
+    }
+
+    /**
+     * @return mixed
+     * @since 6.1.0
+     */
+    public function getBody()
+    {
+        return $this->getLastResponse();
+    }
+
+    /**
+     * @param bool $asArray
+     * @param bool $lCase
+     * @return mixed
+     * @since 6.1.0
+     */
+    public function getHeaders($asArray = false, $lCase = false)
+    {
+        $return = $this->getLastResponseHeaders();
+
+        if ($asArray) {
+            $return = $this->getHeaderArray($this->getLastResponseHeaders(), $lCase);
+        }
+
+        return $return;
+    }
+
+    /**
+     * @param $header
+     * @param bool $lCase
+     * @return array
+     * @since 6.1.0
+     */
+    private function getHeaderArray($header, $lCase = false)
+    {
+        $this->responseHeaderArray = [];
+
+        if (is_string($header)) {
+            $headerSplit = explode("\n", $header);
+            if (is_array($headerSplit)) {
+                foreach ($headerSplit as $headerRow) {
+                    $this->getHeaderRow($headerRow, $lCase);
+                }
+            }
+        }
+
+        return $this->responseHeaderArray;
+    }
+
+    /**
+     * @param $header
+     * @param bool $lCase
+     * @return int
+     * @since 6.1.0
+     */
+    private function getHeaderRow($header, $lCase = false)
+    {
+        $headSplit = explode(':', $header, 2);
+        $spacedSplit = explode(' ', $header, 2);
+
+        if (count($headSplit) < 2) {
+            if (count($spacedSplit) > 1) {
+                $splitName = !$lCase ? $spacedSplit[0] : strtolower($spacedSplit[0]);
+                $this->responseHeaderArray[$splitName][] = trim($spacedSplit[1]);
+            }
+            return strlen($header);
+        }
+
+        $splitName = !$lCase ? $headSplit[0] : strtolower($headSplit[0]);
+        $this->responseHeaderArray[$splitName][] = trim($headSplit[1]);
+        return strlen($header);
+    }
+
+    /**
+     * @return mixed
+     * @since 6.1.0
+     */
+    private function getHeader($key = null)
+    {
+        if (is_null($key)) {
+            $return = $this->getHeaders();
+        } else {
+            $return = $this->getHeaders(true, true);
+        }
+
+        if (isset($return[strtolower($key)])) {
+            $return = $return[strtolower($key)];
+        }
+
+        return $return;
+    }
+
+    /**
      * Dynamic SOAP-requests passing through.
      *
      * @param $name
@@ -350,61 +584,19 @@ class SoapClientWrapper implements Wrapper
      */
     public function __call($name, $arguments)
     {
-        $method = substr($name, 0, 3);
-        $methodContent = (new Strings())->getCamelCase(substr($name, 3));
-
-        switch (strtolower($method)) {
-            case 'get':
-                if (isset($this->soapClientContent[$methodContent])) {
-                    return $this->soapClientContent[$methodContent];
-                } elseif (method_exists($this, $name)) {
-                    return call_user_func_array(
-                        [
-                            $this,
-                            $name,
-                        ],
-                        $arguments
-                    );
-                }
-                break;
-            case 'set':
-                if (method_exists($this, $name)) {
-                    call_user_func_array(
-                        [$this, $name],
-                        $arguments
-                    );
-
-                    return $this;
-                }
-                break;
-            default:
-                break;
+        if (null !== ($internalResponse = $this->getInternalMagics($name, $arguments))) {
+            return $internalResponse;
         }
 
+        // Making sure we initialize the soapclient if not already done.
         if (is_null($this->soapClient)) {
             $this->getSoapInit();
         }
 
-        try {
-            if (isset($arguments[0])) {
-                $this->soapClientResponse = $this->soapClient->$name($arguments[0]);
-            } else {
-                $this->soapClientResponse = $this->soapClient->$name();
-            }
-        } catch (Exception $soapException) {
-        }
-
-        // Collect data from soapclient.
+        $this->soapClientResponse = $this->execSoap($name, $arguments);
         $this->setMergedSoapResponse();
 
-        // Return as the last version, if return exists as a response point, we use this part
-        // primarily.
-        if (isset($this->soapClientResponse->return)) {
-            $return = $this->soapClientResponse->return;
-        } else {
-            $return = $this->soapClientResponse;
-        }
-
-        return $return;
+        // Return as the last version, if return exists as a response point, we use this part primarily.
+        return $this->getSoapResponse($this->soapClientResponse);
     }
 }

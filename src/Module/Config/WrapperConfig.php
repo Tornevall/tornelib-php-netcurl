@@ -792,6 +792,24 @@ class WrapperConfig
     }
 
     /**
+     * Quickset WSDL cache.
+     *
+     *   WSDL_CACHE_NONE = 0
+     *   WSDL_CACHE_DISK = 1
+     *   WSDL_CACHE_MEMORY = 2
+     *   WSDL_CACHE_BOTH = 3
+     *
+     * @param int $cacheSet
+     * @return WrapperConfig
+     */
+    private function setWsdlCache($cacheSet = 0)
+    {
+        $this->streamOptions['cache_wsdl'] = $cacheSet;
+
+        return $this;
+    }
+
+    /**
      * Internal configset magics.
      *
      * @param $name

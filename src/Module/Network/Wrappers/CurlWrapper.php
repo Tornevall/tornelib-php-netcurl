@@ -800,7 +800,6 @@ class CurlWrapper implements Wrapper
         return $this;
     }
 
-
     public function __call($name, $arguments)
     {
     }

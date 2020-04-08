@@ -2,6 +2,12 @@
 
 namespace TorneLIB\Model\Type;
 
+/**
+ * Class requestMethod
+ *
+ * @package TorneLIB\Model\Type
+ * @version 6.1.0
+ */
 abstract class requestMethod
 {
     const METHOD_GET = 0;

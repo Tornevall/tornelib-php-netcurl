@@ -2,6 +2,7 @@
 
 namespace TorneLIB\Module\Config;
 
+use Exception;
 use TorneLIB\Flags;
 
 /**
@@ -39,6 +40,9 @@ class WrapperSSL
         ],
     ];
 
+    /**
+     * @var array
+     */
     private $securityLevelChanges = [];
 
     /**
@@ -48,7 +52,7 @@ class WrapperSSL
     {
         try {
             $this->capable = $this->setSslCapabilities();
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             $this->capable = false;
         }
 
@@ -63,13 +67,13 @@ class WrapperSSL
      * Replaces getCurlSslAvailable from v6.0 where everything is checked in the same method.
      *
      * @return bool
-     * @throws \Exception
+     * @throws Exception
      * @since 6.1.0
      */
     public function getSslCapabilities()
     {
         if (!($return = $this->capable)) {
-            throw new \Exception('NETCURL Exception: SSL capabilities is missing.', 500);
+            throw new Exception('NETCURL Exception: SSL capabilities is missing.', 500);
         }
 
         return $return;
@@ -164,6 +168,7 @@ class WrapperSSL
      * @param bool $selfsignedBooleanValue Allow self signed vertificates (default=false, never allow this).
      * @return mixed
      * @link https://www.php.net/manual/en/context.ssl.php
+     * @version 6.1.0
      */
     public function setStrictVerification($verifyBooleanValue = true, $selfsignedBooleanValue = false)
     {
@@ -179,6 +184,10 @@ class WrapperSSL
         return $this;
     }
 
+    /**
+     * @return $this
+     * @version 6.1.0
+     */
     private function setContextUserAgent()
     {
         $this->context['http'] = [
@@ -192,6 +201,7 @@ class WrapperSSL
      * Get prepared stream context array.
      *
      * @return array
+     * @version 6.1.0
      */
     public function getSslStreamContext()
     {
@@ -206,6 +216,7 @@ class WrapperSSL
     /**
      * @param $key
      * @return array
+     * @version 6.1.0
      */
     public function getContext($key = null)
     {
@@ -224,6 +235,7 @@ class WrapperSSL
      * @param $key
      * @param $value
      * @return WrapperSSL
+     * @version 6.1.0
      */
     public function setContext($key, $value)
     {
@@ -234,6 +246,7 @@ class WrapperSSL
 
     /**
      * @return array
+     * @version 6.1.0
      */
     public function getSecurityLevelChanges()
     {

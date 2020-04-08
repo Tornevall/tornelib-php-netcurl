@@ -94,6 +94,10 @@ class WrapperConfig
      */
     private $configData = [];
 
+    /**
+     * @var WrapperSSL SSL helper and context renderer.
+     * @since 6.1.0
+     */
     private $SSL;
 
     /**

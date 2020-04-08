@@ -1,6 +1,6 @@
 <?php
 
-namespace TorneLIB\Helpers;
+namespace TorneLIB\Module\Config;
 
 use TorneLIB\Flags;
 

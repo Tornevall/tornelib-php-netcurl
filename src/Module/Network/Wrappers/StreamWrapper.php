@@ -72,6 +72,22 @@ class StreamWrapper implements Wrapper
 
     public function request($url, $data = [], $method = requestMethod::METHOD_GET, $dataType = dataType::NORMAL)
     {
+        if (!empty($url)) {
+            $this->CONFIG->setRequestUrl($url);
+        }
+        if (is_array($data) && count($data)) {
+            $this->CONFIG->setRequestData($data);
+        }
+
+        if ($this->CONFIG->getRequestMethod() !== $method) {
+            $this->CONFIG->setRequestMethod($method);
+        }
+
+        if ($this->CONFIG->getRequestDataType() !== $dataType) {
+            $this->CONFIG->setRequestDataType($dataType);
+        }
+
+        return $this;
     }
 
     public function __call($name, $arguments)

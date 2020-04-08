@@ -2,7 +2,6 @@
 
 namespace TorneLIB\Module\Network\Wrappers;
 
-use TorneLIB\Exception\ExceptionHandler;
 use TorneLIB\Model\Type\authType;
 use TorneLIB\Model\Type\dataType;
 use TorneLIB\Module\Config\WrapperConfig;
@@ -74,7 +73,22 @@ class SocketWrapper implements Wrapper
      */
     public function request($url, $data = [], $method = requestMethod::METHOD_GET, $dataType = dataType::NORMAL)
     {
-        // TODO: Implement request() method.
+        if (!empty($url)) {
+            $this->CONFIG->setRequestUrl($url);
+        }
+        if (is_array($data) && count($data)) {
+            $this->CONFIG->setRequestData($data);
+        }
+
+        if ($this->CONFIG->getRequestMethod() !== $method) {
+            $this->CONFIG->setRequestMethod($method);
+        }
+
+        if ($this->CONFIG->getRequestDataType() !== $dataType) {
+            $this->CONFIG->setRequestDataType($dataType);
+        }
+
+        return $this;
     }
 
     public function __call($name, $arguments)

@@ -2,6 +2,12 @@
 
 namespace TorneLIB\Module\Config;
 
+/**
+ * Class WrapperCurlOpt
+ *
+ * @package TorneLIB\Module\Config
+ * @version 6.1.0
+ */
 abstract class WrapperCurlOpt
 {
     const NETCURL_CURLOPT_AUTOREFERER = 58;

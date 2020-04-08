@@ -7,6 +7,7 @@ use TorneLIB\Exception\ExceptionHandler;
 use TorneLIB\Flags;
 use TorneLIB\Helpers\Browsers;
 use TorneLIB\IO\Data\Strings;
+use TorneLIB\Model\Type\authSource;
 use TorneLIB\Model\Type\authType;
 use TorneLIB\Model\Type\dataType;
 use TorneLIB\Model\Type\requestMethod;
@@ -59,6 +60,23 @@ class WrapperConfig
     private $options = [];
 
     /**
+     * @var array Initial SoapOptions
+     *
+     *   WSDL_CACHE_NONE = 0
+     *   WSDL_CACHE_DISK = 1
+     *   WSDL_CACHE_MEMORY = 2
+     *   WSDL_CACHE_BOTH = 3
+     *
+     * @since 6.1.0
+     */
+    private $streamOptions = [
+        'exceptions' => true,
+        'trace' => true,
+        'cache_wsdl' => 0,
+        'stream_context' => null,
+    ];
+
+    /**
      * @var array Authentication data.
      * @since 6.1.0
      */
@@ -76,12 +94,15 @@ class WrapperConfig
      */
     private $configData = [];
 
+    private $SSL;
+
     /**
      * WrapperConfig constructor.
      * @since 6.1.0
      */
     public function __construct()
     {
+        $this->SSL = new WrapperSSL();
         $this->setThrowableHttpCodes();
         $this->setCurlDefaults();
 
@@ -110,16 +131,27 @@ class WrapperConfig
      *
      * @param string $httpMessageString
      * @param string $httpCode
-     * @throws \Exception
+     * @param null $extendException
+     * @throws ExceptionHandler
      * @since 6.0.6
      */
-    public function getHttpException($httpMessageString = '', $httpCode = '', $extendException = null)
-    {
+    public function getHttpException(
+        $httpMessageString = '',
+        $httpCode = '',
+        $extendException = null,
+        $forceException = false
+    ) {
         if (!is_array($this->throwableHttpCodes)) {
             $this->throwableHttpCodes = [];
         }
         foreach ($this->throwableHttpCodes as $codeListArray => $codeArray) {
-            if (isset($codeArray[1]) && $httpCode >= intval($codeArray[0]) && $httpCode <= intval($codeArray[1])) {
+            if (
+                (
+                    isset($codeArray[1]) &&
+                    $httpCode >= intval($codeArray[0]) &&
+                    $httpCode <= intval($codeArray[1])
+                ) || $forceException
+            ) {
                 throw new ExceptionHandler(
                     sprintf(
                         'Error %d returned from server: "%s".',
@@ -358,6 +390,103 @@ class WrapperConfig
     }
 
     /**
+     * @param array $streamOptions
+     * @return WrapperConfig
+     * @since 6.1.0
+     */
+    public function setStreamOptions(array $streamOptions)
+    {
+        $this->streamOptions = $streamOptions;
+
+        return $this;
+    }
+
+    /**
+     * @param $key
+     * @param $value
+     * @param null $subKey
+     * @return WrapperConfig
+     * @since 6.1.0
+     */
+    public function setStreamContext($key, $value, $subKey = null)
+    {
+        $currentStreamContext = $this->getStreamContext();
+
+        if (is_resource($currentStreamContext)) {
+            $currentStreamContext = stream_context_get_options($currentStreamContext);
+        } else {
+            $currentStreamContext = [];
+        }
+
+        if (is_array($currentStreamContext)) {
+            if (is_null($subKey)) {
+                $currentStreamContext[$key] = $value;
+            } else {
+                if (isset($currentStreamContext[$subKey])) {
+                    $currentStreamContext[$subKey] = [];
+                }
+                $currentStreamContext[$subKey][$key] = $value;
+            }
+        }
+
+        $this->streamOptions['stream_context'] = stream_context_create($currentStreamContext);
+
+        return $this;
+    }
+
+    /**
+     * @return mixed
+     * @since 6.1.0
+     */
+    public function getStreamContext()
+    {
+        return $this->streamOptions['stream_context'];
+    }
+
+    /**
+     * Get current soapoptions.
+     *
+     * @return array
+     * @throws ExceptionHandler
+     * @since 6.1.0
+     */
+    public function getStreamOptions()
+    {
+        $this->setRenderedStreamOptions();
+        $this->setStreamContext('ssl', $this->SSL->getContext());
+
+        return $this->streamOptions;
+    }
+
+    /**
+     * Prepare streamoption array.
+     *
+     * @return $this
+     * @throws ExceptionHandler
+     * @since 6.1.0
+     */
+    private function setRenderedStreamOptions()
+    {
+        $this->setRenderedUserAgent();
+
+        return $this;
+    }
+
+    /**
+     * Handle user-agent in streams.
+     *
+     * @return $this
+     * @throws ExceptionHandler
+     * @since 6.1.0
+     */
+    private function setRenderedUserAgent()
+    {
+        $this->setStreamContext('user_agent', $this->getUserAgent(), 'http');
+
+        return $this;
+    }
+
+    /**
      * @param array $options
      * @return WrapperConfig
      * @since 6.1.0
@@ -394,19 +523,75 @@ class WrapperConfig
     /**
      * @param $key
      * @param $value
+     * @param bool $isSoap
      * @return $this
      * @since 6.1.0
      */
-    public function setOption($key, $value)
+    public function setOption($key, $value, $isSoap = false)
     {
         $preKey = $this->getOptionCurl($key);
         if (!empty($preKey)) {
             $key = $preKey;
         }
 
-        $this->options[$key] = $value;
+        if (!$isSoap) {
+            $this->options[$key] = $value;
+        } else {
+            $this->streamOptions[$key] = $value;
+        }
 
         return $this;
+    }
+
+    /**
+     * @param $key
+     * @param bool $isSoap
+     * @return mixed
+     * @throws ExceptionHandler
+     * @since 6.1.0
+     */
+    public function getOption($key, $isSoap = false)
+    {
+        $preKey = $this->getOptionCurl($key);
+        if (!empty($preKey)) {
+            $key = $preKey;
+        }
+
+        if (!$isSoap) {
+            if (isset($this->options[$key])) {
+                return $this->options[$key];
+            }
+        } else {
+            if (isset($this->streamOptions[$key])) {
+                return $this->streamOptions[$key];
+            }
+        }
+
+        throw new ExceptionHandler(
+            sprintf('%s: Option "%s" not set.', __CLASS__, $key),
+            404
+        );
+    }
+
+    /**
+     * @param $key
+     * @param $value
+     * @return $this
+     * @since 6.1.0
+     */
+    public function setStreamOption($key, $value)
+    {
+        return $this->setOption($key, $value, true);
+    }
+
+    /**
+     * @param $key
+     * @return mixed
+     * @throws ExceptionHandler
+     */
+    public function getStreamOption($key)
+    {
+        return $this->getOption($key, true);
     }
 
     /**
@@ -445,29 +630,6 @@ class WrapperConfig
     }
 
     /**
-     * @param $key
-     * @return mixed
-     * @throws ExceptionHandler
-     * @since 6.1.0
-     */
-    public function getOption($key)
-    {
-        $preKey = $this->getOptionCurl($key);
-        if (!empty($preKey)) {
-            $key = $preKey;
-        }
-
-        if (isset($this->options[$key])) {
-            return $this->options[$key];
-        }
-
-        throw new ExceptionHandler(
-            sprintf('%s: Option "%s" not set.', __CLASS__, $key),
-            404
-        );
-    }
-
-    /**
      * Datatype of request (json, etc).
      * @param int $requestDataType
      * @since 6.1.0
@@ -493,13 +655,28 @@ class WrapperConfig
      * @param $username
      * @param $password
      * @param int $authType
+     * @param int $authSource
      * @since 6.1.0
      */
-    public function setAuthentication($username, $password, $authType = authType::BASIC)
-    {
-        $this->authData['username'] = $username;
-        $this->authData['password'] = $password;
-        $this->authData['type'] = $authType;
+    public function setAuthentication(
+        $username,
+        $password,
+        $authType = authType::BASIC,
+        $authSource = authSource::NORMAL
+    ) {
+        switch ($authSource) {
+            case authSource::SOAP:
+                $this->authData['login'] = $username;
+                $this->authData['password'] = $password;
+                $this->setStreamOption('login', $this->authData['login']);
+                $this->setStreamOption('password', $this->authData['password']);
+                break;
+            default:
+                $this->authData['username'] = $username;
+                $this->authData['password'] = $password;
+                $this->authData['type'] = $authType;
+                break;
+        }
     }
 
     /**
@@ -557,6 +734,29 @@ class WrapperConfig
         }
 
         return $this;
+    }
+
+    /**
+     * @param $userAgentString
+     * @param int $source
+     * @return $this
+     * @since 6.1.0
+     */
+    public function setUserAgent($userAgentString)
+    {
+        $this->setOption(WrapperCurlOpt::NETCURL_CURLOPT_USERAGENT, $userAgentString);
+
+        return $this;
+    }
+
+    /**
+     * @return mixed
+     * @throws ExceptionHandler
+     * @since 6.1.0
+     */
+    public function getUserAgent()
+    {
+        return $this->getOption(WrapperCurlOpt::NETCURL_CURLOPT_USERAGENT);
     }
 
     /**

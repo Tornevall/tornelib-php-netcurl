@@ -4,12 +4,12 @@ require_once(__DIR__ . '/../vendor/autoload.php');
 
 use PHPUnit\Framework\TestCase;
 use TorneLIB\Exception\Constants;
+use TorneLIB\Exception\ExceptionHandler;
 use TorneLIB\Flags;
 use TorneLIB\Helpers\Browsers;
 use TorneLIB\Helpers\Version;
 use TorneLIB\Module\Config\WrapperConfig;
 use TorneLIB\Module\Network\Wrappers\CurlWrapper;
-use TorneLIB\Exception\ExceptionHandler;
 
 define('LIB_ERROR_HTTP', true);
 
@@ -320,9 +320,15 @@ class curlWrapperTest extends TestCase
      */
     public function multiGetHeader()
     {
-        $firstMultiUrl = sprintf('https://ipv4.netcurl.org/?func=%s&php=%s', __FUNCTION__, rawurlencode(PHP_VERSION));
-        $secondMultiUrl = sprintf('https://ipv4.netcurl.org/ip.php?func=%s&php=%s', __FUNCTION__,
-            rawurlencode(PHP_VERSION));
+        $firstMultiUrl = sprintf(
+            'https://ipv4.netcurl.org/?func=%s&php=%s',
+            __FUNCTION__,
+            rawurlencode(PHP_VERSION)
+        );
+        $secondMultiUrl = sprintf(
+            'https://ipv4.netcurl.org/ip.php?func=%s&php=%s', __FUNCTION__,
+            rawurlencode(PHP_VERSION)
+        );
         $data = (new CurlWrapper())->request(
             [
                 $firstMultiUrl,

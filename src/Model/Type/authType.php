@@ -6,6 +6,7 @@ namespace TorneLIB\Model\Type;
  * Class authType Authentication methods (inherited from CURLAUTH constants).
  *
  * @package TorneLIB\Model\Type
+ * @version 6.1.0
  */
 class authType
 {

@@ -437,7 +437,6 @@ if (!class_exists('MODULE_SOAP', NETCURL_CLASS_EXISTS_AUTOLOAD) &&
             return $this->SoapFaultCode;
         }
 
-
         /**
          * Get the SOAP response independently on exceptions or successes
          *

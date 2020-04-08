@@ -57,7 +57,17 @@ if (!class_exists('MODULE_CURL', NETCURL_CLASS_EXISTS_AUTOLOAD) &&
          * setting this up. The reason of the change is not only the security, it is also about inheritage of options
          * to SOAPClient.
          *
+         * $curlopt will return in 6.1 but in WrapperConfig with a proper setup instead.
+         *
+         * This array is not in use and seems to be unused for a long time (discovered in april 2020). The discovery
+         * is based on the fact that CURLOPT_SSLVERSION was set to the value 4 (CURL_SSLVERSION_TLSv1_0) which
+         * should've not worked properly with for example omnitest.resurs.com. Instead of using TLS 1.0, netcurl
+         * is configuring everything on fly and is actually no longer using this part of the module. Instead,
+         * CURLOPT_SSLVERSION is set to CURL_SSLVERSION_DEFAULT which means that curl tries to automatically
+         * discover which TLS version that should be used. This is why the TLS connectivity "always" works.
+         *
          * @var array
+         * @deprecated Not in use.
          */
         private $curlopt = [
             CURLOPT_CONNECTTIMEOUT => 6,
@@ -72,6 +82,7 @@ if (!class_exists('MODULE_CURL', NETCURL_CLASS_EXISTS_AUTOLOAD) &&
             CURLOPT_FOLLOWLOCATION => false,
             CURLOPT_HTTPHEADER => ['Accept-Language: en'],
         ];
+
         /** @var array User set SSL Options */
         private $sslopt = [];
 
@@ -3724,9 +3735,10 @@ if (!class_exists('MODULE_CURL', NETCURL_CLASS_EXISTS_AUTOLOAD) &&
                     'previous' => null,
                 ];
             } catch (\Exception $getSoapResponseException) {
-
-                $this->sslVerificationAdjustment($getSoapResponseException->getCode(),
-                    $getSoapResponseException->getMessage());
+                $this->sslVerificationAdjustment(
+                    $getSoapResponseException->getCode(),
+                    $getSoapResponseException->getMessage()
+                );
 
                 $this->DEBUG_DATA['soapdata']['url'][] = [
                     'url' => $this->CURL_STORED_URL,

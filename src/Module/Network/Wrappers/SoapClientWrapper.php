@@ -161,6 +161,27 @@ class SoapClientWrapper implements Wrapper
     }
 
     /**
+     * @throws ExceptionHandler
+     * @throws \SoapFault
+     */
+    private function getSoapClient()
+    {
+        $this->getSoapInitErrorHandler();
+        if (version_compare(PHP_VERSION, '7.1.0', '>=')) {
+            $this->soapClient = new SoapClient(
+                $this->getConfig()->getRequestUrl(),
+                $this->getConfig()->getStreamOptions()
+            );
+        } else {
+            // Suppress fatals in older releases.
+            $this->soapClient = @(new SoapClient(
+                $this->getConfig()->getRequestUrl(),
+                $this->getConfig()->getStreamOptions()
+            ));
+        }
+    }
+
+    /**
      * SOAP initializer.
      * Formerly known as a simpleSoap getSoap() variant.
      *
@@ -171,12 +192,8 @@ class SoapClientWrapper implements Wrapper
      */
     private function getSoapInit($soapwarningControl = false)
     {
-        $this->getSoapInitErrorHandler();
         try {
-            $this->soapClient = new SoapClient(
-                $this->getConfig()->getRequestUrl(),
-                $this->getConfig()->getStreamOptions()
-            );
+            $this->getSoapClient();
         } catch (Exception $soapException) {
             if ((int)$soapException->getCode()) {
                 throw $soapException;
@@ -196,7 +213,8 @@ class SoapClientWrapper implements Wrapper
                 );
             }
         }
-        // Reset errorhandle immediately after soaprequest if no exceptions are detected during first request.
+
+        // Restore the errorhandler immediately after soaprequest if no exceptions are detected during first request.
         restore_error_handler();
 
         return $this;

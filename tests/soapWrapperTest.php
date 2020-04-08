@@ -138,6 +138,7 @@ class soapWrapperTest extends TestCase
     {
         try {
             // Service bails out on error 500 when ?wsdl is excluded.
+            // For older PHP versions this renders a very noisy fatal.
             (new SoapClientWrapper($this->no_wsdl))
                 ->setAuthentication(
                     $this->rEcomPipeU,

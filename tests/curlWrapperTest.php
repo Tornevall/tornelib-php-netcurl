@@ -8,6 +8,7 @@ use TorneLIB\Helpers\Version;
 use TorneLIB\Module\Config\WrapperConfig;
 use TorneLIB\Module\Network\NetWrapper;
 use TorneLIB\Module\Network\Wrappers\CurlWrapper;
+use TorneLIB\Exception\ExceptionHandler;
 
 define('LIB_ERROR_HTTP', true);
 require_once(__DIR__ . '/../vendor/autoload.php');
@@ -474,10 +475,14 @@ class curlWrapperTest extends TestCase
         $curlWrapper = new CurlWrapper();
 
         try {
-            $curlWrapper->setAuthentication($this->rEcomPipeU, $this->rEcomPipeP)->request(
-                sprintf('%s/payment/nonExistingReference', $this->rEcomHost)
+            $curlWrapper->setAuthentication(
+                $this->rEcomPipeU, $this->rEcomPipeP)->request(
+                sprintf(
+                    '%s/payment/nonExistingReference',
+                    $this->rEcomHost
+                )
             );
-        } catch (\TorneLIB\Exception\ExceptionHandler $e) {
+        } catch (ExceptionHandler $e) {
             $body = $curlWrapper->getParsed();
             /** @var CurlWrapper $curlWrapperException */
             $curlWrapperException = $e->getExtendException()->getParsed();

@@ -12,7 +12,7 @@ use TorneLIB\Flags;
  * @package TorneLIB\Helpers
  * @version 6.1.0
  */
-class SSL
+class WrapperSSL
 {
     private $version = '6.1.0';
 
@@ -223,7 +223,7 @@ class SSL
      *
      * @param $key
      * @param $value
-     * @return SSL
+     * @return WrapperSSL
      */
     public function setContext($key, $value)
     {

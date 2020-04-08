@@ -2,7 +2,7 @@
 
 use PHPUnit\Framework\TestCase;
 use TorneLIB\Flags;
-use TorneLIB\Helpers\SSL;
+use TorneLIB\Module\Config\WrapperSSL;
 use TorneLIB\Helpers\Version;
 
 require_once(__DIR__ . '/../vendor/autoload.php');
@@ -24,8 +24,8 @@ class sslWrapperTest extends TestCase
         /** @noinspection PhpUndefinedMethodInspection */
         Flags::_setFlag('NETCURL_NOSSL_TEST');
         try {
-            /** @var SSL $SSL */
-            $SSL = new SSL();
+            /** @var WrapperSSL $SSL */
+            $SSL = new WrapperSSL();
             $SSL->getSslCapabilities();
         } catch (\Exception $e) {
             static::assertTrue($e->getCode() === 500);
@@ -41,7 +41,7 @@ class sslWrapperTest extends TestCase
      */
     public function sslWrappers()
     {
-        static::assertTrue((new SSL())->getSslCapabilities());
+        static::assertTrue((new WrapperSSL())->getSslCapabilities());
     }
 
     /**
@@ -50,7 +50,7 @@ class sslWrapperTest extends TestCase
      */
     public function strictValidation()
     {
-        $sslAction = new SSL();
+        $sslAction = new WrapperSSL();
         $sslAction->setStrictVerification(false);
         $verifyPeerChange = $sslAction->getSecurityLevelChanges();
 
@@ -64,9 +64,9 @@ class sslWrapperTest extends TestCase
          */
         static::assertTrue(
             !(bool)$sslAction->getContext()['verify_peer'] &&
-            (bool)!(new SSL())->getContext()['allow_self_signed'] &&
-            (new SSL())->setContext('passphrase', 'simple_phrase')->getContext()['passphrase'] &&
-            (new SSL())->setContext('passphrase', 'simple_phrase')->getContext('passphrase') === 'simple_phrase' &&
+            (bool)!(new WrapperSSL())->getContext()['allow_self_signed'] &&
+            (new WrapperSSL())->setContext('passphrase', 'simple_phrase')->getContext()['passphrase'] &&
+            (new WrapperSSL())->setContext('passphrase', 'simple_phrase')->getContext('passphrase') === 'simple_phrase' &&
             is_array($verifyPeerChange) &&
             count($verifyPeerChange) === 1
         );
@@ -78,6 +78,6 @@ class sslWrapperTest extends TestCase
      */
     public function getPreparedSslContext()
     {
-        static::assertTrue(is_resource((new SSL())->getSslStreamContext()['stream_context']));
+        static::assertTrue(is_resource((new WrapperSSL())->getSslStreamContext()['stream_context']));
     }
 }

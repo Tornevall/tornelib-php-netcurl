@@ -17,26 +17,31 @@ use TorneLIB\Module\Network\Model\Wrapper;
  * Class SoapClientWrapper
  *
  * @package TorneLIB\Module\Network\Wrappers
+ * @version 6.1.0
  */
 class SoapClientWrapper implements Wrapper
 {
     /**
      * @var WrapperConfig $CONFIG
+     * @since 6.1.0
      */
     private $CONFIG;
 
     /**
      * @var SoapClient $soapClient
+     * @since 6.1.0
      */
     private $soapClient;
 
     /**
      * @var $soapClientResponse
+     * @since 6.1.0
      */
     private $soapClientResponse;
 
     /**
      * @var array $soapClientContent
+     * @since 6.1.0
      */
     private $soapClientContent = [
         'lastRequest' => null,
@@ -50,11 +55,13 @@ class SoapClientWrapper implements Wrapper
      * The header that the soapResponse are returning, converted to an array.
      *
      * @var array $responseHeaderArray
+     * @since 6.1.0
      */
     private $responseHeaderArray = [];
 
     /**
      * @var array $soapWarningException
+     * @since 6.1.0
      */
     private $soapWarningException = ['code' => 0, 'string' => null];
 
@@ -111,6 +118,7 @@ class SoapClientWrapper implements Wrapper
     /**
      * @param WrapperConfig $config
      * @return SoapClientWrapper
+     * @since 6.1.0
      */
     public function setConfig($config)
     {
@@ -154,8 +162,7 @@ class SoapClientWrapper implements Wrapper
 
     /**
      * SOAP initializer.
-     *
-     * Prior simpleSoap getSoap() function.
+     * Formerly known as a simpleSoap getSoap() variant.
      *
      * @param bool $soapwarningControl
      * @return $this
@@ -277,6 +284,7 @@ class SoapClientWrapper implements Wrapper
      * @param int $method Not in use.
      * @param int $dataType Not in use, as we are located in the world of SOAP.
      * @return $this|mixed
+     * @since 6.1.0
      */
     public function request($url, $data = [], $method = requestMethod::METHOD_GET, $dataType = dataType::SOAP)
     {
@@ -296,6 +304,7 @@ class SoapClientWrapper implements Wrapper
 
     /**
      * @return SoapClientWrapper
+     * @since 6.1.0
      */
     private function setMergedSoapResponse()
     {

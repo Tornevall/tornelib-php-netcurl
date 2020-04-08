@@ -138,6 +138,7 @@ class soapWrapperTest extends TestCase
     {
         try {
             // Service bails out on error 500 when ?wsdl is excluded.
+            // For older PHP versions this renders a very noisy fatal.
             (new SoapClientWrapper($this->no_wsdl))
                 ->setAuthentication(
                     $this->rEcomPipeU,
@@ -174,7 +175,7 @@ class soapWrapperTest extends TestCase
     public function setWsdlCache()
     {
         $wrapper = new SoapClientWrapper($this->wsdl);
-        $wrapper->setWsdlCache(WSDL_CACHE_MEMORY)->setAuthentication(
+        $wrapper->setWsdlCache(WSDL_CACHE_DISK)->setAuthentication(
             $this->rEcomPipeU,
             $this->rEcomPipeP
         )->getPaymentMethods();

@@ -12,11 +12,13 @@ use TorneLIB\Module\Network\Model\Wrapper;
  * Class SimpleWrapper Fetching tool in the simplest form. Using file_get_contents.
  *
  * @package TorneLIB\Module\Network\Wrappers
+ * @version 6.1.0
  */
 class SimpleWrapper implements Wrapper
 {
     /**
      * @var WrapperConfig $CONFIG
+     * @version 6.1.0
      */
     private $CONFIG;
 
@@ -26,7 +28,8 @@ class SimpleWrapper implements Wrapper
 
     /**
      * @param WrapperConfig $config
-     * @return CurlWrapper
+     * @return SimpleWrapper
+     * @version 6.1.0
      */
     public function setConfig($config)
     {
@@ -49,7 +52,7 @@ class SimpleWrapper implements Wrapper
      * @param $username
      * @param $password
      * @param int $authType
-     * @return CurlWrapper
+     * @return SimpleWrapper
      * @since 6.1.0
      */
     public function setAuthentication($username, $password, $authType = authType::BASIC)
@@ -69,7 +72,7 @@ class SimpleWrapper implements Wrapper
     }
 
     /**
-     * @inheritDoc
+     * @version 6.1.0
      */
     public function request($url, $data = [], $method = requestMethod::METHOD_GET, $dataType = dataType::NORMAL)
     {

@@ -12,6 +12,7 @@ use TorneLIB\Module\Network\Model\Wrapper;
  * Class SocketWrapper
  *
  * @package TorneLIB\Module\Network\Wrappers
+ * @version 6.1.0
  */
 class SocketWrapper implements Wrapper
 {
@@ -26,7 +27,7 @@ class SocketWrapper implements Wrapper
 
     /**
      * @param WrapperConfig $config
-     * @return CurlWrapper
+     * @return SocketWrapper
      */
     public function setConfig($config)
     {
@@ -49,7 +50,7 @@ class SocketWrapper implements Wrapper
      * @param $username
      * @param $password
      * @param int $authType
-     * @return CurlWrapper
+     * @return SocketWrapper
      * @since 6.1.0
      */
     public function setAuthentication($username, $password, $authType = authType::BASIC)
@@ -69,7 +70,12 @@ class SocketWrapper implements Wrapper
     }
 
     /**
-     * @inheritDoc
+     * @param $url
+     * @param array $data
+     * @param $method
+     * @param int $dataType
+     * @return $this|mixed
+     * @version 6.1.0
      */
     public function request($url, $data = [], $method = requestMethod::METHOD_GET, $dataType = dataType::NORMAL)
     {

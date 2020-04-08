@@ -13,6 +13,7 @@ use TorneLIB\Module\Network\Model\Wrapper;
  * Class StreamWrapper
  *
  * @package TorneLIB\Module\Network\Wrappers
+ * @version 6.1.0
  */
 class StreamWrapper implements Wrapper
 {
@@ -28,7 +29,8 @@ class StreamWrapper implements Wrapper
 
     /**
      * @param WrapperConfig $config
-     * @return CurlWrapper
+     * @return StreamWrapper
+     * @version 6.1.0
      */
     public function setConfig($config)
     {
@@ -51,7 +53,7 @@ class StreamWrapper implements Wrapper
      * @param $username
      * @param $password
      * @param int $authType
-     * @return CurlWrapper
+     * @return StreamWrapper
      * @since 6.1.0
      */
     public function setAuthentication($username, $password, $authType = authType::BASIC)
@@ -70,6 +72,14 @@ class StreamWrapper implements Wrapper
         return $this->CONFIG->getAuthentication();
     }
 
+    /**
+     * @param $url
+     * @param array $data
+     * @param $method
+     * @param int $dataType
+     * @return $this|mixed
+     * @version 6.1.0
+     */
     public function request($url, $data = [], $method = requestMethod::METHOD_GET, $dataType = dataType::NORMAL)
     {
         if (!empty($url)) {

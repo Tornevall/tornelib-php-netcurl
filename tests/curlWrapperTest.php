@@ -1,17 +1,17 @@
 <?php
 
+require_once(__DIR__ . '/../vendor/autoload.php');
+
 use PHPUnit\Framework\TestCase;
 use TorneLIB\Exception\Constants;
 use TorneLIB\Flags;
 use TorneLIB\Helpers\Browsers;
 use TorneLIB\Helpers\Version;
 use TorneLIB\Module\Config\WrapperConfig;
-use TorneLIB\Module\Network\NetWrapper;
 use TorneLIB\Module\Network\Wrappers\CurlWrapper;
 use TorneLIB\Exception\ExceptionHandler;
 
 define('LIB_ERROR_HTTP', true);
-require_once(__DIR__ . '/../vendor/autoload.php');
 
 try {
     Version::getRequiredVersion();
@@ -29,16 +29,6 @@ class curlWrapperTest extends TestCase
     private $rEcomPipeU = 'tornevall';
     private $rEcomPipeP = '2suyqJRXyd8YBGxTz42xr7g1tCWW6M2R';
     private $rEcomHost = 'https://omnitest.resurs.com';
-
-    /**
-     * @test
-     * @testdox Test the primary wrapper controller.
-     */
-    public function majorWrapperControl()
-    {
-        $netWrap = new NetWrapper();
-        static::assertTrue(count($netWrap->getWrappers()) ? true : false);
-    }
 
     /**
      * @test

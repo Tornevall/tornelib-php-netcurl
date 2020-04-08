@@ -635,10 +635,10 @@ class WrapperConfig
 
     /**
      * Datatype of request (json, etc).
-     * @param int $requestDataType
+     * @param $requestDataType
      * @since 6.1.0
      */
-    public function setRequestDataType(int $requestDataType)
+    public function setRequestDataType($requestDataType)
     {
         $this->requestDataType = $requestDataType;
     }

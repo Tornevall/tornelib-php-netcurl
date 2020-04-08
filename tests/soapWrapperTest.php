@@ -174,7 +174,7 @@ class soapWrapperTest extends TestCase
     public function setWsdlCache()
     {
         $wrapper = new SoapClientWrapper($this->wsdl);
-        $wrapper->setWsdlCache(WSDL_CACHE_MEMORY)->setAuthentication(
+        $wrapper->setWsdlCache(WSDL_CACHE_DISK)->setAuthentication(
             $this->rEcomPipeU,
             $this->rEcomPipeP
         )->getPaymentMethods();

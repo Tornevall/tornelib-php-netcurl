@@ -681,6 +681,10 @@ class WrapperConfig
                 $this->authData['username'] = $username;
                 $this->authData['password'] = $password;
                 $this->authData['type'] = $authType;
+                // Always push streamOptions for user/pass into the default flow to be compatible with soap
+                // setups.
+                $this->setStreamOption('login', $this->authData['username']);
+                $this->setStreamOption('password', $this->authData['password']);
                 break;
         }
     }

@@ -61,7 +61,7 @@ class soapWrapperTest extends TestCase
     public function getSoapEmbeddedRandomRequest()
     {
         // Note: We could've been chaining this one, but in this case, there's other stuff to test.
-        $soapWrapper = new SoapClientWrapper($this->netcurlWsdl);
+        $soapWrapper = (new SoapClientWrapper($this->netcurlWsdl))->setWsdlCache(WSDL_CACHE_DISK);
         $soapWrapper->setAuthentication($this->rEcomPipeU, $this->rEcomPipeP);
         $soapWrapper->setUserAgent('That requesting client');
         $userAgent = $soapWrapper->getUserAgent();
@@ -86,7 +86,7 @@ class soapWrapperTest extends TestCase
     public function getSoapEmbeddedReal()
     {
         try {
-            $soapWrapper = new SoapClientWrapper($this->wsdl);
+            $soapWrapper = (new SoapClientWrapper($this->wsdl))->setWsdlCache(WSDL_CACHE_DISK);
             $soapWrapper->setAuthentication($this->rEcomPipeU, $this->rEcomPipeP);
             $paymentMethods = $soapWrapper->getPaymentMethods();
             $functions = $soapWrapper->getFunctions();
@@ -120,7 +120,7 @@ class soapWrapperTest extends TestCase
     public function getSoapEmbeddedAuthFail()
     {
         try {
-            $soapWrapper = new SoapClientWrapper($this->wsdl);
+            $soapWrapper = (new SoapClientWrapper($this->wsdl))->setWsdlCache(WSDL_CACHE_DISK);
             $soapWrapper->setAuthentication('fail', 'doubleFail')->getPaymentMethods();
         } catch (Exception $e) {
             // Assert "Unauthorized" code (401) or error code 2 based on E_WARNING
@@ -140,6 +140,7 @@ class soapWrapperTest extends TestCase
             // Service bails out on error 500 when ?wsdl is excluded.
             // For older PHP versions this renders a very noisy fatal.
             (new SoapClientWrapper($this->no_wsdl))
+                ->setWsdlCache(WSDL_CACHE_DISK)
                 ->setAuthentication(
                     $this->rEcomPipeU,
                     $this->rEcomPipeP
@@ -155,7 +156,7 @@ class soapWrapperTest extends TestCase
      */
     public function getSoapEmbeddedRequest()
     {
-        $wrapper = new SoapClientWrapper();
+        $wrapper = (new SoapClientWrapper())->setWsdlCache(WSDL_CACHE_DISK);
         $wrapper->setAuthentication(
             $this->rEcomPipeU,
             $this->rEcomPipeP

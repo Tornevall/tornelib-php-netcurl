@@ -44,8 +44,8 @@ pipelines:
           - composer require phpunit/phpunit
           - vendor/bin/phpunit --configuration ./phpunit.xml
     - step:
-        name: NetCURL 6.1/PHP 7.1
-        image: php:7.1
+        name: NetCURL 6.1/PHP 7.1.33
+        image: php:7.1.33
         caches:
           - composer
         script:

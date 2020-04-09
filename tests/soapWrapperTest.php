@@ -133,7 +133,6 @@ class soapWrapperTest extends TestCase
 
     /**
      * @test
-     * @throws ExceptionHandler
      */
     public function getSoapEmbeddedNoWsdl()
     {
@@ -205,10 +204,12 @@ class soapWrapperTest extends TestCase
         $currentTimeStamp = time();
 
         // Prepare SOAP-wrapper.
-        $rWrapper = (new SoapClientWrapper($this->wsdl_config))->setAuthentication(
-            $this->rEcomPipeU,
-            $this->rEcomPipeP
-        );
+        $rWrapper = (new SoapClientWrapper($this->wsdl_config))
+            ->setWsdlCache(WSDL_CACHE_DISK, 60)
+            ->setAuthentication(
+                $this->rEcomPipeU,
+                $this->rEcomPipeP
+            );
 
         // Send an url to our upstream soap instance.
         $rWrapper->registerEventCallback(

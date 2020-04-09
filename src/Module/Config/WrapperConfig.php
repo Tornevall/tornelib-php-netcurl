@@ -11,6 +11,7 @@ use TorneLIB\Model\Type\authSource;
 use TorneLIB\Model\Type\authType;
 use TorneLIB\Model\Type\dataType;
 use TorneLIB\Model\Type\requestMethod;
+use TorneLIB\Utils\Ini;
 
 /**
  * Class WrapperConfig
@@ -804,11 +805,19 @@ class WrapperConfig
      *   WSDL_CACHE_BOTH = 3
      *
      * @param int $cacheSet
+     * @param int $ttlCache Cache lifetime. If null, this won't be set.
      * @return WrapperConfig
      */
-    private function setWsdlCache($cacheSet = 0)
+    private function setWsdlCache($cacheSet = 0, $ttlCache = null)
     {
         $this->streamOptions['cache_wsdl'] = $cacheSet;
+        if (
+            (new Ini())->getIniSettable('soap.wsdl_cache_ttl') &&
+            !empty($ttlCache) &&
+            (int)$ttlCache
+        ) {
+            ini_set('soap.wsdl_cache_ttl', 1);
+        }
 
         return $this;
     }

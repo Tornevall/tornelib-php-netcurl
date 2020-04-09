@@ -120,6 +120,7 @@ class soapWrapperTest extends TestCase
     public function getSoapEmbeddedAuthFail()
     {
         try {
+            // NOTE: By setting cached wsdl here, authentication failures can not be cached.
             $soapWrapper = (new SoapClientWrapper($this->wsdl))->setWsdlCache(WSDL_CACHE_DISK);
             $soapWrapper->setAuthentication('fail', 'doubleFail')->getPaymentMethods();
         } catch (Exception $e) {

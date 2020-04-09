@@ -5,3 +5,5 @@ vendor
 runit.sh
 **.swp
 merge.sh
+docs
+netcurl-6.1.doxygen

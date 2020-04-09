@@ -108,7 +108,7 @@ class curlWrapperTest extends TestCase
 
     /**
      * @test
-     * @throws \TorneLIB\Exception\ExceptionHandler
+     * @throws ExceptionHandler
      */
     public function basicMultiGet()
     {
@@ -123,7 +123,7 @@ class curlWrapperTest extends TestCase
 
     /**
      * @test
-     * @throws \TorneLIB\Exception\ExceptionHandler
+     * @throws ExceptionHandler
      */
     public function curlWrapperConstructor()
     {
@@ -146,7 +146,7 @@ class curlWrapperTest extends TestCase
 
     /**
      * @test
-     * @throws \TorneLIB\Exception\ExceptionHandler
+     * @throws ExceptionHandler
      */
     public function basicGet()
     {
@@ -159,7 +159,7 @@ class curlWrapperTest extends TestCase
 
     /**
      * @test
-     * @throws \TorneLIB\Exception\ExceptionHandler
+     * @throws ExceptionHandler
      */
     public function basicGetLowTLS()
     {
@@ -182,7 +182,7 @@ class curlWrapperTest extends TestCase
 
     /**
      * @test
-     * @throws \TorneLIB\Exception\ExceptionHandler
+     * @throws ExceptionHandler
      */
     public function basicGetTLS11()
     {
@@ -204,7 +204,7 @@ class curlWrapperTest extends TestCase
 
     /**
      * @test
-     * @throws \TorneLIB\Exception\ExceptionHandler
+     * @throws ExceptionHandler
      */
     public function basicGetTLS13()
     {
@@ -240,7 +240,7 @@ class curlWrapperTest extends TestCase
 
     /**
      * @test
-     * @throws \TorneLIB\Exception\ExceptionHandler
+     * @throws ExceptionHandler
      */
     public function basicGetHeader()
     {
@@ -251,7 +251,7 @@ class curlWrapperTest extends TestCase
 
     /**
      * @test
-     * @throws \TorneLIB\Exception\ExceptionHandler
+     * @throws ExceptionHandler
      */
     public function basicPostWithGetData()
     {
@@ -270,7 +270,7 @@ class curlWrapperTest extends TestCase
 
     /**
      * @test
-     * @throws \TorneLIB\Exception\ExceptionHandler
+     * @throws ExceptionHandler
      */
     public function basicGetWithPost()
     {
@@ -285,7 +285,7 @@ class curlWrapperTest extends TestCase
 
     /**
      * @test
-     * @throws \TorneLIB\Exception\ExceptionHandler
+     * @throws ExceptionHandler
      */
     public function basicPost()
     {
@@ -300,7 +300,7 @@ class curlWrapperTest extends TestCase
 
     /**
      * @test
-     * @throws \TorneLIB\Exception\ExceptionHandler
+     * @throws ExceptionHandler
      */
     public function basicGetHeaderUserAgent()
     {
@@ -316,7 +316,7 @@ class curlWrapperTest extends TestCase
 
     /**
      * @test
-     * @throws \TorneLIB\Exception\ExceptionHandler
+     * @throws ExceptionHandler
      */
     public function multiGetHeader()
     {
@@ -348,7 +348,7 @@ class curlWrapperTest extends TestCase
      * Initialize empty curlwrapper - set url after init and request an uninitialized wrapper. Expected result
      * is self initialized wrapper of curl.
      *
-     * @throws \TorneLIB\Exception\ExceptionHandler
+     * @throws ExceptionHandler
      */
     public function unInitializedCurlWrapperByConfig()
     {
@@ -369,7 +369,7 @@ class curlWrapperTest extends TestCase
 
     /**
      * @test
-     * @throws \TorneLIB\Exception\ExceptionHandler
+     * @throws ExceptionHandler
      */
     public function unInitializedCurlWrapperMinorConfig()
     {
@@ -435,8 +435,8 @@ class curlWrapperTest extends TestCase
     }
 
     /**
-     * @test
-     * @throws \TorneLIB\Exception\ExceptionHandler
+     * @test Testing a simple "real world" rest request
+     * @throws ExceptionHandler
      */
     public function getRestWithAuth()
     {
@@ -463,8 +463,10 @@ class curlWrapperTest extends TestCase
     }
 
     /**
+     * Real world rest request with specific body errors.
      * @test
-     * @throws \TorneLIB\Exception\ExceptionHandler
+     *
+     * @throws ExceptionHandler
      */
     public function getThrowablesByBody()
     {
@@ -498,6 +500,8 @@ class curlWrapperTest extends TestCase
     }
 
     /**
+     * Tests WrapperConfig and data setup.
+     *
      * @test
      */
     public function setConfigData()
@@ -508,7 +512,7 @@ class curlWrapperTest extends TestCase
         $gTimeout = $config->getTimeout();
         try {
             $config->getEmptySetting();
-        } catch (\TorneLIB\Exception\ExceptionHandler $e) {
+        } catch (ExceptionHandler $e) {
             static::assertTrue(
                 $e->getCode() === Constants::LIB_CONFIGWRAPPER_VAR_NOT_SET &&
                 (int)$gTimeout['REQUEST'] === 6 &&
@@ -529,7 +533,7 @@ class curlWrapperTest extends TestCase
         $gTimeout = $config->getTimeout();
         try {
             $config->getEmptySetting();
-        } catch (\TorneLIB\Exception\ExceptionHandler $e) {
+        } catch (ExceptionHandler $e) {
             // The last request will make WrapperConfig throw an exception as getEmptySetting does not exist
             // in the magics setup. So we'll check the other values from here. Floats are returned regardless
             // of seconds and milliseconds, so we'll cast the values into integers here.

@@ -9,7 +9,7 @@ class netcurlTest extends TestCase
 {
     /**
      * @test
-     * @testdox Test the primary wrapper controller.
+     * Test the primary wrapper controller.
      */
     public function majorWrapperControl()
     {

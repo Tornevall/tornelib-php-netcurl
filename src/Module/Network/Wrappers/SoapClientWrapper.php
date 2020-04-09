@@ -394,7 +394,9 @@ class SoapClientWrapper implements Wrapper
     {
         $return = null;
 
-        if (method_exists($this, $name)) {
+        if (isset($this->soapClientContent[$methodContent])) {
+            $return = $this->soapClientContent[$methodContent];
+        } elseif (method_exists($this, $name)) {
             $return = call_user_func_array(
                 [
                     $this,
@@ -402,8 +404,6 @@ class SoapClientWrapper implements Wrapper
                 ],
                 $arguments
             );
-        } elseif (isset($this->soapClientContent[$methodContent])) {
-            $return = $this->soapClientContent[$methodContent];
         }
 
         return $return;

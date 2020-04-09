@@ -394,9 +394,7 @@ class SoapClientWrapper implements Wrapper
     {
         $return = null;
 
-        if (isset($this->soapClientContent[$methodContent])) {
-            $return = $this->soapClientContent[$methodContent];
-        } elseif (method_exists($this, $name)) {
+        if (method_exists($this, $name)) {
             $return = call_user_func_array(
                 [
                     $this,
@@ -404,6 +402,8 @@ class SoapClientWrapper implements Wrapper
                 ],
                 $arguments
             );
+        } elseif (isset($this->soapClientContent[$methodContent])) {
+            $return = $this->soapClientContent[$methodContent];
         }
 
         return $return;
@@ -453,6 +453,8 @@ class SoapClientWrapper implements Wrapper
      */
     private function execSoap($name, $arguments)
     {
+        $return = null;
+
         try {
             if (isset($arguments[0])) {
                 $return = $this->soapClient->$name($arguments[0]);
@@ -464,19 +466,22 @@ class SoapClientWrapper implements Wrapper
             // for example authorization problems. This is why the soapResponse is fetched and analyzed before
             // giving up.
 
-            // Initialize a merged soapResponse of what's left in this exception.
+            // Initialize a merged soapResponse of what's left in this exception - and to see if it was a real
+            // api request or a local one.
             $this->setMergedSoapResponse();
 
-            // Pick up the http-head response from the soapResponseHeader.
-            $httpHeader = $this->getHeader('http');
+            if (!is_null($this->soapClientContent['lastResponseHeaders'])) {
+                // Pick up the http-head response from the soapResponseHeader.
+                $httpHeader = $this->getHeader('http');
 
-            // Check if it is time to throw something specific.
-            $this->CONFIG->getHttpException(
-                $this->getHttpHead($httpHeader, 'message'),
-                $this->getHttpHead($httpHeader)
-            );
+                // Check if it is time to throw something specific.
+                $this->CONFIG->getHttpException(
+                    $this->getHttpHead($httpHeader, 'message'),
+                    $this->getHttpHead($httpHeader)
+                );
+            }
 
-            // Or continue throw the soapFault as it.
+            // Continue throw the soapFault as it.
             throw $soapFault;
         }
 

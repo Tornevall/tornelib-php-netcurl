@@ -32,6 +32,7 @@ class curlWrapperTest extends TestCase
 
     /**
      * @test
+     * Test initial curl wrapper with predefined http request.
      */
     public function initialCurlWrapper()
     {
@@ -83,6 +84,7 @@ class curlWrapperTest extends TestCase
 
     /**
      * @test
+     * Check secure mode status.
      */
     public function secureMode()
     {
@@ -96,6 +98,7 @@ class curlWrapperTest extends TestCase
 
     /**
      * @test
+     * Check what the Browsers-class are generating.
      */
     public function browserSet()
     {
@@ -108,6 +111,7 @@ class curlWrapperTest extends TestCase
 
     /**
      * @test
+     * Make multiple URL request s.
      * @throws ExceptionHandler
      */
     public function basicMultiGet()
@@ -123,6 +127,7 @@ class curlWrapperTest extends TestCase
 
     /**
      * @test
+     * Test the curlwrapper constructor with a basic request.
      * @throws ExceptionHandler
      */
     public function curlWrapperConstructor()
@@ -146,6 +151,7 @@ class curlWrapperTest extends TestCase
 
     /**
      * @test
+     * Make a basic get and validate response.
      * @throws ExceptionHandler
      */
     public function basicGet()
@@ -159,6 +165,7 @@ class curlWrapperTest extends TestCase
 
     /**
      * @test
+     * Make a TLS 1.0 request.
      * @throws ExceptionHandler
      */
     public function basicGetLowTLS()
@@ -182,6 +189,7 @@ class curlWrapperTest extends TestCase
 
     /**
      * @test
+     * Make a TLS 1.1 request.
      * @throws ExceptionHandler
      */
     public function basicGetTLS11()
@@ -204,7 +212,7 @@ class curlWrapperTest extends TestCase
 
     /**
      * @test
-     * @throws ExceptionHandler
+     * Make a TLS 1.3 request (if available).
      */
     public function basicGetTLS13()
     {
@@ -240,6 +248,7 @@ class curlWrapperTest extends TestCase
 
     /**
      * @test
+     * Run basic request where netcurl is automatically render "correct" request.
      * @throws ExceptionHandler
      */
     public function basicGetHeader()
@@ -251,6 +260,7 @@ class curlWrapperTest extends TestCase
 
     /**
      * @test
+     * Run basic post request with parameters.
      * @throws ExceptionHandler
      */
     public function basicPostWithGetData()
@@ -270,6 +280,7 @@ class curlWrapperTest extends TestCase
 
     /**
      * @test
+     * Run a basic get request.
      * @throws ExceptionHandler
      */
     public function basicGetWithPost()
@@ -285,6 +296,7 @@ class curlWrapperTest extends TestCase
 
     /**
      * @test
+     * Run a basic post request.
      * @throws ExceptionHandler
      */
     public function basicPost()
@@ -300,6 +312,7 @@ class curlWrapperTest extends TestCase
 
     /**
      * @test
+     * Create basic request with a specific user agent.
      * @throws ExceptionHandler
      */
     public function basicGetHeaderUserAgent()
@@ -316,6 +329,7 @@ class curlWrapperTest extends TestCase
 
     /**
      * @test
+     * Ask for multiple urls.
      * @throws ExceptionHandler
      */
     public function multiGetHeader()
@@ -344,10 +358,8 @@ class curlWrapperTest extends TestCase
 
     /**
      * @test
-     *
      * Initialize empty curlwrapper - set url after init and request an uninitialized wrapper. Expected result
      * is self initialized wrapper of curl.
-     *
      * @throws ExceptionHandler
      */
     public function unInitializedCurlWrapperByConfig()
@@ -369,6 +381,7 @@ class curlWrapperTest extends TestCase
 
     /**
      * @test
+     * Initialize netcurl without predefined url.
      * @throws ExceptionHandler
      */
     public function unInitializedCurlWrapperMinorConfig()
@@ -389,7 +402,6 @@ class curlWrapperTest extends TestCase
 
     /**
      * @test
-     *
      * Lowest initializer level, where nothing can be initiated since there is no defined url.
      */
     public function unInitializedCurlWrapperNoConfig()
@@ -435,7 +447,8 @@ class curlWrapperTest extends TestCase
     }
 
     /**
-     * @test Testing a simple "real world" rest request
+     * @test
+     * Testing a simple "real world" rest request
      * @throws ExceptionHandler
      */
     public function getRestWithAuth()
@@ -463,9 +476,8 @@ class curlWrapperTest extends TestCase
     }
 
     /**
-     * Real world rest request with specific body errors.
      * @test
-     *
+     * Real world rest request with specific body errors.
      * @throws ExceptionHandler
      */
     public function getThrowablesByBody()
@@ -500,9 +512,8 @@ class curlWrapperTest extends TestCase
     }
 
     /**
-     * Tests WrapperConfig and data setup.
-     *
      * @test
+     * Tests WrapperConfig and data setup.
      */
     public function setConfigData()
     {
@@ -523,6 +534,7 @@ class curlWrapperTest extends TestCase
 
     /**
      * @test
+     * Test timeout configurations.
      */
     public function setMilliTimeout()
     {

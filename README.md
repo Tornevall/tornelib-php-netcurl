@@ -9,12 +9,32 @@ Recommended solution: Composer.
 
 Alternatives: git clone this repo.
 
-### XML, CURL, SOAP
+## Documents
+
+* [Version 6.1](https://docs.tornevall.net/display/TORNEVALL/NETCURLv6.1)
+* [Exceptions handling for v6.0](https://docs.tornevall.net/x/EgCNAQ)
+
+# NETCURL IS AND IS NOTS
+
+* [Written for 6.0](https://docs.tornevall.net/x/GQCsAQ)
+
+# HOWTOs
+
+## Getting started
+
+* [MODULE_CURL 6.1](https://docs.tornevall.net/display/TORNEVALL/NETCURLv6.1)
+* [Getting started: Individual Modules](https://docs.tornevall.net/x/EAB4Aw)
+
+### Obsolete documents
+
+* [MODULE_CURL 6.0](https://docs.tornevall.net/x/EoBiAQ)
+
+
+### XML, CURL, SOAP, JSON
 
 In apt-based systems, extra libraries can be installed with commands such as:
 
-`apt-get install php-curl php-xml`
-`apt-get install php-soap`
+`apt-get install php-curl php-xml php-json php-soap`
 
 ... and whatever suits your needs.
 
@@ -51,44 +71,28 @@ To keep compatibility with v6.0 the plan is to keep the primary class MODULE_CUR
   
 In its initial state, there are basically no requirements as this module tries to pick the best available driver in runtime.
 
-### Support
+### Library Support
 
 #### Current
 
-* curl implementation halfway
+* curl
+* SoapClient
 
 #### In progress
 
-* (Guzzle)
-* (RSS feeds)
-* (SoapClient (with dependencies))
-* (Zend)
-* (Sockets)
-* (Streams)
+* Streams / Simple requests (down to file_get_contents support)
 
-#### Further dependencies on special support
+##### Pending
+
+* Guzzle
+* RSS feeds
+* Zend
+* Sockets
+
+#### Dependencies, not required, but recommended
 
 * SSL: OpenSSL or similar.
 * SOAP: SoapClient and XML-drivers.
-
-## Documents
-
-* [Version 6.1](https://docs.tornevall.net/display/TORNEVALL/NETCURLv6.1)
-* [Exceptions handling for v6.0](https://docs.tornevall.net/x/EgCNAQ)
-
-
-# NETCURL IS AND IS NOTS
-
-* [Written for 6.0](https://docs.tornevall.net/x/GQCsAQ)
-
-
-# HOWTOs
-
-## Getting started
-
-* [MODULE_CURL 6.1 - coming soon](https://docs.tornevall.net/display/TORNEVALL/NETCURLv6.1)
-* [MODULE_CURL 6.0](https://docs.tornevall.net/x/EoBiAQ)
-
 
 # Changes
 
@@ -96,8 +100,7 @@ Version 6.1 follows the standard of what's written in 6.0 - there is a primary m
 
 ## Breaking changes?
 
-No. Version 6.1 is written to reach highest compatibility with v6.1 as possible.
-
+No. Version 6.1 is written to reach highest compatibility with v6.0 as possible, but with modernized code and PSR-4. Make sure you check out https://docs.tornevall.net/x/DoBPAw before deciding to run anything as older PHP-releases could be incompatible. However, if they are, so are probably you.
 
 # Composer addons
 
@@ -105,4 +108,3 @@ No. Version 6.1 is written to reach highest compatibility with v6.1 as possible.
         "zendframework/zend-http": "^2.11",
         "guzzlehttp/guzzle": "^6.5"
         "zendframework/zend-http": "^2.9"
-

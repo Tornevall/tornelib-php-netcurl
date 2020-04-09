@@ -18,6 +18,7 @@ class soapWrapperTest extends TestCase
     private $rEcomPipeU = 'tornevall';
     private $rEcomPipeP = '2suyqJRXyd8YBGxTz42xr7g1tCWW6M2R';
     private $wsdl = 'https://test.resurs.com/ecommerce-test/ws/V4/SimplifiedShopFlowService?wsdl';
+    private $wsdl_config = 'https://test.resurs.com/ecommerce-test/ws/V4/ConfigurationService?wsdl';
     private $no_wsdl = 'https://test.resurs.com/ecommerce-test/ws/V4/SimplifiedShopFlowService';
     private $netcurlWsdl = 'https://tests.netcurl.org/tornevall_network/index.wsdl?wsdl';
 
@@ -192,5 +193,42 @@ class soapWrapperTest extends TestCase
                 ) || is_array($headers)
             )
         );
+    }
+
+    /**
+     * @test
+     * Testing soapwrapper with outgoing parameters.
+     */
+    public function setSoapValue()
+    {
+        // Expected result.
+        $currentTimeStamp = time();
+
+        // Prepare SOAP-wrapper.
+        $rWrapper = (new SoapClientWrapper($this->wsdl_config))->setAuthentication(
+            $this->rEcomPipeU,
+            $this->rEcomPipeP
+        );
+
+        // Send an url to our upstream soap instance.
+        $rWrapper->registerEventCallback(
+            [
+                'eventType' => 'BOOKED',
+                'uriTemplate' => sprintf(
+                    'https://www.netcurl.org/?callback=BOOKED&ts=%d', $currentTimeStamp
+                ),
+            ]
+        );
+
+        // Dicover the change.
+        parse_str(
+            parse_url(
+                $rWrapper->getRegisteredEventCallback(
+                    ['eventType' => 'BOOKED']
+                )->uriTemplate)['query'],
+            $uriTemplate
+        );
+
+        static::assertTrue((int)$uriTemplate['ts'] === $currentTimeStamp);
     }
 }

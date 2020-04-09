@@ -464,6 +464,7 @@ class SoapClientWrapper implements Wrapper
         } else {
             $return = $soapClientResponse;
         }
+
         return $return;
     }
 

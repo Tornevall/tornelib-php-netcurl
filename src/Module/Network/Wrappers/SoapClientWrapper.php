@@ -456,11 +456,9 @@ class SoapClientWrapper implements Wrapper
         $return = null;
 
         try {
-            if (isset($arguments[0])) {
-                $return = $this->soapClient->$name($arguments[0]);
-            } else {
-                $return = $this->soapClient->$name();
-            }
+            // Giving the soapcall a more natural touch with call_user_func_array. Besides, this also means
+            // we don't have to check for arguments.
+            $return = call_user_func_array(array($this->soapClient, $name), $arguments);
         } catch (Exception $soapFault) {
             // Public note: Those exceptions may be thrown by the soap-api or when the wsdl is cache and there is
             // for example authorization problems. This is why the soapResponse is fetched and analyzed before

@@ -216,7 +216,7 @@ class curlWrapperTest extends TestCase
      */
     public function basicGetTLS13()
     {
-        if (defined('CURL_SSLVERSION_TLSv1_3')) {
+        if (defined('CURL_SSLVERSION_TLSv1_3') && version_compare(PHP_VERSION, '5.6', '>=')) {
             try {
                 $tlsResponse = (new CurlWrapper())->
                 setConfig((new WrapperConfig())->setOption(CURLOPT_SSLVERSION, CURL_SSLVERSION_TLSv1_3))->
@@ -242,7 +242,11 @@ class curlWrapperTest extends TestCase
                 }
             }
         } else {
-            static::markTestSkipped('TLSv1.3 is not available on this platform.');
+            if (version_compare(PHP_VERSION, '5.6', '>=')) {
+                static::markTestSkipped('TLSv1.3 problems: Your platform is too old to even bother.');
+            } else {
+                static::markTestSkipped('TLSv1.3 is not available on this platform.');
+            }
         }
     }
 

@@ -8,7 +8,7 @@ use TorneLIB\Helpers\Version;
 use TorneLIB\Module\Network\Wrappers\SoapClientWrapper;
 
 try {
-    Version::getRequiredVersion();
+    Version::getRequiredVersion('5.6');
 } catch (Exception $e) {
     die($e->getMessage());
 }

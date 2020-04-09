@@ -4,6 +4,7 @@ namespace TorneLIB\Module\Network\Wrappers;
 
 use Exception;
 use SoapClient;
+use SoapFault;
 use TorneLIB\Exception\ExceptionHandler;
 use TorneLIB\IO\Data\Strings;
 use TorneLIB\Model\Type\authSource;
@@ -162,7 +163,7 @@ class SoapClientWrapper implements Wrapper
 
     /**
      * @throws ExceptionHandler
-     * @throws \SoapFault
+     * @throws SoapFault
      */
     private function getSoapClient()
     {
@@ -230,13 +231,22 @@ class SoapClientWrapper implements Wrapper
     {
         $return = $string;
         $headString = preg_replace(
-            '/(.*?) HTTP\/(.*?)\s(.*)$/is',
+            '/(.*?)\sHTTP\/(.*?)\s(.*)$/is',
             '$3',
             trim($string)
         );
 
         if (preg_match('/\s/', $headString)) {
             $headContent = explode(' ', $headString, 2);
+
+            // Make sure there is no extras when starting to extract this data.
+            if (!is_numeric($headContent[0]) &&
+                strtolower($headContent[0]) === 'http' &&
+                preg_match('/\s/', $headContent[1])
+            ) {
+                // Drop one to the left, and retry.
+                $headContent = explode(' ', $headContent[1], 2);
+            }
 
             switch ($returnData) {
                 case 'code':
@@ -438,14 +448,41 @@ class SoapClientWrapper implements Wrapper
      * @param $name
      * @param $arguments
      * @return mixed
+     * @throws Exception
      * @since 6.1.0
      */
     private function execSoap($name, $arguments)
     {
-        if (isset($arguments[0])) {
-            $return = $this->soapClient->$name($arguments[0]);
-        } else {
-            $return = $this->soapClient->$name();
+        $return = null;
+
+        try {
+            if (isset($arguments[0])) {
+                $return = $this->soapClient->$name($arguments[0]);
+            } else {
+                $return = $this->soapClient->$name();
+            }
+        } catch (Exception $soapFault) {
+            // Public note: Those exceptions may be thrown by the soap-api or when the wsdl is cache and there is
+            // for example authorization problems. This is why the soapResponse is fetched and analyzed before
+            // giving up.
+
+            // Initialize a merged soapResponse of what's left in this exception - and to see if it was a real
+            // api request or a local one.
+            $this->setMergedSoapResponse();
+
+            if (!is_null($this->soapClientContent['lastResponseHeaders'])) {
+                // Pick up the http-head response from the soapResponseHeader.
+                $httpHeader = $this->getHeader('http');
+
+                // Check if it is time to throw something specific.
+                $this->CONFIG->getHttpException(
+                    $this->getHttpHead($httpHeader, 'message'),
+                    $this->getHttpHead($httpHeader)
+                );
+            }
+
+            // Continue throw the soapFault as it.
+            throw $soapFault;
         }
 
         return $return;
@@ -572,6 +609,18 @@ class SoapClientWrapper implements Wrapper
         if (count($headSplit) < 2) {
             if (count($spacedSplit) > 1) {
                 $splitName = !$lCase ? $spacedSplit[0] : strtolower($spacedSplit[0]);
+
+                if (preg_match('/^http\/(.*?)$/i', $splitName)) {
+                    $httpSplitName = explode("/", $splitName, 2);
+                    $realSplitName = !$lCase ? $httpSplitName[0] : strtolower($httpSplitName[0]);
+
+                    if (!isset($this->responseHeaderArray[$realSplitName])) {
+                        $this->responseHeaderArray[$realSplitName] = trim($spacedSplit[1]);
+                    } else {
+                        $this->responseHeaderArray[$realSplitName][] = trim($spacedSplit[1]);
+                    }
+                }
+
                 $this->responseHeaderArray[$splitName][] = trim($spacedSplit[1]);
             }
             return strlen($header);
@@ -583,6 +632,7 @@ class SoapClientWrapper implements Wrapper
     }
 
     /**
+     * @param null $key
      * @return mixed
      * @since 6.1.0
      */

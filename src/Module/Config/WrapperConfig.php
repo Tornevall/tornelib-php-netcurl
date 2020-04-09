@@ -137,6 +137,7 @@ class WrapperConfig
      * @param string $httpMessageString
      * @param string $httpCode
      * @param null $extendException
+     * @param bool $forceException
      * @throws ExceptionHandler
      * @since 6.0.6
      */

@@ -115,13 +115,32 @@ class soapWrapperTest extends TestCase
 
     /**
      * @test
-     * @throws ExceptionHandler
+     * Fail request with wrong credentials. Do cache wsdl on disk.
      */
-    public function getSoapEmbeddedAuthFail()
+    public function getSoapEmbeddedAuthFailCache()
     {
         try {
             // NOTE: By setting cached wsdl here, authentication failures can not be cached.
             $soapWrapper = (new SoapClientWrapper($this->wsdl))->setWsdlCache(WSDL_CACHE_DISK);
+            $soapWrapper->setAuthentication('fail', 'doubleFail')->getPaymentMethods();
+        } catch (Exception $e) {
+            // Assert "Unauthorized" code (401) or error code 2 based on E_WARNING
+            static::assertTrue(
+                $e->getCode() === 401 ||
+                $e->getCode() === 2
+            );
+        }
+    }
+
+    /**
+     * @test
+     * Fail request with wrong credentials. Do not cache wsdl on disk.
+     */
+    public function getSoapEmbeddedAuthFailUnCached()
+    {
+        try {
+            // NOTE: By setting cached wsdl here, authentication failures can not be cached.
+            $soapWrapper = (new SoapClientWrapper($this->wsdl));
             $soapWrapper->setAuthentication('fail', 'doubleFail')->getPaymentMethods();
         } catch (Exception $e) {
             // Assert "Unauthorized" code (401) or error code 2 based on E_WARNING

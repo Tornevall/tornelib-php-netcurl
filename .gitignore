@@ -9,3 +9,4 @@ coverage
 source/build
 *.swp
 .phpunit.result.cache
+build

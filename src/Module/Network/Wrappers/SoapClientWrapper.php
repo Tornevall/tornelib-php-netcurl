@@ -504,6 +504,13 @@ class SoapClientWrapper implements Wrapper
     }
 
     /**
+     * @return int
+     */
+    public function getCode() {
+       return (int)$this->getHttpHead($this->getHeader('http'));
+    }
+
+    /**
      * @param $name
      * @param $arguments
      * @return $this|mixed|null

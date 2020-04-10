@@ -73,6 +73,7 @@ class SoapClientWrapper implements Wrapper
         }
 
         $this->CONFIG = new WrapperConfig();
+        $this->CONFIG->setSoapRequest(true);
         $this->getPriorCompatibilityArguments(func_get_args());
     }
 
@@ -164,6 +165,7 @@ class SoapClientWrapper implements Wrapper
     /**
      * @throws ExceptionHandler
      * @throws SoapFault
+     * @since 6.1.0
      */
     private function getSoapClient()
     {
@@ -296,9 +298,10 @@ class SoapClientWrapper implements Wrapper
             // Not properly initialized yet.
             $this->getConfig()->getStreamOptions();
             $currentStreamContext = $this->getConfig()->getStreamContext();
-            if (is_resource($currentStreamContext)) {
-                $currentStreamContext = stream_context_get_options($currentStreamContext);
-            }
+        }
+
+        if (is_resource($currentStreamContext)) {
+            $currentStreamContext = stream_context_get_options($currentStreamContext);
         }
 
         return $currentStreamContext;
@@ -505,6 +508,7 @@ class SoapClientWrapper implements Wrapper
 
     /**
      * @return int
+     * @since 6.1.0
      */
     public function getCode() {
        return (int)$this->getHttpHead($this->getHeader('http'));
@@ -671,7 +675,8 @@ class SoapClientWrapper implements Wrapper
             return $internalResponse;
         }
 
-        // Making sure we initialize the soapclient if not already done.
+        // Making sure we initialize the soapclient if not already done. Set higher priority for internal requests
+        // and configuration.
         if (is_null($this->soapClient)) {
             $this->getSoapInit();
         }

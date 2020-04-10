@@ -3,6 +3,7 @@
 require_once(__DIR__ . '/../vendor/autoload.php');
 
 use PHPUnit\Framework\TestCase;
+use TorneLIB\Config\Flag;
 use TorneLIB\Exception\ExceptionHandler;
 use TorneLIB\Helpers\Version;
 use TorneLIB\Module\Network\Wrappers\SoapClientWrapper;
@@ -61,12 +62,13 @@ class soapWrapperTest extends TestCase
     public function getSoapEmbeddedRandomRequest()
     {
         // Note: We could've been chaining this one, but in this case, there's other stuff to test.
-        $soapWrapper = (new SoapClientWrapper($this->netcurlWsdl))->setWsdlCache(WSDL_CACHE_DISK);
+        $soapWrapper = (new SoapClientWrapper($this->netcurlWsdl));
         $soapWrapper->setAuthentication($this->rEcomPipeU, $this->rEcomPipeP);
         $soapWrapper->setUserAgent('That requesting client');
         $userAgent = $soapWrapper->getUserAgent();
         $soapContext = $soapWrapper->getStreamContext();
         $hasErrorOnRandom = false;
+
         try {
             $soapWrapper->getRandomRequest();
         } catch (Exception $e) {
@@ -81,7 +83,67 @@ class soapWrapperTest extends TestCase
 
     /**
      * @test
+     * Test writing directly to stream_context instead of going through WrapperConfig. Also trying to use
+     * overwritable flagset, as user_agent is normally internally protected from overwriting when going this way.
      * @throws ExceptionHandler
+     */
+    public function getSoapEmbeddedRandomRequestInstantStream()
+    {
+        $directStreamUserAgent = 'stream_context_agent_request';
+        $realDirectStreamUserAgent = 'stream_context_agent_request_ov';
+
+        // Note: We could've been chaining this one, but in this case, there's other stuff to test.
+        $soapWrapper = (new SoapClientWrapper($this->netcurlWsdl))
+            ->setAuthentication($this->rEcomPipeU, $this->rEcomPipeP)
+            ->setStreamContext('user_agent', $directStreamUserAgent, 'http');
+        $hasErrorOnRandom = false;
+
+        $soapWrapper->setStreamContext('user_agent', 'overwrited', 'http');
+        Flag::setFlag('canoverwrite', ['user_agent']);
+        $soapWrapper->setStreamContext('user_agent', $realDirectStreamUserAgent, 'http');
+
+        $context = $soapWrapper->getStreamContext();
+        $fromAgentContext = $soapWrapper->getUserAgent();
+
+        try {
+            $soapWrapper->getRandomRequest();
+        } catch (Exception $e) {
+            $hasErrorOnRandom = true;
+        }
+        static::assertTrue(
+            !empty($context['http']) &&
+            $context['http']['user_agent'] === $realDirectStreamUserAgent &&
+            $fromAgentContext === $realDirectStreamUserAgent &&
+            $hasErrorOnRandom
+        );
+    }
+
+    /**
+     * @test
+     * Test to set proxy. The test is setting up a stream that does not exist. If this throws an exception, we know
+     * that the stream context accepted the parameter.
+     * @throws ExceptionHandler
+     */
+    public function getSoapEmbeddedRandomRequestProxy()
+    {
+        // Note: We could've been chaining this one, but in this case, there's other stuff to test.
+        $soapWrapper = (new SoapClientWrapper($this->netcurlWsdl))
+            ->setAuthentication($this->rEcomPipeU, $this->rEcomPipeP)
+            ->setStreamContext('proxy', 'http://null:80', 'http');
+
+        try {
+            $soapWrapper->getRandomRequest();
+        } catch (Exception $e) {
+            $message = $e->getMessage(); // expect: failed to open stream: Unable to find the socket transport
+            static::assertTrue(
+                $e->getCode() === 2 &&
+                preg_match('/unable(.*?)transport/is', $message) ? true : false
+            );
+        }
+    }
+
+    /**
+     * @test
      */
     public function getSoapEmbeddedReal()
     {
@@ -208,6 +270,29 @@ class soapWrapperTest extends TestCase
             is_array($result) &&
             count($result)
         );
+    }
+
+    /**
+     * @test
+     * @throws ExceptionHandler
+     * @link https://www.php.net/manual/en/context.http.php
+     */
+    public function getSoapEmbeddedRequestTimeoutUncached()
+    {
+        $wrapper = (new SoapClientWrapper())->setTimeout(0);
+        $wrapper->setAuthentication(
+            $this->rEcomPipeU,
+            $this->rEcomPipeP
+        );
+        try {
+            $result = $wrapper->request($this->wsdl)->getPaymentMethods();
+            static::assertTrue(
+                is_array($result) &&
+                count($result)
+            );
+        } catch (Exception $e) {
+            static::assertTrue($e->getCode() === 2);
+        }
     }
 
     /**

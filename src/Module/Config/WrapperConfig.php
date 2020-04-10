@@ -2,6 +2,7 @@
 
 namespace TorneLIB\Module\Config;
 
+use TorneLIB\Config\Flag;
 use TorneLIB\Exception\Constants;
 use TorneLIB\Exception\ExceptionHandler;
 use TorneLIB\Flags;
@@ -100,6 +101,17 @@ class WrapperConfig
      * @since 6.1.0
      */
     private $SSL;
+
+    /**
+     * @var array User data that normally can not be overwritten more than once (when not exists).
+     */
+    private $irreplacable = ['user_agent'];
+
+    /**
+     * @var bool $isSoapRequest Discovered soaprequest.
+     * @since 6.1.0
+     */
+    private $isSoapRequest = false;
 
     /**
      * WrapperConfig constructor.
@@ -426,18 +438,54 @@ class WrapperConfig
 
         if (is_array($currentStreamContext)) {
             if (is_null($subKey)) {
-                $currentStreamContext[$key] = $value;
+                if (
+                    (isset($currentStreamContext[$key]) && $this->canOverwrite($key)) ||
+                    !isset($currentStreamContext[$key])
+                ) {
+                    $currentStreamContext[$key] = $value;
+                }
             } else {
-                if (isset($currentStreamContext[$subKey])) {
+                if (!isset($currentStreamContext[$subKey])) {
                     $currentStreamContext[$subKey] = [];
                 }
-                $currentStreamContext[$subKey][$key] = $value;
+                if (
+                    (isset($currentStreamContext[$subKey][$key]) && $this->canOverwrite($key)) ||
+                    !isset($currentStreamContext[$subKey][$key])
+                ) {
+                    $currentStreamContext[$subKey][$key] = $value;
+                }
             }
         }
 
+        // This can throw an exception if something is not properly set.
+        // stream_context_create(): options should have the form ["wrappername"]["optionname"] = $value
         $this->streamOptions['stream_context'] = stream_context_create($currentStreamContext);
 
         return $this;
+    }
+
+    /**
+     * @param $key
+     * @return bool
+     * @since 6.1.0
+     */
+    private function canOverwrite($key)
+    {
+        $dynamicOverwrites = Flag::getFlag('canoverwrite');
+
+        $return = in_array(
+            $key, array_map('strtolower', $this->irreplacable)
+        ) ? false : true;
+
+        // Dynamic override.
+        if (is_array($dynamicOverwrites) && in_array(
+                $key, $dynamicOverwrites
+            )
+        ) {
+            $return = true;
+        }
+
+        return $return;
     }
 
     /**
@@ -580,6 +628,24 @@ class WrapperConfig
     }
 
     /**
+     * @param $isSoapRequest
+     * @since 6.1.0
+     */
+    public function setSoapRequest($isSoapRequest)
+    {
+        $this->isSoapRequest = $isSoapRequest;
+    }
+
+    /**
+     * @return bool
+     * @since 6.1.0
+     */
+    public function getSoapRequest()
+    {
+        return $this->isSoapRequest;
+    }
+
+    /**
      * @param $key
      * @param $value
      * @return $this
@@ -594,6 +660,7 @@ class WrapperConfig
      * @param $key
      * @return mixed
      * @throws ExceptionHandler
+     * @since 6.1.0
      */
     public function getStreamOption($key)
     {
@@ -743,12 +810,14 @@ class WrapperConfig
             );
         }
 
+        $this->setStreamContext('timeout', (int)ceil($timeout), 'http');
+        $this->setStreamContext('connection_timeout', (int)ceil($timeout / 2), 'http');
+
         return $this;
     }
 
     /**
      * @param $userAgentString
-     * @param int $source
      * @return $this
      * @since 6.1.0
      */
@@ -766,7 +835,21 @@ class WrapperConfig
      */
     public function getUserAgent()
     {
-        return $this->getOption(WrapperCurlOpt::NETCURL_CURLOPT_USERAGENT);
+        $return = $this->getOption(WrapperCurlOpt::NETCURL_CURLOPT_USERAGENT);
+
+        if ($this->getSoapRequest()) {
+            $currentStreamContext = $this->getStreamContext();
+            if (!is_null($currentStreamContext)) {
+                $currentStreamContext = stream_context_get_options($currentStreamContext);
+            }
+
+            // If it is already set from another place.
+            if (isset($currentStreamContext['http']['user_agent'])) {
+                $return = $currentStreamContext['http']['user_agent'];
+            }
+        }
+
+        return $return;
     }
 
     /**
@@ -777,6 +860,9 @@ class WrapperConfig
      */
     private function getTimeout()
     {
+        $cTimeout = null;
+        $eTimeout = null;
+
         $timeoutIsMillisec = false;
         if (isset($this->options[WrapperCurlOpt::NETCURL_CURLOPT_CONNECTTIMEOUT])) {
             $cTimeout = $this->options[WrapperCurlOpt::NETCURL_CURLOPT_CONNECTTIMEOUT]; // connectTimeout
@@ -812,6 +898,7 @@ class WrapperConfig
      * @param int $cacheSet
      * @param int $ttlCache Cache lifetime. If null, this won't be set.
      * @return WrapperConfig
+     * @since 6.1.0
      */
     private function setWsdlCache($cacheSet = 0, $ttlCache = null)
     {

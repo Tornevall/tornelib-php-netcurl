@@ -86,4 +86,20 @@ class RssWrapper implements Wrapper
     {
         // TODO: Implement request() method.
     }
+
+    /**
+     * @inheritDoc
+     */
+    public function getBody()
+    {
+        // TODO: Implement getBody() method.
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function getParsed()
+    {
+        // TODO: Implement getParsed() method.
+    }
 }

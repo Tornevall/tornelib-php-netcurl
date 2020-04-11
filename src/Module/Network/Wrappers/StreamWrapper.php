@@ -107,4 +107,20 @@ class StreamWrapper implements Wrapper
     public function __get($name)
     {
     }
+
+    /**
+     * @inheritDoc
+     */
+    public function getBody()
+    {
+        // TODO: Implement getBody() method.
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function getParsed()
+    {
+        // TODO: Implement getParsed() method.
+    }
 }

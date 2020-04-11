@@ -47,6 +47,7 @@ if (!class_exists('MODULE_CURL', NETCURL_CLASS_EXISTS_AUTOLOAD) &&
      * @link    https://docs.tornevall.net/x/KwCy Network & Curl v5 and v6 Library usage
      * @link    https://docs.tornevall.net/x/FoBU TorneLIB Full documentation
      * @since   6.0.20
+     * @deprecated MODULE_CURL is still present in v6.1 but will be raised as a backward compatible module.
      */
     class MODULE_CURL
     {

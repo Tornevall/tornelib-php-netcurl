@@ -292,10 +292,21 @@ class NetWrapper implements Wrapper
      * Returns the instance classname if set and ready.
      *
      * @return string
+     * @throws ExceptionHandler
      * @since 6.1.0
      */
     public function getInstanceClass()
     {
+        if (empty($this->instanceClass)) {
+            throw new ExceptionHandler(
+                sprintf(
+                    '%s instantiation failure: No wrapper available.',
+                    __CLASS__
+                ),
+                Constants::LIB_NETCURL_NETWRAPPER_NO_DRIVER_FOUND
+            );
+        }
+
         return (string)$this->instanceClass;
     }
 

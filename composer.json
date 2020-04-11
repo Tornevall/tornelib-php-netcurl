@@ -9,7 +9,7 @@
         "tornevall/tornelib-php-crypto": "dev-develop/6.1",
         "tornevall/tornelib-php-io": "dev-develop/6.1",
         "tornevall/tornelib-php-flags": "^6.1",
-        "tornevall/tornelib-php-utils": "dev-develop/6.1",
+        "tornevall/tornelib-php-utils": "dev-master",
         "ext-curl": "*",
         "ext-soap": "*"
     },

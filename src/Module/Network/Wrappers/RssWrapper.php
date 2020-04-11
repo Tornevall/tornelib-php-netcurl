@@ -9,6 +9,7 @@ use TorneLIB\Model\Type\dataType;
 use TorneLIB\Module\Config\WrapperConfig;
 use TorneLIB\Module\Network\Model\requestMethod;
 use TorneLIB\Module\Network\Model\Wrapper;
+use TorneLIB\Utils\Generic;
 
 try {
     Version::getRequiredVersion();
@@ -33,6 +34,20 @@ class RssWrapper implements Wrapper
      */
     public function __construct()
     {
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function getVersion()
+    {
+        $return = $this->version;
+
+        if (empty($return)) {
+            $return = (new Generic())->getVersionByClassDoc(__CLASS__);
+        }
+
+        return $this->version;
     }
 
     /**

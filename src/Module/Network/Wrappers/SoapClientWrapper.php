@@ -13,6 +13,7 @@ use TorneLIB\Model\Type\dataType;
 use TorneLIB\Model\Type\requestMethod;
 use TorneLIB\Module\Config\WrapperConfig;
 use TorneLIB\Module\Network\Model\Wrapper;
+use TorneLIB\Utils\Generic;
 
 /**
  * Class SoapClientWrapper
@@ -75,6 +76,20 @@ class SoapClientWrapper implements Wrapper
         $this->CONFIG = new WrapperConfig();
         $this->CONFIG->setSoapRequest(true);
         $this->getPriorCompatibilityArguments(func_get_args());
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function getVersion()
+    {
+        $return = $this->version;
+
+        if (empty($return)) {
+            $return = (new Generic())->getVersionByClassDoc(__CLASS__);
+        }
+
+        return $this->version;
     }
 
     /**

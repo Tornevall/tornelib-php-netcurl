@@ -10,6 +10,7 @@ use TorneLIB\Model\Type\dataType;
 use TorneLIB\Model\Type\requestMethod;
 use TorneLIB\Module\Config\WrapperConfig;
 use TorneLIB\Module\Network\Model\Wrapper;
+use TorneLIB\Utils\Generic;
 use TorneLIB\Utils\Security;
 
 try {
@@ -25,9 +26,12 @@ try {
  * preferred way to fetch data.
  *
  * @package TorneLIB\Module\Network\Wrappers
+ * @version 6.1.0
  */
 class CurlWrapper implements Wrapper
 {
+    private $version = '6.1.0';
+
     /**
      * @var WrapperConfig $CONFIG
      */
@@ -119,6 +123,20 @@ class CurlWrapper implements Wrapper
     }
 
     /**
+     * @inheritDoc
+     */
+    public function getVersion()
+    {
+        $return = $this->version;
+
+        if (empty($return)) {
+            $return = (new Generic())->getVersionByClassDoc(__CLASS__);
+        }
+
+        return $this->version;
+    }
+
+    /**
      * Destructor for cleaning up resources.
      *
      * @since 6.1.0
@@ -186,8 +204,8 @@ class CurlWrapper implements Wrapper
 
     /**
      * @param $curlHandle
-     * @since 6.1.0
      * @return CurlWrapper
+     * @since 6.1.0
      */
     private function setCurlPostData($curlHandle)
     {
@@ -310,8 +328,8 @@ class CurlWrapper implements Wrapper
 
     /**
      * @param $curlHandle
-     * @since 6.1.0
      * @return CurlWrapper
+     * @since 6.1.0
      */
     private function setCurlDynamicValues($curlHandle)
     {

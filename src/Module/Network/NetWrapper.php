@@ -10,6 +10,7 @@ use TorneLIB\Module\Config\WrapperConfig;
 use TorneLIB\Module\Network\Model\requestMethod;
 use TorneLIB\Module\Network\Model\Wrapper;
 use TorneLIB\Module\Network\Wrappers\SoapClientWrapper;
+use TorneLIB\Utils\Generic;
 
 /**
  * Class NetWrapper
@@ -45,9 +46,25 @@ class NetWrapper implements Wrapper
      */
     private $isSoapRequest = false;
 
+    private $version;
+
     public function __construct()
     {
         $this->initializeWrappers();
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function getVersion()
+    {
+        $return = $this->version;
+
+        if (empty($return)) {
+            $return = (new Generic())->getVersionByClassDoc(__CLASS__);
+        }
+
+        return $this->version;
     }
 
     private function initializeWrappers()

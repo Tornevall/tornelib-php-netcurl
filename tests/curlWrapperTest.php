@@ -71,6 +71,21 @@ class curlWrapperTest extends TestCase
 
     /**
      * @test
+     * @throws ExceptionHandler
+     */
+    public function getVersion()
+    {
+        static::assertTrue(
+            version_compare(
+                (new CurlWrapper())->getVersion(),
+                '6.1',
+                '>='
+            )
+        );
+    }
+
+    /**
+     * @test
      */
     public function safeMode()
     {

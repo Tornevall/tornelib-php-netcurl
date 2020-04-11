@@ -8,6 +8,7 @@ use TorneLIB\Model\Type\dataType;
 use TorneLIB\Module\Config\WrapperConfig;
 use TorneLIB\Module\Network\Model\requestMethod;
 use TorneLIB\Module\Network\Model\Wrapper;
+use TorneLIB\Utils\Generic;
 
 /**
  * Class StreamWrapper
@@ -25,6 +26,20 @@ class StreamWrapper implements Wrapper
     public function __construct()
     {
         throw new ExceptionHandler('Unhandled wrapper: Stream. Make sure the developer checks for existence before loading.');
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function getVersion()
+    {
+        $return = $this->version;
+
+        if (empty($return)) {
+            $return = (new Generic())->getVersionByClassDoc(__CLASS__);
+        }
+
+        return $this->version;
     }
 
     /**

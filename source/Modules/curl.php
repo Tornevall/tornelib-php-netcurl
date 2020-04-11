@@ -20,7 +20,7 @@
  * All since-markings are based on the major release of NetCurl.
  *
  * @package TorneLIB
- * @version 6.0.25
+ * @version 6.0.26
  */
 
 namespace TorneLIB;
@@ -29,7 +29,7 @@ if (!class_exists('MODULE_CURL', NETCURL_CLASS_EXISTS_AUTOLOAD) &&
     !class_exists('TorneLIB\MODULE_CURL', NETCURL_CLASS_EXISTS_AUTOLOAD)
 ) {
     if (!defined('NETCURL_CURL_RELEASE')) {
-        define('NETCURL_CURL_RELEASE', '6.0.25');
+        define('NETCURL_CURL_RELEASE', '6.0.26');
     }
     if (!defined('NETCURL_CURL_MODIFY')) {
         define('NETCURL_CURL_MODIFY', '20200401');

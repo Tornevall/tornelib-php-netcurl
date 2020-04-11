@@ -148,6 +148,7 @@ class WrapperConfig
      *
      * @param string $httpMessageString
      * @param string $httpCode
+     * @param null $previousException
      * @param null $extendException
      * @param bool $forceException
      * @throws ExceptionHandler
@@ -156,6 +157,7 @@ class WrapperConfig
     public function getHttpException(
         $httpMessageString = '',
         $httpCode = '',
+        $previousException = null,
         $extendException = null,
         $forceException = false
     ) {
@@ -177,7 +179,7 @@ class WrapperConfig
                         $httpMessageString
                     ),
                     $httpCode,
-                    null,
+                    $previousException,
                     null,
                     null,
                     $extendException

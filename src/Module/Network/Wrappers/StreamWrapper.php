@@ -2,6 +2,7 @@
 
 namespace TorneLIB\Module\Network\Wrappers;
 
+use TorneLIB\Exception\Constants;
 use TorneLIB\Exception\ExceptionHandler;
 use TorneLIB\Model\Type\authType;
 use TorneLIB\Model\Type\dataType;
@@ -25,7 +26,10 @@ class StreamWrapper implements Wrapper
 
     public function __construct()
     {
-        throw new ExceptionHandler('Unhandled wrapper: Stream. Make sure the developer checks for existence before loading.');
+        throw new ExceptionHandler(
+            'Unhandled wrapper: Stream. Make sure the developer checks for existence before loading.',
+            Constants::LIB_NETCURL_NETWRAPPER_UNHANDLED_WRAPPER
+        );
     }
 
     /**

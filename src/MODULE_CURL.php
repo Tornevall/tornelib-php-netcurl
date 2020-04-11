@@ -57,7 +57,10 @@ class MODULE_CURL
      */
     private function setChain()
     {
-        //throw new ExceptionHandler('Chaining has been removed from netcurl 6.1!', Constants::LIB_METHOD_OBSOLETE);
+        /*throw new ExceptionHandler(
+            'Chaining has been removed from netcurl 6.1!',
+            Constants::LIB_METHOD_OBSOLETE
+        );*/
         return false;
     }
 

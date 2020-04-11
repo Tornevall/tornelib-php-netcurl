@@ -227,6 +227,7 @@ class SoapClientWrapper implements Wrapper
                     (int)$code > 0 && !empty($message) ? $message : $this->soapWarningException['string'],
                     (int)$code > 0 ? $code : $this->soapWarningException['code'],
                     $soapException,
+                    $this,
                     true
                 );
             }
@@ -493,7 +494,9 @@ class SoapClientWrapper implements Wrapper
                 // Check if it is time to throw something specific.
                 $this->CONFIG->getHttpException(
                     $this->getHttpHead($httpHeader, 'message'),
-                    $this->getHttpHead($httpHeader)
+                    $this->getHttpHead($httpHeader),
+                    $soapFault,
+                    $this
                 );
             }
 

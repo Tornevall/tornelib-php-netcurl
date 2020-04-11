@@ -2,6 +2,7 @@
 
 namespace TorneLIB\Module\Network\Wrappers;
 
+use Exception;
 use TorneLIB\Exception\Constants;
 use TorneLIB\Exception\ExceptionHandler;
 use TorneLIB\Helpers\Version;
@@ -525,10 +526,11 @@ class CurlWrapper implements Wrapper
     /**
      * @param $curlHandle
      * @param $httpCode
+     * @param Exception $previousException
      * @throws ExceptionHandler
      * @since 6.1.0
      */
-    private function getCurlException($curlHandle, $httpCode)
+    private function getCurlException($curlHandle, $httpCode, $previousException = null)
     {
         $errorString = curl_error($curlHandle);
         $errorCode = curl_errno($curlHandle);
@@ -547,7 +549,7 @@ class CurlWrapper implements Wrapper
         if (empty($errorString) && !empty($httpHead)) {
             $errorString = $httpHead;
         }
-        $this->CONFIG->getHttpException($errorString, $httpCode, $this);
+        $this->CONFIG->getHttpException($errorString, $httpCode, null, $this);
     }
 
     /**
@@ -579,7 +581,7 @@ class CurlWrapper implements Wrapper
      *
      * @param array $funcArgs
      * @return bool
-     * @throws \Exception
+     * @throws Exception
      */
     private function getPriorCompatibilityArguments($funcArgs = [])
     {

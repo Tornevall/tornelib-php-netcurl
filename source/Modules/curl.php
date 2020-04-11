@@ -68,7 +68,6 @@ if (!class_exists('MODULE_CURL', NETCURL_CLASS_EXISTS_AUTOLOAD) &&
          * discover which TLS version that should be used. This is why the TLS connectivity "always" works.
          *
          * @var array
-         * @deprecated Not in use.
          */
         private $curlopt = [
             CURLOPT_CONNECTTIMEOUT => 6,
@@ -1583,15 +1582,17 @@ if (!class_exists('MODULE_CURL', NETCURL_CLASS_EXISTS_AUTOLOAD) &&
                 if (is_null($this->NETCURL_CURL_SESSION)) {
                     $this->initializeNetCurl();
                 }
+                // curlopt is normally in use from the top array, but as curl_setopt fails on invalid
+                // key/value combinations not all options here will be set properly.
                 if (is_array($curlOptArrayOrKey)) {
                     foreach ($curlOptArrayOrKey as $key => $val) {
                         $this->curlopt[$key] = $val;
-                        curl_setopt($this->NETCURL_CURL_SESSION, $key, $val);
+                        @curl_setopt($this->NETCURL_CURL_SESSION, $key, $val);
                     }
                 }
                 if (!is_array($curlOptArrayOrKey) && !empty($curlOptArrayOrKey) && !is_null($curlOptValue)) {
                     $this->curlopt[$curlOptArrayOrKey] = $curlOptValue;
-                    curl_setopt($this->NETCURL_CURL_SESSION, $curlOptArrayOrKey, $curlOptValue);
+                    @curl_setopt($this->NETCURL_CURL_SESSION, $curlOptArrayOrKey, $curlOptValue);
                 }
             }
         }
@@ -1613,7 +1614,7 @@ if (!class_exists('MODULE_CURL', NETCURL_CLASS_EXISTS_AUTOLOAD) &&
                 if (!is_array($curlOptArrayOrKey) && !empty($curlOptArrayOrKey) && !is_null($curlOptValue)) {
                     if (!isset($this->curlopt[$curlOptArrayOrKey])) {
                         $this->curlopt[$curlOptArrayOrKey] = $curlOptValue;
-                        curl_setopt($this->NETCURL_CURL_SESSION, $curlOptArrayOrKey, $curlOptValue);
+                        @curl_setopt($this->NETCURL_CURL_SESSION, $curlOptArrayOrKey, $curlOptValue);
                     }
                 }
             }

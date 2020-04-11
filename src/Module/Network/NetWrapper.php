@@ -9,6 +9,7 @@ use TorneLIB\Model\Type\dataType;
 use TorneLIB\Module\Config\WrapperConfig;
 use TorneLIB\Module\Network\Model\requestMethod;
 use TorneLIB\Module\Network\Model\Wrapper;
+use TorneLIB\Module\Network\Wrappers\SoapClientWrapper;
 
 /**
  * Class NetWrapper
@@ -39,6 +40,11 @@ class NetWrapper implements Wrapper
         'TorneLIB\Module\Network\Wrappers\GuzzleWrapper',
     ];
 
+    /**
+     * @var bool
+     */
+    private $isSoapRequest = false;
+
     public function __construct()
     {
         $this->initializeWrappers();
@@ -57,6 +63,26 @@ class NetWrapper implements Wrapper
 
         return $this->wrappers;
     }
+
+    /**
+     * @return bool
+     * @since 6.1.0
+     */
+    public function getIsSoap() {
+        return $this->isSoapRequest;
+    }
+
+    /**
+     * @var Wrapper $instance The instance is normally the wrapperinterface.
+     * @since 6.1.0
+     */
+    private $instance;
+
+    /**
+     * @var
+     * @since 6.1.0
+     */
+    private $instanceClass;
 
     /**
      * @return mixed
@@ -118,6 +144,44 @@ class NetWrapper implements Wrapper
     }
 
     /**
+     * @return mixed
+     * @throws ExceptionHandler
+     * @since 6.1.0
+     */
+    public function getBody() {
+        if (method_exists($this->instance, 'getBody')) {
+            return $this->instance->getBody();
+        }
+
+        throw new ExceptionHandler(
+            sprintf(
+                '%s instance %s does not support %s.',
+                __CLASS__,
+                $this->getInstanceClass(),
+                __FUNCTION__
+            )
+        );
+    }
+
+    /**
+     * @since 6.1.0
+     */
+    public function getParsed() {
+        if (method_exists($this->instance, 'getBody')) {
+            return $this->instance->getParsed();
+        }
+
+        throw new ExceptionHandler(
+            sprintf(
+                '%s instance %s does not support %s.',
+                __CLASS__,
+                $this->getInstanceClass(),
+                __FUNCTION__
+            )
+        );
+    }
+
+    /**
      * @param $name
      * @param $arguments
      * @return mixed
@@ -125,11 +189,22 @@ class NetWrapper implements Wrapper
      */
     public function __call($name, $arguments)
     {
+        $requestType = substr($name, 0, 3);
+        //$requestName = lcfirst(substr($name, 3));
+
         switch ($name) {
             case 'setAuth':
                 // Abbreviation for setAuthentication.
                 return call_user_func_array([$this, 'setAuthentication'], $arguments);
             default:
+                break;
+        }
+
+        switch ($requestType) {
+            default:
+                if ($instanceRequest = call_user_func_array([$this->instance, $name], $arguments)) {
+                    return $instanceRequest;
+                }
                 throw new \Exception(
                     sprintf('Undefined function: %s', $name)
                 );
@@ -153,6 +228,7 @@ class NetWrapper implements Wrapper
                 $currentWrapperClass === sprintf('TorneLIB\Module\Network\Wrappers\%s', $wrapperNameClass) ||
                 $currentWrapperClass === $wrapperNameClass
             ) {
+                $this->instanceClass = $wrapperNameClass;
                 $return = $wrapperClass;
                 break;
             }
@@ -168,7 +244,20 @@ class NetWrapper implements Wrapper
             );
         }
 
+        $this->instance = $return;
+
         return $return;
+    }
+
+    /**
+     * Returns the instance classname if set and ready.
+     *
+     * @return string
+     * @since 6.1.0
+     */
+    public function getInstanceClass()
+    {
+        return (string)$this->instanceClass;
     }
 
     /**
@@ -179,8 +268,9 @@ class NetWrapper implements Wrapper
         $return = null;
 
         if ($dataType === dataType::SOAP || preg_match('/\?wsdl|\&wsdl/i', $url)) {
-            /** @var Wrapper $classRequest */
+            /** @var SoapClientWrapper $classRequest */
             if (($classRequest = $this->getWrapper('SoapClientWrapper'))) {
+                $this->isSoapRequest = true;
                 $classRequest->setConfig($this->getConfig());
                 $return = $classRequest->request($url, $data, $method, $dataType);
             }

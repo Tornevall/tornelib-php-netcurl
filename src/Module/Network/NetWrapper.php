@@ -318,19 +318,21 @@ class NetWrapper implements Wrapper
      */
     public function request($url, $data = [], $method = requestMethod::METHOD_GET, $dataType = dataType::NORMAL)
     {
-        $return = null;
+        if (preg_match('/\?wsdl|\&wsdl/i', $url)) {
+            $dataType = dataType::SOAP;
+        }
 
-        if ($dataType === dataType::SOAP || preg_match('/\?wsdl|\&wsdl/i', $url)) {
-            /** @var SoapClientWrapper $classRequest */
-            if (($classRequest = $this->getWrapper('SoapClientWrapper'))) {
-                $this->isSoapRequest = true;
-                $classRequest->setConfig($this->getConfig());
-                $return = $classRequest->request($url, $data, $method, $dataType);
-            }
-        } elseif (($classRequest = $this->getWrapper('CurlWrapper'))) {
+        /** @var SoapClientWrapper $classRequest */
+        if ($dataType === dataType::SOAP && ($classRequest = $this->getWrapper('SoapClientWrapper'))) {
+            $this->isSoapRequest = true;
             $classRequest->setConfig($this->getConfig());
             $return = $classRequest->request($url, $data, $method, $dataType);
-        } else {
+        } elseif ($classRequest = $this->getWrapper('CurlWrapper')) {
+            $classRequest->setConfig($this->getConfig());
+            $return = $classRequest->request($url, $data, $method, $dataType);
+        }
+
+        if (is_null($return)) {
             throw new ExceptionHandler(
                 sprintf(
                     '%s instantiation failure: No wrapper available in function %s.',

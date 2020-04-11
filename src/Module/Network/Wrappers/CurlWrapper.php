@@ -472,7 +472,7 @@ class CurlWrapper implements Wrapper
         }
 
         if (is_string($this->CONFIG->getRequestUrl())) {
-            $requestUrl = $this->CONFIG->getRequestUrl(); // 5.4 @todo: throw it out.
+            $requestUrl = $this->CONFIG->getRequestUrl();
             if (!empty($requestUrl) &&
                 filter_var($this->CONFIG->getRequestUrl(), FILTER_VALIDATE_URL)
             ) {

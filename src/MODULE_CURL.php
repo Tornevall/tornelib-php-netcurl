@@ -36,6 +36,18 @@ class MODULE_CURL
      */
     private $flags;
 
+    /**
+     * @var array
+     */
+    private $deprecatedRequest = [
+        'get' => requestMethod::METHOD_GET,
+        'post' => requestMethod::METHOD_POST,
+        'put' => requestMethod::METHOD_PUT,
+        'delete' => requestMethod::METHOD_DELETE,
+        'head' => requestMethod::METHOD_HEAD,
+        'request' => requestMethod::METHOD_REQUEST,
+    ];
+
     public function __construct()
     {
         $this->netWrapper = new NetWrapper();
@@ -44,6 +56,8 @@ class MODULE_CURL
 
         //$cli = new Client('http://identifier.tornevall.net');
         //echo $cli->send();
+
+        return $this;
     }
 
     public function doGet($url = '', $postDataType = dataType::NORMAL)
@@ -68,10 +82,22 @@ class MODULE_CURL
     {
     }
 
+    /**
+     * @param $requestType
+     * @return requestMethod
+     */
+    private function getDeprecatedRequest($requestType)
+    {
+        return isset($this->deprecatedRequest[$requestType]) ? $this->deprecatedRequest[$requestType] : requestMethod::METHOD_GET;
+    }
+
     public function __call($name, $arguments)
     {
+        // Ignore failures.
         $requestType = substr($name, 0, 3);
         $requestName = lcfirst(substr($name, 3));
+        $deprecatedRequest = substr($name, 0, 2);
+        $deprecatedRequestName = lcfirst(substr($name, 2));
 
         if (method_exists($this, $name)) {
             return call_user_func_array(
@@ -100,6 +126,28 @@ class MODULE_CURL
             }
 
             return $getFlagResponse;
+        } elseif ($deprecatedRequest === 'do') {
+            switch ($deprecatedRequestName) {
+                case 'get':
+                    $return = $this->netWrapper->request(
+                        isset($arguments[0]) ? $arguments[0] : null,
+                        [],
+                        $this->getDeprecatedRequest('get'),
+                        isset($arguments[1]) ? $arguments[1] : null
+                    );
+                    break;
+                default:
+                    $return = $this->netWrapper->request(
+                        isset($arguments[0]) ? $arguments[0] : null,
+                        isset($arguments[1]) ? $arguments[1] : null,
+                        isset($arguments[2]) ? $this->getDeprecatedRequest(
+                            $arguments[2]
+                        ) : $this->getDeprecatedRequest('post'),
+                        isset($arguments[3]) ? $arguments[3] : null
+                    );
+                    break;
+            }
+            return $return;
         }
     }
 }

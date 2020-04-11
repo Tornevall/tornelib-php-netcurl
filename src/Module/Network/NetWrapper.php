@@ -107,7 +107,8 @@ class NetWrapper implements Wrapper
      * @return bool
      * @since 6.1.0
      */
-    public function getIsSoap() {
+    public function getIsSoap()
+    {
         return $this->isSoapRequest;
     }
 
@@ -187,7 +188,8 @@ class NetWrapper implements Wrapper
      * @throws ExceptionHandler
      * @since 6.1.0
      */
-    public function getBody() {
+    public function getBody()
+    {
         if (method_exists($this->instance, 'getBody')) {
             return $this->instance->getBody();
         }
@@ -205,7 +207,8 @@ class NetWrapper implements Wrapper
     /**
      * @since 6.1.0
      */
-    public function getParsed() {
+    public function getParsed()
+    {
         if (method_exists($this->instance, 'getBody')) {
             return $this->instance->getParsed();
         }
@@ -324,6 +327,18 @@ class NetWrapper implements Wrapper
                 $classRequest->setConfig($this->getConfig());
                 $return = $classRequest->request($url, $data, $method, $dataType);
             }
+        } elseif (($classRequest = $this->getWrapper('CurlWrapper'))) {
+            $classRequest->setConfig($this->getConfig());
+            $return = $classRequest->request($url, $data, $method, $dataType);
+        } else {
+            throw new ExceptionHandler(
+                sprintf(
+                    '%s instantiation failure: No wrapper available in function %s.',
+                    __CLASS__,
+                    __FUNCTION__
+                ),
+                Constants::LIB_NETCURL_NETWRAPPER_NO_DRIVER_FOUND
+            );
         }
 
         return $return;

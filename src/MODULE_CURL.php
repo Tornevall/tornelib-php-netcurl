@@ -140,10 +140,10 @@ class MODULE_CURL
                     $return = $this->netWrapper->request(
                         isset($arguments[0]) ? $arguments[0] : null,
                         isset($arguments[1]) ? $arguments[1] : null,
-                        isset($arguments[2]) ? $this->getDeprecatedRequest(
-                            $arguments[2]
+                        isset($deprecatedRequestName) ? $this->getDeprecatedRequest(
+                            $deprecatedRequestName
                         ) : $this->getDeprecatedRequest('post'),
-                        isset($arguments[3]) ? $arguments[3] : null
+                        isset($arguments[2]) ? $arguments[2] : null
                     );
                     break;
             }

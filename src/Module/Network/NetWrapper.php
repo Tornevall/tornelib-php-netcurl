@@ -224,6 +224,26 @@ class NetWrapper implements Wrapper
     }
 
     /**
+     * @inheritDoc
+     */
+    public function getCode()
+    {
+        if (method_exists($this->instance, 'getCode')) {
+            return $this->instance->getCode();
+        }
+
+        throw new ExceptionHandler(
+            sprintf(
+                '%s instance %s does not support %s.',
+                __CLASS__,
+                $this->getInstanceClass(),
+                __FUNCTION__
+            )
+        );
+    }
+
+
+    /**
      * @param $name
      * @param $arguments
      * @return mixed

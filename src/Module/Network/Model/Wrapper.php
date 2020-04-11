@@ -60,6 +60,12 @@ interface Wrapper
     public function getParsed();
 
     /**
+     * @return mixed
+     * @since 6.1.0
+     */
+    public function getCode();
+
+    /**
      * @return string
      */
     public function getVersion();

@@ -45,6 +45,7 @@ if (!class_exists('MODULE_SOAP', NETCURL_CLASS_EXISTS_AUTOLOAD) &&
      *
      * @package TorneLIB
      * @since   6.0.20
+     * @deprecated In v6.1 MODULE_SOAP is replaced by SoapClientWrapper.
      */
     class MODULE_SOAP extends MODULE_CURL
     {

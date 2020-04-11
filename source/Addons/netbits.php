@@ -42,6 +42,7 @@ if (!class_exists('MODULE_NETBITS', NETCURL_CLASS_EXISTS_AUTOLOAD) &&
      *
      * @package TorneLIB
      * @version 6.0.1
+     * @deprecated Use tornevall/tornelib-php-bitmask instead!
      */
     class MODULE_NETBITS
     {

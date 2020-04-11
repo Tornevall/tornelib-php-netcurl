@@ -86,7 +86,16 @@ class MODULE_CURL
             return call_user_func_array([$this->flags, 'setFlag'], $arguments);
         } elseif ($requestType === 'get') {
             $arguments = array_merge([$requestName], $arguments);
-            return call_user_func_array([$this->flags, 'getFlag'], $arguments);
+            $getFlagResponse = call_user_func_array([$this->flags, 'getFlag'], $arguments);
+
+            if (!is_null($this->netWrapper) && method_exists($this->netWrapper, $name)) {
+                return call_user_func_array(
+                    [$this->netWrapper, $name],
+                    $arguments
+                );
+            }
+
+            return $getFlagResponse;
         }
     }
 }

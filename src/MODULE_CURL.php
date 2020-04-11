@@ -16,6 +16,7 @@ use TorneLIB\Module\Network\NetWrapper;
  *
  * @package TorneLIB
  * @version 6.1.0
+ * @since   6.0.20
  * @deprecated You should consider NetWrapper instead.
  */
 class MODULE_CURL

@@ -22,9 +22,6 @@
         }
     ],
     "autoload": {
-        "files": [
-            "src/init.php"
-        ],
         "psr-4": {
             "TorneLIB\\": "src/"
         }

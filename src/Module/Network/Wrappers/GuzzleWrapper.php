@@ -91,4 +91,12 @@ class GuzzleWrapper implements Wrapper
     {
         // TODO: Implement getParsed() method.
     }
+
+    /**
+     * @inheritDoc
+     */
+    public function getCode()
+    {
+        // TODO: Implement getCode() method.
+    }
 }

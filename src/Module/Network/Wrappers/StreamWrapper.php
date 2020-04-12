@@ -142,4 +142,12 @@ class StreamWrapper implements Wrapper
     {
         // TODO: Implement getParsed() method.
     }
+
+    /**
+     * @inheritDoc
+     */
+    public function getCode()
+    {
+        // TODO: Implement getCode() method.
+    }
 }

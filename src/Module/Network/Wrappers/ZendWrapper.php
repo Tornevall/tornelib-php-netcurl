@@ -90,4 +90,12 @@ class ZendWrapper implements Wrapper
     {
         // TODO: Implement request() method.
     }
+
+    /**
+     * @inheritDoc
+     */
+    public function getCode()
+    {
+        // TODO: Implement getCode() method.
+    }
 }

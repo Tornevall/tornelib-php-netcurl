@@ -11,6 +11,12 @@ if (!defined('NETCURL_VERSION')) {
     define('NETCURL_VERSION', '6.1.0');
 }
 
+/**
+ * Interface Wrapper Interface with basic setup that should be present in all modules included in this package.
+ * @package TorneLIB\Module\Network\Model
+ * @version 6.1.0
+ * @since 6.1.0
+ */
 interface Wrapper
 {
     /**

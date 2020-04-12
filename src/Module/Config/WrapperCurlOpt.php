@@ -3,10 +3,13 @@
 namespace TorneLIB\Module\Config;
 
 /**
- * Class WrapperCurlOpt
+ * Class WrapperCurlOpt Protective layour for CURLOPT constants, in case they are not installed via curl.
+ * Normally, when curl is installed with PHP, CURLOPT_<constant> is available. But if they are not present, this could
+ * cause warnings or worse in a system that uses them. This is the failover class.
  *
  * @package TorneLIB\Module\Config
  * @version 6.1.0
+ * @since 6.1.0
  */
 abstract class WrapperCurlOpt
 {

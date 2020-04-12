@@ -16,12 +16,11 @@ use TorneLIB\Utils\Ini;
 
 /**
  * Class WrapperConfig
- *
- * Shared configurator. All wrapper services that needs shared configuration like credentials, SSL setup, etc, goes
- * here to set this up.
+ * Configuration handler. All wrapper services that needs shared configuration like credentials, SSL setup, etc.
  *
  * @package Module\Config
  * @version 6.1.0
+ * @since 6.1.0
  */
 class WrapperConfig
 {

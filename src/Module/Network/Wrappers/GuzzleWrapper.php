@@ -12,6 +12,14 @@ use TorneLIB\Module\Network\Model\requestMethod;
 use TorneLIB\Module\Network\Model\Wrapper;
 use TorneLIB\Utils\Generic;
 
+/**
+ * Class GuzzleWrapper Prepared wrapper for Guzzle, if preferred over regular drivers. Probably quite unnecessary
+ * since Guzzle uses curl and/or streams.
+ *
+ * @package TorneLIB\Module\Network\Wrappers
+ * @version 6.1.0
+ * @since 6.0 Wrapper was included in 6.0 but with another look.
+ */
 class GuzzleWrapper implements Wrapper
 {
     public function __construct()

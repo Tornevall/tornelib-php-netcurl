@@ -6,12 +6,12 @@ use Exception;
 use TorneLIB\Flags;
 
 /**
- * Class SSL
- *
- * Imports and facelift from MODULE_SSH v6.0 - used for SoapClient and standard streams.
+ * Class SSL WrapperConfig for SSL related requests. Sets up stream contexts if necessary (for SOAP) and settings
+ * for curl, etc.
  *
  * @package TorneLIB\Helpers
  * @version 6.1.0
+ * @since 6.1.0
  */
 class WrapperSSL
 {

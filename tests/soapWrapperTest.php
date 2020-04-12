@@ -14,6 +14,10 @@ try {
     die($e->getMessage());
 }
 
+/**
+ * Class soapWrapperTest
+ * Tests for all special SoapClient-requests.
+ */
 class soapWrapperTest extends TestCase
 {
     private $rEcomPipeU = 'tornevall';

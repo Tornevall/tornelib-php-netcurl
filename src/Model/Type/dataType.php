@@ -14,4 +14,5 @@ class dataType
     const JSON = 1;
     const SOAP = 2;
     const XML = 3;
+    const SOAP_XML = 4;
 }

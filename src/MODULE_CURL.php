@@ -11,8 +11,7 @@ use TorneLIB\Module\Network\NetWrapper;
 
 /**
  * Class MODULE_CURL
- *
- *  Passthrough client that v6.0 remember.
+ * Passthrough client that v6.0 remember.
  *
  * @package TorneLIB
  * @version 6.1.0

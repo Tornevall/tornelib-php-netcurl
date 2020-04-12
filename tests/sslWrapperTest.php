@@ -13,6 +13,10 @@ try {
     die($e->getMessage());
 }
 
+/**
+ * Class sslWrapperTest
+ * Tests for the sslWrapper that is included via ConfigWrapper
+ */
 class sslWrapperTest extends TestCase
 {
     /**

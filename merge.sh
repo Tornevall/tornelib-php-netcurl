@@ -23,13 +23,13 @@ do
     fi
 done
 
-crypto=`find |grep tornevall_crypto.php`
+crypto=`find |grep MODULE_CRYPTO.php`
 if [ "" != "$crypto" ] ; then
     echo "Merging ${crypto} into ${mergeTo}"
     sed -e '1,/namespace/d' $crypto >>${mergeTo}
 fi
 
-io=`find |grep tornevall_io.php`
+io=`find |grep MODULE_IO.php`
 if [ "" != "$io" ] ; then
     echo "Merging ${io} into ${mergeTo}"
     sed -e '1,/namespace/d' $io >>${mergeTo}

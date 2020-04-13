@@ -6,6 +6,7 @@ use Exception;
 use TorneLIB\Exception\Constants;
 use TorneLIB\Exception\ExceptionHandler;
 use TorneLIB\Helpers\Version;
+use TorneLIB\IO\Data\Content;
 use TorneLIB\Model\Type\authType;
 use TorneLIB\Model\Type\dataType;
 use TorneLIB\Model\Type\requestMethod;
@@ -134,7 +135,7 @@ class CurlWrapper implements Wrapper
             $return = (new Generic())->getVersionByClassDoc(__CLASS__);
         }
 
-        return $this->version;
+        return $return;
     }
 
     /**
@@ -175,6 +176,7 @@ class CurlWrapper implements Wrapper
 
     /**
      * @param $curlHandle
+     * @return CurlWrapper
      */
     private function setCurlRequestMethod($curlHandle)
     {
@@ -201,6 +203,8 @@ class CurlWrapper implements Wrapper
                 $this->setOptionCurl($curlHandle, CURLOPT_CUSTOMREQUEST, 'GET');
                 break;
         }
+
+        return $this;
     }
 
     /**
@@ -213,6 +217,9 @@ class CurlWrapper implements Wrapper
         $requestData = $this->CONFIG->getRequestData();
 
         switch ($this->CONFIG->getRequestDataType()) {
+            case dataType::XML:
+                $this->setCurlPostXmlHeader($curlHandle, $requestData);
+                break;
             case dataType::JSON:
                 $this->setCurlPostJsonHeader($curlHandle, $requestData);
                 break;
@@ -242,6 +249,30 @@ class CurlWrapper implements Wrapper
         }
 
         $this->customPreHeaders['Content-Type'] = $jsonContentType;
+        $this->customPreHeaders['Content-Length'] = strlen($requestData);
+        $this->setOptionCurl($curlHandle, CURLOPT_POSTFIELDS, $requestData);
+
+        return $this;
+    }
+
+    /**
+     * @param $curlHandle
+     * @param $requestData
+     * @return $this
+     * @throws ExceptionHandler
+     * @since 6.1.0
+     * @todo Convert arrayed data to XML.
+     */
+    public function setCurlPostXmlHeader($curlHandle, $requestData)
+    {
+        if (is_array($requestData)) {
+            throw new ExceptionHandler(
+                'Convert arrayed data to XML error - no parsed present!',
+                Constants::LIB_UNHANDLED
+            );
+        }
+
+        $this->customPreHeaders['Content-Type'] = 'Content-Type: text/xml; charset=utf-8';
         $this->customPreHeaders['Content-Length'] = strlen($requestData);
         $this->setOptionCurl($curlHandle, CURLOPT_POSTFIELDS, $requestData);
 
@@ -559,6 +590,8 @@ class CurlWrapper implements Wrapper
      */
     public function getCurlRequest()
     {
+        // Reset responseheader on each request.
+        $this->curlResponseHeaders = [];
         $this->initCurlHandle();
 
         if (!$this->isMultiCurl && is_resource($this->getCurlHandle())) {
@@ -585,34 +618,7 @@ class CurlWrapper implements Wrapper
      */
     private function getPriorCompatibilityArguments($funcArgs = [])
     {
-        $return = false;
-
-        foreach ($funcArgs as $funcIndex => $funcValue) {
-            switch ($funcIndex) {
-                case 0:
-                    if (!empty($funcValue)) {
-                        $this->CONFIG->setRequestUrl($funcValue);
-                        $return = true;
-                    }
-                    break;
-                case 1:
-                    if (is_array($funcValue) && count($funcValue)) {
-                        $this->CONFIG->setRequestData($funcValue);
-                        $return = true;
-                    }
-                    break;
-                case 2:
-                    $this->CONFIG->setRequestMethod($funcValue);
-                    $return = true;
-                    break;
-                case 3:
-                    $this->CONFIG->setRequestFlags(is_array($funcValue) ? $funcValue : []);
-                    $return = true;
-                    break;
-            }
-        }
-
-        return $return;
+        return $this->CONFIG->getCompatibilityArguments($funcArgs);
     }
 
     /**
@@ -724,6 +730,10 @@ class CurlWrapper implements Wrapper
 
         if (is_array($headerRequest) && count($headerRequest)) {
             foreach ($headerRequest as $headKey => $headArray) {
+                // Something has pushed in duplicates of a header row, so lets pop one.
+                if (count($headArray) > 1) {
+                    $headArray = array_pop($headArray);
+                }
                 if (is_array($headArray) && count($headArray) === 1) {
                     if (!$specificKey) {
                         $return[] = sprintf("%s: %s", $headKey, array_pop($headArray));
@@ -777,9 +787,14 @@ class CurlWrapper implements Wrapper
     public function getParsed()
     {
         $return = $this->getBody();
-        switch ($contentType = $this->getHeader('content-type')) {
-            case (preg_match('/application\/json/i', $contentType) ? true : false):
-                $return = json_decode($this->getBody());
+
+        // In v6.0, netcurl was much for guessing games. For 6.1, we trust content types.
+        switch (($contentType = $this->getHeader('content-type'))) {
+            case (!empty($contentType) && preg_match('/\/xml/i', $contentType) ? true : false):
+                $return = (new Content())->getFromXml($return);
+                break;
+            case (preg_match('/\/json/i', $contentType) ? true : false):
+                $return = json_decode($return);
                 break;
             default:
                 break;
@@ -799,20 +814,7 @@ class CurlWrapper implements Wrapper
      */
     public function request($url = '', $data = [], $method = requestMethod::METHOD_GET, $dataType = dataType::NORMAL)
     {
-        if (!empty($url)) {
-            $this->CONFIG->setRequestUrl($url);
-        }
-        if (is_array($data) && count($data)) {
-            $this->CONFIG->setRequestData($data);
-        }
-
-        if ($this->CONFIG->getRequestMethod() !== $method) {
-            $this->CONFIG->setRequestMethod($method);
-        }
-
-        if ($this->CONFIG->getRequestDataType() !== $dataType) {
-            $this->CONFIG->setRequestDataType($dataType);
-        }
+        $this->CONFIG->request($url, $data, $method, $dataType);
 
         $this->getCurlRequest();
         $this->getCurlParse();
@@ -822,9 +824,6 @@ class CurlWrapper implements Wrapper
 
     public function __call($name, $arguments)
     {
-    }
-
-    public function __get($name)
-    {
+        return $this;
     }
 }

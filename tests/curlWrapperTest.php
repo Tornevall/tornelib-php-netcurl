@@ -8,6 +8,7 @@ use TorneLIB\Exception\ExceptionHandler;
 use TorneLIB\Flags;
 use TorneLIB\Helpers\Browsers;
 use TorneLIB\Helpers\Version;
+use TorneLIB\IO\Data\Content;
 use TorneLIB\Module\Config\WrapperConfig;
 use TorneLIB\Module\Network\Wrappers\CurlWrapper;
 
@@ -171,8 +172,11 @@ class curlWrapperTest extends TestCase
      */
     public function basicGet()
     {
-        $wrapper = (new CurlWrapper())->request(sprintf('https://ipv4.netcurl.org/?func=%s', __FUNCTION__));
-        $parsed = $wrapper->getCurlRequest()->getParsed();
+        $wrapper = (new CurlWrapper())
+            ->request(sprintf('https://ipv4.netcurl.org/?func=%s', __FUNCTION__));
+
+        $parsed = $wrapper->getParsed();
+
         if (isset($parsed->ip)) {
             static::assertTrue(filter_var($parsed->ip, FILTER_VALIDATE_IP) ? true : false);
         }

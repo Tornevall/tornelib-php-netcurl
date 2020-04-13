@@ -47,7 +47,7 @@ class RssWrapper implements Wrapper
             $return = (new Generic())->getVersionByClassDoc(__CLASS__);
         }
 
-        return $this->version;
+        return $return;
     }
 
     /**

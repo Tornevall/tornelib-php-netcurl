@@ -14,6 +14,8 @@ use TorneLIB\Model\Type\requestMethod;
 use TorneLIB\Module\Config\WrapperConfig;
 use TorneLIB\Module\Network\Model\Wrapper;
 use TorneLIB\Utils\Generic;
+use TorneLIB\Utils\Ini;
+use TorneLIB\Utils\Security;
 
 /**
  * Class SoapClientWrapper
@@ -67,11 +69,13 @@ class SoapClientWrapper implements Wrapper
      */
     private $soapWarningException = ['code' => 0, 'string' => null];
 
+    /**
+     * SoapClientWrapper constructor.
+     * @throws ExceptionHandler
+     */
     public function __construct()
     {
-        if (!class_exists('SoapClient')) {
-            throw new ExceptionHandler('SOAP unavailable: SoapClient is missing.');
-        }
+        Security::getCurrentClassState('SoapClient');
 
         $this->CONFIG = new WrapperConfig();
         $this->CONFIG->setSoapRequest(true);
@@ -89,11 +93,12 @@ class SoapClientWrapper implements Wrapper
             $return = (new Generic())->getVersionByClassDoc(__CLASS__);
         }
 
-        return $this->version;
+        return $return;
     }
 
     /**
      * Reverse compatibility with v6.0 - returns true if any of the settings here are touched.
+     * Main function as it is duplicated is moved into WrapprConfig->getCompatibilityArguments()
      *
      * @param array $funcArgs
      * @return bool
@@ -102,34 +107,49 @@ class SoapClientWrapper implements Wrapper
      */
     private function getPriorCompatibilityArguments($funcArgs = [])
     {
-        $return = false;
+        return $this->CONFIG->getCompatibilityArguments($funcArgs);
+    }
 
-        foreach ($funcArgs as $funcIndex => $funcValue) {
-            switch ($funcIndex) {
-                case 0:
-                    if (!empty($funcValue)) {
-                        $this->CONFIG->setRequestUrl($funcValue);
-                        $return = true;
-                    }
-                    break;
-                case 1:
-                    if (is_array($funcValue) && count($funcValue)) {
-                        $this->CONFIG->setRequestData($funcValue);
-                        $return = true;
-                    }
-                    break;
-                case 2:
-                    $this->CONFIG->setRequestMethod($funcValue);
-                    $return = true;
-                    break;
-                case 3:
-                    $this->CONFIG->setRequestFlags(is_array($funcValue) ? $funcValue : []);
-                    $return = true;
-                    break;
-            }
-        }
+    /**
+     * @return mixed
+     * @since 6.1.0
+     */
+    public function getLastRequest() {
+        return (string)$this->soapClientContent['lastRequest'];
+    }
 
-        return $return;
+    /**
+     * @return mixed
+     * @since 6.1.0
+     */
+    public function getLastRequestHeaders() {
+        return (string)$this->soapClientContent['lastRequestHeaders'];
+    }
+
+    /**
+     * @return bool
+     * @since 6.1.0;
+     */
+    public function getLastResponse() {
+        return (string)$this->soapClientContent['lastResponse'];
+    }
+
+    /**
+     * @return string
+     * @since 6.1.0
+     */
+    public function getLastResponseHeaders() {
+        return (string)$this->soapClientContent['lastResponseHeaders'];
+    }
+
+    /**
+     * Returns an array of function from the soapcall.
+     *
+     * @return array
+     * @since 6.1.0
+     */
+    public function getFunctions() {
+        return (array)$this->soapClientContent['functions'];
     }
 
     /**

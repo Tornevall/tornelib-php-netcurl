@@ -26,13 +26,15 @@ namespace TorneLIB\Module\Network;
 
 use TorneLIB\Exception\Constants;
 use TorneLIB\Exception\ExceptionHandler;
+use TorneLIB\IO\Data\Content;
 use TorneLIB\Model\Type\authType;
 use TorneLIB\Model\Type\dataType;
 use TorneLIB\Module\Config\WrapperConfig;
-use TorneLIB\Module\Network\Model\requestMethod;
+use TorneLIB\Model\Type\requestMethod;
 use TorneLIB\Module\Network\Model\Wrapper;
 use TorneLIB\Module\Network\Wrappers\SoapClientWrapper;
 use TorneLIB\Utils\Generic;
+use TorneLIB\Utils\Security;
 
 /**
  * Class NetWrapper
@@ -68,6 +70,9 @@ class NetWrapper implements Wrapper
      */
     private $isSoapRequest = false;
 
+    /**
+     * @var string $version Internal version.
+     */
     private $version;
 
     public function __construct()
@@ -86,9 +91,13 @@ class NetWrapper implements Wrapper
             $return = (new Generic())->getVersionByClassDoc(__CLASS__);
         }
 
-        return $this->version;
+        return $return;
     }
 
+    /**
+     * @return mixed
+     * @since 6.1.0
+     */
     private function initializeWrappers()
     {
         $this->CONFIG = new WrapperConfig();
@@ -242,38 +251,6 @@ class NetWrapper implements Wrapper
         );
     }
 
-
-    /**
-     * @param $name
-     * @param $arguments
-     * @return mixed
-     * @throws \Exception
-     */
-    public function __call($name, $arguments)
-    {
-        $requestType = substr($name, 0, 3);
-        //$requestName = lcfirst(substr($name, 3));
-
-        switch ($name) {
-            case 'setAuth':
-                // Abbreviation for setAuthentication.
-                return call_user_func_array([$this, 'setAuthentication'], $arguments);
-            default:
-                break;
-        }
-
-        switch ($requestType) {
-            default:
-                if ($instanceRequest = call_user_func_array([$this->instance, $name], $arguments)) {
-                    return $instanceRequest;
-                }
-                throw new \Exception(
-                    sprintf('Undefined function: %s', $name)
-                );
-                break;
-        }
-    }
-
     /**
      * @param $wrapperNameClass
      * @return mixed
@@ -338,11 +315,22 @@ class NetWrapper implements Wrapper
      */
     public function request($url, $data = [], $method = requestMethod::METHOD_GET, $dataType = dataType::NORMAL)
     {
+        $return = null;
+
         if (preg_match('/\?wsdl|\&wsdl/i', $url)) {
-            $dataType = dataType::SOAP;
+            try {
+                Security::getCurrentClassState('SoapClient');
+                $dataType = dataType::SOAP;
+            } catch (ExceptionHandler $e) {
+                $method = requestMethod::METHOD_POST;
+                $dataType = dataType::XML;
+                if (!is_string($data) && !empty($data)) {
+                    $data = (new Content())->getXmlFromArray($data);
+                }
+            }
         }
 
-        /** @var SoapClientWrapper $classRequest */
+        /** @var Wrapper $classRequest */
         if ($dataType === dataType::SOAP && ($classRequest = $this->getWrapper('SoapClientWrapper'))) {
             $this->isSoapRequest = true;
             $classRequest->setConfig($this->getConfig());
@@ -364,5 +352,36 @@ class NetWrapper implements Wrapper
         }
 
         return $return;
+    }
+
+    /**
+     * @param $name
+     * @param $arguments
+     * @return mixed
+     * @throws \Exception
+     */
+    public function __call($name, $arguments)
+    {
+        $requestType = substr($name, 0, 3);
+        //$requestName = lcfirst(substr($name, 3));
+
+        switch ($name) {
+            case 'setAuth':
+                // Abbreviation for setAuthentication.
+                return call_user_func_array([$this, 'setAuthentication'], $arguments);
+            default:
+                break;
+        }
+
+        switch ($requestType) {
+            default:
+                if ($instanceRequest = call_user_func_array([$this->instance, $name], $arguments)) {
+                    return $instanceRequest;
+                }
+                throw new \Exception(
+                    sprintf('Undefined function: %s', $name)
+                );
+                break;
+        }
     }
 }

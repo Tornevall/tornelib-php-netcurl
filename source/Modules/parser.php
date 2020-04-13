@@ -1,5 +1,4 @@
 <?php
-
 /**
  * Copyright 2018 Tomas Tornevall & Tornevall Networks
  *
@@ -16,14 +15,14 @@
  * limitations under the License.
  *
  * Tornevall Networks netCurl library - Yet another http- and network communicator library
- * Each class in this library has its own version numbering to keep track of where the changes are. However, there is a
- * major version too.
- *
+ * Each class in this library has its own version numbering to keep track of where the changes are. However, there is a major version too.
  * @package TorneLIB
- * @version 6.0.3
+ * @version 6.0.4
  */
 
 namespace TorneLIB;
+
+use Exception;
 
 if (!class_exists('NETCURL_PARSER', NETCURL_CLASS_EXISTS_AUTOLOAD) &&
     !class_exists('TorneLIB\NETCURL_PARSER', NETCURL_CLASS_EXISTS_AUTOLOAD)
@@ -32,6 +31,7 @@ if (!class_exists('NETCURL_PARSER', NETCURL_CLASS_EXISTS_AUTOLOAD) &&
      * Class NETCURL_PARSER Network communications driver detection
      *
      * @package TorneLIB
+     * @deprecated netcurl 6.1 is rewritten without the guessing games.
      */
     class NETCURL_PARSER
     {
@@ -65,8 +65,7 @@ if (!class_exists('NETCURL_PARSER', NETCURL_CLASS_EXISTS_AUTOLOAD) &&
          * @param string $htmlContent
          * @param string $contentType
          * @param array $flags
-         *
-         * @throws \Exception
+         * @throws Exception
          * @since 6.0.0
          */
         public function __construct($htmlContent = '', $contentType = '', $flags = [])
@@ -88,7 +87,6 @@ if (!class_exists('NETCURL_PARSER', NETCURL_CLASS_EXISTS_AUTOLOAD) &&
 
         /**
          * @param bool $returnAsIs
-         *
          * @return null|string
          * @since 6.0.0
          */
@@ -100,7 +98,7 @@ if (!class_exists('NETCURL_PARSER', NETCURL_CLASS_EXISTS_AUTOLOAD) &&
                 }
 
                 return $this->getNull($this->IO->getFromJson($this->PARSE_CONTAINER));
-            } catch (\Exception $e) {
+            } catch (Exception $e) {
             }
 
             return null;
@@ -110,7 +108,6 @@ if (!class_exists('NETCURL_PARSER', NETCURL_CLASS_EXISTS_AUTOLOAD) &&
          * Enable/disable the parsing of Dom content
          *
          * @param bool $domContentProhibit
-         *
          * @since 6.0.3
          */
         public function setDomContentParser($domContentProhibit = false)
@@ -131,7 +128,6 @@ if (!class_exists('NETCURL_PARSER', NETCURL_CLASS_EXISTS_AUTOLOAD) &&
 
         /**
          * @param bool $returnAsIs
-         *
          * @return null|string
          * @since 6.0.0
          */
@@ -143,7 +139,7 @@ if (!class_exists('NETCURL_PARSER', NETCURL_CLASS_EXISTS_AUTOLOAD) &&
                 }
 
                 return $this->getNull($this->IO->getFromXml($this->PARSE_CONTAINER));
-            } catch (\Exception $e) {
+            } catch (Exception $e) {
             }
 
             return null;
@@ -151,7 +147,6 @@ if (!class_exists('NETCURL_PARSER', NETCURL_CLASS_EXISTS_AUTOLOAD) &&
 
         /**
          * @param bool $returnAsIs
-         *
          * @return null|string
          * @since 6.0.0
          */
@@ -163,7 +158,7 @@ if (!class_exists('NETCURL_PARSER', NETCURL_CLASS_EXISTS_AUTOLOAD) &&
                 }
 
                 return $this->getNull($this->IO->getFromYaml($this->PARSE_CONTAINER));
-            } catch (\Exception $e) {
+            } catch (Exception $e) {
             }
 
             return null;
@@ -171,7 +166,6 @@ if (!class_exists('NETCURL_PARSER', NETCURL_CLASS_EXISTS_AUTOLOAD) &&
 
         /**
          * @param bool $returnAsIs
-         *
          * @return null|string
          * @since 6.0.0
          */
@@ -183,7 +177,7 @@ if (!class_exists('NETCURL_PARSER', NETCURL_CLASS_EXISTS_AUTOLOAD) &&
                 }
 
                 return $this->getNull($this->IO->getFromSerializerInternal($this->PARSE_CONTAINER));
-            } catch (\Exception $e) {
+            } catch (Exception $e) {
             }
 
             return null;
@@ -191,7 +185,6 @@ if (!class_exists('NETCURL_PARSER', NETCURL_CLASS_EXISTS_AUTOLOAD) &&
 
         /**
          * @param string $testData
-         *
          * @return null|string
          * @since 6.0.0
          */
@@ -206,7 +199,7 @@ if (!class_exists('NETCURL_PARSER', NETCURL_CLASS_EXISTS_AUTOLOAD) &&
 
         /**
          * @return array|null|string
-         * @throws \Exception
+         * @throws Exception
          * @since 6.0.0
          */
         private function getContentByTest()
@@ -215,24 +208,14 @@ if (!class_exists('NETCURL_PARSER', NETCURL_CLASS_EXISTS_AUTOLOAD) &&
 
             if (!is_null($respond = $this->getContentByJson())) {
                 $returnNonNullValue = $respond;
-            } else {
-                if (!is_null($respond = $this->getContentBySerial())) {
-                    $returnNonNullValue = $respond;
-                } else {
-                    if (!is_null($respond = $this->getContentByXml())) {
-                        $returnNonNullValue = $respond;
-                    } else {
-                        if (!is_null($respond = $this->getContentByYaml())) {
-                            $returnNonNullValue = $respond;
-                        } else {
-                            if (!$this->NETCURL_PROHIBIT_DOMCONTENT_PARSE &&
-                                !is_null($response = $this->getDomElements())
-                            ) {
-                                return $response;
-                            }
-                        }
-                    }
-                }
+            } elseif (!is_null($respond = $this->getContentBySerial())) {
+                $returnNonNullValue = $respond;
+            } elseif (!is_null($respond = $this->getContentByXml())) {
+                $returnNonNullValue = $respond;
+            } elseif (!is_null($respond = $this->getContentByYaml())) {
+                $returnNonNullValue = $respond;
+            } elseif (!$this->NETCURL_PROHIBIT_DOMCONTENT_PARSE && !is_null($response = $this->getDomElements())) {
+                return $response;
             }
 
             return $returnNonNullValue;
@@ -244,7 +227,6 @@ if (!class_exists('NETCURL_PARSER', NETCURL_CLASS_EXISTS_AUTOLOAD) &&
          *
          * @param array $childNode
          * @param string $getAs
-         *
          * @return array
          * @since 6.0.0
          */
@@ -330,7 +312,7 @@ if (!class_exists('NETCURL_PARSER', NETCURL_CLASS_EXISTS_AUTOLOAD) &&
 
         /**
          * @return array
-         * @throws \Exception
+         * @throws Exception
          * @since 6.0.0
          */
         private function getDomElements()
@@ -365,7 +347,7 @@ if (!class_exists('NETCURL_PARSER', NETCURL_CLASS_EXISTS_AUTOLOAD) &&
                     }
                 }
             } else {
-                throw new \Exception(
+                throw new Exception(
                     NETCURL_CURL_CLIENTNAME . " HtmlParse exception: Can not parse DOMDocuments without the DOMDocuments class",
                     $this->NETWORK->getExceptionCode("NETCURL_DOMDOCUMENT_CLASS_MISSING")
                 );

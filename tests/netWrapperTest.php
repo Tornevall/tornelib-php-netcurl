@@ -28,10 +28,7 @@ class netWrapperTest extends TestCase
         static::assertTrue(count($netWrap->getWrappers()) ? true : false);
     }
 
-    /**
-     * @test
-     */
-    public function noSoapClient()
+    /*public function noSoapClient()
     {
         try {
             $wrapper = (new NetWrapper())
@@ -53,7 +50,6 @@ class netWrapperTest extends TestCase
         Flag::setFlag('testmode_disabled_SoapClient');
 
         try {
-            /** @var NetWrapper $wrapper */
             $wrapper = (new NetWrapper())
                 ->setAuthentication($this->rEcomPipeU, $this->rEcomPipeP)
                 ->request($this->wsdl, $asXml)
@@ -73,5 +69,5 @@ class netWrapperTest extends TestCase
         static::assertTrue(
             is_array($wrapper)
         );
-    }
+    }*/
 }

@@ -916,6 +916,43 @@ class WrapperConfig
     }
 
     /**
+     * @param array $funcArgs
+     * @return bool
+     * @throws \Exception
+     */
+    public function getCompatibilityArguments($funcArgs = [])
+    {
+        $return = false;
+
+        foreach ($funcArgs as $funcIndex => $funcValue) {
+            switch ($funcIndex) {
+                case 0:
+                    if (!empty($funcValue)) {
+                        $this->setRequestUrl($funcValue);
+                        $return = true;
+                    }
+                    break;
+                case 1:
+                    if (is_array($funcValue) && count($funcValue)) {
+                        $this->setRequestData($funcValue);
+                        $return = true;
+                    }
+                    break;
+                case 2:
+                    $this->setRequestMethod($funcValue);
+                    $return = true;
+                    break;
+                case 3:
+                    $this->setRequestFlags(is_array($funcValue) ? $funcValue : []);
+                    $return = true;
+                    break;
+            }
+        }
+
+        return $return;
+    }
+
+    /**
      * Internal configset magics.
      *
      * @param $name
@@ -965,6 +1002,36 @@ class WrapperConfig
                 break;
             default:
                 break;
+        }
+
+        return $this;
+    }
+
+    /**
+     * @param string $url
+     * @param array $data
+     * @param int $method
+     * @param int $dataType
+     * @return $this
+     * @since 6.1.0
+     */
+    public function request($url = '', $data = [], $method = requestMethod::METHOD_GET, $dataType = dataType::NORMAL)
+    {
+        if (!empty($url)) {
+            $this->setRequestUrl($url);
+        }
+        if ((is_array($data) && count($data)) ||
+            (is_string($data) && strlen($data) > 0)
+        ) {
+            $this->setRequestData($data);
+        }
+
+        if ($this->getRequestMethod() !== $method) {
+            $this->setRequestMethod($method);
+        }
+
+        if ($this->getRequestDataType() !== $dataType) {
+            $this->setRequestDataType($dataType);
         }
 
         return $this;

@@ -30,24 +30,15 @@ class netWrapperTest extends TestCase
 
     /**
      * @test
-     * @throws ExceptionHandler
      */
     public function noSoapClient()
     {
-        $wrapper = (new NetWrapper())
-            ->setAuthentication($this->rEcomPipeU, $this->rEcomPipeP)
-            ->request($this->wsdl);
-        $wrapper->getPaymentMethods();
-        $asXml = $wrapper->getLastRequest();
-
-        Flag::setFlag('testmode_disabled_SoapClient');
-
         try {
-            /** @var NetWrapper $wrapper */
             $wrapper = (new NetWrapper())
                 ->setAuthentication($this->rEcomPipeU, $this->rEcomPipeP)
-                ->request($this->wsdl, $asXml)
-                ->getParsed();
+                ->request($this->wsdl);
+            $wrapper->getPaymentMethods();
+            $asXml = $wrapper->getLastRequest();
         } catch (ExceptionHandler $e) {
             static::markTestSkipped(
                 sprintf(
@@ -59,10 +50,28 @@ class netWrapperTest extends TestCase
             return;
         }
 
-        Flag::deleteFlag('testmode_disabled_SoapClient');
+        Flag::setFlag('testmode_disabled_SoapClient');
+
+        try {
+            /** @var NetWrapper $wrapper */
+            $wrapper = (new NetWrapper())
+                ->setAuthentication($this->rEcomPipeU, $this->rEcomPipeP)
+                ->request($this->wsdl, $asXml)
+                ->getParsed();
+        } catch (ExceptionHandler $e) {
+            Flag::deleteFlag('testmode_disabled_SoapClient');
+            static::markTestSkipped(
+                sprintf(
+                    'Skipped test due to code %s, message %s.',
+                    $e->getCode(),
+                    $e->getMessage()
+                )
+            );
+            return;
+        }
 
         static::assertTrue(
-            is_object($wrapper)
+            is_array($wrapper)
         );
     }
 }

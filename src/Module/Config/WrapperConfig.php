@@ -213,7 +213,7 @@ class WrapperConfig
             'CURLOPT_SSL_VERIFYHOST' => 2,
             'CURLOPT_ENCODING' => 1,
             'CURLOPT_USERAGENT' => (new Browsers())->getBrowser(),
-            'CURLOPT_SSLVERSION' => CURL_SSLVERSION_DEFAULT,
+            'CURLOPT_SSLVERSION' => WrapperCurlOpt::NETCURL_CURL_SSLVERSION_DEFAULT,
             'CURLOPT_FOLLOWLOCATION' => false,
             'CURLOPT_HTTPHEADER' => ['Accept-Language: en'],
         ]);

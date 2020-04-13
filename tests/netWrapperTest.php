@@ -59,6 +59,8 @@ class netWrapperTest extends TestCase
             return;
         }
 
+        Flag::deleteFlag('testmode_disabled_SoapClient');
+
         static::assertTrue(
             is_object($wrapper)
         );

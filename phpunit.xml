@@ -8,12 +8,12 @@
 
     <filter>
         <whitelist processUncoveredFilesFromWhitelist="true">
-            <directory>src</directory>
+            <directory suffix=".php">./src</directory>
         </whitelist>
     </filter>
 
     <logging>
-        <log type="coverage-xml" target="build/coverage/xml"/>
         <log type="coverage-html" target="build/coverage/html"/>
+        <log type="coverage-xml" target="build/coverage/xml"/>
     </logging>
 </phpunit>

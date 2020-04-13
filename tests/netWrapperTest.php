@@ -48,7 +48,6 @@ class netWrapperTest extends TestCase
             ->request($this->wsdl, $asXml)
             ->getParsed();
 
-        // @todo IO-Wrapper not parsing xml from soap properly.
         static::assertTrue(
             is_object($wrapper)
         );

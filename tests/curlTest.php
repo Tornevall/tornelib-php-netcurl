@@ -872,8 +872,9 @@ class curlTest extends TestCase
      * @test
      * @testdox Test SoapClient by making a standard doGet()
      * @throws Exception
+     * @deprecated SoapClient and local requests like this is not properly supported.
      */
-    public function wsdlSoapClient()
+    /*public function wsdlSoapClient()
     {
         $this->__setUp();
         $assertThis = true;
@@ -893,7 +894,7 @@ class curlTest extends TestCase
 
         }
         static::assertTrue($assertThis);
-    }
+    }*/
 
     /**
      * @test

@@ -1,21 +1,19 @@
 <?php
 /**
  * Copyright 2018 Tomas Tornevall & Tornevall Networks
- *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
  * http://www.apache.org/licenses/LICENSE-2.0
- *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  * Tornevall Networks netCurl library - Yet another http- and network communicator library
- * Each class in this library has its own version numbering to keep track of where the changes are. However, there is a major version too.
+ * Each class in this library has its own version numbering to keep track of where the changes are. However, there is a
+ * major version too.
+ *
  * @package TorneLIB
  * @version 6.0.4
  */
@@ -168,19 +166,46 @@ if (!class_exists('NETCURL_PARSER', NETCURL_CLASS_EXISTS_AUTOLOAD) &&
          * @param bool $returnAsIs
          * @return null|string
          * @since 6.0.0
+         * @deprecated This function is not supported in version 6.1.0 and above.
          */
         public function getContentBySerial($returnAsIs = false)
         {
+            $return = null;
+
             try {
                 if ($returnAsIs) {
-                    return $this->IO->getFromSerializerInternal($this->PARSE_CONTAINER);
+                    return $this->getFromSerializerInternal($this->PARSE_CONTAINER);
                 }
 
-                return $this->getNull($this->IO->getFromSerializerInternal($this->PARSE_CONTAINER));
+                return $this->getNull($this->getFromSerializerInternal($this->PARSE_CONTAINER));
             } catch (Exception $e) {
             }
 
-            return null;
+            return $return;
+        }
+
+        /**
+         * Return serialized-by-php content. Not supported in the IO-package from v6.1 so we're taking it home.
+         *
+         * @param string $serialInput
+         * @param bool $assoc
+         * @return mixed|null
+         * @since 6.0.26
+         * @deprecated This function is not supported in version 6.1.0 and above.
+         */
+        public function getFromSerializerInternal($serialInput = '', $assoc = false)
+        {
+            // Skip this if there's nothing to serialize, as some error handlers might pick up errors even if we
+            // suppress them.
+            $trimData = trim($serialInput);
+            if (empty($trimData)) {
+                return null;
+            }
+            if (!$assoc) {
+                return @unserialize($serialInput);
+            } else {
+                return $this->arrayObjectToStdClass(@unserialize($serialInput));
+            }
         }
 
         /**

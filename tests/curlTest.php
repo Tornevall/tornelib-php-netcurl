@@ -464,6 +464,7 @@ class curlTest extends TestCase
      * @test
      * @testdox Check if we can parse a serialized response
      * @throws Exception
+     * @deprecated This function is not supported in version 6.1.0 and above.
      */
     public function getSerialize()
     {
@@ -477,8 +478,9 @@ class curlTest extends TestCase
      * @test
      * @testdox Test if XML/Serializer are parsed correctly
      * @throws Exception
+     * @deprecated Not supported in neither v6.1 nor v6.0 release of IO-lib as serializers need to be installed.
      */
-    public function getXmlSerializer()
+    /*public function getXmlSerializer()
     {
         if (!class_exists('XML_Serializer')) {
             static::markTestSkipped('XML_Serializer test can not run without XML_Serializer');
@@ -489,7 +491,7 @@ class curlTest extends TestCase
         // XML_Serializer
         $container = $this->getParsed($this->urlGet("ssl&bool&o=xml&method=get"));
         static::assertTrue(isset($container->using) && is_object($container->using) && $container->using['0'] == "XML/Serializer");
-    }
+    }*/
 
     /**
      * @param $container
@@ -513,8 +515,9 @@ class curlTest extends TestCase
      * @test
      * @testdox Test if SimpleXml are parsed correctly
      * @throws Exception
+     * @deprecated Not properly supported over two release branches.
      */
-    public function getSimpleXml()
+    /*public function getSimpleXml()
     {
         $this->pemDefault();
         // SimpleXMLElement
@@ -524,7 +527,7 @@ class curlTest extends TestCase
             is_object($container->using) &&
             $container->using == "SimpleXMLElement"
         );
-    }
+    }*/
 
     /**
      * @test
@@ -1173,7 +1176,8 @@ class curlTest extends TestCase
 
     /**
      * @test
-     * @testdox Safe mode and basepath cechking without paramters - in our environment, open_basedir is empty and safe_mode is off
+     * @testdox Safe mode and basepath cechking without paramters - in our environment, open_basedir is empty and
+     *     safe_mode is off
      */
     public function getSafePermissionFull()
     {

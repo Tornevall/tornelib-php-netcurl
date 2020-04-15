@@ -80,6 +80,7 @@ class skippablePhpTest extends TestCase
         }
         if (!$serviceFound) {
             static::markTestSkipped("Skip TOR Network tests: TOR Service not found in the current control");
+            return;
         } else {
             $this->CURL->setProxy($this->TorSetupAddress, $this->TorSetupType);
             $this->CURL->doGet(\TESTURLS::getUrlSimpleJson());

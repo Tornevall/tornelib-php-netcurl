@@ -67,6 +67,8 @@ if (!class_exists('MODULE_CURL', NETCURL_CLASS_EXISTS_AUTOLOAD) &&
          * CURLOPT_SSLVERSION is set to CURL_SSLVERSION_DEFAULT which means that curl tries to automatically
          * discover which TLS version that should be used. This is why the TLS connectivity "always" works.
          *
+         * 0=CURL_SSLVERSION_DEFAULT, some systems will throw exceptions when lost.
+         *
          * @var array
          */
         private $curlopt = [
@@ -78,7 +80,7 @@ if (!class_exists('MODULE_CURL', NETCURL_CLASS_EXISTS_AUTOLOAD) &&
             CURLOPT_TIMEOUT => 10,
             CURLOPT_USERAGENT => 'TorneLIB-PHPcURL',
             CURLOPT_POST => true,
-            CURLOPT_SSLVERSION => CURL_SSLVERSION_DEFAULT,
+            CURLOPT_SSLVERSION => 0,
             CURLOPT_FOLLOWLOCATION => false,
             CURLOPT_HTTPHEADER => ['Accept-Language: en'],
         ];

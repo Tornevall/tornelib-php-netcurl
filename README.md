@@ -2,6 +2,14 @@
 
 [Full documents are located here](https://docs.tornevall.net/x/KwCy)
 
+## This package is about to get deprecated
+
+Documentation for v6.1 is located [here](https://docs.tornevall.net/display/TORNEVALL/NETCURLv6.1).
+
+## Contact and live information
+
+There's a [Mailinglist](https://lists.tornevall.net/pipermail/netcurl/) put up for everything concerning netcurl. That's also where you can find release information (for now). You can subscribe to the list [here](https://lists.tornevall.net/mailman/listinfo/netcurl).
+
 
 ## Compatibility span (Supported PHP versions)
 

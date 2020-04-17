@@ -6,3 +6,5 @@ runit.sh
 **.swp
 merge.sh
 build
+.phpunit.result.cache
+coverage

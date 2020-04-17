@@ -336,6 +336,7 @@ class soapWrapperTest extends TestCase
         $currentTimeStamp = time();
 
         // Prepare SOAP-wrapper.
+        /** @var SoapClientWrapper $rWrapper */
         $rWrapper = (new SoapClientWrapper($this->wsdl_config))
             ->setWsdlCache(WSDL_CACHE_DISK, 60)
             ->setAuthentication(
@@ -361,6 +362,8 @@ class soapWrapperTest extends TestCase
                 )->uriTemplate)['query'],
             $uriTemplate
         );
+
+        $last = $rWrapper->getLastResponse();
 
         static::assertTrue((int)$uriTemplate['ts'] === $currentTimeStamp);
     }

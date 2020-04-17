@@ -8,7 +8,6 @@ use TorneLIB\Exception\ExceptionHandler;
 use TorneLIB\Flags;
 use TorneLIB\Helpers\Browsers;
 use TorneLIB\Helpers\Version;
-use TorneLIB\IO\Data\Content;
 use TorneLIB\Module\Config\WrapperConfig;
 use TorneLIB\Module\Network\Wrappers\CurlWrapper;
 
@@ -126,13 +125,23 @@ class curlWrapperTest extends TestCase
     }
 
     /**
+     * @return WrapperConfig
+     */
+    private function setTestAgent()
+    {
+        return (new WrapperConfig())->setUserAgent(
+            sprintf('netcurl-%s', NETCURL_VERSION)
+        );
+    }
+
+    /**
      * @test
      * Make multiple URL request s.
      * @throws ExceptionHandler
      */
     public function basicMultiGet()
     {
-        $wrapper = (new CurlWrapper())->request([
+        $wrapper = (new CurlWrapper())->setConfig($this->setTestAgent())->request([
             sprintf('https://ipv4.netcurl.org/ip.php?func=%s', __FUNCTION__),
             sprintf('https://ipv4.netcurl.org/?func=%s', __FUNCTION__),
         ]);
@@ -173,6 +182,7 @@ class curlWrapperTest extends TestCase
     public function basicGet()
     {
         $wrapper = (new CurlWrapper())
+            ->setConfig($this->setTestAgent())
             ->request(sprintf('https://ipv4.netcurl.org/?func=%s', __FUNCTION__));
 
         $parsed = $wrapper->getParsed();
@@ -190,12 +200,14 @@ class curlWrapperTest extends TestCase
     public function basicGetLowTLS()
     {
         $tlsResponse = (new CurlWrapper())->
-        setConfig((new WrapperConfig())->setOption(CURLOPT_SSLVERSION, CURL_SSLVERSION_TLSv1_0))->
-        request(
-            sprintf('https://ipv4.netcurl.org/?func=%s',
-                __FUNCTION__
-            )
-        )->getParsed();
+        setConfig((new WrapperConfig())
+            ->setOption(CURLOPT_SSLVERSION, CURL_SSLVERSION_TLSv1_0)
+            ->setUserAgent(sprintf('netcurl-%s', NETCURL_VERSION)))
+            ->request(
+                sprintf('https://ipv4.netcurl.org/?func=%s',
+                    __FUNCTION__
+                )
+            )->getParsed();
 
 
         if (isset($tlsResponse->ip)) {
@@ -214,8 +226,11 @@ class curlWrapperTest extends TestCase
     public function basicGetTLS11()
     {
         $tlsResponse = (new CurlWrapper())->
-        setConfig((new WrapperConfig())->setOption(CURLOPT_SSLVERSION, CURL_SSLVERSION_TLSv1_1))->
-        request(
+        setConfig(
+            (new WrapperConfig())
+                ->setUserAgent(sprintf('netcurl-%s', NETCURL_VERSION))
+                ->setOption(CURLOPT_SSLVERSION, CURL_SSLVERSION_TLSv1_1)
+        )->request(
             sprintf('https://ipv4.netcurl.org/?func=%s',
                 __FUNCTION__
             )
@@ -238,12 +253,15 @@ class curlWrapperTest extends TestCase
         if (defined('CURL_SSLVERSION_TLSv1_3') && version_compare(PHP_VERSION, '5.6', '>=')) {
             try {
                 $tlsResponse = (new CurlWrapper())->
-                setConfig((new WrapperConfig())->setOption(CURLOPT_SSLVERSION, CURL_SSLVERSION_TLSv1_3))->
-                request(
-                    sprintf('https://ipv4.netcurl.org/?func=%s',
-                        __FUNCTION__
-                    )
-                )->getParsed();
+                setConfig(
+                    (new WrapperConfig())
+                        ->setOption(CURLOPT_SSLVERSION, CURL_SSLVERSION_TLSv1_3))
+                    ->setUserAgent(sprintf('netcurl-%s', NETCURL_VERSION))
+                    ->request(
+                        sprintf('https://ipv4.netcurl.org/?func=%s',
+                            __FUNCTION__
+                        )
+                    )->getParsed();
 
                 if (isset($tlsResponse->ip)) {
                     static::assertTrue(
@@ -276,7 +294,9 @@ class curlWrapperTest extends TestCase
      */
     public function basicGetHeader()
     {
-        $data = (new CurlWrapper())->request(sprintf('https://ipv4.netcurl.org/?func=%s', __FUNCTION__));
+        $data = (new CurlWrapper())
+            ->setConfig($this->setTestAgent())
+            ->request(sprintf('https://ipv4.netcurl.org/?func=%s', __FUNCTION__));
 
         static::assertTrue($data->getHeader('content-type') === 'application/json');
     }
@@ -288,10 +308,12 @@ class curlWrapperTest extends TestCase
      */
     public function basicPostWithGetData()
     {
-        $data = (new CurlWrapper())->request(
-            sprintf('https://ipv4.netcurl.org/?func=%s', __FUNCTION__),
-            ['hello' => 'world'],
-            \TorneLIB\Model\Type\requestMethod::METHOD_POST)
+        $data = (new CurlWrapper())
+            ->setConfig($this->setTestAgent())
+            ->request(
+                sprintf('https://ipv4.netcurl.org/?func=%s', __FUNCTION__),
+                ['hello' => 'world'],
+                \TorneLIB\Model\Type\requestMethod::METHOD_POST)
             ->getParsed();
 
         static::assertTrue(
@@ -308,10 +330,12 @@ class curlWrapperTest extends TestCase
      */
     public function basicGetWithPost()
     {
-        $data = (new CurlWrapper())->request(
-            sprintf('https://ipv4.netcurl.org/?func=%s', __FUNCTION__),
-            ['hello' => 'world'],
-            \TorneLIB\Model\Type\requestMethod::METHOD_GET)
+        $data = (new CurlWrapper())
+            ->setConfig($this->setTestAgent())
+            ->request(
+                sprintf('https://ipv4.netcurl.org/?func=%s', __FUNCTION__),
+                ['hello' => 'world'],
+                \TorneLIB\Model\Type\requestMethod::METHOD_GET)
             ->getParsed();
 
         static::assertTrue(!isset($data->PARAMS_REQUEST->hello));
@@ -324,10 +348,12 @@ class curlWrapperTest extends TestCase
      */
     public function basicPost()
     {
-        $data = (new CurlWrapper())->request(
-            sprintf('https://ipv4.netcurl.org/?func=%s', __FUNCTION__),
-            ['hello' => 'world'],
-            \TorneLIB\Model\Type\requestMethod::METHOD_POST)
+        $data = (new CurlWrapper())
+            ->setConfig($this->setTestAgent())
+            ->request(
+                sprintf('https://ipv4.netcurl.org/?func=%s', __FUNCTION__),
+                ['hello' => 'world'],
+                \TorneLIB\Model\Type\requestMethod::METHOD_POST)
             ->getParsed();
 
         static::assertTrue(isset($data->PARAMS_POST->hello));
@@ -366,7 +392,9 @@ class curlWrapperTest extends TestCase
             'https://ipv4.netcurl.org/ip.php?func=%s&php=%s', __FUNCTION__,
             rawurlencode(PHP_VERSION)
         );
-        $data = (new CurlWrapper())->request(
+        $data = (new CurlWrapper())
+            ->setConfig($this->setTestAgent())
+            ->request(
             [
                 $firstMultiUrl,
                 $secondMultiUrl,
@@ -387,7 +415,7 @@ class curlWrapperTest extends TestCase
      */
     public function unInitializedCurlWrapperByConfig()
     {
-        $wrapper = new CurlWrapper();
+        $wrapper = (new CurlWrapper());
         $wrapper->getConfig()->setRequestUrl(
             sprintf(
                 'https://ipv4.netcurl.org/?func=%s&php=%s',
@@ -410,6 +438,7 @@ class curlWrapperTest extends TestCase
     public function unInitializedCurlWrapperMinorConfig()
     {
         $wrapper = new CurlWrapper();
+        $wrapper->setConfig($this->setTestAgent());
         $wrapper->getConfig()->setRequestUrl(
             sprintf(
                 'https://ipv4.netcurl.org/?func=%s&php=%s',

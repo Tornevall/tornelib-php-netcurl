@@ -1,13 +1,16 @@
 # NETCURL 6.1
 
-Full documents for v6.0 is located [here](https://docs.tornevall.net/x/KwCy).
-For v6.1 -- please hold.
+Documentation for v6.1 is located [here](https://docs.tornevall.net/display/TORNEVALL/NETCURLv6.1).
 
 ## Installation
 
 Recommended solution: Composer.
 
 Alternatives: git clone this repo.
+
+## Contact and live information
+
+There's a [Mailinglist](https://lists.tornevall.net/pipermail/netcurl/) put up for everything concerning netcurl. That's also where you can find release information (for now). You can subscribe to the list [here](https://lists.tornevall.net/mailman/listinfo/netcurl).
 
 ## Documents
 
@@ -35,8 +38,6 @@ Alternatives: git clone this repo.
 In apt-based systems, extra libraries can be installed with commands such as:
 
 `apt-get install php-curl php-xml php-json php-soap`
-
-... and whatever suits your needs.
 
 
 ### The module installation itself

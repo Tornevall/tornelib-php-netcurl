@@ -32,7 +32,7 @@ if (!class_exists('MODULE_CURL', NETCURL_CLASS_EXISTS_AUTOLOAD) &&
         define('NETCURL_CURL_RELEASE', '6.0.26');
     }
     if (!defined('NETCURL_CURL_MODIFY')) {
-        define('NETCURL_CURL_MODIFY', '20200415');
+        define('NETCURL_CURL_MODIFY', '20200418');
     }
     if (!defined('NETCURL_CURL_CLIENTNAME')) {
         define('NETCURL_CURL_CLIENTNAME', 'MODULE_CURL');

@@ -5,7 +5,7 @@
 ## This package is about to get deprecated
 
 Documentation for v6.1 is located [here](https://docs.tornevall.net/display/TORNEVALL/NETCURLv6.1).
-Stable releases for v6.0 will, for now on, no longer be pushed into the master repository. A new stable/6.0 has been created for maintenance releases.
+Stable releases for v6.0 will, for now on, be pushed into stable/6.0, instead of master. The branch itself should probably considered a maintenance repo.
 
 ## Contact and live information
 

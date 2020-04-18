@@ -21,6 +21,8 @@
 namespace TorneLIB;
 
 use Exception;
+use Exception\ExceptionHandler;
+use TorneLIB\Utils\Security;
 
 if (!class_exists('NETCURL_PARSER', NETCURL_CLASS_EXISTS_AUTOLOAD) &&
     !class_exists('TorneLIB\NETCURL_PARSER', NETCURL_CLASS_EXISTS_AUTOLOAD)
@@ -190,6 +192,7 @@ if (!class_exists('NETCURL_PARSER', NETCURL_CLASS_EXISTS_AUTOLOAD) &&
          * @param string $serialInput
          * @param bool $assoc
          * @return mixed|null
+         * @throws Exception
          * @since 6.0.26
          * @deprecated This function is not supported in version 6.1.0 and above.
          */
@@ -206,6 +209,37 @@ if (!class_exists('NETCURL_PARSER', NETCURL_CLASS_EXISTS_AUTOLOAD) &&
             } else {
                 return $this->arrayObjectToStdClass(@unserialize($serialInput));
             }
+        }
+
+        /**
+         * @param array $objectArray
+         * @return mixed|null
+         * @throws Exception
+         */
+        public function arrayObjectToStdClass($objectArray = [])
+        {
+            /**
+             * If json_decode and json_encode exists as function, do it the simple way.
+             * http://php.net/manual/en/function.json-encode.php
+             */
+            if (function_exists('json_decode') &&
+                function_exists('json_encode')) {
+                return json_decode(json_encode($objectArray));
+            }
+            $newArray = null;
+            if (is_array($objectArray) || is_object($objectArray)) {
+                foreach ($objectArray as $itemKey => $itemValue) {
+                    if (is_array($itemValue)) {
+                        $newArray[$itemKey] = (array)$this->arrayObjectToStdClass($itemValue);
+                    } elseif (is_object($itemValue)) {
+                        $newArray[$itemKey] = (object)(array)$this->arrayObjectToStdClass($itemValue);
+                    } else {
+                        $newArray[$itemKey] = $itemValue;
+                    }
+                }
+            }
+
+            return $newArray;
         }
 
         /**

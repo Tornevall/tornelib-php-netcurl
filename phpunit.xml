@@ -12,8 +12,8 @@
         </whitelist>
     </filter>
 
-    <logging>
+    <!--<logging>
         <log type="coverage-xml" target="build/coverage/xml"/>
         <log type="coverage-html" target="build/coverage/html"/>
-    </logging>
+    </logging>-->
 </phpunit>

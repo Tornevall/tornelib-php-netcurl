@@ -20,10 +20,6 @@
 
 namespace TorneLIB;
 
-use Exception;
-use Exception\ExceptionHandler;
-use TorneLIB\Utils\Security;
-
 if (!class_exists('NETCURL_PARSER', NETCURL_CLASS_EXISTS_AUTOLOAD) &&
     !class_exists('TorneLIB\NETCURL_PARSER', NETCURL_CLASS_EXISTS_AUTOLOAD)
 ) {
@@ -371,7 +367,7 @@ if (!class_exists('NETCURL_PARSER', NETCURL_CLASS_EXISTS_AUTOLOAD) &&
 
         /**
          * @return array
-         * @throws Exception
+         * @throws \Exception
          * @since 6.0.0
          */
         private function getDomElements()
@@ -406,7 +402,7 @@ if (!class_exists('NETCURL_PARSER', NETCURL_CLASS_EXISTS_AUTOLOAD) &&
                     }
                 }
             } else {
-                throw new Exception(
+                throw new \Exception(
                     NETCURL_CURL_CLIENTNAME . " HtmlParse exception: Can not parse DOMDocuments without the DOMDocuments class",
                     $this->NETWORK->getExceptionCode("NETCURL_DOMDOCUMENT_CLASS_MISSING")
                 );

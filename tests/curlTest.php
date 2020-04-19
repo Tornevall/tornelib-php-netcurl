@@ -532,7 +532,7 @@ class curlTest extends TestCase
     /**
      * @test
      * @testdox Test if a html response are converted to a proper array
-     * @throws Exception
+     * @throws \Exception
      */
     public function getSimpleDom()
     {
@@ -543,12 +543,13 @@ class curlTest extends TestCase
         $container = null;
         try {
             $container = $this->getParsed(
-                $this->urlGet("ssl&bool&o=xml&method=get&using=SimpleXMLElement",
+                $this->urlGet(
+                    'ssl&bool&o=xml&method=get&using=SimpleXMLElement',
                     null,
-                    "simple.html")
+                    'simple.html'
+                )
             );
         } catch (\Exception $e) {
-
         }
         // ByNodes, ByClosestTag, ById
         static::assertTrue(isset($container['ById']) && count($container['ById']) > 0);

@@ -10,7 +10,7 @@ use TorneLIB\Module\Network\NetWrapper;
  * @package TorneLIB\Helpers
  * @since 6.1.0
  */
-class Network {
+class NetUtil {
     /**
      * @param $gitRequest
      * @return array

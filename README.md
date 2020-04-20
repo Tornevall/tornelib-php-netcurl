@@ -1,51 +1,43 @@
-# NETCURL
-
-[Full documents are located here](https://docs.tornevall.net/x/KwCy)
-
-## This package is about to get deprecated
+# NETCURL 6.1
 
 Documentation for v6.1 is located [here](https://docs.tornevall.net/display/TORNEVALL/NETCURLv6.1).
+
+## Installation
+
+Recommended solution: Composer.
+
+Alternatives: git clone this repo.
 
 ## Contact and live information
 
 There's a [Mailinglist](https://lists.tornevall.net/pipermail/netcurl/) put up for everything concerning netcurl. That's also where you can find release information (for now). You can subscribe to the list [here](https://lists.tornevall.net/mailman/listinfo/netcurl).
 
+## Documents
 
-## Compatibility span (Supported PHP versions)
+* [Version 6.1](https://docs.tornevall.net/display/TORNEVALL/NETCURLv6.1)
+* [Exceptions handling for v6.0](https://docs.tornevall.net/x/EgCNAQ)
 
-This library should be compatible with at least PHP (eventually) 5.3 up to PHP 7.3. As many developers is about to abandon the PHP 5-series, netcurl should probably do so to. One part of this project lies ahead in netcurl 6.1 where PSR4 are honored (with backward compatibility, unfortunately). However, the support for very old PHP release may be cut in a near future.
+# NETCURL IS AND IS NOTS
 
-Running this module in older versions of PHP makes it more unreliable as PHP is continuosly developed. There are no guarantees that the module is fully functional from obsolete releases (like PHP 5.3 and most of the PHP 5.x-series is).
+* [Written for 6.0](https://docs.tornevall.net/x/GQCsAQ)
 
-### Requirements and dependencies
+# HOWTOs
 
-Some kind of a supported driver is needed. NetCURL was built for curl so it could be a great idea to have curl available in your system. The goal with the module is however to pick up the best available driver in your system.
+## Getting started
 
-#### Supported drivers
+* [MODULE_CURL 6.1](https://docs.tornevall.net/display/TORNEVALL/NETCURLv6.1)
+* [Getting started: Individual Modules](https://docs.tornevall.net/x/EAB4Aw)
 
-* curl
-* soap (SoapClient with XML)
-* Guzzle
-* Wordpress 
+### Obsolete documents
 
-#### Future plans for independence
+* [MODULE_CURL 6.0](https://docs.tornevall.net/x/EoBiAQ)
 
-* Streams
-* Sockets
 
-### Dependencies and installation
-
-As netcurl is built to be independently running dependencies is not necessesary required. To reach full functionality the list below might be good to have available.
-
-* **Installation:** Composer. NetCURL can be bundled/manually downloaded, but the best practice is to install via composer. Otherwise you're a bit on your own.
-* **SSL (OpenSSL):** Not having SSL available means that you won't be able to speak https
-* **SOAP:** To make use of the SOAP components in NetCurl, XML libraries and SoapClient needs to be there. SoapClient uses Streams to fetch wsdl.
-
-#### XML, CURL, SOAP
+### XML, CURL, SOAP, JSON
 
 In apt-based systems, extra libraries can be installed with commands such as:
 
-`apt-get install php-curl php-xml`
+`apt-get install php-curl php-xml php-json php-soap`
 
 
 ### The module installation itself
@@ -53,30 +45,67 @@ In apt-based systems, extra libraries can be installed with commands such as:
 This is the recommended way (and only officially supported) of installing the package.
 
 * Get composer.
-* Run composer:
+* Run composer.
 
-`composer require tornevall/tornelib-php-netcurl`
+      composer require tornevall/tornelib-php-netcurl
+      
+Or more preferrably either...
 
-## Documents
+      composer require tornevall/tornelib-php-netcurl ^6.1 
 
-[Exceptions handling](https://docs.tornevall.net/x/EgCNAQ)
-
-
-## Auto detection of communicators
-
-Using this call before running calls will try to prepare for a proper communications driver. If curl is available, the internal functions will be prioritized before others as this used to be best practice. However, if curl is missing, this might help you find a proper driver automatically.
-
-    $LIB->setDriverAuto();
+or during development...
+      
+      composer require tornevall/tornelib-php-netcurl dev-develop/6.1 
 
 
-# NETCURL IS AND IS NOTS
+# Module Information
 
-[Read this document](https://docs.tornevall.net/x/GQCsAQ)
+## Compatibility
 
+This library is built to work with PHP 5.6 and higher (I prefer to follow the live updates of PHP with their EOL's - [check it here](https://www.php.net/supported-versions.php)). The [Bamboo-server](https://bamboo.tornevall.net) has a history which makes PHP from 5.4 available on demand. However, autotests tend to fail on older PHP's so as of march 2020 all tests lower than 5.6 is disabled.
 
-# HOWTOs
+However, it is not that easy. The compatibility span **has** to be lower as the world I'm living in tend to be slow. If this module is built after the bleeding edge-principles, that also means that something will blow up somewhere. It's disussable whether that's something to ignore or not, but I think it's important to be supportive regardless of end of life-restrictions (but not too far). When support ends from software developers point of view, I see a perfect moment to follow that stream. This is very important as 2019 and 2020 seems to be two such years when most of the society is forcing movement forward. 
 
-## Getting started
+To keep compatibility with v6.0 the plan is to keep the primary class MODULE_CURL callable from a root position. It will probably be recommended to switch over to a PSR friendly structure from there, but the base will remain in 6.1 and the best way to instantiate the module in future is to call for the same wrapper as the main MODULE_CURL will use - NetWrapper (TorneLIB\Module\Network\NetWrapper) as it is planned to be the primary driver handler.
 
-* [This document and furthermore information](https://docs.tornevall.net/x/CYBiAQ).
-* [MODULE_CURL](https://docs.tornevall.net/x/EoBiAQ)
+## Requirements and dependencies
+  
+In its initial state, there are basically no requirements as this module tries to pick the best available driver in runtime.
+
+### Library Support
+
+#### Current
+
+* curl
+* SoapClient
+
+#### In progress
+
+* Streams / Simple requests (down to file_get_contents support)
+
+##### Pending
+
+* Guzzle
+* RSS feeds
+* Zend
+* Sockets
+
+#### Dependencies, not required, but recommended
+
+* SSL: OpenSSL or similar.
+* SOAP: SoapClient and XML-drivers.
+
+# Changes
+
+Version 6.1 follows the standard of what's written in 6.0 - there is a primary module that handles all actions regardless of which driver installed. However, 6.0 is built on a curl-only-core with only halfway fixed PSR-supported code. For example, autoloading has a few workarounds to properly work with platforms that requires PSR-based code. In the prior release the class_exists-control rather generates a lot of warning rather than "doing it right". In 6.1 the order of behaviour is changed and all curl-only-based code has been restructured.
+
+## Breaking changes?
+
+No. Version 6.1 is written to reach highest compatibility with v6.0 as possible, but with modernized code and PSR-4. Make sure you check out https://docs.tornevall.net/x/DoBPAw before deciding to run anything as older PHP-releases could be incompatible. However, if they are, so are probably you.
+
+# Composer addons
+
+        "phpunit/phpunit": "^7.5",
+        "zendframework/zend-http": "^2.11",
+        "guzzlehttp/guzzle": "^6.5"
+        "zendframework/zend-http": "^2.9"

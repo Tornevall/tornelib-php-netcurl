@@ -49,10 +49,14 @@ This is the recommended way (and only officially supported) of installing the pa
 
 
       composer require tornevall/tornelib-php-netcurl
-      
-Or more preferrably either...
 
-      composer require tornevall/tornelib-php-netcurl ^6.1 
+If you wish, you can alternative also do one of those requirements, when the tags is ready:
+
+      composer require tornevall/tornelib-php-netcurl:^6.1
+      # or
+      composer require tornevall/tornelib-php-network:^6.1
+
+Installing the network module instead will make features such as getGitTagsByUrl fully available.
 
 # Module Information
 

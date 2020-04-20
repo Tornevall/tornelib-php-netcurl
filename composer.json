@@ -5,7 +5,6 @@
     "license": "Apache-2.0",
     "require": {
         "tornevall/tornelib-php-errorhandler": "^6.1",
-        "tornevall/tornelib-php-network": "dev-master",
         "tornevall/tornelib-php-crypto": "^6.1",
         "tornevall/tornelib-php-io": "^6.1",
         "tornevall/tornelib-php-flags": "^6.1",

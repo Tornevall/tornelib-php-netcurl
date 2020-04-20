@@ -45,18 +45,14 @@ In apt-based systems, extra libraries can be installed with commands such as:
 This is the recommended way (and only officially supported) of installing the package.
 
 * Get composer.
-* Run composer.
+* Run composer as shown below.
+
 
       composer require tornevall/tornelib-php-netcurl
       
 Or more preferrably either...
 
       composer require tornevall/tornelib-php-netcurl ^6.1 
-
-or during development...
-      
-      composer require tornevall/tornelib-php-netcurl dev-develop/6.1 
-
 
 # Module Information
 

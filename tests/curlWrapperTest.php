@@ -255,8 +255,8 @@ class curlWrapperTest extends TestCase
                 $tlsResponse = (new CurlWrapper())->
                 setConfig(
                     (new WrapperConfig())
-                        ->setOption(CURLOPT_SSLVERSION, CURL_SSLVERSION_TLSv1_3))
-                    ->setUserAgent(sprintf('netcurl-%s', NETCURL_VERSION))
+                        ->setOption(CURLOPT_SSLVERSION, CURL_SSLVERSION_TLSv1_3)
+                        ->setUserAgent(sprintf('netcurl-%s', NETCURL_VERSION)))
                     ->request(
                         sprintf('https://ipv4.netcurl.org/?func=%s',
                             __FUNCTION__
@@ -395,11 +395,11 @@ class curlWrapperTest extends TestCase
         $data = (new CurlWrapper())
             ->setConfig($this->setTestAgent())
             ->request(
-            [
-                $firstMultiUrl,
-                $secondMultiUrl,
-            ]
-        );
+                [
+                    $firstMultiUrl,
+                    $secondMultiUrl,
+                ]
+            );
 
         static::assertTrue(
             $data->getHeader('content-type', $firstMultiUrl) === 'application/json' &&

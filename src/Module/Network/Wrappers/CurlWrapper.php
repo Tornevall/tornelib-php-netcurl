@@ -108,19 +108,13 @@ class CurlWrapper implements Wrapper
      */
     public function __construct()
     {
+        // Make sure there are available drivers before using the wrapper.
+        Security::getCurrentFunctionState('curl_init');
+        Security::getCurrentFunctionState('curl_exec');
+
         $this->CONFIG = new WrapperConfig();
         $hasConstructorArguments = $this->getPriorCompatibilityArguments(func_get_args());
-        // Make sure there are available drivers before using the wrapper.
-        if (!function_exists('curl_init') || !function_exists('curl_exec')) {
-            $secCheck = new Security();
-            if ($secCheck->getDisabledFunction(['curl_init', 'curl_exec'])) {
-                throw new ExceptionHandler(
-                    'curl unavailable: It turns out that php.ini has the functions ' .
-                    'curl_init and/or curl_exec disabled. Your should update php.ini and try again.'
-                );
-            }
-            throw new ExceptionHandler('curl unavailable: curl_init and/or curl_exec not found.');
-        }
+
         if ($hasConstructorArguments) {
             $this->initCurlHandle();
         }

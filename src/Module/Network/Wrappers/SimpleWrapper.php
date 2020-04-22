@@ -2,12 +2,19 @@
 
 namespace TorneLIB\Module\Network\Wrappers;
 
+use TorneLIB\Helpers\Version;
 use TorneLIB\Model\Type\authType;
 use TorneLIB\Model\Type\dataType;
 use TorneLIB\Module\Config\WrapperConfig;
 use TorneLIB\Module\Network\Model\requestMethod;
 use TorneLIB\Module\Network\Model\Wrapper;
 use TorneLIB\Utils\Generic;
+
+try {
+    Version::getRequiredVersion();
+} catch (Exception $e) {
+    die($e->getMessage());
+}
 
 /**
  * Class SimpleWrapper Fetching tool in the simplest form. Using file_get_contents.

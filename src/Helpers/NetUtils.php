@@ -10,7 +10,7 @@ use TorneLIB\Module\Network\NetWrapper;
  * @package TorneLIB\Helpers
  * @since 6.1.0
  */
-class NetUtil {
+class NetUtils {
     /**
      * @param $gitRequest
      * @return array
@@ -111,5 +111,67 @@ class NetUtil {
         $url .= "/info/refs?service=git-upload-pack";
         $gitRequest = (new NetWrapper())->request($url);
         return $this->getGitsTagsRegEx($gitRequest->getBody());
+    }
+
+    /**
+     * @param $giturl
+     * @param $version1
+     * @param $version2
+     * @param $operator
+     * @return array
+     * @throws ExceptionHandler
+     */
+    public function getGitTagsByVersion($giturl, $version1, $version2, $operator)
+    {
+        $return = [];
+        $versionList = $this->getGitTagsByUrl($giturl);
+        if (is_array($versionList) && count($versionList)) {
+            foreach ($versionList as $versionNum) {
+                if (version_compare($versionNum, $version1, '>=') &&
+                    version_compare($versionNum, $version2, '<=') &&
+                    !in_array($versionNum, $return)
+                ) {
+                    $return[] = $versionNum;
+                }
+            }
+        }
+
+        return $return;
+    }
+
+    /**
+     * @param $gitUrl
+     * @param string $yourVersion
+     * @return array
+     * @throws ExceptionHandler
+     */
+    public function getHigherVersions($gitUrl, $yourVersion = '')
+    {
+        $versionArray = $this->getGitTagsByUrl($gitUrl, true, true);
+        $versionsHigher = [];
+        foreach ($versionArray as $tagVersion) {
+            if (version_compare($tagVersion, $yourVersion, ">")) {
+                $versionsHigher[] = $tagVersion;
+            }
+        }
+
+        return $versionsHigher;
+    }
+
+    /**
+     * Checks if requested version is the latest compared to the git repo.
+     *
+     * @param $gitUrl
+     * @param string $yourVersion
+     * @return bool
+     * @throws ExceptionHandler
+     */
+    public function getVersionLatest($gitUrl, $yourVersion = '')
+    {
+        if (!count($this->getHigherVersions($gitUrl, $yourVersion))) {
+            return true;
+        }
+
+        return false;
     }
 }

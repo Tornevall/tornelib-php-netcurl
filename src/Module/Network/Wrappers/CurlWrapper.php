@@ -3,6 +3,7 @@
 namespace TorneLIB\Module\Network\Wrappers;
 
 use Exception;
+use ReflectionException;
 use TorneLIB\Exception\Constants;
 use TorneLIB\Exception\ExceptionHandler;
 use TorneLIB\Helpers\Version;
@@ -103,6 +104,7 @@ class CurlWrapper implements Wrapper
      * CurlWrapper constructor.
      *
      * @throws ExceptionHandler
+     * @throws Exception
      */
     public function __construct()
     {
@@ -125,7 +127,9 @@ class CurlWrapper implements Wrapper
     }
 
     /**
-     * @inheritDoc
+     * @return string
+     * @throws ReflectionException
+     * @noinspection PhpSingleStatementWithBracesInspection
      */
     public function getVersion()
     {
@@ -159,13 +163,14 @@ class CurlWrapper implements Wrapper
      * @param $curlHandle
      * @param $url
      * @return $this
+     * @throws ExceptionHandler
      */
     private function setupHandle($curlHandle, $url)
     {
         $this->setCurlAuthentication($curlHandle);
         $this->setCurlDynamicValues($curlHandle);
         $this->setCurlSslValues($curlHandle);
-        $this->setCurlStaticValues($curlHandle, $url);
+        $this->setCurlStaticValues($curlHandle);
         $this->setCurlPostData($curlHandle);
         $this->setCurlRequestMethod($curlHandle);
         $this->setCurlCustomHeaders($curlHandle);
@@ -210,6 +215,7 @@ class CurlWrapper implements Wrapper
     /**
      * @param $curlHandle
      * @return CurlWrapper
+     * @throws ExceptionHandler
      * @since 6.1.0
      */
     private function setCurlPostData($curlHandle)
@@ -267,7 +273,7 @@ class CurlWrapper implements Wrapper
     {
         if (is_array($requestData)) {
             throw new ExceptionHandler(
-                'Convert arrayed data to XML error - no parsed present!',
+                'Convert arrayed data to XML error - no data present!',
                 Constants::LIB_UNHANDLED
             );
         }
@@ -281,12 +287,14 @@ class CurlWrapper implements Wrapper
 
     /**
      * @param string $setContentTypeString
-     *
+     * @return CurlWrapper
      * @since 6.0.17
      */
     public function setContentType($setContentTypeString = 'application/json; charset=utf-8')
     {
         $this->contentType = $setContentTypeString;
+
+        return $this;
     }
 
     /**
@@ -300,17 +308,20 @@ class CurlWrapper implements Wrapper
 
     /**
      * @param $curlHandle
+     * @return CurlWrapper
      * @since 6.1.0
      */
     private function setCurlCustomHeaders($curlHandle)
     {
         $this->setProperCustomerHeader();
         $this->setupHeaders($curlHandle);
+        return $this;
     }
 
     /**
      * @param string $key
      * @param string $value
+     * @return CurlWrapper
      * @since 6.0
      */
     public function setCurlHeader($key = '', $value = '')
@@ -324,12 +335,15 @@ class CurlWrapper implements Wrapper
                 }
             }
         }
+
+        return $this;
     }
 
     /**
      * Fix problematic header data by converting them to proper outputs.
      *
      * @since 6.1.0
+     * @return $this
      */
     private function setProperCustomerHeader()
     {
@@ -342,6 +356,8 @@ class CurlWrapper implements Wrapper
             }
             unset($this->customPreHeaders[$headerKey]);
         }
+
+        return $this;
     }
 
     /**
@@ -393,10 +409,9 @@ class CurlWrapper implements Wrapper
      * Values set here can not be changed via any other part of the wrapper.
      *
      * @param $curlHandle
-     * @param $url
      * @return $this
      */
-    private function setCurlStaticValues($curlHandle, $url)
+    private function setCurlStaticValues($curlHandle)
     {
         $this->setOptionCurl($curlHandle, CURLOPT_RETURNTRANSFER, true);
         $this->setOptionCurl($curlHandle, CURLOPT_HEADER, false);
@@ -493,7 +508,7 @@ class CurlWrapper implements Wrapper
     /**
      * Initialize simple or multi curl handles.
      *
-     * @return CurlWrapper
+     * @return $this
      * @throws ExceptionHandler
      */
     private function initCurlHandle()
@@ -514,10 +529,11 @@ class CurlWrapper implements Wrapper
             }
         } else {
             // Prepare for multiple curl requests.
-            if (is_array($this->CONFIG->getRequestUrl()) && count($this->CONFIG->getRequestUrl())) {
+            $requestUrlArray = $this->CONFIG->getRequestUrl();
+            if (is_array($requestUrlArray) && count($requestUrlArray)) {
                 $this->isMultiCurl = true;
                 $this->multiCurlHandle = curl_multi_init();
-                foreach ($this->CONFIG->getRequestUrl() as $url) {
+                foreach ($requestUrlArray as $url) {
                     $this->multiCurlHandleObjects[$url] = curl_init();
                     $this->setupHandle(
                         $this->multiCurlHandleObjects[$url],
@@ -558,6 +574,7 @@ class CurlWrapper implements Wrapper
      * @param $curlHandle
      * @param $httpCode
      * @param Exception $previousException
+     * @return CurlWrapper
      * @throws ExceptionHandler
      * @since 6.1.0
      */
@@ -581,12 +598,15 @@ class CurlWrapper implements Wrapper
             $errorString = $httpHead;
         }
         $this->CONFIG->getHttpException($errorString, $httpCode, null, $this);
+
+        return $this;
     }
 
     /**
      * The curl_exec part.
      * @return $this
      * @throws ExceptionHandler
+     * @todo Handle multicurl exceptions.
      */
     public function getCurlRequest()
     {
@@ -623,6 +643,7 @@ class CurlWrapper implements Wrapper
 
     /**
      * @since 6.1.0
+     * @return $this
      */
     private function setMultiCurlHandles()
     {
@@ -630,6 +651,8 @@ class CurlWrapper implements Wrapper
         foreach ($reqUrlArray as $url) {
             curl_multi_add_handle($this->multiCurlHandle, $this->multiCurlHandleObjects[$url]);
         }
+
+        return $this;
     }
 
     /**
@@ -718,7 +741,7 @@ class CurlWrapper implements Wrapper
                 $headerRequest = array_pop($this->curlResponseHeaders);
             } else {
                 if (empty($specificUrl)) {
-                    throw new \TorneLIB\Exception\ExceptionHandler(
+                    throw new ExceptionHandler(
                         'You must specify the URL from which you want to retrieve headers.',
                         Constants::LIB_MULTI_HEADER
                     );
@@ -747,6 +770,7 @@ class CurlWrapper implements Wrapper
                 }
             }
         }
+
         return implode("\n", $return);
     }
 
@@ -783,6 +807,7 @@ class CurlWrapper implements Wrapper
      * @return mixed
      * @throws ExceptionHandler
      * @since 6.0
+     * @noinspection PhpComposerExtensionStubsInspection
      */
     public function getParsed()
     {
@@ -815,15 +840,8 @@ class CurlWrapper implements Wrapper
     public function request($url = '', $data = [], $method = requestMethod::METHOD_GET, $dataType = dataType::NORMAL)
     {
         $this->CONFIG->request($url, $data, $method, $dataType);
-
         $this->getCurlRequest();
-        $this->getCurlParse();
 
-        return $this;
-    }
-
-    public function __call($name, $arguments)
-    {
         return $this;
     }
 }

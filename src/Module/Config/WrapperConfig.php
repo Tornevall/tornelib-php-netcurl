@@ -2,6 +2,7 @@
 
 namespace TorneLIB\Module\Config;
 
+use Exception;
 use TorneLIB\Config\Flag;
 use TorneLIB\Exception\Constants;
 use TorneLIB\Exception\ExceptionHandler;
@@ -390,7 +391,6 @@ class WrapperConfig
 
     /**
      * @param array $requestFlags
-     * @throws \Exception
      * @since 6.1.0
      */
     public function setRequestFlags(array $requestFlags)
@@ -918,7 +918,7 @@ class WrapperConfig
     /**
      * @param array $funcArgs
      * @return bool
-     * @throws \Exception
+     * @throws Exception
      */
     public function getCompatibilityArguments($funcArgs = [])
     {

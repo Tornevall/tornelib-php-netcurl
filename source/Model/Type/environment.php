@@ -20,6 +20,7 @@
  * major version too.
  *
  * @package TorneLIB
+ * @deprecated Replaced with PSR4 compliances in v6.1
  */
 
 namespace TorneLIB;

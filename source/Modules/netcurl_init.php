@@ -20,16 +20,17 @@
  *
  * @package TorneLIB
  * @version 6.0.27
+ * @deprecated Initializer removed from 6.1.0
  */
 
 namespace TorneLIB;
 
 // Library Release Information
 if (!defined('NETCURL_RELEASE')) {
-    define('NETCURL_RELEASE', '6.0.27');
+    define('NETCURL_RELEASE', '6.0.28');
 }
 if (!defined('NETCURL_MODIFY')) {
-    define('NETCURL_MODIFY', '20200419');
+    define('NETCURL_MODIFY', '20200422');
 }
 if (!defined('TORNELIB_NETCURL_RELEASE')) {
     // Compatibility constant

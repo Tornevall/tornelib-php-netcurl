@@ -43,6 +43,7 @@ if (!class_exists('MODULE_NETWORK', NETCURL_CLASS_EXISTS_AUTOLOAD) &&
      * @link    https://docs.tornevall.net/x/KQCy TorneLIB (PHP) Landing documentation
      * @link    https://bitbucket.tornevall.net/projects/LIB/repos/tornelib-php/browse Sources of TorneLIB
      * @package TorneLIB
+     * @deprecated Replaced with PSR4 compliances in v6.1
      */
     class MODULE_NETWORK
     {
@@ -93,6 +94,7 @@ if (!class_exists('MODULE_NETWORK', NETCURL_CLASS_EXISTS_AUTOLOAD) &&
          *
          * @param string $exceptionConstantName Constant name (make sure it exists before use)
          * @return int
+         * @deprecated It is recommended to use ExceptionHandler instead.
          */
         public function getExceptionCode($exceptionConstantName = 'NETCURL_NO_ERROR')
         {
@@ -132,6 +134,7 @@ if (!class_exists('MODULE_NETWORK', NETCURL_CLASS_EXISTS_AUTOLOAD) &&
          * @param bool $keepCredentials
          * @return array
          * @throws \Exception
+         * @deprecated Moved to netcurl 6.1.
          */
         public function getGitTagsByVersion(
             $gitUrl,
@@ -166,6 +169,7 @@ if (!class_exists('MODULE_NETWORK', NETCURL_CLASS_EXISTS_AUTOLOAD) &&
          * @return array
          * @throws \Exception
          * @since 6.0.4
+         * @deprecated Method moved to netcurl-6.1, use that directly instead of this old reference pointer.
          */
         public function getGitTagsByUrl(
             $gitUrl,
@@ -247,6 +251,7 @@ if (!class_exists('MODULE_NETWORK', NETCURL_CLASS_EXISTS_AUTOLOAD) &&
          * @return array
          * @throws \Exception
          * @since 6.0.4
+         * @deprecated Moved to netcurl 6.1.
          */
         public function getMyVersionByGitTag($myVersion = '', $gitUrl = '')
         {
@@ -269,6 +274,7 @@ if (!class_exists('MODULE_NETWORK', NETCURL_CLASS_EXISTS_AUTOLOAD) &&
          * @return bool
          * @throws \Exception
          * @since 6.0.4
+         * @deprecated Moved to netcurl 6.1
          */
         public function getVersionTooOld($myVersion = '', $gitUrl = '')
         {
@@ -323,7 +329,7 @@ if (!class_exists('MODULE_NETWORK', NETCURL_CLASS_EXISTS_AUTOLOAD) &&
         /**
          * Extract urls from a text string and return as array
          *
-         * @param       $stringWithUrls
+         * @param $stringWithUrls
          * @param int $offset
          * @param int $urlLimit
          * @param array $protocols
@@ -394,6 +400,7 @@ if (!class_exists('MODULE_NETWORK', NETCURL_CLASS_EXISTS_AUTOLOAD) &&
          * @param string $value
          * @param string $expire
          * @return bool
+         * @deprecated Removed in netcurl 6.1, won't be readded until needed.
          */
         public function setCookie($name = '', $value = '', $expire = '')
         {
@@ -424,6 +431,7 @@ if (!class_exists('MODULE_NETWORK', NETCURL_CLASS_EXISTS_AUTOLOAD) &&
          * @param null $prefix
          * @param null $domain
          * @param null $secure
+         * @deprecated Removed in netcurl 6.1, won't be re-added until needed.
          */
         public function setCookieParameters($path = "/", $prefix = null, $domain = null, $secure = null)
         {

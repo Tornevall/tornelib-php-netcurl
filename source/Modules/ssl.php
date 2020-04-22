@@ -42,6 +42,7 @@ if (!class_exists('MODULE_SSL', NETCURL_CLASS_EXISTS_AUTOLOAD) &&
      * Class MODULE_SSL SSL Helper class
      *
      * @package TorneLIB
+     * @deprecated Replaced with PSR4 compliances in v6.1
      */
     class MODULE_SSL
     {

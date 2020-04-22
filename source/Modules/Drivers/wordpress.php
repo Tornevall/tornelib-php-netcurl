@@ -18,6 +18,7 @@
  * Tornevall Networks netCurl library - Yet another http- and network communicator library
  * Each class in this library has its own version numbering to keep track of where the changes are. However, there is a major version too.
  * @package TorneLIB
+ * @deprecated Replaced with PSR4 compliances in v6.1
  */
 
 namespace TorneLIB;
@@ -33,6 +34,7 @@ if (!class_exists('NETCURL_DRIVER_WORDPRESS',
      *
      * @package TorneLIB
      * @since 6.0.20
+     * @deprecated Replaced with PSR4 compliances in v6.1
      */
     class NETCURL_DRIVER_WORDPRESS implements NETCURL_DRIVERS_INTERFACE
     {

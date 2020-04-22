@@ -9,7 +9,7 @@ if (!class_exists('Tornevall_SimpleSoap', NETCURL_CLASS_EXISTS_AUTOLOAD) &&
      * Class MODULE_CURL
      *
      * @package    TorneLIB
-     * @deprecated 6.0.20 Use MODULE_SOAP
+     * @deprecated 6.0.20 Use MODULE_SOAP, removed entirely in v6.1
      */
     class Tornevall_SimpleSoap extends MODULE_SOAP
     {

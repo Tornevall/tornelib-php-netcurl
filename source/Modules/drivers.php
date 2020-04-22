@@ -32,6 +32,7 @@ if (!class_exists('NETCURL_DRIVER_CONTROLLER', NETCURL_CLASS_EXISTS_AUTOLOAD) &&
      *
      * @package TorneLIB
      * @since   6.0.20
+     * @deprecated Removed in 6.1.0, each driver has its own "controller".
      */
     class NETCURL_DRIVER_CONTROLLER
     {

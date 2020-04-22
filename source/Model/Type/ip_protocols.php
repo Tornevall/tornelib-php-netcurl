@@ -20,6 +20,7 @@
  * major version too.
  *
  * @package TorneLIB
+ * @deprecated Replaced with PSR4 compliances in v6.1
  */
 
 namespace TorneLIB;
@@ -32,6 +33,7 @@ if (!class_exists('NETCURL_IP_PROTOCOLS', NETCURL_CLASS_EXISTS_AUTOLOAD) &&
      *
      * @package TorneLIB
      * @since   6.0.20
+     * @deprecated Entirely removed from 6.1.0
      */
     abstract class NETCURL_IP_PROTOCOLS
     {
@@ -48,7 +50,7 @@ if (!class_exists('TorneLIB_Network_IP', NETCURL_CLASS_EXISTS_AUTOLOAD) &&
      * Class TorneLIB_Network_IP
      *
      * @package    TorneLIB
-     * @deprecated 6.0.20 Use NETCURL_IP_PROTOCOLS
+     * @deprecated 6.0.20 Use NETCURL_IP_PROTOCOLS - entirely removed from netcurl 6.1
      */
     abstract class TorneLIB_Network_IP extends NETCURL_IP_PROTOCOLS
     {

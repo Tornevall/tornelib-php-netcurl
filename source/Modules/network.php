@@ -400,7 +400,6 @@ if (!class_exists('MODULE_NETWORK', NETCURL_CLASS_EXISTS_AUTOLOAD) &&
          * @param string $value
          * @param string $expire
          * @return bool
-         * @deprecated Removed in netcurl 6.1, won't be readded until needed.
          */
         public function setCookie($name = '', $value = '', $expire = '')
         {
@@ -431,7 +430,6 @@ if (!class_exists('MODULE_NETWORK', NETCURL_CLASS_EXISTS_AUTOLOAD) &&
          * @param null $prefix
          * @param null $domain
          * @param null $secure
-         * @deprecated Removed in netcurl 6.1, won't be re-added until needed.
          */
         public function setCookieParameters($path = "/", $prefix = null, $domain = null, $secure = null)
         {

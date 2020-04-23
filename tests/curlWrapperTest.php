@@ -578,8 +578,8 @@ class curlWrapperTest extends TestCase
         } catch (ExceptionHandler $e) {
             static::assertTrue(
                 $e->getCode() === Constants::LIB_CONFIGWRAPPER_VAR_NOT_SET &&
-                (int)$gTimeout['REQUEST'] === 6 &&
-                (int)$gTimeout['CONNECT'] === 3
+                (int)$gTimeout['REQUEST'] === 8 &&
+                (int)$gTimeout['CONNECT'] === 4
             );
         }
     }

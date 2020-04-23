@@ -42,6 +42,14 @@ class NetWrapper implements WrapperInterface
         'TorneLIB\Module\Network\Wrappers\GuzzleWrapper',
     ];
 
+    /**
+     * @var bool $useRegisteredWrappersFirst If true, make NetWrapper try to use those wrappers first.
+     */
+    private $useRegisteredWrappersFirst = false;
+
+    /**
+     * @var array $externalWrapperList List of self developed wrappers to use if nothing else works.
+     */
     private $externalWrapperList = [];
 
     /**
@@ -173,7 +181,7 @@ class NetWrapper implements WrapperInterface
     /**
      * Register a new wrapper/module/communicator.
      */
-    public function register($wrapperClass)
+    public function register($wrapperClass, $tryFirst = false)
     {
         if (!is_object($wrapperClass)) {
             throw new ExceptionHandler(
@@ -185,6 +193,7 @@ class NetWrapper implements WrapperInterface
             );
         }
 
+        $this->useRegisteredWrappersFirst = $tryFirst;
         $this->registerClassInterface($wrapperClass);
 
         return $this;
@@ -363,6 +372,17 @@ class NetWrapper implements WrapperInterface
     {
         $return = null;
 
+        if ($this->useRegisteredWrappersFirst && count($this->externalWrapperList)) {
+            try {
+                $returnable = $this->requestExternalExecute($url, $data, $method, $dataType);
+                if (!is_null($returnable)) {
+                    return $returnable;
+                }
+            } catch (ExceptionHandler $requestexternalExecute) {
+
+            }
+        }
+
         if (preg_match('/\?wsdl|\&wsdl/i', $url)) {
             try {
                 Security::getCurrentClassState('SoapClient');
@@ -376,14 +396,30 @@ class NetWrapper implements WrapperInterface
             }
         }
 
+        $hasReturnedRequest = false;
         /** @var WrapperInterface $classRequest */
         if ($dataType === dataType::SOAP && ($classRequest = $this->getWrapper('SoapClientWrapper'))) {
             $this->isSoapRequest = true;
             $classRequest->setConfig($this->getConfig());
             $return = $classRequest->request($url, $data, $method, $dataType);
+            $hasReturnedRequest = true;
         } elseif ($classRequest = $this->getWrapper('CurlWrapper')) {
             $classRequest->setConfig($this->getConfig());
             $return = $classRequest->request($url, $data, $method, $dataType);
+            $hasReturnedRequest = true;
+        }
+
+        // Internal handles are usually throwing execptions before landing here.
+        if (!$hasReturnedRequest &&
+            !empty($return) &&
+            !$this->useRegisteredWrappersFirst &&
+            count($this->externalWrapperList)
+        ) {
+            // Last execution should render errors thrown from external executes.
+            $returnable = $this->requestExternalExecute($url, $data, $method, $dataType);
+            if (!is_null($returnable)) {
+                return $returnable;
+            }
         }
 
         if (is_null($return)) {
@@ -393,7 +429,92 @@ class NetWrapper implements WrapperInterface
                     __CLASS__,
                     __FUNCTION__
                 ),
-                Constants::LIB_NETCURL_NETWRAPPER_NO_DRIVER_FOUND
+                Constants::LIB_NETCURL_NETWRAPPER_NO_DRIVER_FOUND,
+                $requestexternalExecute
+            );
+        }
+
+        return $return;
+    }
+
+    private function requestExternalExecute(
+        $url,
+        $data = [],
+        $method = requestMethod::METHOD_GET,
+        $dataType = dataType::NORMAL
+    ) {
+        $externalHasErrors = false;
+        $externalRequestException = null;
+        $returnable = null;
+        try {
+            $returnable = $this->requestExternal(
+                $url,
+                $data,
+                $method,
+                $dataType
+            );
+        } catch (\Exception $externalRequestException) {
+            // Ignore errors here as we have more to go.
+            $externalHasErrors = true;
+        }
+        if (!$externalHasErrors) {
+            return $returnable;
+        }
+
+        throw new ExceptionHandler(
+            sprintf(
+                'Internal %s error.',
+                __FUNCTION__
+            ),
+            Constants::LIB_UNHANDLED,
+            $externalRequestException
+        );
+    }
+
+    private function requestExternal(
+        $url,
+        $data = [],
+        $method = requestMethod::METHOD_GET,
+        $dataType = dataType::NORMAL
+    ) {
+        $return = null;
+        $hasInternalSuccess = false;
+
+        // Walk through external wrappers.
+        foreach ($this->externalWrapperList as $wrapperClass) {
+            $returnable = null;
+            try {
+                $returnable = call_user_func_array(
+                    [
+                        $wrapperClass,
+                        'request',
+                    ],
+                    [
+                        $url,
+                        $data,
+                        $method,
+                        $dataType,
+                    ]
+                );
+            } catch (\Exception $externalException) {
+
+            }
+            // Break on first success.
+            if (!is_null($returnable)) {
+                $hasInternalSuccess = true;
+                $return = $returnable;
+                break;
+            }
+        }
+
+        if (!$hasInternalSuccess) {
+            throw new ExceptionHandler(
+                sprintf(
+                    'An error occurred when configured external wrappers tried to communicate with %s.',
+                    $url
+                ),
+                isset($externalException) ? $externalException->getCode() : Constants::LIB_UNHANDLED,
+                isset($externalException) ? $externalException : null
             );
         }
 

@@ -5,12 +5,11 @@ namespace TorneLIB\Module\Network;
 use TorneLIB\Exception\Constants;
 use TorneLIB\Exception\ExceptionHandler;
 use TorneLIB\IO\Data\Content;
+use TorneLIB\Model\Interfaces\WrapperInterface;
 use TorneLIB\Model\Type\authType;
 use TorneLIB\Model\Type\dataType;
-use TorneLIB\Module\Config\WrapperConfig;
 use TorneLIB\Model\Type\requestMethod;
-use TorneLIB\Model\Interfaces\WrapperInterface;
-use TorneLIB\Module\Network\Wrappers\SoapClientWrapper;
+use TorneLIB\Module\Config\WrapperConfig;
 use TorneLIB\Utils\Generic;
 use TorneLIB\Utils\Security;
 
@@ -31,7 +30,7 @@ class NetWrapper implements WrapperInterface
     /**
      * @var
      */
-    private $wrappers;
+    private $wrappers = [];
 
     /**
      * @var array $internalWrapperList What we support internally.
@@ -58,6 +57,8 @@ class NetWrapper implements WrapperInterface
     public function __construct()
     {
         $this->initializeWrappers();
+
+        return $this;
     }
 
     /**
@@ -84,7 +85,6 @@ class NetWrapper implements WrapperInterface
 
         foreach ($this->internalWrapperList as $wrapperClass) {
             if (!empty($wrapperClass) &&
-                is_array($this->wrappers) &&
                 !in_array($wrapperClass, $this->wrappers)
             ) {
                 try {
@@ -173,17 +173,69 @@ class NetWrapper implements WrapperInterface
     /**
      * Register a new wrapper/module/communicator.
      */
-    public function register($wrapperClassName)
+    public function register($wrapperClass)
     {
-        if (!in_array($wrapperClassName, $this->externalWrapperList)) {
-            try {
-                $this->externalWrapperList[] = new $wrapperClassName();
-            } catch (\Exception $e) {
-
-            }
+        if (!is_object($wrapperClass)) {
+            throw new ExceptionHandler(
+                sprintf(
+                    'Unable to register wrong class type in %s.',
+                    __CLASS__
+                ),
+                Constants::LIB_CLASS_UNAVAILABLE
+            );
         }
-        echo $wrapperClassName;
-        die;
+
+        $this->registerClassInterface($wrapperClass);
+
+        return $this;
+    }
+
+    /**
+     * @param $wrapperClass
+     */
+    private function registerClassInterface($wrapperClass)
+    {
+        $badClass = false;
+
+        if (!in_array($wrapperClass, $this->externalWrapperList) &&
+            $this->registerCheckImplements($wrapperClass)
+        ) {
+            $this->externalWrapperList[] = $wrapperClass;
+        } else {
+            $badClass = true;
+        }
+
+        $this->registerCheckBadClass($badClass, $wrapperClass);
+    }
+
+    /**
+     * @param $badClass
+     * @param $wrapperClass
+     * @throws ExceptionHandler
+     * @since 6.1.0
+     */
+    private function registerCheckBadClass($badClass, $wrapperClass)
+    {
+        if ($badClass) {
+            throw new ExceptionHandler(
+                sprintf(
+                    'Unable to register class %s in %s with wrong interface.',
+                    get_class($wrapperClass),
+                    __CLASS__
+                ),
+                Constants::LIB_CLASS_UNAVAILABLE
+            );
+        }
+    }
+
+    /**
+     * @param $wrapperClass
+     */
+    private function registerCheckImplements($wrapperClass)
+    {
+        $implements = class_implements($wrapperClass);
+
+        return in_array('TorneLIB\Model\Interfaces\WrapperInterface', $implements);
     }
 
     /**

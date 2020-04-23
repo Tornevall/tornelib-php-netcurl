@@ -8,7 +8,7 @@ use TorneLIB\Model\Type\authType;
 use TorneLIB\Model\Type\dataType;
 use TorneLIB\Module\Config\WrapperConfig;
 use TorneLIB\Module\Network\Model\requestMethod;
-use TorneLIB\Module\Network\Model\Wrapper;
+use TorneLIB\Module\Network\Model\WrapperInterface;
 use TorneLIB\Utils\Generic;
 
 try {
@@ -22,7 +22,7 @@ try {
  *
  * @package TorneLIB\Module\Network\Wrappers
  */
-class RssWrapper implements Wrapper
+class RssWrapper implements WrapperInterface
 {
     /**
      * @var WrapperConfig $CONFIG

@@ -12,7 +12,7 @@ use TorneLIB\Model\Type\authType;
 use TorneLIB\Model\Type\dataType;
 use TorneLIB\Model\Type\requestMethod;
 use TorneLIB\Module\Config\WrapperConfig;
-use TorneLIB\Module\Network\Model\Wrapper;
+use TorneLIB\Module\Network\Model\WrapperInterface;
 use TorneLIB\Utils\Generic;
 use TorneLIB\Utils\Ini;
 use TorneLIB\Utils\Security;
@@ -23,7 +23,7 @@ use TorneLIB\Utils\Security;
  * @package TorneLIB\Module\Network\Wrappers
  * @version 6.1.0
  */
-class SoapClientWrapper implements Wrapper
+class SoapClientWrapper implements WrapperInterface
 {
     /**
      * @var WrapperConfig $CONFIG

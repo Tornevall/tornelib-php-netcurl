@@ -12,7 +12,7 @@ use TorneLIB\Model\Type\authType;
 use TorneLIB\Model\Type\dataType;
 use TorneLIB\Model\Type\requestMethod;
 use TorneLIB\Module\Config\WrapperConfig;
-use TorneLIB\Module\Network\Model\Wrapper;
+use TorneLIB\Module\Network\Model\WrapperInterface;
 use TorneLIB\Utils\Generic;
 use TorneLIB\Utils\Security;
 
@@ -31,7 +31,7 @@ try {
  * @package TorneLIB\Module\Network\Wrappers
  * @version 6.1.0
  */
-class CurlWrapper implements Wrapper
+class CurlWrapper implements WrapperInterface
 {
     private $version = '6.1.0';
 

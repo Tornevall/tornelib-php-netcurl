@@ -12,7 +12,7 @@ use TorneLIB\Model\Type\authType;
 use TorneLIB\Model\Type\dataType;
 use TorneLIB\Model\Type\requestMethod;
 use TorneLIB\Module\Config\WrapperConfig;
-use TorneLIB\Module\Network\Model\WrapperInterface;
+use TorneLIB\Model\Interfaces\WrapperInterface;
 use TorneLIB\Utils\Generic;
 use TorneLIB\Utils\Security;
 

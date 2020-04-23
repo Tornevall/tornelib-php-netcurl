@@ -1,6 +1,6 @@
 <?php
 
-namespace TorneLIB\Module\Network\Model;
+namespace TorneLIB\Model\Interfaces;
 
 use TorneLIB\Model\Type\authType;
 use TorneLIB\Model\Type\dataType;

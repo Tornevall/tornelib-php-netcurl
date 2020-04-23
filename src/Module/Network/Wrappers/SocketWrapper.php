@@ -5,8 +5,8 @@ namespace TorneLIB\Module\Network\Wrappers;
 use TorneLIB\Model\Type\authType;
 use TorneLIB\Model\Type\dataType;
 use TorneLIB\Module\Config\WrapperConfig;
-use TorneLIB\Module\Network\Model\requestMethod;
-use TorneLIB\Module\Network\Model\WrapperInterface;
+use TorneLIB\Model\Type\requestMethod;
+use TorneLIB\Model\Interfaces\WrapperInterface;
 use TorneLIB\Utils\Generic;
 
 /**

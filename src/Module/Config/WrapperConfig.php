@@ -206,7 +206,7 @@ class WrapperConfig
      */
     private function setCurlDefaults()
     {
-        $this->setTimeout(6);
+        $this->setTimeout(8);
 
         $this->setCurlConstants([
             'CURLOPT_RETURNTRANSFER' => true,

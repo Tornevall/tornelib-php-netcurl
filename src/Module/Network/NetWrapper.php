@@ -43,6 +43,8 @@ class NetWrapper implements Wrapper
         'TorneLIB\Module\Network\Wrappers\GuzzleWrapper',
     ];
 
+    private $externalWrapperList = [];
+
     /**
      * @var bool
      */
@@ -341,7 +343,6 @@ class NetWrapper implements Wrapper
     public function __call($name, $arguments)
     {
         $requestType = substr($name, 0, 3);
-        //$requestName = lcfirst(substr($name, 3));
 
         switch ($name) {
             case 'setAuth':

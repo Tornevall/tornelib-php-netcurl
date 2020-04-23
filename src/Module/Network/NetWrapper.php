@@ -343,7 +343,7 @@ class NetWrapper implements WrapperInterface
             }
         }
 
-        if (!$testOnly && is_object($return)) {
+        if (!$testOnly && !is_object($return)) {
             throw new ExceptionHandler(
                 sprintf(
                     'Could not find a proper NetWrapper (%s) to communicate with!',

@@ -166,8 +166,16 @@ class NetWrapper implements Wrapper
     /**
      * Register a new wrapper/module/communicator.
      */
-    public function register()
+    public function register($wrapperNamespace, $wrapperClassName)
     {
+        sprintf(
+            '%s\%s',
+            __NAMESPACE__,
+            __CLASS__
+        );
+
+        print_R($wrapperClass);
+        die;
     }
 
     /**

@@ -83,9 +83,14 @@ class NetWrapper implements WrapperInterface
         $this->CONFIG = new WrapperConfig();
 
         foreach ($this->internalWrapperList as $wrapperClass) {
-            try {
-                $this->wrappers[] = new $wrapperClass();
-            } catch (\Exception $wrapperLoadException) {
+            if (!empty($wrapperClass) &&
+                is_array($this->wrappers) &&
+                !in_array($wrapperClass, $this->wrappers)
+            ) {
+                try {
+                    $this->wrappers[] = new $wrapperClass();
+                } catch (\Exception $wrapperLoadException) {
+                }
             }
         }
 
@@ -168,8 +173,17 @@ class NetWrapper implements WrapperInterface
     /**
      * Register a new wrapper/module/communicator.
      */
-    public function register()
+    public function register($wrapperClassName)
     {
+        if (!in_array($wrapperClassName, $this->externalWrapperList)) {
+            try {
+                $this->externalWrapperList[] = new $wrapperClassName();
+            } catch (\Exception $e) {
+
+            }
+        }
+        echo $wrapperClassName;
+        die;
     }
 
     /**

@@ -7,10 +7,9 @@ use TorneLIB\Exception\ExceptionHandler;
 use TorneLIB\IO\Data\Content;
 use TorneLIB\Model\Type\authType;
 use TorneLIB\Model\Type\dataType;
-use TorneLIB\Module\Config\WrapperConfig;
 use TorneLIB\Model\Type\requestMethod;
+use TorneLIB\Module\Config\WrapperConfig;
 use TorneLIB\Module\Network\Model\WrapperInterface;
-use TorneLIB\Module\Network\Wrappers\SoapClientWrapper;
 use TorneLIB\Utils\Generic;
 use TorneLIB\Utils\Security;
 
@@ -83,9 +82,14 @@ class NetWrapper implements WrapperInterface
         $this->CONFIG = new WrapperConfig();
 
         foreach ($this->internalWrapperList as $wrapperClass) {
-            try {
-                $this->wrappers[] = new $wrapperClass();
-            } catch (\Exception $wrapperLoadException) {
+            if (!empty($wrapperClass) &&
+                is_array($this->wrappers) &&
+                !in_array($wrapperClass, $this->wrappers)
+            ) {
+                try {
+                    $this->wrappers[] = new $wrapperClass();
+                } catch (\Exception $wrapperLoadException) {
+                }
             }
         }
 
@@ -168,15 +172,17 @@ class NetWrapper implements WrapperInterface
     /**
      * Register a new wrapper/module/communicator.
      */
-    public function register($wrapperNamespace, $wrapperClassName)
+    public function register($wrapperClassName)
     {
-        sprintf(
-            '%s\%s',
-            __NAMESPACE__,
-            __CLASS__
-        );
+        if (!in_array($wrapperClassName, $this->externalWrapperList)) {
+            try {
+                $this->externalWrapperList[] = new $wrapperClassName();
+            } catch (\Exception $e) {
 
-        print_R($wrapperClass);
+            }
+        }
+
+        print_R($registerClassName);
         die;
     }
 

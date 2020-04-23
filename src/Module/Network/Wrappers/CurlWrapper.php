@@ -138,7 +138,6 @@ class CurlWrapper implements WrapperInterface
 
     /**
      * Destructor for cleaning up resources.
-     *
      * @since 6.1.0
      */
     public function __destruct()

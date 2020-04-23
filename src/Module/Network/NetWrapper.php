@@ -127,7 +127,10 @@ class NetWrapper implements WrapperInterface
     private $instanceClass;
 
     /**
+     * Get list of internal wrappers.
+     *
      * @return mixed
+     * @since 6.1.0
      */
     public function getWrappers()
     {
@@ -137,6 +140,7 @@ class NetWrapper implements WrapperInterface
     /**
      * @param WrapperConfig $config
      * @return NetWrapper
+     * @since 6.1.0
      */
     public function setConfig($config)
     {
@@ -179,7 +183,9 @@ class NetWrapper implements WrapperInterface
     }
 
     /**
-     * Register a new wrapper/module/communicator.
+     * Register an external wrapper/module/communicator.
+     *
+     * @since 6.1.0
      */
     public function register($wrapperClass, $tryFirst = false)
     {
@@ -200,7 +206,10 @@ class NetWrapper implements WrapperInterface
     }
 
     /**
+     * Register external wrapper class as useble if it implements the wrapper interface.
+     *
      * @param $wrapperClass
+     * @since 6.1.0
      */
     private function registerClassInterface($wrapperClass)
     {
@@ -238,7 +247,10 @@ class NetWrapper implements WrapperInterface
     }
 
     /**
+     * Checks if registering class implements WrapperInterface.
+     *
      * @param $wrapperClass
+     * @since 6.1.0
      */
     private function registerCheckImplements($wrapperClass)
     {
@@ -307,17 +319,20 @@ class NetWrapper implements WrapperInterface
     }
 
     /**
+     * Find found if internal wrapper is available and return it.
+     *
      * @param $wrapperNameClass
+     * @param bool $testOnly Test wrapper only. Meaning: Do not throw exceptions during control.
      * @return mixed
      * @throws ExceptionHandler
+     * @since 6.1.0
      */
-    private function getWrapper($wrapperNameClass)
+    private function getWrapper($wrapperNameClass, $testOnly = false)
     {
         $return = null;
 
         foreach ($this->wrappers as $wrapperClass) {
             $currentWrapperClass = get_class($wrapperClass);
-
             if (
                 $currentWrapperClass === sprintf('TorneLIB\Module\Network\Wrappers\%s', $wrapperNameClass) ||
                 $currentWrapperClass === $wrapperNameClass
@@ -328,7 +343,7 @@ class NetWrapper implements WrapperInterface
             }
         }
 
-        if (is_null($return)) {
+        if (!$testOnly && is_object($return)) {
             throw new ExceptionHandler(
                 sprintf(
                     'Could not find a proper NetWrapper (%s) to communicate with!',
@@ -371,6 +386,7 @@ class NetWrapper implements WrapperInterface
     public function request($url, $data = [], $method = requestMethod::METHOD_GET, $dataType = dataType::NORMAL)
     {
         $return = null;
+        $requestexternalExecute = null;
 
         if ($this->useRegisteredWrappersFirst && count($this->externalWrapperList)) {
             try {
@@ -382,6 +398,48 @@ class NetWrapper implements WrapperInterface
 
             }
         }
+
+        // Run internal wrappers.
+        if ($hasReturnedRequest = $this->getResultFromInternals(
+            $url,
+            $data,
+            $method,
+            $dataType
+        )) {
+            $return = $hasReturnedRequest;
+        };
+
+        // Internal handles are usually throwing execptions before landing here.
+        if (is_null($return) &&
+            !$this->useRegisteredWrappersFirst &&
+            count($this->externalWrapperList)
+        ) {
+            // Last execution should render errors thrown from external executes.
+            $returnable = $this->requestExternalExecute($url, $data, $method, $dataType);
+            if (!is_null($returnable)) {
+                return $returnable;
+            }
+        }
+
+        $this->getInstantiationException($return, __CLASS__, __FILE__, $requestexternalExecute);
+
+        return $return;
+    }
+
+    /**
+     * @param $url
+     * @param array $data
+     * @param int $method
+     * @param int $dataType
+     * @throws ExceptionHandler
+     */
+    private function getResultFromInternals(
+        $url,
+        $data = [],
+        $method = requestMethod::METHOD_GET,
+        $dataType = dataType::NORMAL
+    ) {
+        $return = null;
 
         if (preg_match('/\?wsdl|\&wsdl/i', $url)) {
             try {
@@ -396,47 +454,83 @@ class NetWrapper implements WrapperInterface
             }
         }
 
-        $hasReturnedRequest = false;
         /** @var WrapperInterface $classRequest */
-        if ($dataType === dataType::SOAP && ($classRequest = $this->getWrapper('SoapClientWrapper'))) {
+        if ($dataType === dataType::SOAP &&
+            ($classRequest = $this->getWrapperAllowed('SoapClientWrapper'))
+        ) {
             $this->isSoapRequest = true;
             $classRequest->setConfig($this->getConfig());
             $return = $classRequest->request($url, $data, $method, $dataType);
-            $hasReturnedRequest = true;
-        } elseif ($classRequest = $this->getWrapper('CurlWrapper')) {
+        } elseif ($classRequest = $this->getWrapperAllowed('CurlWrapper')) {
             $classRequest->setConfig($this->getConfig());
             $return = $classRequest->request($url, $data, $method, $dataType);
-            $hasReturnedRequest = true;
-        }
-
-        // Internal handles are usually throwing execptions before landing here.
-        if (!$hasReturnedRequest &&
-            !empty($return) &&
-            !$this->useRegisteredWrappersFirst &&
-            count($this->externalWrapperList)
-        ) {
-            // Last execution should render errors thrown from external executes.
-            $returnable = $this->requestExternalExecute($url, $data, $method, $dataType);
-            if (!is_null($returnable)) {
-                return $returnable;
-            }
-        }
-
-        if (is_null($return)) {
-            throw new ExceptionHandler(
-                sprintf(
-                    '%s instantiation failure: No wrapper available in function %s.',
-                    __CLASS__,
-                    __FUNCTION__
-                ),
-                Constants::LIB_NETCURL_NETWRAPPER_NO_DRIVER_FOUND,
-                $requestexternalExecute
-            );
         }
 
         return $return;
     }
 
+    /**
+     * Returns proper wrapper for internal wrapper requests, depending on external available wrappers.
+     *
+     * @param $wrapperName
+     * @return mixed
+     * @throws ExceptionHandler
+     * @since 6.1.0
+     */
+    private function getWrapperAllowed($wrapperName)
+    {
+        // If there are no available external wrappers, let getWrapper do its actions and throw exceptions if
+        // the internal wrapper fails to load.
+        if (!count($this->externalWrapperList)) {
+            $return = $this->getWrapper($wrapperName);
+        } else {
+            // If there are available external wrappers, just try to load external wrapper and proceed
+            // without noise on failures, as we'd like to try to use the externals first.
+            $return = $this->getWrapper($wrapperName, true);
+        }
+
+        return $return;
+    }
+
+    /**
+     * Check if return value is null and if, do thrown an exception. This is done if no instances has been successfully
+     * created during request.
+     *
+     * @param $nullValue
+     * @param $className
+     * @param $functioName
+     * @throws ExceptionHandler
+     * @since 6.1.0
+     */
+    private function getInstantiationException($nullValue, $className, $functioName, $requestexternalExecute)
+    {
+        if (is_null($nullValue)) {
+            throw new ExceptionHandler(
+                sprintf(
+                    '%s instantiation failure: No wrapper available in function %s.',
+                    $className,
+                    $functioName
+                ),
+                Constants::LIB_NETCURL_NETWRAPPER_NO_DRIVER_FOUND,
+                $requestexternalExecute
+            );
+        }
+    }
+
+    /**
+     * Initiate an external wrapper request. This actually initiates a "wrapper loop" that runs through
+     * each registered wrapper and uses the first that responds correctly. Method is collected here as it
+     * runs both in the top of request (if prioritized like that) and in the bottom if developers primarily
+     * prefers to use internal classes before their own.
+     *
+     * @param $url
+     * @param array $data
+     * @param int $method
+     * @param int $dataType
+     * @return mixed|null
+     * @throws ExceptionHandler
+     * @since 6.1.0
+     */
     private function requestExternalExecute(
         $url,
         $data = [],
@@ -471,6 +565,17 @@ class NetWrapper implements WrapperInterface
         );
     }
 
+    /**
+     * request external execution looper.
+     *
+     * @param $url
+     * @param array $data
+     * @param int $method
+     * @param int $dataType
+     * @return mixed|null
+     * @throws ExceptionHandler
+     * @since 6.1.0
+     */
     private function requestExternal(
         $url,
         $data = [],

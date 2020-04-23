@@ -17,7 +17,7 @@ if (!defined('NETCURL_VERSION')) {
  * @version 6.1.0
  * @since 6.1.0
  */
-interface Wrapper
+interface WrapperInterface
 {
     /**
      * Wrapper constructor.

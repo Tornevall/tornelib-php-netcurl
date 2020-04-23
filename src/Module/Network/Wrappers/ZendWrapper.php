@@ -7,7 +7,7 @@ use TorneLIB\Model\Type\authType;
 use TorneLIB\Model\Type\dataType;
 use TorneLIB\Module\Config\WrapperConfig;
 use TorneLIB\Module\Network\Model\requestMethod;
-use TorneLIB\Module\Network\Model\Wrapper;
+use TorneLIB\Module\Network\Model\WrapperInterface;
 use TorneLIB\Utils\Generic;
 use Zend\Http\Client;
 
@@ -17,7 +17,7 @@ use Zend\Http\Client;
  * @version 6.1.0
  * @since 6.0 Was included with v6.0 but with another look.
  */
-class ZendWrapper implements Wrapper
+class ZendWrapper implements WrapperInterface
 {
     public function __construct()
     {

@@ -9,7 +9,7 @@ use TorneLIB\Model\Type\authType;
 use TorneLIB\Model\Type\dataType;
 use TorneLIB\Module\Config\WrapperConfig;
 use TorneLIB\Model\Type\requestMethod;
-use TorneLIB\Module\Network\Model\Wrapper;
+use TorneLIB\Module\Network\Model\WrapperInterface;
 use TorneLIB\Module\Network\Wrappers\SoapClientWrapper;
 use TorneLIB\Utils\Generic;
 use TorneLIB\Utils\Security;
@@ -21,7 +21,7 @@ use TorneLIB\Utils\Security;
  * @package TorneLIB\Module\Network
  * @version 6.1.0
  */
-class NetWrapper implements Wrapper
+class NetWrapper implements WrapperInterface
 {
     /**
      * @var WrapperConfig $CONFIG
@@ -42,6 +42,8 @@ class NetWrapper implements Wrapper
         'TorneLIB\Module\Network\Wrappers\SoapClientWrapper',
         'TorneLIB\Module\Network\Wrappers\GuzzleWrapper',
     ];
+
+    private $externalWrapperList = [];
 
     /**
      * @var bool
@@ -100,7 +102,7 @@ class NetWrapper implements Wrapper
     }
 
     /**
-     * @var Wrapper $instance The instance is normally the wrapperinterface.
+     * @var WrapperInterface $instance The instance is normally the wrapperinterface.
      * @since 6.1.0
      */
     private $instance;
@@ -316,7 +318,7 @@ class NetWrapper implements Wrapper
             }
         }
 
-        /** @var Wrapper $classRequest */
+        /** @var WrapperInterface $classRequest */
         if ($dataType === dataType::SOAP && ($classRequest = $this->getWrapper('SoapClientWrapper'))) {
             $this->isSoapRequest = true;
             $classRequest->setConfig($this->getConfig());
@@ -349,7 +351,6 @@ class NetWrapper implements Wrapper
     public function __call($name, $arguments)
     {
         $requestType = substr($name, 0, 3);
-        //$requestName = lcfirst(substr($name, 3));
 
         switch ($name) {
             case 'setAuth':

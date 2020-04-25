@@ -212,8 +212,6 @@ class WrapperConfig
      */
     private function setCurlDefaults()
     {
-        $this->setTimeout(8);
-
         $this->setCurlConstants([
             'CURLOPT_RETURNTRANSFER' => true,
             'CURLOPT_SSL_VERIFYPEER' => 1,
@@ -224,6 +222,8 @@ class WrapperConfig
             'CURLOPT_FOLLOWLOCATION' => false,
             'CURLOPT_HTTPHEADER' => ['Accept-Language: en'],
         ]);
+
+        $this->setTimeout(8);
 
         return $this;
     }
@@ -399,7 +399,7 @@ class WrapperConfig
      * @param array $requestFlags
      * @since 6.1.0
      */
-    public function setRequestFlags(array $requestFlags)
+    public function setRequestFlags($requestFlags)
     {
         /** @noinspection PhpUndefinedMethodInspection */
         Flags::_setFlags($requestFlags);
@@ -634,7 +634,7 @@ class WrapperConfig
 
         throw new ExceptionHandler(
             sprintf('%s: Option "%s" not set.', __CLASS__, $key),
-            404
+            Constants::LIB_UNHANDLED
         );
     }
 

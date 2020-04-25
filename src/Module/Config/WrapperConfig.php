@@ -51,8 +51,9 @@ class WrapperConfig
     private $requestMethod = requestMethod::METHOD_GET;
 
     /**
+     * Datatype to post in (default = uses ?key=value for GET and &key=value in body for POST).
+     * @var int
      * @since 6.1.0
-     * @var int Datatype to post in (default = uses ?key=value for GET and &key=value in body for POST).
      */
     private $requestDataType = dataType::NORMAL;
 
@@ -82,6 +83,7 @@ class WrapperConfig
     /**
      * Allow WrapperConfig to push out netcurl identification instead of a spoofed browser.
      * @var bool
+     * @since 6.1.0
      */
     private $identifierAgent = false;
 
@@ -89,11 +91,13 @@ class WrapperConfig
      * If netcurl identification is allowed, also allow PHP version to be pushed into the useragent, unless
      * it's already done somewhere else.
      * @var bool
+     * @since 6.1.0
      */
     private $identifierAgentPhp = false;
 
     /**
      * @var bool
+     * @since 6.1.0
      */
     private $isCustomUserAgent = false;
 
@@ -139,18 +143,23 @@ class WrapperConfig
     private $SSL;
 
     /**
-     * @var array User data that normally can not be overwritten more than once (when not exists).
+     * User data that normally can not be overwritten more than once (when not exists).
+     * @var array
+     * @since 6.1.0
      */
     private $irreplacable = ['user_agent'];
 
     /**
-     * @var bool $isSoapRequest Discovered soaprequest.
+     * If discovered soaprequest.
+     * @var bool $isSoapRequest
      * @since 6.1.0
      */
     private $isSoapRequest = false;
 
     /**
+     * If discovered stream request.
      * @var bool
+     * @since 6.1.0
      */
     private $isStreamRequest = false;
 
@@ -460,7 +469,8 @@ class WrapperConfig
      * @throws ExceptionHandler
      * @since 6.1.0
      */
-    private function setHandledUserAgent() {
+    private function setHandledUserAgent()
+    {
         $currentUserAgent = $this->getUserAgent();
 
         if ($this->getIdentifiers()) {
@@ -488,7 +498,8 @@ class WrapperConfig
      * @return string
      * @since 6.1.0
      */
-    private function getPhpString() {
+    private function getPhpString()
+    {
         if ($this->identifierAgentPhp) {
             $phpString = sprintf(';PHP-%s', PHP_VERSION);
         } else {
@@ -497,7 +508,8 @@ class WrapperConfig
         return $phpString;
     }
 
-    private function getNetWrapperString() {
+    private function getNetWrapperString()
+    {
         return $this->isNetWrapper ? 'NetWrapper' : 'Instant';
     }
 
@@ -975,7 +987,8 @@ class WrapperConfig
      * @return bool
      * @since 6.1.0
      */
-    public function getIsCustomUserAgent() {
+    public function getIsCustomUserAgent()
+    {
         return $this->isCustomUserAgent;
     }
 
@@ -1132,7 +1145,8 @@ class WrapperConfig
      * @param $isWrapped
      * @return $this
      */
-    public function setNetWrapper($isWrapped) {
+    public function setNetWrapper($isWrapped)
+    {
         $this->isNetWrapper = $isWrapped;
 
         return $this;

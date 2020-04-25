@@ -62,6 +62,12 @@ class WrapperConfig
     private $options = [];
 
     /**
+     * @var string
+     * @since 6.1.0
+     */
+    private static $userAgentSignature;
+
+    /**
      * @var array Initial SoapOptions
      *
      *   WSDL_CACHE_NONE = 0
@@ -401,10 +407,14 @@ class WrapperConfig
 
     /**
      * @return array
+     * @throws ExceptionHandler
      * @since 6.1.0
      */
     public function getOptions()
     {
+        $currentUserAgent = $this->getUserAgent();
+        $this->setUserAgent($currentUserAgent);
+
         return $this->options;
     }
 
@@ -836,6 +846,11 @@ class WrapperConfig
      */
     public function getUserAgent()
     {
+        $globalSignature = WrapperConfig::getSignature();
+        if (!empty($globalSignature)) {
+            return $globalSignature;
+        }
+
         $return = $this->getOption(WrapperCurlOpt::NETCURL_CURLOPT_USERAGENT);
 
         if ($this->getSoapRequest()) {
@@ -1005,6 +1020,50 @@ class WrapperConfig
         }
 
         return $this;
+    }
+
+    /**
+     * Setting useragent statically and on global level.
+     *
+     * @param $userAgentSignature
+     * @since 6.1.0
+     */
+    public static function setSignature($userAgentSignature) {
+        self::$userAgentSignature = $userAgentSignature;
+    }
+
+    /**
+     * Remove static useragent.
+     * @since 6.1.0
+     */
+    public static function deleteSignature() {
+        self::$userAgentSignature = null;
+    }
+
+    /**
+     * @return string
+     * @since 6.1.0
+     */
+    public static function getSignature() {
+        return self::$userAgentSignature;
+    }
+
+    /**
+     * @param $userAgentSignatureString
+     * @return $this
+     * @since 6.1.0
+     */
+    public function setUserAgentSignature($userAgentSignatureString) {
+        WrapperConfig::setSignature($userAgentSignatureString);
+        return $this;
+    }
+
+    /**
+     * @return string
+     * @since 6.1.0
+     */
+    public function getUserAgentSignature() {
+        return WrapperConfig::getSignature();
     }
 
     /**

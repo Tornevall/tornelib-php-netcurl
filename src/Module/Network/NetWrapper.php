@@ -66,7 +66,7 @@ class NetWrapper implements WrapperInterface
      * @return NetWrapper
      * @since 6.1.0
      */
-    public function setIdentifiers($activation, $allowPhpRelease)
+    public function setIdentifiers($activation, $allowPhpRelease = false)
     {
         $this->CONFIG->setIdentifiers($activation, $allowPhpRelease);
 

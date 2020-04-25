@@ -3,6 +3,7 @@
 require_once(__DIR__ . '/../vendor/autoload.php');
 
 use PHPUnit\Framework\TestCase;
+use TorneLIB\Exception\ExceptionHandler;
 use TorneLIB\Module\Config\WrapperConfig;
 use TorneLIB\Module\Config\WrapperDriver;
 use TorneLIB\Module\Network\NetWrapper;
@@ -57,6 +58,7 @@ class netWrapperTest extends TestCase
 
     /**
      * @test
+     * @throws ExceptionHandler
      */
     public function sigGet()
     {
@@ -66,6 +68,8 @@ class netWrapperTest extends TestCase
             ->request(sprintf('https://ipv4.netcurl.org/?func=%s', __FUNCTION__));
 
         $parsed = $wrapper->getParsed();
+
+        WrapperConfig::deleteSignature();
 
         static::assertTrue($parsed->HTTP_USER_AGENT === 'Korven skriker.');
     }

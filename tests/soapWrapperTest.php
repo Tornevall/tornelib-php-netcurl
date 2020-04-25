@@ -363,8 +363,6 @@ class soapWrapperTest extends TestCase
             $uriTemplate
         );
 
-        $last = $rWrapper->getLastResponse();
-
         static::assertTrue((int)$uriTemplate['ts'] === $currentTimeStamp);
     }
 }

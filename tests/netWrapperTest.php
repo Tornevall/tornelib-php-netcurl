@@ -58,7 +58,8 @@ class netWrapperTest extends TestCase
     /**
      * @test
      */
-    public function sigGet() {
+    public function sigGet()
+    {
         WrapperConfig::setSignature('Korven skriker.');
 
         $wrapper = (new NetWrapper())
@@ -66,6 +67,6 @@ class netWrapperTest extends TestCase
 
         $parsed = $wrapper->getParsed();
 
-        print_R($parsed->HTTP_USER_AGENT);
+        static::assertTrue($parsed->HTTP_USER_AGENT === 'Korven skriker.');
     }
 }

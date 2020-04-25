@@ -2,8 +2,7 @@
 
 namespace TorneLIB\Module\Network\Wrappers;
 
-use TorneLIB\Exception\Constants;
-use TorneLIB\Exception\ExceptionHandler;
+use TorneLIB\Helpers\Version;
 use TorneLIB\Model\Type\authType;
 use TorneLIB\Model\Type\dataType;
 use TorneLIB\Module\Config\WrapperConfig;
@@ -11,25 +10,28 @@ use TorneLIB\Model\Type\requestMethod;
 use TorneLIB\Model\Interfaces\WrapperInterface;
 use TorneLIB\Utils\Generic;
 
+try {
+    Version::getRequiredVersion();
+} catch (Exception $e) {
+    die($e->getMessage());
+}
+
 /**
- * Class StreamWrapper
+ * Class SimpleWrapper Fetching tool in the simplest form. Using file_get_contents.
  *
  * @package TorneLIB\Module\Network\Wrappers
  * @version 6.1.0
  */
-class StreamWrapper implements WrapperInterface
+class SimpleStreamWrapper implements WrapperInterface
 {
     /**
      * @var WrapperConfig $CONFIG
+     * @version 6.1.0
      */
     private $CONFIG;
 
     public function __construct()
     {
-        throw new ExceptionHandler(
-            'Unhandled wrapper: Stream. Make sure the developer checks for existence before loading.',
-            Constants::LIB_NETCURL_NETWRAPPER_UNHANDLED_WRAPPER
-        );
     }
 
     /**
@@ -48,7 +50,7 @@ class StreamWrapper implements WrapperInterface
 
     /**
      * @param WrapperConfig $config
-     * @return StreamWrapper
+     * @return SimpleStreamWrapper
      * @version 6.1.0
      */
     public function setConfig($config)
@@ -72,7 +74,7 @@ class StreamWrapper implements WrapperInterface
      * @param $username
      * @param $password
      * @param int $authType
-     * @return StreamWrapper
+     * @return SimpleStreamWrapper
      * @since 6.1.0
      */
     public function setAuthentication($username, $password, $authType = authType::BASIC)
@@ -92,11 +94,6 @@ class StreamWrapper implements WrapperInterface
     }
 
     /**
-     * @param $url
-     * @param array $data
-     * @param $method
-     * @param int $dataType
-     * @return $this|mixed
      * @version 6.1.0
      */
     public function request($url, $data = [], $method = requestMethod::METHOD_GET, $dataType = dataType::NORMAL)

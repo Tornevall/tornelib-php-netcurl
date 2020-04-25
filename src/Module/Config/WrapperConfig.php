@@ -65,6 +65,7 @@ class WrapperConfig
 
     /**
      * @var string $currentWrapper
+     * @since 6.1.0
      */
     private $currentWrapper;
 
@@ -447,7 +448,7 @@ class WrapperConfig
      * @param array $requestFlags
      * @since 6.1.0
      */
-    public function setRequestFlags(array $requestFlags)
+    public function setRequestFlags($requestFlags)
     {
         /** @noinspection PhpUndefinedMethodInspection */
         Flags::_setFlags($requestFlags);
@@ -514,11 +515,13 @@ class WrapperConfig
     }
 
     /**
+     * Update stream options (which transforms into stream_context).
+     *
      * @param array $streamOptions
      * @return WrapperConfig
      * @since 6.1.0
      */
-    public function setStreamOptions(array $streamOptions)
+    public function setStreamOptions($streamOptions)
     {
         $this->streamOptions = $streamOptions;
 
@@ -657,7 +660,7 @@ class WrapperConfig
      * @return WrapperConfig
      * @since 6.1.0
      */
-    public function setOptions(array $options)
+    public function setOptions($options)
     {
         $this->options = $options;
 

@@ -11,7 +11,6 @@ class genericTest extends TestCase
 {
     /**
      * @test
-     * @throws ExceptionHandler
      */
     public function getGitTagsNetcurl()
     {
@@ -23,7 +22,6 @@ class genericTest extends TestCase
 
     /**
      * @test
-     * @throws ExceptionHandler
      */
     public function getGitTagsNetcurlBucket()
     {

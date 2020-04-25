@@ -95,15 +95,12 @@ class NetUtils {
     }
 
     /**
-     * getGitTagsByUrl
-     *
-     * From 6.1, the $keepCredentials has no effect.
+     * getGitTagsByUrl (From 6.1, the $keepCredentials has no effect).
      *
      * @param $url
      * @param bool $numericsOnly
      * @param bool $numericsSanitized
      * @return array
-     * @throws ExceptionHandler
      * @since 6.0.4 Moved from Network Library.
      */
     public function getGitTagsByUrl($url, $numericsOnly = false, $numericsSanitized = false)
@@ -119,7 +116,6 @@ class NetUtils {
      * @param $version2
      * @param $operator
      * @return array
-     * @throws ExceptionHandler
      */
     public function getGitTagsByVersion($giturl, $version1, $version2, $operator)
     {
@@ -143,7 +139,6 @@ class NetUtils {
      * @param $gitUrl
      * @param string $yourVersion
      * @return array
-     * @throws ExceptionHandler
      */
     public function getHigherVersions($gitUrl, $yourVersion = '')
     {
@@ -164,7 +159,6 @@ class NetUtils {
      * @param $gitUrl
      * @param string $yourVersion
      * @return bool
-     * @throws ExceptionHandler
      */
     public function getVersionLatest($gitUrl, $yourVersion = '')
     {

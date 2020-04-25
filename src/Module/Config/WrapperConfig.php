@@ -901,7 +901,7 @@ class WrapperConfig
      * @return WrapperConfig
      * @since 6.1.0
      */
-    private function setWsdlCache($cacheSet = 0, $ttlCache = null)
+    public function setWsdlCache($cacheSet = 0, $ttlCache = null)
     {
         $this->streamOptions['cache_wsdl'] = $cacheSet;
         if (

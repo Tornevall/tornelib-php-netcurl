@@ -72,6 +72,7 @@ class curlWrapperTest extends TestCase
     /**
      * @test
      * @throws ExceptionHandler
+     * @throws ReflectionException
      */
     public function getVersion()
     {

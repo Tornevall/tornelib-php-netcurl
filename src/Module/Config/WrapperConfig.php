@@ -8,6 +8,7 @@ use TorneLIB\Exception\Constants;
 use TorneLIB\Exception\ExceptionHandler;
 use TorneLIB\Flags;
 use TorneLIB\Helpers\Browsers;
+use TorneLIB\IO\Data\Content;
 use TorneLIB\IO\Data\Strings;
 use TorneLIB\Model\Type\authSource;
 use TorneLIB\Model\Type\authType;
@@ -50,8 +51,9 @@ class WrapperConfig
     private $requestMethod = requestMethod::METHOD_GET;
 
     /**
+     * Datatype to post in (default = uses ?key=value for GET and &key=value in body for POST).
+     * @var int
      * @since 6.1.0
-     * @var int Datatype to post in (default = uses ?key=value for GET and &key=value in body for POST).
      */
     private $requestDataType = dataType::NORMAL;
 
@@ -62,10 +64,43 @@ class WrapperConfig
     private $options = [];
 
     /**
+     * @var string $currentWrapper
+     * @since 6.1.0
+     */
+    private $currentWrapper;
+
+    /**
+     * @var bool
+     * @since 6.1.0
+     */
+    private $isNetWrapper = false;
+
+    /**
      * @var string
      * @since 6.1.0
      */
     private static $userAgentSignature;
+
+    /**
+     * Allow WrapperConfig to push out netcurl identification instead of a spoofed browser.
+     * @var bool
+     * @since 6.1.0
+     */
+    private $identifierAgent = false;
+
+    /**
+     * If netcurl identification is allowed, also allow PHP version to be pushed into the useragent, unless
+     * it's already done somewhere else.
+     * @var bool
+     * @since 6.1.0
+     */
+    private $identifierAgentPhp = false;
+
+    /**
+     * @var bool
+     * @since 6.1.0
+     */
+    private $isCustomUserAgent = false;
 
     /**
      * @var array Initial SoapOptions
@@ -109,15 +144,25 @@ class WrapperConfig
     private $SSL;
 
     /**
-     * @var array User data that normally can not be overwritten more than once (when not exists).
+     * User data that normally can not be overwritten more than once (when not exists).
+     * @var array
+     * @since 6.1.0
      */
     private $irreplacable = ['user_agent'];
 
     /**
-     * @var bool $isSoapRequest Discovered soaprequest.
+     * If discovered soaprequest.
+     * @var bool $isSoapRequest
      * @since 6.1.0
      */
     private $isSoapRequest = false;
+
+    /**
+     * If discovered stream request.
+     * @var bool
+     * @since 6.1.0
+     */
+    private $isStreamRequest = false;
 
     /**
      * WrapperConfig constructor.
@@ -128,6 +173,29 @@ class WrapperConfig
         $this->SSL = new WrapperSSL();
         $this->setThrowableHttpCodes();
         $this->setCurlDefaults();
+
+        return $this;
+    }
+
+    /**
+     * Preparing curl defaults in a way we like.
+     * @return $this
+     * @since 6.1.0
+     */
+    private function setCurlDefaults()
+    {
+        $this->setCurlConstants([
+            'CURLOPT_RETURNTRANSFER' => true,
+            'CURLOPT_SSL_VERIFYPEER' => 1,
+            'CURLOPT_SSL_VERIFYHOST' => 2,
+            'CURLOPT_ENCODING' => 1,
+            'CURLOPT_USERAGENT' => (new Browsers())->getBrowser(),
+            'CURLOPT_SSLVERSION' => WrapperCurlOpt::NETCURL_CURL_SSLVERSION_DEFAULT,
+            'CURLOPT_FOLLOWLOCATION' => false,
+            'CURLOPT_HTTPHEADER' => ['Accept-Language: en'],
+        ]);
+
+        $this->setTimeout(8);
 
         return $this;
     }
@@ -206,29 +274,6 @@ class WrapperConfig
     }
 
     /**
-     * Preparing curl defaults in a way we like.
-     * @return $this
-     * @since 6.1.0
-     */
-    private function setCurlDefaults()
-    {
-        $this->setTimeout(8);
-
-        $this->setCurlConstants([
-            'CURLOPT_RETURNTRANSFER' => true,
-            'CURLOPT_SSL_VERIFYPEER' => 1,
-            'CURLOPT_SSL_VERIFYHOST' => 2,
-            'CURLOPT_ENCODING' => 1,
-            'CURLOPT_USERAGENT' => (new Browsers())->getBrowser(),
-            'CURLOPT_SSLVERSION' => WrapperCurlOpt::NETCURL_CURL_SSLVERSION_DEFAULT,
-            'CURLOPT_FOLLOWLOCATION' => false,
-            'CURLOPT_HTTPHEADER' => ['Accept-Language: en'],
-        ]);
-
-        return $this;
-    }
-
-    /**
      * @return array
      * @since 6.1.0
      */
@@ -294,6 +339,10 @@ class WrapperConfig
         // Return as is on string.
         if (!is_string($return)) {
             switch ($this->requestDataType) {
+                case dataType::XML:
+                    $this->requestDataContainer = (new Content())->getXmlFromArray($return);
+                    $return = $this->requestDataContainer;
+                    break;
                 case dataType::JSON:
                     $this->requestDataContainer = $this->getJsonData($return);
                     $return = $this->requestDataContainer;
@@ -399,7 +448,7 @@ class WrapperConfig
      * @param array $requestFlags
      * @since 6.1.0
      */
-    public function setRequestFlags(array $requestFlags)
+    public function setRequestFlags($requestFlags)
     {
         /** @noinspection PhpUndefinedMethodInspection */
         Flags::_setFlags($requestFlags);
@@ -412,18 +461,67 @@ class WrapperConfig
      */
     public function getOptions()
     {
-        $currentUserAgent = $this->getUserAgent();
-        $this->setUserAgent($currentUserAgent);
+        $this->setHandledUserAgent();
 
         return $this->options;
     }
 
     /**
+     * @throws ExceptionHandler
+     * @since 6.1.0
+     */
+    private function setHandledUserAgent()
+    {
+        $currentUserAgent = $this->getUserAgent();
+
+        if ($this->getIdentifiers()) {
+            if (!$this->getIsCustomUserAgent()) {
+                // Reset if not custom already.
+                $currentUserAgent = sprintf(
+                    'netcurl-%s',
+                    NETCURL_VERSION
+                );
+            }
+
+            $currentUserAgent = sprintf(
+                '%s;%s +%s;%s',
+                $currentUserAgent,
+                $this->getCurrentWrapperClass(true),
+                $this->getNetWrapperString(),
+                $this->getPhpString()
+            );
+        }
+
+        $this->setUserAgent($currentUserAgent);
+    }
+
+    /**
+     * @return string
+     * @since 6.1.0
+     */
+    private function getPhpString()
+    {
+        if ($this->identifierAgentPhp) {
+            $phpString = sprintf(';PHP-%s', PHP_VERSION);
+        } else {
+            $phpString = '';
+        }
+        return $phpString;
+    }
+
+    private function getNetWrapperString()
+    {
+        return $this->isNetWrapper ? 'NetWrapper' : 'Instant';
+    }
+
+    /**
+     * Update stream options (which transforms into stream_context).
+     *
      * @param array $streamOptions
      * @return WrapperConfig
      * @since 6.1.0
      */
-    public function setStreamOptions(array $streamOptions)
+    public function setStreamOptions($streamOptions)
     {
         $this->streamOptions = $streamOptions;
 
@@ -460,10 +558,21 @@ class WrapperConfig
                     $currentStreamContext[$subKey] = [];
                 }
                 if (
-                    (isset($currentStreamContext[$subKey][$key]) && $this->canOverwrite($key)) ||
+                    (
+                        isset($currentStreamContext[$subKey][$key]) && $this->canOverwrite($key)
+                    ) ||
                     !isset($currentStreamContext[$subKey][$key])
                 ) {
-                    $currentStreamContext[$subKey][$key] = $value;
+                    if (!isset($currentStreamContext[$subKey][$key])) {
+                        $currentStreamContext[$subKey][$key] = $value;
+                    } else {
+                        if ($key === 'header') {
+                            $currentStreamContext[$subKey][$key] .= "\r\n" . $value;
+                        } else {
+                            // Overwrite if not header context.
+                            $currentStreamContext[$subKey][$key] = $value;
+                        }
+                    }
                 }
             }
         }
@@ -546,7 +655,7 @@ class WrapperConfig
      */
     private function setRenderedUserAgent()
     {
-        $this->setStreamContext('user_agent', $this->getUserAgent(), 'http');
+        $this->setDualStreamHttp('user_agent', $this->getUserAgent());
 
         return $this;
     }
@@ -556,7 +665,7 @@ class WrapperConfig
      * @return WrapperConfig
      * @since 6.1.0
      */
-    public function setOptions(array $options)
+    public function setOptions($options)
     {
         $this->options = $options;
 
@@ -648,12 +757,29 @@ class WrapperConfig
     }
 
     /**
+     * @param $isStreamRequest
+     * @since 6.1.0
+     */
+    public function setStreamRequest($isStreamRequest)
+    {
+        $this->isStreamRequest = $isStreamRequest;
+    }
+
+    /**
      * @return bool
      * @since 6.1.0
      */
     public function getSoapRequest()
     {
         return $this->isSoapRequest;
+    }
+
+    /**
+     * @return bool
+     */
+    public function getStreamRequest()
+    {
+        return $this->isStreamRequest;
     }
 
     /**
@@ -665,6 +791,19 @@ class WrapperConfig
     public function setStreamOption($key, $value)
     {
         return $this->setOption($key, $value, true);
+    }
+
+    /**
+     * @param $key
+     * @param $value
+     * @return $this
+     */
+    public function setDualStreamHttp($key, $value)
+    {
+        $this->setStreamContext($key, $value, 'https');
+        $this->setStreamContext($key, $value, 'http');
+
+        return $this;
     }
 
     /**
@@ -749,6 +888,14 @@ class WrapperConfig
         $authSource = authSource::NORMAL
     ) {
         switch ($authSource) {
+            case authSource::STREAM:
+                if ($authType === authType::BASIC) {
+                    $this->setDualStreamHttp(
+                        'header',
+                        'Authorization: Basic ' . base64_encode("$username:$password")
+                    );
+                }
+                break;
             case authSource::SOAP:
                 $this->authData['login'] = $username;
                 $this->authData['password'] = $password;
@@ -834,9 +981,44 @@ class WrapperConfig
      */
     public function setUserAgent($userAgentString)
     {
-        $this->setOption(WrapperCurlOpt::NETCURL_CURLOPT_USERAGENT, $userAgentString);
+        $this->isCustomUserAgent = true;
+
+        $this->setOption(
+            WrapperCurlOpt::NETCURL_CURLOPT_USERAGENT,
+            $userAgentString
+        );
 
         return $this;
+    }
+
+    /**
+     * @return bool
+     * @since 6.1.0
+     */
+    public function getIsCustomUserAgent()
+    {
+        return $this->isCustomUserAgent;
+    }
+
+    /**
+     * Allows strict identification in user-agent header.
+     * @param $activate
+     * @since 6.1.0
+     */
+    public function setIdentifiers($activate, $allowPhpRelease = false)
+    {
+        $this->identifierAgent = $activate;
+        $this->identifierAgentPhp = $allowPhpRelease;
+    }
+
+    /**
+     * Status of identifierAgent, if enable or not.
+     * @return bool
+     * @since 6.1.0
+     */
+    public function getIdentifiers()
+    {
+        return $this->identifierAgent;
     }
 
     /**
@@ -853,7 +1035,7 @@ class WrapperConfig
 
         $return = $this->getOption(WrapperCurlOpt::NETCURL_CURLOPT_USERAGENT);
 
-        if ($this->getSoapRequest()) {
+        if ($this->getSoapRequest() || $this->getStreamRequest()) {
             $currentStreamContext = $this->getStreamContext();
             if (!is_null($currentStreamContext)) {
                 $currentStreamContext = stream_context_get_options($currentStreamContext);
@@ -968,56 +1150,12 @@ class WrapperConfig
     }
 
     /**
-     * Internal configset magics.
-     *
-     * @param $name
-     * @param $arguments
-     * @return $this|mixed
-     * @throws ExceptionHandler
-     * @since 6.1.0
+     * @param $isWrapped
+     * @return $this
      */
-    public function __call($name, $arguments)
+    public function setNetWrapper($isWrapped)
     {
-        $method = substr($name, 0, 3);
-        $methodContent = (new Strings())->getCamelCase(substr($name, 3));
-
-        switch (strtolower($method)) {
-            case 'get':
-                if (method_exists($this, sprintf('get%s', ucfirst($methodContent)))) {
-                    return call_user_func_array(
-                        [
-                            $this,
-                            sprintf(
-                                'get%s',
-                                ucfirst($methodContent)
-                            ),
-                        ],
-                        []
-                    );
-                }
-
-                if (isset($this->configData[$methodContent])) {
-                    return $this->configData[$methodContent];
-                }
-
-                throw new ExceptionHandler('Variable not set.', Constants::LIB_CONFIGWRAPPER_VAR_NOT_SET);
-                break;
-            case 'set':
-                if (method_exists($this, sprintf('set%s', ucfirst($methodContent)))) {
-                    call_user_func_array(
-                        [
-                            $this,
-                            sprintf('set%s', ucfirst($methodContent)),
-                        ],
-                        $arguments
-                    );
-                }
-
-                $this->configData[$methodContent] = array_pop($arguments);
-                break;
-            default:
-                break;
-        }
+        $this->isNetWrapper = $isWrapped;
 
         return $this;
     }
@@ -1084,6 +1222,58 @@ class WrapperConfig
     }
 
     /**
+     * @return string
+     * @since 6.1.0
+     */
+    public function getCurrentWrapper()
+    {
+        return $this->currentWrapper;
+    }
+
+    /**
+     * @param $currentWrapper
+     * @return WrapperConfig
+     * @since 6.1.0
+     */
+    public function setCurrentWrapper($currentWrapper)
+    {
+        if (!empty($currentWrapper)) {
+            $this->currentWrapper = $currentWrapper;
+        }
+
+        return $this;
+    }
+
+    /**
+     * @param bool $short
+     * @return string
+     * @since 6.1.0
+     */
+    public function getCurrentWrapperClass($short = false)
+    {
+        return !$short ? $this->currentWrapper : $this->getShortWrapperClass($this->currentWrapper);
+    }
+
+    /**
+     * @param $namespaceClassName
+     * @return mixed
+     * @since 6.1.0
+     */
+    private function getShortWrapperClass($namespaceClassName)
+    {
+        $return = $namespaceClassName;
+
+        if (!empty($this->currentWrapper)) {
+            $wrapperClassExplode = explode('\\', $this->currentWrapper);
+            if (is_array($wrapperClassExplode) && count($wrapperClassExplode)) {
+                $return = $wrapperClassExplode[count($wrapperClassExplode) - 1];
+            }
+        }
+
+        return $return;
+    }
+
+    /**
      * @param string $url
      * @param array $data
      * @param int $method
@@ -1108,6 +1298,61 @@ class WrapperConfig
 
         if ($this->getRequestDataType() !== $dataType) {
             $this->setRequestDataType($dataType);
+        }
+
+        return $this;
+    }
+
+    /**
+     * Internal configset magics.
+     *
+     * @param $name
+     * @param $arguments
+     * @return $this|mixed
+     * @throws ExceptionHandler
+     * @since 6.1.0
+     */
+    public function __call($name, $arguments)
+    {
+        $method = substr($name, 0, 3);
+        $methodContent = (new Strings())->getCamelCase(substr($name, 3));
+
+        switch (strtolower($method)) {
+            case 'get':
+                if (method_exists($this, sprintf('get%s', ucfirst($methodContent)))) {
+                    return call_user_func_array(
+                        [
+                            $this,
+                            sprintf(
+                                'get%s',
+                                ucfirst($methodContent)
+                            ),
+                        ],
+                        []
+                    );
+                }
+
+                if (isset($this->configData[$methodContent])) {
+                    return $this->configData[$methodContent];
+                }
+
+                throw new ExceptionHandler('Variable not set.', Constants::LIB_CONFIGWRAPPER_VAR_NOT_SET);
+                break;
+            case 'set':
+                if (method_exists($this, sprintf('set%s', ucfirst($methodContent)))) {
+                    call_user_func_array(
+                        [
+                            $this,
+                            sprintf('set%s', ucfirst($methodContent)),
+                        ],
+                        $arguments
+                    );
+                }
+
+                $this->configData[$methodContent] = array_pop($arguments);
+                break;
+            default:
+                break;
         }
 
         return $this;

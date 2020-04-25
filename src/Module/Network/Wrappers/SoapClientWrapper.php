@@ -11,6 +11,7 @@ use TorneLIB\Model\Type\authSource;
 use TorneLIB\Model\Type\authType;
 use TorneLIB\Model\Type\dataType;
 use TorneLIB\Model\Type\requestMethod;
+use TorneLIB\Module\Config\GenericParser;
 use TorneLIB\Module\Config\WrapperConfig;
 use TorneLIB\Model\Interfaces\WrapperInterface;
 use TorneLIB\Utils\Generic;
@@ -79,6 +80,7 @@ class SoapClientWrapper implements WrapperInterface
 
         $this->CONFIG = new WrapperConfig();
         $this->CONFIG->setSoapRequest(true);
+        $this->CONFIG->setCurrentWrapper(__CLASS__);
         $this->getPriorCompatibilityArguments(func_get_args());
     }
 
@@ -159,10 +161,20 @@ class SoapClientWrapper implements WrapperInterface
      */
     public function setConfig($config)
     {
-        /** @var WrapperConfig CONFIG */
-        $this->CONFIG = $config;
+        $this->CONFIG = $this->getInheritedConfig($config);
 
         return $this;
+    }
+
+    /**
+     * @param $config
+     * @return mixed
+     * @since 6.1.0
+     */
+    private function getInheritedConfig($config) {
+        $config->setCurrentWrapper($this->CONFIG->getCurrentWrapper());
+
+        return $config;
     }
 
     /**
@@ -267,41 +279,7 @@ class SoapClientWrapper implements WrapperInterface
      */
     private function getHttpHead($string, $returnData = 'code')
     {
-        $return = $string;
-        $headString = preg_replace(
-            '/(.*?)\sHTTP\/(.*?)\s(.*)$/is',
-            '$3',
-            trim($string)
-        );
-
-        if (preg_match('/\s/', $headString)) {
-            $headContent = explode(' ', $headString, 2);
-
-            // Make sure there is no extras when starting to extract this data.
-            if (!is_numeric($headContent[0]) &&
-                strtolower($headContent[0]) === 'http' &&
-                preg_match('/\s/', $headContent[1])
-            ) {
-                // Drop one to the left, and retry.
-                $headContent = explode(' ', $headContent[1], 2);
-            }
-
-            switch ($returnData) {
-                case 'code':
-                    if ((int)$headContent[0]) {
-                        $return = (int)$headContent[0];
-                    }
-                    break;
-                case 'message':
-                    $return = (string)$headContent[1];
-                    break;
-                default:
-                    $return = $string;
-                    break;
-            }
-        }
-
-        return $return;
+        return GenericParser::getHttpHead($string, $returnData);
     }
 
     /**

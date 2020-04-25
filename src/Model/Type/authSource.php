@@ -12,4 +12,5 @@ class authSource
 {
     const NORMAL = 0;
     const SOAP = 1;
+    const STREAM = 2;
 }

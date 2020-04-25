@@ -7,12 +7,12 @@ use ReflectionException;
 use TorneLIB\Exception\Constants;
 use TorneLIB\Exception\ExceptionHandler;
 use TorneLIB\Helpers\Version;
-use TorneLIB\IO\Data\Content;
+use TorneLIB\Model\Interfaces\WrapperInterface;
 use TorneLIB\Model\Type\authType;
 use TorneLIB\Model\Type\dataType;
 use TorneLIB\Model\Type\requestMethod;
+use TorneLIB\Module\Config\GenericParser;
 use TorneLIB\Module\Config\WrapperConfig;
-use TorneLIB\Model\Interfaces\WrapperInterface;
 use TorneLIB\Utils\Generic;
 use TorneLIB\Utils\Security;
 
@@ -114,6 +114,8 @@ class CurlWrapper implements WrapperInterface
         Security::getCurrentFunctionState('curl_exec');
 
         $this->CONFIG = new WrapperConfig();
+        $this->CONFIG->setCurrentWrapper(__CLASS__);
+
         $hasConstructorArguments = $this->getPriorCompatibilityArguments(func_get_args());
 
         if ($hasConstructorArguments) {
@@ -336,8 +338,8 @@ class CurlWrapper implements WrapperInterface
     /**
      * Fix problematic header data by converting them to proper outputs.
      *
-     * @since 6.1.0
      * @return $this
+     * @since 6.1.0
      */
     private function setProperCustomHeader()
     {
@@ -637,8 +639,8 @@ class CurlWrapper implements WrapperInterface
     }
 
     /**
-     * @since 6.1.0
      * @return $this
+     * @since 6.1.0
      */
     private function setMultiCurlHandles()
     {
@@ -653,13 +655,24 @@ class CurlWrapper implements WrapperInterface
     /**
      * @param WrapperConfig $config
      * @return CurlWrapper
+     * @since 6.1.0
      */
     public function setConfig($config)
     {
-        /** @var WrapperConfig CONFIG */
-        $this->CONFIG = $config;
+        $this->CONFIG = $this->getInheritedConfig($config);
 
         return $this;
+    }
+
+    /**
+     * @param $config
+     * @return mixed
+     * @since 6.1.0
+     */
+    private function getInheritedConfig($config) {
+        $config->setCurrentWrapper($this->CONFIG->getCurrentWrapper());
+
+        return $config;
     }
 
     /**
@@ -806,21 +819,10 @@ class CurlWrapper implements WrapperInterface
      */
     public function getParsed()
     {
-        $return = $this->getBody();
-
-        // In v6.0, netcurl was much for guessing games. For 6.1, we trust content types.
-        switch (($contentType = $this->getHeader('content-type'))) {
-            case (!empty($contentType) && preg_match('/\/xml/i', $contentType) ? true : false):
-                $return = (new Content())->getFromXml($return);
-                break;
-            case (preg_match('/\/json/i', $contentType) ? true : false):
-                $return = json_decode($return);
-                break;
-            default:
-                break;
-        }
-
-        return $return;
+        return GenericParser::getParsed(
+            $this->getBody(),
+            $this->getHeader('content-type')
+        );
     }
 
     /**

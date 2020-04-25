@@ -12,10 +12,6 @@ use TorneLIB\Module\Network\Wrappers\SimpleStreamWrapper;
 
 class simpleStreamWrapperTest extends TestCase
 {
-    private $rEcomPipeU = 'tornevall';
-    private $rEcomPipeP = '2suyqJRXyd8YBGxTz42xr7g1tCWW6M2R';
-    private $rEcomHost = 'https://omnitest.resurs.com';
-
     /**
      * @test
      */
@@ -120,40 +116,6 @@ class simpleStreamWrapperTest extends TestCase
 
         static::assertTrue(
             isset($response->input) && strlen($response->input) > 4
-        );
-    }
-
-    /**
-     * @test
-     */
-    public function getBasicRestTest()
-    {
-        $response = [];
-
-        $stream = (new SimpleStreamWrapper())->setAuthentication(
-            $this->rEcomPipeU,
-            $this->rEcomPipeP
-        );
-
-        try {
-            $response = $stream->request(
-                sprintf(
-                    '%s/callbacks',
-                    $this->rEcomHost
-                )
-            )->getParsed();
-        } catch (ExceptionHandler $e) {
-            static::markTestSkipped(
-                sprintf(
-                    'Exception marking this test skipped: (%s) %s',
-                    $e->getCode(),
-                    $e->getMessage()
-                )
-            );
-        }
-
-        static::assertTrue(
-            count($response) > 0
         );
     }
 

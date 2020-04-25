@@ -296,7 +296,10 @@ class NetWrapper implements WrapperInterface
             $this->isSoapRequest = true;
             $classRequest->setConfig($this->getConfig());
             $return = $classRequest->request($url, $data, $method, $dataType);
-        } elseif ($classRequest = WrapperDriver::getWrapperAllowed('CurlWrapper')) {
+        } elseif ($classRequest = WrapperDriver::getWrapperAllowed('CurlWrapper', true)) {
+            $classRequest->setConfig($this->getConfig());
+            $return = $classRequest->request($url, $data, $method, $dataType);
+        } elseif ($classRequest = WrapperDriver::getWrapperAllowed('SimpleStreamWrapper', true)) {
             $classRequest->setConfig($this->getConfig());
             $return = $classRequest->request($url, $data, $method, $dataType);
         }
@@ -310,18 +313,19 @@ class NetWrapper implements WrapperInterface
      *
      * @param $nullValue
      * @param $className
-     * @param $functioName
+     * @param $functionName
+     * @param $requestexternalExecute
      * @throws ExceptionHandler
      * @since 6.1.0
      */
-    private function getInstantiationException($nullValue, $className, $functioName, $requestexternalExecute)
+    private function getInstantiationException($nullValue, $className, $functionName, $requestexternalExecute)
     {
         if (is_null($nullValue)) {
             throw new ExceptionHandler(
                 sprintf(
-                    '%s instantiation failure: No wrapper available in function %s.',
+                    '%s instantiation failure: No communication wrappers currently available in function/class %s.',
                     $className,
-                    $functioName
+                    $functionName
                 ),
                 Constants::LIB_NETCURL_NETWRAPPER_NO_DRIVER_FOUND,
                 $requestexternalExecute

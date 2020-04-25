@@ -8,6 +8,7 @@ use TorneLIB\Exception\Constants;
 use TorneLIB\Exception\ExceptionHandler;
 use TorneLIB\Flags;
 use TorneLIB\Helpers\Browsers;
+use TorneLIB\IO\Data\Content;
 use TorneLIB\IO\Data\Strings;
 use TorneLIB\Model\Type\authSource;
 use TorneLIB\Model\Type\authType;
@@ -118,6 +119,11 @@ class WrapperConfig
      * @since 6.1.0
      */
     private $isSoapRequest = false;
+
+    /**
+     * @var bool
+     */
+    private $isStreamRequest = false;
 
     /**
      * WrapperConfig constructor.
@@ -294,6 +300,10 @@ class WrapperConfig
         // Return as is on string.
         if (!is_string($return)) {
             switch ($this->requestDataType) {
+                case dataType::XML:
+                    $this->requestDataContainer = (new Content())->getXmlFromArray($return);
+                    $return = $this->requestDataContainer;
+                    break;
                 case dataType::JSON:
                     $this->requestDataContainer = $this->getJsonData($return);
                     $return = $this->requestDataContainer;
@@ -460,10 +470,16 @@ class WrapperConfig
                     $currentStreamContext[$subKey] = [];
                 }
                 if (
-                    (isset($currentStreamContext[$subKey][$key]) && $this->canOverwrite($key)) ||
+                    (
+                        isset($currentStreamContext[$subKey][$key]) && $this->canOverwrite($key)
+                    ) ||
                     !isset($currentStreamContext[$subKey][$key])
                 ) {
-                    $currentStreamContext[$subKey][$key] = $value;
+                    if (!isset($currentStreamContext[$subKey][$key])) {
+                        $currentStreamContext[$subKey][$key] = $value;
+                    } else {
+                        $currentStreamContext[$subKey][$key] .= "\r\n" . $value;
+                    }
                 }
             }
         }
@@ -546,7 +562,7 @@ class WrapperConfig
      */
     private function setRenderedUserAgent()
     {
-        $this->setStreamContext('user_agent', $this->getUserAgent(), 'http');
+        $this->setDualStreamHttp('user_agent', $this->getUserAgent());
 
         return $this;
     }
@@ -648,12 +664,29 @@ class WrapperConfig
     }
 
     /**
+     * @param $isStreamRequest
+     * @since 6.1.0
+     */
+    public function setStreamRequest($isStreamRequest)
+    {
+        $this->isStreamRequest = $isStreamRequest;
+    }
+
+    /**
      * @return bool
      * @since 6.1.0
      */
     public function getSoapRequest()
     {
         return $this->isSoapRequest;
+    }
+
+    /**
+     * @return bool
+     */
+    public function getStreamRequest()
+    {
+        return $this->isStreamRequest;
     }
 
     /**
@@ -665,6 +698,19 @@ class WrapperConfig
     public function setStreamOption($key, $value)
     {
         return $this->setOption($key, $value, true);
+    }
+
+    /**
+     * @param $key
+     * @param $value
+     * @return $this
+     */
+    public function setDualStreamHttp($key, $value)
+    {
+        $this->setStreamContext($key, $value, 'https');
+        $this->setStreamContext($key, $value, 'http');
+
+        return $this;
     }
 
     /**
@@ -749,6 +795,14 @@ class WrapperConfig
         $authSource = authSource::NORMAL
     ) {
         switch ($authSource) {
+            case authSource::STREAM:
+                if ($authType === authType::BASIC) {
+                    $this->setDualStreamHttp(
+                        'header',
+                        'Authorization: Basic ' . base64_encode("$username:$password")
+                    );
+                }
+                break;
             case authSource::SOAP:
                 $this->authData['login'] = $username;
                 $this->authData['password'] = $password;
@@ -853,7 +907,7 @@ class WrapperConfig
 
         $return = $this->getOption(WrapperCurlOpt::NETCURL_CURLOPT_USERAGENT);
 
-        if ($this->getSoapRequest()) {
+        if ($this->getSoapRequest() || $this->getStreamRequest()) {
             $currentStreamContext = $this->getStreamContext();
             if (!is_null($currentStreamContext)) {
                 $currentStreamContext = stream_context_get_options($currentStreamContext);

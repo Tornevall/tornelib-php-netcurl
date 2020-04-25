@@ -28,6 +28,7 @@ class WrapperDriver
     private static $internalWrapperList = [
         'TorneLIB\Module\Network\Wrappers\CurlWrapper',
         'TorneLIB\Module\Network\Wrappers\SoapClientWrapper',
+        'TorneLIB\Module\Network\Wrappers\SimpleStreamWrapper',
     ];
 
     /**
@@ -159,19 +160,20 @@ class WrapperDriver
      * Returns proper wrapper for internal wrapper requests, depending on external available wrappers.
      *
      * @param $wrapperName
+     * @param bool $testOnly
      * @return mixed
      * @throws ExceptionHandler
      * @since 6.1.0
      */
-    public static function getWrapperAllowed($wrapperName)
+    public static function getWrapperAllowed($wrapperName, $testOnly = false)
     {
         // If there are no available external wrappers, let getWrapper do its actions and throw exceptions if
         // the internal wrapper fails to load.
         if (!count(self::$externalWrapperList)) {
-            $return = self::getWrapper($wrapperName);
+            $return = self::getWrapper($wrapperName, $testOnly);
         } else {
             // If there are available external wrappers, just try to load external wrapper and proceed
-            // without noise on failures, as we'd like to try to use the externals first.
+            // without noise on failures, as we'd like to try to use the externals first. Always.
             $return = self::getWrapper($wrapperName, true);
         }
 

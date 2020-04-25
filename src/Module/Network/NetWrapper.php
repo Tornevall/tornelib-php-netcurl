@@ -10,6 +10,7 @@ use TorneLIB\Model\Type\authType;
 use TorneLIB\Model\Type\dataType;
 use TorneLIB\Model\Type\requestMethod;
 use TorneLIB\Module\Config\WrapperConfig;
+use TorneLIB\Module\Config\WrapperDriver;
 use TorneLIB\Utils\Generic;
 use TorneLIB\Utils\Security;
 
@@ -28,34 +29,16 @@ class NetWrapper implements WrapperInterface
     private $CONFIG;
 
     /**
-     * @var
+     * @var bool
      */
-    private $wrappers = [];
-
-    /**
-     * @var array $internalWrapperList What we support internally.
-     */
-    private $internalWrapperList = [
-        'TorneLIB\Module\Network\Wrappers\CurlWrapper',
-        'TorneLIB\Module\Network\Wrappers\StreamWrapper',
-        'TorneLIB\Module\Network\Wrappers\SoapClientWrapper',
-        'TorneLIB\Module\Network\Wrappers\GuzzleWrapper',
-    ];
+    private $isSoapRequest = false;
 
     /**
      * @var bool $useRegisteredWrappersFirst If true, make NetWrapper try to use those wrappers first.
      */
     private $useRegisteredWrappersFirst = false;
 
-    /**
-     * @var array $externalWrapperList List of self developed wrappers to use if nothing else works.
-     */
-    private $externalWrapperList = [];
-
-    /**
-     * @var bool
-     */
-    private $isSoapRequest = false;
+    private $wrappers = [];
 
     /**
      * @var string $version Internal version.
@@ -65,7 +48,16 @@ class NetWrapper implements WrapperInterface
     public function __construct()
     {
         $this->initializeWrappers();
+        return $this;
+    }
 
+    /**
+     * @since 6.1.0
+     */
+    private function initializeWrappers()
+    {
+        WrapperDriver::initializeWrappers();
+        $this->CONFIG = new WrapperConfig();
         return $this;
     }
 
@@ -84,28 +76,6 @@ class NetWrapper implements WrapperInterface
     }
 
     /**
-     * @return mixed
-     * @since 6.1.0
-     */
-    private function initializeWrappers()
-    {
-        $this->CONFIG = new WrapperConfig();
-
-        foreach ($this->internalWrapperList as $wrapperClass) {
-            if (!empty($wrapperClass) &&
-                !in_array($wrapperClass, $this->wrappers)
-            ) {
-                try {
-                    $this->wrappers[] = new $wrapperClass();
-                } catch (\Exception $wrapperLoadException) {
-                }
-            }
-        }
-
-        return $this->wrappers;
-    }
-
-    /**
      * @return bool
      * @since 6.1.0
      */
@@ -121,12 +91,6 @@ class NetWrapper implements WrapperInterface
     private $instance;
 
     /**
-     * @var
-     * @since 6.1.0
-     */
-    private $instanceClass;
-
-    /**
      * Get list of internal wrappers.
      *
      * @return mixed
@@ -134,7 +98,7 @@ class NetWrapper implements WrapperInterface
      */
     public function getWrappers()
     {
-        return $this->wrappers;
+        return WrapperDriver::getWrappers();
     }
 
     /**
@@ -189,74 +153,9 @@ class NetWrapper implements WrapperInterface
      */
     public function register($wrapperClass, $tryFirst = false)
     {
-        if (!is_object($wrapperClass)) {
-            throw new ExceptionHandler(
-                sprintf(
-                    'Unable to register wrong class type in %s.',
-                    __CLASS__
-                ),
-                Constants::LIB_CLASS_UNAVAILABLE
-            );
-        }
-
-        $this->useRegisteredWrappersFirst = $tryFirst;
-        $this->registerClassInterface($wrapperClass);
+        WrapperDriver::register($wrapperClass, $tryFirst);
 
         return $this;
-    }
-
-    /**
-     * Register external wrapper class as useble if it implements the wrapper interface.
-     *
-     * @param $wrapperClass
-     * @since 6.1.0
-     */
-    private function registerClassInterface($wrapperClass)
-    {
-        $badClass = false;
-
-        if (!in_array($wrapperClass, $this->externalWrapperList) &&
-            $this->registerCheckImplements($wrapperClass)
-        ) {
-            $this->externalWrapperList[] = $wrapperClass;
-        } else {
-            $badClass = true;
-        }
-
-        $this->registerCheckBadClass($badClass, $wrapperClass);
-    }
-
-    /**
-     * @param $badClass
-     * @param $wrapperClass
-     * @throws ExceptionHandler
-     * @since 6.1.0
-     */
-    private function registerCheckBadClass($badClass, $wrapperClass)
-    {
-        if ($badClass) {
-            throw new ExceptionHandler(
-                sprintf(
-                    'Unable to register class %s in %s with wrong interface.',
-                    get_class($wrapperClass),
-                    __CLASS__
-                ),
-                Constants::LIB_CLASS_UNAVAILABLE
-            );
-        }
-    }
-
-    /**
-     * Checks if registering class implements WrapperInterface.
-     *
-     * @param $wrapperClass
-     * @since 6.1.0
-     */
-    private function registerCheckImplements($wrapperClass)
-    {
-        $implements = class_implements($wrapperClass);
-
-        return in_array('TorneLIB\Model\Interfaces\WrapperInterface', $implements);
     }
 
     /**
@@ -319,68 +218,6 @@ class NetWrapper implements WrapperInterface
     }
 
     /**
-     * Find found if internal wrapper is available and return it.
-     *
-     * @param $wrapperNameClass
-     * @param bool $testOnly Test wrapper only. Meaning: Do not throw exceptions during control.
-     * @return mixed
-     * @throws ExceptionHandler
-     * @since 6.1.0
-     */
-    private function getWrapper($wrapperNameClass, $testOnly = false)
-    {
-        $return = null;
-
-        foreach ($this->wrappers as $wrapperClass) {
-            $currentWrapperClass = get_class($wrapperClass);
-            if (
-                $currentWrapperClass === sprintf('TorneLIB\Module\Network\Wrappers\%s', $wrapperNameClass) ||
-                $currentWrapperClass === $wrapperNameClass
-            ) {
-                $this->instanceClass = $wrapperNameClass;
-                $return = $wrapperClass;
-                break;
-            }
-        }
-
-        if (!$testOnly && !is_object($return)) {
-            throw new ExceptionHandler(
-                sprintf(
-                    'Could not find a proper NetWrapper (%s) to communicate with!',
-                    $wrapperNameClass
-                ),
-                Constants::LIB_NETCURL_NETWRAPPER_NO_DRIVER_FOUND
-            );
-        }
-
-        $this->instance = $return;
-
-        return $return;
-    }
-
-    /**
-     * Returns the instance classname if set and ready.
-     *
-     * @return string
-     * @throws ExceptionHandler
-     * @since 6.1.0
-     */
-    public function getInstanceClass()
-    {
-        if (empty($this->instanceClass)) {
-            throw new ExceptionHandler(
-                sprintf(
-                    '%s instantiation failure: No wrapper available.',
-                    __CLASS__
-                ),
-                Constants::LIB_NETCURL_NETWRAPPER_NO_DRIVER_FOUND
-            );
-        }
-
-        return (string)$this->instanceClass;
-    }
-
-    /**
      * @inheritDoc
      */
     public function request($url, $data = [], $method = requestMethod::METHOD_GET, $dataType = dataType::NORMAL)
@@ -431,6 +268,7 @@ class NetWrapper implements WrapperInterface
      * @param array $data
      * @param int $method
      * @param int $dataType
+     * @return mixed|null
      * @throws ExceptionHandler
      */
     private function getResultFromInternals(
@@ -456,37 +294,14 @@ class NetWrapper implements WrapperInterface
 
         /** @var WrapperInterface $classRequest */
         if ($dataType === dataType::SOAP &&
-            ($classRequest = $this->getWrapperAllowed('SoapClientWrapper'))
+            ($classRequest = WrapperDriver::getWrapperAllowed('SoapClientWrapper'))
         ) {
             $this->isSoapRequest = true;
             $classRequest->setConfig($this->getConfig());
             $return = $classRequest->request($url, $data, $method, $dataType);
-        } elseif ($classRequest = $this->getWrapperAllowed('CurlWrapper')) {
+        } elseif ($classRequest = WrapperDriver::getWrapperAllowed('CurlWrapper')) {
             $classRequest->setConfig($this->getConfig());
             $return = $classRequest->request($url, $data, $method, $dataType);
-        }
-
-        return $return;
-    }
-
-    /**
-     * Returns proper wrapper for internal wrapper requests, depending on external available wrappers.
-     *
-     * @param $wrapperName
-     * @return mixed
-     * @throws ExceptionHandler
-     * @since 6.1.0
-     */
-    private function getWrapperAllowed($wrapperName)
-    {
-        // If there are no available external wrappers, let getWrapper do its actions and throw exceptions if
-        // the internal wrapper fails to load.
-        if (!count($this->externalWrapperList)) {
-            $return = $this->getWrapper($wrapperName);
-        } else {
-            // If there are available external wrappers, just try to load external wrapper and proceed
-            // without noise on failures, as we'd like to try to use the externals first.
-            $return = $this->getWrapper($wrapperName, true);
         }
 
         return $return;

@@ -1026,9 +1026,17 @@ class WrapperConfig
      * Setting useragent statically and on global level.
      *
      * @param $userAgentSignature
+     * @throws ExceptionHandler
      * @since 6.1.0
      */
-    public static function setSignature($userAgentSignature) {
+    public static function setSignature($userAgentSignature)
+    {
+        if (defined('WRAPPERCONFIG_NO_SIGNATURE')) {
+            throw new ExceptionHandler(
+                'You are not allowed to set global signature.',
+                Constants::LIB_UNHANDLED
+            );
+        }
         self::$userAgentSignature = $userAgentSignature;
     }
 
@@ -1036,7 +1044,8 @@ class WrapperConfig
      * Remove static useragent.
      * @since 6.1.0
      */
-    public static function deleteSignature() {
+    public static function deleteSignature()
+    {
         self::$userAgentSignature = null;
     }
 
@@ -1044,16 +1053,23 @@ class WrapperConfig
      * @return string
      * @since 6.1.0
      */
-    public static function getSignature() {
+    public static function getSignature()
+    {
+        if (defined('NO_SIGNATURE')) {
+            return null;
+        }
+
         return self::$userAgentSignature;
     }
 
     /**
      * @param $userAgentSignatureString
      * @return $this
+     * @throws ExceptionHandler
      * @since 6.1.0
      */
-    public function setUserAgentSignature($userAgentSignatureString) {
+    public function setUserAgentSignature($userAgentSignatureString)
+    {
         WrapperConfig::setSignature($userAgentSignatureString);
         return $this;
     }
@@ -1062,7 +1078,8 @@ class WrapperConfig
      * @return string
      * @since 6.1.0
      */
-    public function getUserAgentSignature() {
+    public function getUserAgentSignature()
+    {
         return WrapperConfig::getSignature();
     }
 

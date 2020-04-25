@@ -60,6 +60,8 @@ class SimpleStreamWrapper implements WrapperInterface
         }
 
         $this->CONFIG = new WrapperConfig();
+        $this->CONFIG->setStreamRequest(true);
+        $this->CONFIG->setCurrentWrapper(__CLASS__);
     }
 
     /**
@@ -79,14 +81,24 @@ class SimpleStreamWrapper implements WrapperInterface
     /**
      * @param WrapperConfig $config
      * @return SimpleStreamWrapper
-     * @version 6.1.0
+     * @since 6.1.0
      */
     public function setConfig($config)
     {
-        /** @var WrapperConfig CONFIG */
-        $this->CONFIG = $config;
+        $this->CONFIG = $this->getInheritedConfig($config);
 
         return $this;
+    }
+
+    /**
+     * @param $config
+     * @return mixed
+     * @since 6.1.0
+     */
+    private function getInheritedConfig($config) {
+        $config->setCurrentWrapper($this->CONFIG->getCurrentWrapper());
+
+        return $config;
     }
 
     /**
@@ -201,7 +213,6 @@ class SimpleStreamWrapper implements WrapperInterface
      */
     public function getStreamRequest()
     {
-        $this->CONFIG->setStreamRequest(true);
         $this->CONFIG->getStreamOptions();
         $this->setStreamRequestMethod();
         $this->setStreamRequestData();

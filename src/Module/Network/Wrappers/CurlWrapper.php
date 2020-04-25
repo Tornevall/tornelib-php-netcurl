@@ -114,6 +114,8 @@ class CurlWrapper implements WrapperInterface
         Security::getCurrentFunctionState('curl_exec');
 
         $this->CONFIG = new WrapperConfig();
+        $this->CONFIG->setCurrentWrapper(__CLASS__);
+
         $hasConstructorArguments = $this->getPriorCompatibilityArguments(func_get_args());
 
         if ($hasConstructorArguments) {
@@ -653,13 +655,24 @@ class CurlWrapper implements WrapperInterface
     /**
      * @param WrapperConfig $config
      * @return CurlWrapper
+     * @since 6.1.0
      */
     public function setConfig($config)
     {
-        /** @var WrapperConfig CONFIG */
-        $this->CONFIG = $config;
+        $this->CONFIG = $this->getInheritedConfig($config);
 
         return $this;
+    }
+
+    /**
+     * @param $config
+     * @return mixed
+     * @since 6.1.0
+     */
+    private function getInheritedConfig($config) {
+        $config->setCurrentWrapper($this->CONFIG->getCurrentWrapper());
+
+        return $config;
     }
 
     /**

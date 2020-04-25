@@ -7,6 +7,7 @@ use TorneLIB\Exception\ExceptionHandler;
 use TorneLIB\Model\Type\dataType;
 use TorneLIB\Model\Type\requestMethod;
 use TorneLIB\Module\Config\WrapperConfig;
+use TorneLIB\Module\Network\NetWrapper;
 use TorneLIB\Module\Network\Wrappers\SimpleStreamWrapper;
 
 class simpleStreamWrapperTest extends TestCase
@@ -153,6 +154,41 @@ class simpleStreamWrapperTest extends TestCase
 
         static::assertTrue(
             count($response) > 0
+        );
+    }
+
+    /**
+     * @test
+     * To get access to simplestreamwrapper, set below:
+     * allow_url_fopen = Off
+     * disable_functions = curl_exec,curl_init,openssl_encrypt
+     */
+    public function getBasicNetwrapper()
+    {
+        $stream = (new NetWrapper());
+        $stream->setIdentifiers(true);
+        $stream->request('http://ipv4.netcurl.org/')->getParsed();
+        $currentWrapper = $stream->getCurrentWrapperClass(true);
+
+        static::assertTrue(
+            !empty($currentWrapper)
+        );
+    }
+
+    /**
+     * @test
+     */
+    public function getBasicNetwrapperClient()
+    {
+        $stream = (new NetWrapper());
+        $stream->setIdentifiers(true,true); // spoofable advanced
+        $stream->setUserAgent('World Dominator');
+        $stream->request('http://ipv4.netcurl.org/')->getParsed();
+        $content = $stream->getParsed();
+
+        static::assertTrue(
+            isset($content->HTTP_USER_AGENT) &&
+            preg_match('/world dominator/i', $content->HTTP_USER_AGENT) ? true : false
         );
     }
 }

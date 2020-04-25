@@ -38,6 +38,11 @@ class NetWrapper implements WrapperInterface
      */
     private $version;
 
+    /**
+     * @var string $selectedWrapper
+     */
+    private $selectedWrapper;
+
     public function __construct()
     {
         $this->initializeWrappers();
@@ -51,6 +56,20 @@ class NetWrapper implements WrapperInterface
     {
         WrapperDriver::initializeWrappers();
         $this->CONFIG = new WrapperConfig();
+        return $this;
+    }
+
+    /**
+     * Allows strict identification in user-agent header.
+     * @param $activation
+     * @param $allowPhpRelease
+     * @return NetWrapper
+     * @since 6.1.0
+     */
+    public function setIdentifiers($activation, $allowPhpRelease)
+    {
+        $this->CONFIG->setIdentifiers($activation, $allowPhpRelease);
+
         return $this;
     }
 
@@ -213,6 +232,7 @@ class NetWrapper implements WrapperInterface
      */
     public function request($url, $data = [], $method = requestMethod::METHOD_GET, $dataType = dataType::NORMAL)
     {
+        $this->CONFIG->setNetWrapper(true);
         $return = null;
         $requestexternalExecute = null;
 
@@ -304,7 +324,23 @@ class NetWrapper implements WrapperInterface
             $return = $classRequest->request($url, $data, $method, $dataType);
         }
 
+        if (!is_null($classRequest)) {
+            $this->selectedWrapper = get_class($classRequest);
+        }
+
+        $this->instance = $classRequest;
+
         return $return;
+    }
+
+    /**
+     * @param bool $short
+     * @return string
+     * @since 6.1.0
+     */
+    public function getCurrentWrapperClass($short = false)
+    {
+        return $this->CONFIG->getCurrentWrapperClass($short);
     }
 
     /**
@@ -463,8 +499,18 @@ class NetWrapper implements WrapperInterface
 
         switch ($requestType) {
             default:
-                if ($instanceRequest = call_user_func_array([$this->instance, $name], $arguments)) {
-                    return $instanceRequest;
+                if (method_exists($this->instance, $name)) {
+                    if ($instanceRequest = call_user_func_array([$this->instance, $name], $arguments)) {
+                        return $instanceRequest;
+                    }
+                } elseif (method_exists($this->CONFIG, $name)) {
+                    call_user_func_array(
+                        [
+                            $this->CONFIG,
+                            $name,
+                        ], $arguments
+                    );
+                    break;
                 }
                 throw new \Exception(
                     sprintf('Undefined function: %s', $name)

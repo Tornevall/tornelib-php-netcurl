@@ -81,7 +81,8 @@ class CurlWrapper implements WrapperInterface
     private $curlMultiResponse;
 
     /**
-     * @var string Data that probably should be added to the user-agent.
+     * Data that probably should be added to the user-agent.
+     * @var string
      */
     private $curlVersion;
 
@@ -306,7 +307,7 @@ class CurlWrapper implements WrapperInterface
      */
     private function setCurlCustomHeaders($curlHandle)
     {
-        $this->setProperCustomerHeader();
+        $this->setProperCustomHeader();
         $this->setupHeaders($curlHandle);
         return $this;
     }
@@ -338,7 +339,7 @@ class CurlWrapper implements WrapperInterface
      * @since 6.1.0
      * @return $this
      */
-    private function setProperCustomerHeader()
+    private function setProperCustomHeader()
     {
         foreach ($this->customPreHeaders as $headerKey => $headerValue) {
             $testHead = explode(":", $headerValue, 2);
@@ -370,6 +371,7 @@ class CurlWrapper implements WrapperInterface
     /**
      * @param $curlHandle
      * @return CurlWrapper
+     * @throws ExceptionHandler
      * @since 6.1.0
      */
     private function setCurlDynamicValues($curlHandle)

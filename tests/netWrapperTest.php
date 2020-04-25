@@ -54,4 +54,18 @@ class netWrapperTest extends TestCase
             static::assertTrue(filter_var($parsed->ip, FILTER_VALIDATE_IP) ? true : false);
         }
     }
+
+    /**
+     * @test
+     */
+    public function sigGet() {
+        WrapperConfig::setSignature('Korven skriker.');
+
+        $wrapper = (new NetWrapper())
+            ->request(sprintf('https://ipv4.netcurl.org/?func=%s', __FUNCTION__));
+
+        $parsed = $wrapper->getParsed();
+
+        print_R($parsed->HTTP_USER_AGENT);
+    }
 }

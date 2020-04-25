@@ -566,7 +566,12 @@ class WrapperConfig
                     if (!isset($currentStreamContext[$subKey][$key])) {
                         $currentStreamContext[$subKey][$key] = $value;
                     } else {
-                        $currentStreamContext[$subKey][$key] .= "\r\n" . $value;
+                        if ($key === 'header') {
+                            $currentStreamContext[$subKey][$key] .= "\r\n" . $value;
+                        } else {
+                            // Overwrite if not header context.
+                            $currentStreamContext[$subKey][$key] = $value;
+                        }
                     }
                 }
             }

@@ -442,6 +442,7 @@ class NetWrapper implements WrapperInterface
         foreach ($externalWrapperList as $wrapperClass) {
             $returnable = null;
             try {
+                $this->CONFIG->setCurrentWrapper(get_class($wrapperClass));
                 $returnable = call_user_func_array(
                     [
                         $wrapperClass,

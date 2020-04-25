@@ -13,12 +13,17 @@ use TorneLIB\Exception\ExceptionHandler;
 class WrapperDriver
 {
     /**
-     * @var
+     * Internal wrappers loaded.
+     * @var array $wrappers
+     * @since 6.1.0
      */
     private static $wrappers = [];
 
     /**
-     * @var array $internalWrapperList What we support internally.
+     * What we support internally.
+     *
+     * @var array $internalWrapperList
+     * @since 6.1.0
      */
     private static $internalWrapperList = [
         'TorneLIB\Module\Network\Wrappers\CurlWrapper',
@@ -26,17 +31,24 @@ class WrapperDriver
     ];
 
     /**
-     * @var array $externalWrapperList List of self developed wrappers to use if nothing else works.
+     * List of self developed wrappers to use if nothing else works.
+     * @var array $externalWrapperList
+     * @since 6.1.0
      */
     private static $externalWrapperList = [];
 
     /**
-     * @var
+     * @var $instanceClass
      * @since 6.1.0
      */
     private static $instanceClass;
 
-    //private static $instance;
+    /**
+     * If true, make NetWrapper try to use those wrappers first.
+     * @var bool $useRegisteredWrappersFirst
+     * @since 6.1.0
+     */
+    private static $useRegisteredWrappersFirst = false;
 
     /**
      * Register external wrapper class as useble if it implements the wrapper interface.
@@ -49,18 +61,21 @@ class WrapperDriver
     {
         $badClass = false;
 
-        if (!in_array($wrapperClass, self::$externalWrapperList) &&
-            self::registerCheckImplements($wrapperClass)
-        ) {
-            self::$externalWrapperList[] = $wrapperClass;
-        } else {
-            $badClass = true;
+        $wrapperClassName = @get_class($wrapperClass);
+        if (!isset(self::$externalWrapperList[$wrapperClassName])) {
+            if (self::registerCheckImplements($wrapperClass)) {
+                self::$externalWrapperList[$wrapperClassName] = $wrapperClass;
+            } else {
+                $badClass = true;
+            }
         }
 
         self::registerCheckBadClass($badClass, $wrapperClass);
     }
 
     /**
+     * Check if class is not properly registered and throw exception.
+     *
      * @param $badClass
      * @param $wrapperClass
      * @throws ExceptionHandler
@@ -107,8 +122,11 @@ class WrapperDriver
     {
         $return = null;
 
-        foreach (self::$wrappers as $wrapperClass) {
-            $currentWrapperClass = get_class($wrapperClass);
+        //$wrapperNameClass = preg_replace('/\//', "\", $wrapperNameClass);
+
+        $allWrappers = self::getWrappers();
+        foreach ($allWrappers as $wrapperClass) {
+            $currentWrapperClass = @get_class($wrapperClass);
             if (
                 $currentWrapperClass === sprintf('TorneLIB\Module\Network\Wrappers\%s', $wrapperNameClass) ||
                 $currentWrapperClass === $wrapperNameClass
@@ -161,6 +179,7 @@ class WrapperDriver
     }
 
     /**
+     * Initialize available wrappers.
      * @return mixed
      * @since 6.1.0
      */
@@ -168,10 +187,10 @@ class WrapperDriver
     {
         foreach (self::$internalWrapperList as $wrapperClass) {
             if (!empty($wrapperClass) &&
-                !in_array($wrapperClass, self::$wrappers)
+                !isset(self::$wrappers[$wrapperClass])
             ) {
                 try {
-                    self::$wrappers[] = new $wrapperClass();
+                    self::$wrappers[$wrapperClass] = new $wrapperClass();
                 } catch (\Exception $wrapperLoadException) {
                 }
             }
@@ -202,6 +221,15 @@ class WrapperDriver
         return (string)self::$instanceClass;
     }
 
+    /**
+     * Register a new wrapperclass for netcurl (NetWrapper).
+     *
+     * @param $wrapperClass
+     * @param bool $tryFirst
+     * @return string
+     * @throws ExceptionHandler
+     * @since 6.1.0
+     */
     public static function register($wrapperClass, $tryFirst = false)
     {
         if (!is_object($wrapperClass)) {
@@ -221,9 +249,36 @@ class WrapperDriver
     }
 
     /**
-     * @return array
+     * If this is true Netwrapper will try the registered drivers before the internal.
+     *
+     * @return bool
+     * @since 6.1.0
      */
-    public static function getWrappers() {
-        return self::$wrappers;
+    public static function getRegisteredWrappersFirst()
+    {
+        return self::$useRegisteredWrappersFirst;
+    }
+
+    /**
+     * Get list of available wrappers, both internal and external.
+     *
+     * @return array
+     * @since 6.1.0
+     */
+    public static function getWrappers()
+    {
+        // return self::$wrappers;
+        return array_merge(self::$wrappers, self::$externalWrapperList);
+    }
+
+    /**
+     * Get list of externally registered wrappers.
+     *
+     * @return array
+     * @since 6.1.0
+     */
+    public static function getExternalWrappers()
+    {
+        return self::$externalWrapperList;
     }
 }

@@ -34,13 +34,6 @@ class NetWrapper implements WrapperInterface
     private $isSoapRequest = false;
 
     /**
-     * @var bool $useRegisteredWrappersFirst If true, make NetWrapper try to use those wrappers first.
-     */
-    private $useRegisteredWrappersFirst = false;
-
-    private $wrappers = [];
-
-    /**
      * @var string $version Internal version.
      */
     private $version;
@@ -153,9 +146,7 @@ class NetWrapper implements WrapperInterface
      */
     public function register($wrapperClass, $tryFirst = false)
     {
-        WrapperDriver::register($wrapperClass, $tryFirst);
-
-        return $this;
+        return WrapperDriver::register($wrapperClass, $tryFirst);
     }
 
     /**
@@ -225,7 +216,8 @@ class NetWrapper implements WrapperInterface
         $return = null;
         $requestexternalExecute = null;
 
-        if ($this->useRegisteredWrappersFirst && count($this->externalWrapperList)) {
+        $externalWrapperList = WrapperDriver::getExternalWrappers();
+        if (WrapperDriver::getRegisteredWrappersFirst() && count($externalWrapperList)) {
             try {
                 $returnable = $this->requestExternalExecute($url, $data, $method, $dataType);
                 if (!is_null($returnable)) {
@@ -246,10 +238,11 @@ class NetWrapper implements WrapperInterface
             $return = $hasReturnedRequest;
         };
 
+        $externalWrapperList = WrapperDriver::getExternalWrappers();
         // Internal handles are usually throwing execptions before landing here.
         if (is_null($return) &&
-            !$this->useRegisteredWrappersFirst &&
-            count($this->externalWrapperList)
+            !WrapperDriver::getRegisteredWrappersFirst() &&
+            count($externalWrapperList)
         ) {
             // Last execution should render errors thrown from external executes.
             $returnable = $this->requestExternalExecute($url, $data, $method, $dataType);
@@ -291,6 +284,10 @@ class NetWrapper implements WrapperInterface
                 }
             }
         }
+
+        // Example from tornelib-php-drivertest.
+        // This allows us to add internal supported drivers without including them in this specific package.
+        //$testWrapper = WrapperDriver::getWrapperAllowed('myNameSpace\myDriver');
 
         /** @var WrapperInterface $classRequest */
         if ($dataType === dataType::SOAP &&
@@ -400,8 +397,9 @@ class NetWrapper implements WrapperInterface
         $return = null;
         $hasInternalSuccess = false;
 
+        $externalWrapperList = WrapperDriver::getExternalWrappers();
         // Walk through external wrappers.
-        foreach ($this->externalWrapperList as $wrapperClass) {
+        foreach ($externalWrapperList as $wrapperClass) {
             $returnable = null;
             try {
                 $returnable = call_user_func_array(

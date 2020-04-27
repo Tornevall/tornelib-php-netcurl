@@ -262,7 +262,8 @@ class WrapperConfig
     }
 
     /**
-     * Return the list of throwable http error codes (if set)
+     * Return the list of throwable http error codes (if set). For developers that needs to see which http codes
+     * that is normally thrown on errors.
      *
      * @return array
      * @since 6.0.6 Since netcurl.
@@ -273,6 +274,8 @@ class WrapperConfig
     }
 
     /**
+     * Get current list of curlopts, etc.
+     *
      * @return array
      * @since 6.1.0
      */
@@ -307,6 +310,8 @@ class WrapperConfig
     }
 
     /**
+     * Which URL is the current requested?
+     *
      * @return string
      * @since 6.1.0
      */
@@ -316,6 +321,8 @@ class WrapperConfig
     }
 
     /**
+     * Set up a new URL to be requested from the wrappers.
+     *
      * @param string $requestUrl
      * @return WrapperConfig
      * @since 6.1.0
@@ -328,6 +335,8 @@ class WrapperConfig
     }
 
     /**
+     * Transform requested data into a proper format based on the content-type.
+     *
      * @return array
      * @since 6.1.0
      */
@@ -370,6 +379,8 @@ class WrapperConfig
     }
 
     /**
+     * Handle json. Legacy. Maybe.
+     *
      * @param $transformData
      * @return string
      * @since 6.1.0
@@ -405,7 +416,7 @@ class WrapperConfig
     }
 
     /**
-     * POST, GET, DELETE, etc
+     * Set up which method that should be used: POST, GET, DELETE, etc
      *
      * @param int $requestMethod
      * @return WrapperConfig
@@ -423,7 +434,7 @@ class WrapperConfig
     }
 
     /**
-     * POST, GET, DELETE, etc
+     * Get information about the current request method that is used: POST, GET, DELETE, etc
      *
      * @return int
      * @since 6.1.0
@@ -434,6 +445,8 @@ class WrapperConfig
     }
 
     /**
+     * Flags registered in the Flags class.
+     *
      * @return array
      * @since 6.1.0
      */

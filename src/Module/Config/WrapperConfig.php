@@ -528,7 +528,7 @@ class WrapperConfig
             }
         }
 
-        return implode('+', $return);
+        return implode(' +', $return);
     }
 
     /**

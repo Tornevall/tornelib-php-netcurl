@@ -70,6 +70,11 @@ class SoapClientWrapper implements WrapperInterface
      */
     private $soapWarningException = ['code' => 0, 'string' => null];
 
+    /**
+     * Reuse soapClient session if this is true. By means, it will be reinitialized on each call otherwise.
+     * @var bool
+     * @since 6.1.0
+     */
     private $reuseSoapClient = false;
 
     /**

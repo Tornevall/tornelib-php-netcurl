@@ -192,58 +192,6 @@ class curlWrapperTest extends TestCase
 
     /**
      * @test
-     * Make a TLS 1.0 request.
-     * @throws ExceptionHandler
-     */
-    public function basicGetLowTLS()
-    {
-        $tlsResponse = (new CurlWrapper())->
-        setConfig((new WrapperConfig())
-            ->setOption(CURLOPT_SSLVERSION, CURL_SSLVERSION_TLSv1_0)
-            ->setUserAgent(sprintf('netcurl-%s', NETCURL_VERSION)))
-            ->request(
-                sprintf('https://ipv4.netcurl.org/?func=%s',
-                    __FUNCTION__
-                )
-            )->getParsed();
-
-
-        if (isset($tlsResponse->ip)) {
-            static::assertTrue(
-                filter_var($tlsResponse->ip, FILTER_VALIDATE_IP) ? true : false &&
-                    $tlsResponse->SSL->SSL_PROTOCOL === 'TLSv1'
-            );
-        }
-    }
-
-    /**
-     * @test
-     * Make a TLS 1.1 request.
-     * @throws ExceptionHandler
-     */
-    public function basicGetTLS11()
-    {
-        $tlsResponse = (new CurlWrapper())->
-        setConfig(
-            (new WrapperConfig())
-                ->setUserAgent(sprintf('netcurl-%s', NETCURL_VERSION))
-                ->setOption(CURLOPT_SSLVERSION, CURL_SSLVERSION_TLSv1_1)
-        )->request(
-            sprintf('https://ipv4.netcurl.org/?func=%s',
-                __FUNCTION__
-            )
-        )->getParsed();
-
-        if (isset($tlsResponse->ip)) {
-            static::assertTrue(
-                filter_var($tlsResponse->ip, FILTER_VALIDATE_IP) ? true : false &&
-                    $tlsResponse->SSL->SSL_PROTOCOL === 'TLSv1.1'
-            );
-        }
-    }
-
-    /**
-     * @test
      * Make a TLS 1.3 request (if available).
      */
     public function basicGetTLS13()

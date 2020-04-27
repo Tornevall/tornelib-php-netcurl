@@ -720,7 +720,7 @@ class SoapClientWrapper implements WrapperInterface
         // Set higher priority for internal requests and configuration. If there is no reuse setting active
         // it has to be reinitialized as there may be several sessions after each other with different credentials
         // etc.
-        if (is_null($this->soapClient) && !$this->getReuseSoapClient()) {
+        if (is_null($this->soapClient) || !$this->getReuseSoapClient()) {
             $this->getSoapInit();
         }
 

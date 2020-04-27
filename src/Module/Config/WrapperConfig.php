@@ -489,13 +489,11 @@ class WrapperConfig
         if ($this->getIdentifiers()) {
             if (!$this->getIsCustomUserAgent()) {
                 // Reset if not custom already.
-                $currentUserAgent = sprintf(
-                    'netcurl-%s',
-                    NETCURL_VERSION
-                );
+                $currentUserAgent = '';
             }
 
             $currentUserAgentArray = [
+                sprintf('netcurl-%s', NETCURL_VERSION),
                 $this->getCurrentWrapperClass(true),
                 $this->getNetWrapperString(),
                 $this->getPhpString(),

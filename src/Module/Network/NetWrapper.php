@@ -75,6 +75,7 @@ class NetWrapper implements WrapperInterface
 
     /**
      * @inheritDoc
+     * @throws \ReflectionException
      */
     public function getVersion()
     {
@@ -183,7 +184,7 @@ class NetWrapper implements WrapperInterface
             sprintf(
                 '%s instance %s does not support %s.',
                 __CLASS__,
-                $this->getInstanceClass(),
+                WrapperDriver::getInstanceClass(),
                 __FUNCTION__
             )
         );
@@ -202,7 +203,7 @@ class NetWrapper implements WrapperInterface
             sprintf(
                 '%s instance %s does not support %s.',
                 __CLASS__,
-                $this->getInstanceClass(),
+                WrapperDriver::getInstanceClass(),
                 __FUNCTION__
             )
         );
@@ -221,7 +222,7 @@ class NetWrapper implements WrapperInterface
             sprintf(
                 '%s instance %s does not support %s.',
                 __CLASS__,
-                $this->getInstanceClass(),
+                WrapperDriver::getInstanceClass(),
                 __FUNCTION__
             )
         );

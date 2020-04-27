@@ -28,9 +28,9 @@ class simpleStreamWrapperTest extends TestCase
      */
     public function getBasicUrl()
     {
-        $stream = (new SimpleStreamWrapper())->setConfig(
+        $stream = (new NetWrapper())/*->setConfig(
             (new WrapperConfig())->setUserAgent('SimpleStreamWrapper')
-        );
+        )*/;
         $response = $stream->request('http://ipv4.netcurl.org/');
 
         $body = $response->getBody();

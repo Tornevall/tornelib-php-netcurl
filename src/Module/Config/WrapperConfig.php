@@ -493,17 +493,14 @@ class WrapperConfig
             }
 
             $currentUserAgentArray = [
+                $currentUserAgent,
                 sprintf('netcurl-%s', NETCURL_VERSION),
                 $this->getCurrentWrapperClass(true),
                 $this->getNetWrapperString(),
                 $this->getPhpString(),
             ];
 
-            $currentUserAgent = sprintf(
-                '%s;%s',
-                $currentUserAgent,
-                $this->getUserAgentsMerged($currentUserAgentArray)
-            );
+            $currentUserAgent = $this->getUserAgentsMerged($currentUserAgentArray);
         }
 
         $this->setUserAgent($currentUserAgent);

@@ -77,23 +77,32 @@ In its initial state, there are basically no requirements as this module tries t
 #### Current
 
 * curl
+* The simplest form of streamdriver and the binary safe file_get_contents (instead of the fopen-drivers that is based on the same system).
 * SoapClient
 
-#### In progress
+##### Pending/In progress
 
-* Streams / Simple requests (down to file_get_contents support)
+* RSS feeds
 
-##### Pending
+#### Removed
 
 * Guzzle
-* RSS feeds
 * Zend
 * Sockets
+* Wordpress (At least for now)
+
+The reason of the above removals is simple: Both guzzle, zend and wordpress drivers are actually based on the same methods that is already implemented in this package in the form of curl and stream-support. Wordpress for example, first tries to utilize curl support is available and then fails over to the stream support. This package is using file_get_contents after an important decision to be binary safe, as this method is. The fopen/fread-methods are not necessarily binary safe so in the first release, this support has been skipped. As for the other drivers, zend and guzzle, there are similar ways of running curl=>stream.
+
+##### How about sockets?
+
+This driver requires more, so this is put on hold.
 
 #### Dependencies, not required, but recommended
 
-* SSL: OpenSSL or similar.
-* SOAP: SoapClient and XML-drivers.
+* SSL: OpenSSL or similar (if doing https requests).
+* SOAP: SoapClient and XML-drivers (if doing https requests).
+* CURL (if you prefer curl before streams).
+* allow_url_fopen (if you have no access to curl, this has to be enabled).
 
 # Changes
 
@@ -102,10 +111,3 @@ Version 6.1 follows the standard of what's written in 6.0 - there is a primary m
 ## Breaking changes?
 
 No. Version 6.1 is written to reach highest compatibility with v6.0 as possible, but with modernized code and PSR-4. Make sure you check out https://docs.tornevall.net/x/DoBPAw before deciding to run anything as older PHP-releases could be incompatible. However, if they are, so are probably you.
-
-# Composer addons
-
-        "phpunit/phpunit": "^7.5",
-        "zendframework/zend-http": "^2.11",
-        "guzzlehttp/guzzle": "^6.5"
-        "zendframework/zend-http": "^2.9"

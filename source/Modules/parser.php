@@ -351,8 +351,10 @@ if (!class_exists('NETCURL_PARSER', NETCURL_CLASS_EXISTS_AUTOLOAD) &&
                             }
 
                             $idNoName = $nodeItem->tagName;
-                            // Forms without id namings will get the tagname. This will open up for reading forms and other elements without id's.
-                            // NOTE: If forms are not tagged with an id, the form will not render "properly" and the form fields might pop outside the real form.
+                            // Forms without id namings will get the tagname. This will open up for reading forms and
+                            // other elements without id's.
+                            // NOTE: If forms are not tagged with an id, the form will not render "properly" and the
+                            // form fields might pop outside the real form.
                             if (empty($elementData['id'])) {
                                 $elementData['id'] = $idNoName;
                             }

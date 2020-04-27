@@ -608,6 +608,7 @@ class CurlWrapper implements WrapperInterface
     public function getCurlRequest()
     {
         // Reset responseheader on each request.
+        $this->customHeaders = [];
         $this->curlResponseHeaders = [];
         $this->initCurlHandle();
 

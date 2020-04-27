@@ -13,7 +13,7 @@ if (!class_exists('Tornevall_SimpleSoap', NETCURL_CLASS_EXISTS_AUTOLOAD) &&
      */
     class Tornevall_SimpleSoap extends MODULE_SOAP
     {
-        function __construct(string $Url, $that = null)
+        public function __construct(string $Url, $that = null)
         {
             parent::__construct($Url, $that);
         }

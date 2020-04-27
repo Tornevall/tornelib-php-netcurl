@@ -13,7 +13,7 @@ if (!class_exists('TorneLIB_Network', NETCURL_CLASS_EXISTS_AUTOLOAD) &&
      */
     class TorneLIB_Network extends MODULE_NETWORK
     {
-        function __construct()
+        public function __construct()
         {
             parent::__construct();
         }

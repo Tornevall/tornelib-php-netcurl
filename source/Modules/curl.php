@@ -1,28 +1,5 @@
 <?php
 
-/**
- * Copyright 2018 Tomas Tornevall & Tornevall Networks
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- *
- * Tornevall Networks netCurl library - Yet another http- and network communicator library
- * Each class in this library has its own version numbering to keep track of where the changes are.
- * All since-markings are based on the major release of NetCurl.
- *
- * @package TorneLIB
- * @version 6.0.26
- */
-
 namespace TorneLIB;
 
 if (!class_exists('MODULE_CURL', NETCURL_CLASS_EXISTS_AUTOLOAD) &&
@@ -46,6 +23,7 @@ if (!class_exists('MODULE_CURL', NETCURL_CLASS_EXISTS_AUTOLOAD) &&
      * @link    https://bitbucket.tornevall.net/projects/LIB/repos/tornelib-php-netcurl/browse Sources of TorneLIB
      * @link    https://docs.tornevall.net/x/KwCy Network & Curl v5 and v6 Library usage
      * @link    https://docs.tornevall.net/x/FoBU TorneLIB Full documentation
+     * @version 6.0.27
      * @since   6.0.20
      * @deprecated MODULE_CURL is still present in v6.1 but will be raised as a backward compatible module.
      */

@@ -70,6 +70,8 @@ class SoapClientWrapper implements WrapperInterface
      */
     private $soapWarningException = ['code' => 0, 'string' => null];
 
+    private $reuseSoapClient = false;
+
     /**
      * SoapClientWrapper constructor.
      * @throws ExceptionHandler
@@ -264,7 +266,6 @@ class SoapClientWrapper implements WrapperInterface
                 );
             }
         }
-
         // Restore the errorhandler immediately after soaprequest if no exceptions are detected during first request.
         restore_error_handler();
 
@@ -677,6 +678,25 @@ class SoapClientWrapper implements WrapperInterface
     }
 
     /**
+     * @param bool $reuseEnabled
+     * @return SoapClientWrapper
+     * @since 6.1.0
+     */
+    public function setReuseSoapClient($reuseEnabled = false) {
+        $this->reuseSoapClient = $reuseEnabled;
+
+        return $this;
+    }
+
+    /**
+     * @return bool
+     * @since 6.1.0
+     */
+    public function getReuseSoapClient() {
+        return $this->reuseSoapClient;
+    }
+
+    /**
      * Dynamic SOAP-requests passing through.
      *
      * @param $name
@@ -691,9 +711,11 @@ class SoapClientWrapper implements WrapperInterface
             return $internalResponse;
         }
 
-        // Making sure we initialize the soapclient if not already done. Set higher priority for internal requests
-        // and configuration.
-        if (is_null($this->soapClient)) {
+        // Making sure we initialize the soapclient if not already done and only when asked to reuse old sessions.
+        // Set higher priority for internal requests and configuration. If there is no reuse setting active
+        // it has to be reinitialized as there may be several sessions after each other with different credentials
+        // etc.
+        if (is_null($this->soapClient) && !$this->getReuseSoapClient()) {
             $this->getSoapInit();
         }
 

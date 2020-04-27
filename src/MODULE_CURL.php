@@ -53,15 +53,32 @@ class MODULE_CURL
         $this->flags = new Flags();
         $this->CONFIG = $this->netWrapper->getConfig();
 
-        //$cli = new Client('http://identifier.tornevall.net');
-        //echo $cli->send();
-
         return $this;
     }
 
+    /**
+     * @param string $url
+     * @param int $postDataType
+     * @return mixed|null
+     * @deprecated Avoid this method. Use request.
+     */
     public function doGet($url = '', $postDataType = dataType::NORMAL)
     {
         return $this->netWrapper->request($url, [], requestMethod::METHOD_GET, $postDataType);
+    }
+
+    /**
+     * Allows strict identification in user-agent header.
+     * @param $activation
+     * @param bool $allowPhpRelease
+     * @return MODULE_CURL
+     * @since 6.1.0
+     */
+    public function setIdentifiers($activation, $allowPhpRelease = false)
+    {
+        $this->netWrapper->setIdentifiers($activation, $allowPhpRelease);
+
+        return $this;
     }
 
     /**

@@ -311,27 +311,37 @@ class NetWrapper implements WrapperInterface
         //$testWrapper = WrapperDriver::getWrapperAllowed('myNameSpace\myDriver');
 
         /** @var WrapperInterface $classRequest */
-        if ($dataType === dataType::SOAP &&
-            ($classRequest = WrapperDriver::getWrapperAllowed('SoapClientWrapper'))
-        ) {
+        if ($dataType === dataType::SOAP && ($this->getProperInstanceWrapper('SoapClientWrapper'))) {
             $this->isSoapRequest = true;
-            $classRequest->setConfig($this->getConfig());
+            $this->instance->setConfig($this->getConfig());
             $return = $classRequest->request($url, $data, $method, $dataType);
-        } elseif ($classRequest = WrapperDriver::getWrapperAllowed('CurlWrapper', true)) {
-            $classRequest->setConfig($this->getConfig());
+        } elseif ($this->getProperInstanceWrapper('CurlWrapper')) {
+            $this->instance->setConfig($this->getConfig());
             $return = $classRequest->request($url, $data, $method, $dataType);
-        } elseif ($classRequest = WrapperDriver::getWrapperAllowed('SimpleStreamWrapper', true)) {
-            $classRequest->setConfig($this->getConfig());
+        } elseif ($this->getProperInstanceWrapper('SimpleStreamWrapper')) {
+            $this->instance->setConfig($this->getConfig());
             $return = $classRequest->request($url, $data, $method, $dataType);
-        }
-
-        if (!is_null($classRequest)) {
-            $this->selectedWrapper = get_class($classRequest);
         }
 
         $this->instance = $classRequest;
 
         return $return;
+    }
+
+    /**
+     * @param $wrapperName
+     * @return mixed|WrapperInterface
+     * @throws ExceptionHandler
+     * @since 6.1.0
+     */
+    private function getProperInstanceWrapper($wrapperName) {
+        $this->instance = WrapperDriver::getWrapperAllowed($wrapperName, true);
+
+        if (!is_null($this->instance)) {
+            $this->selectedWrapper = get_class($this->instance);
+        }
+
+        return $this->instance;
     }
 
     /**

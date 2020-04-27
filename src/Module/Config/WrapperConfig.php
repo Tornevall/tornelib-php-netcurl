@@ -1037,6 +1037,7 @@ class WrapperConfig
     /**
      * Allows strict identification in user-agent header.
      * @param $activate
+     * @param bool $allowPhpRelease
      * @since 6.1.0
      */
     public function setIdentifiers($activate, $allowPhpRelease = false)

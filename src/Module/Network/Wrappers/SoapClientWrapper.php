@@ -7,15 +7,14 @@ use SoapClient;
 use SoapFault;
 use TorneLIB\Exception\ExceptionHandler;
 use TorneLIB\IO\Data\Strings;
+use TorneLIB\Model\Interfaces\WrapperInterface;
 use TorneLIB\Model\Type\authSource;
 use TorneLIB\Model\Type\authType;
 use TorneLIB\Model\Type\dataType;
 use TorneLIB\Model\Type\requestMethod;
 use TorneLIB\Module\Config\GenericParser;
 use TorneLIB\Module\Config\WrapperConfig;
-use TorneLIB\Model\Interfaces\WrapperInterface;
 use TorneLIB\Utils\Generic;
-use TorneLIB\Utils\Ini;
 use TorneLIB\Utils\Security;
 
 /**
@@ -123,7 +122,8 @@ class SoapClientWrapper implements WrapperInterface
      * @return mixed
      * @since 6.1.0
      */
-    public function getLastRequest() {
+    public function getLastRequest()
+    {
         return (string)$this->soapClientContent['lastRequest'];
     }
 
@@ -131,7 +131,8 @@ class SoapClientWrapper implements WrapperInterface
      * @return mixed
      * @since 6.1.0
      */
-    public function getLastRequestHeaders() {
+    public function getLastRequestHeaders()
+    {
         return (string)$this->soapClientContent['lastRequestHeaders'];
     }
 
@@ -139,7 +140,8 @@ class SoapClientWrapper implements WrapperInterface
      * @return bool
      * @since 6.1.0;
      */
-    public function getLastResponse() {
+    public function getLastResponse()
+    {
         return (string)$this->soapClientContent['lastResponse'];
     }
 
@@ -147,7 +149,8 @@ class SoapClientWrapper implements WrapperInterface
      * @return string
      * @since 6.1.0
      */
-    public function getLastResponseHeaders() {
+    public function getLastResponseHeaders()
+    {
         return (string)$this->soapClientContent['lastResponseHeaders'];
     }
 
@@ -157,7 +160,8 @@ class SoapClientWrapper implements WrapperInterface
      * @return array
      * @since 6.1.0
      */
-    public function getFunctions() {
+    public function getFunctions()
+    {
         return (array)$this->soapClientContent['functions'];
     }
 
@@ -178,7 +182,8 @@ class SoapClientWrapper implements WrapperInterface
      * @return mixed
      * @since 6.1.0
      */
-    private function getInheritedConfig($config) {
+    private function getInheritedConfig($config)
+    {
         $config->setCurrentWrapper($this->CONFIG->getCurrentWrapper());
 
         return $config;
@@ -223,6 +228,7 @@ class SoapClientWrapper implements WrapperInterface
      */
     private function getSoapClient()
     {
+        $this->CONFIG->getOptions();
         $this->getSoapInitErrorHandler();
         if (version_compare(PHP_VERSION, '7.1.0', '>=')) {
             $this->soapClient = new SoapClient(
@@ -242,12 +248,11 @@ class SoapClientWrapper implements WrapperInterface
      * SOAP initializer.
      * Formerly known as a simpleSoap getSoap() variant.
      *
-     * @param bool $soapwarningControl
      * @return $this
      * @throws ExceptionHandler
      * @since 6.1.0
      */
-    private function getSoapInit($soapwarningControl = false)
+    private function getSoapInit()
     {
         try {
             $this->getSoapClient();
@@ -481,7 +486,7 @@ class SoapClientWrapper implements WrapperInterface
         try {
             // Giving the soapcall a more natural touch with call_user_func_array. Besides, this also means
             // we don't have to check for arguments.
-            $return = call_user_func_array(array($this->soapClient, $name), $arguments);
+            $return = call_user_func_array([$this->soapClient, $name], $arguments);
         } catch (Exception $soapFault) {
             // Public note: Those exceptions may be thrown by the soap-api or when the wsdl is cache and there is
             // for example authorization problems. This is why the soapResponse is fetched and analyzed before
@@ -532,8 +537,9 @@ class SoapClientWrapper implements WrapperInterface
      * @return int
      * @since 6.1.0
      */
-    public function getCode() {
-       return (int)$this->getHttpHead($this->getHeader('http'));
+    public function getCode()
+    {
+        return (int)$this->getHttpHead($this->getHeader('http'));
     }
 
     /**
@@ -687,7 +693,8 @@ class SoapClientWrapper implements WrapperInterface
      * @return SoapClientWrapper
      * @since 6.1.0
      */
-    public function setReuseSoapClient($reuseEnabled = false) {
+    public function setReuseSoapClient($reuseEnabled = false)
+    {
         $this->reuseSoapClient = $reuseEnabled;
 
         return $this;
@@ -697,7 +704,8 @@ class SoapClientWrapper implements WrapperInterface
      * @return bool
      * @since 6.1.0
      */
-    public function getReuseSoapClient() {
+    public function getReuseSoapClient()
+    {
         return $this->reuseSoapClient;
     }
 

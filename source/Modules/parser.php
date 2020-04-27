@@ -2,6 +2,8 @@
 
 namespace TorneLIB;
 
+use Exception;
+
 if (!class_exists('NETCURL_PARSER', NETCURL_CLASS_EXISTS_AUTOLOAD) &&
     !class_exists('TorneLIB\NETCURL_PARSER', NETCURL_CLASS_EXISTS_AUTOLOAD)
 ) {
@@ -56,12 +58,19 @@ if (!class_exists('NETCURL_PARSER', NETCURL_CLASS_EXISTS_AUTOLOAD) &&
                 $this->NETCURL_PROHIBIT_DOMCONTENT_PARSE = $flags['NETCURL_PROHIBIT_DOMCONTENT_PARSE'];
             }
 
-            /*if (is_null($this->IO)) {
-                throw new \Exception( NETCURL_CURL_CLIENTNAME . " is missing MODULE_IO for rendering post data content", $this->NETWORK->getExceptionCode( 'NETCURL_PARSE_XML_FAILURE' ) );
-            }*/
             $this->PARSE_CONTAINER = $htmlContent;
             $this->PARSE_CONTENT_TYPE = $contentType;
             $this->PARSE_CONTENT_OUTPUT = $this->getContentByTest();
+
+            // Consider the solution below.
+            /*try {
+                $this->PARSE_CONTENT_OUTPUT = $this->getContentByTest();
+            } catch (Exception $e) {
+                $this->PARSE_CONTENT_OUTPUT = $this->getContentByHeaderType(
+                    $this->PARSE_CONTAINER,
+                    $this->PARSE_CONTENT_TYPE
+                );
+            }*/
         }
 
         /**
@@ -127,7 +136,9 @@ if (!class_exists('NETCURL_PARSER', NETCURL_CLASS_EXISTS_AUTOLOAD) &&
         /**
          * @param bool $returnAsIs
          * @return null|string
+         * @throws Exception
          * @since 6.0.0
+         * @deprecated Do not use this. It will be removed from version 6.1.0 anyway.
          */
         public function getContentByYaml($returnAsIs = false)
         {
@@ -239,10 +250,20 @@ if (!class_exists('NETCURL_PARSER', NETCURL_CLASS_EXISTS_AUTOLOAD) &&
          * @return array|null|string
          * @throws Exception
          * @since 6.0.0
+         * @deprecated Stop using this. Run by content-type instead.
          */
         private function getContentByTest()
         {
             $returnNonNullValue = null;
+
+            // Trust content-type higher than the guessing game (NETCURL-290, implementation imported from netcur 6.1).
+            // Note: This solution support only xml and json.
+            if (!empty($this->PARSE_CONTENT_TYPE)) {
+                $response = $this->getContentByHeaderType($this->PARSE_CONTAINER, $this->PARSE_CONTENT_TYPE);
+                if ($response !== $this->PARSE_CONTAINER && !empty($response)) {
+                    return $response;
+                }
+            }
 
             if (!is_null($respond = $this->getContentByJson())) {
                 $returnNonNullValue = $respond;
@@ -259,6 +280,29 @@ if (!class_exists('NETCURL_PARSER', NETCURL_CLASS_EXISTS_AUTOLOAD) &&
             return $returnNonNullValue;
         }
 
+        /**
+         * @param $content
+         * @param $contentType
+         * @return mixed|string|null
+         * @since 6.1.0 Imported feature.
+         */
+        private function getContentByHeaderType($content, $contentType)
+        {
+            $return = $content;
+
+            switch ($contentType) {
+                case (!empty($contentType) && preg_match('/\/xml/i', $contentType) ? true : false):
+                    $return = $this->getContentByXml();
+                    break;
+                case (preg_match('/\/json/i', $contentType) ? true : false):
+                    $return = json_decode($content);
+                    break;
+                default:
+                    break;
+            }
+
+            return $return;
+        }
 
         /**
          * Experimental: Convert DOMDocument to an array
@@ -350,7 +394,7 @@ if (!class_exists('NETCURL_PARSER', NETCURL_CLASS_EXISTS_AUTOLOAD) &&
 
         /**
          * @return array
-         * @throws \Exception
+         * @throws Exception
          * @since 6.0.0
          */
         private function getDomElements()
@@ -385,7 +429,7 @@ if (!class_exists('NETCURL_PARSER', NETCURL_CLASS_EXISTS_AUTOLOAD) &&
                     }
                 }
             } else {
-                throw new \Exception(
+                throw new Exception(
                     NETCURL_CURL_CLIENTNAME . " HtmlParse exception: Can not parse DOMDocuments without the DOMDocuments class",
                     $this->NETWORK->getExceptionCode("NETCURL_DOMDOCUMENT_CLASS_MISSING")
                 );

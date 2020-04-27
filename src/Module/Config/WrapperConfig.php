@@ -495,16 +495,40 @@ class WrapperConfig
                 );
             }
 
-            $currentUserAgent = sprintf(
-                '%s;%s +%s;%s',
-                $currentUserAgent,
+            $currentUserAgentArray = [
                 $this->getCurrentWrapperClass(true),
                 $this->getNetWrapperString(),
-                $this->getPhpString()
+                $this->getPhpString(),
+            ];
+
+            $currentUserAgent = sprintf(
+                '%s;%s',
+                $currentUserAgent,
+                $this->getUserAgentsMerged($currentUserAgentArray)
             );
         }
 
         $this->setUserAgent($currentUserAgent);
+    }
+
+    /**
+     * @param $userAgentArray
+     * @return string
+     * @since 6.1.0
+     */
+    private function getUserAgentsMerged($userAgentArray)
+    {
+        $return = [];
+
+        if (is_array($userAgentArray)) {
+            foreach ($userAgentArray as $item) {
+                if (!empty($item)) {
+                    $return[] = $item;
+                }
+            }
+        }
+
+        return implode('+', $return);
     }
 
     /**
@@ -514,7 +538,7 @@ class WrapperConfig
     private function getPhpString()
     {
         if ($this->identifierAgentPhp) {
-            $phpString = sprintf(';PHP-%s', PHP_VERSION);
+            $phpString = sprintf('PHP-%s', PHP_VERSION);
         } else {
             $phpString = '';
         }

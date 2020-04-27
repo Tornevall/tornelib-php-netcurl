@@ -310,20 +310,17 @@ class NetWrapper implements WrapperInterface
         // This allows us to add internal supported drivers without including them in this specific package.
         //$testWrapper = WrapperDriver::getWrapperAllowed('myNameSpace\myDriver');
 
-        /** @var WrapperInterface $classRequest */
         if ($dataType === dataType::SOAP && ($this->getProperInstanceWrapper('SoapClientWrapper'))) {
             $this->isSoapRequest = true;
             $this->instance->setConfig($this->getConfig());
-            $return = $classRequest->request($url, $data, $method, $dataType);
+            $return = $this->instance->request($url, $data, $method, $dataType);
         } elseif ($this->getProperInstanceWrapper('CurlWrapper')) {
             $this->instance->setConfig($this->getConfig());
-            $return = $classRequest->request($url, $data, $method, $dataType);
+            $return = $this->instance->request($url, $data, $method, $dataType);
         } elseif ($this->getProperInstanceWrapper('SimpleStreamWrapper')) {
             $this->instance->setConfig($this->getConfig());
-            $return = $classRequest->request($url, $data, $method, $dataType);
+            $return = $this->instance->request($url, $data, $method, $dataType);
         }
-
-        $this->instance = $classRequest;
 
         return $return;
     }

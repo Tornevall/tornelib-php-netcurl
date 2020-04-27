@@ -18,7 +18,7 @@ class Version
      * @param string $op
      * @throws Exception
      */
-    public static function getRequiredVersion($lowest = '5.4', $op = '<')
+    public static function getRequiredVersion($lowest = '5.5', $op = '<')
     {
         if (version_compare(PHP_VERSION, $lowest, $op)) {
             throw new Exception(

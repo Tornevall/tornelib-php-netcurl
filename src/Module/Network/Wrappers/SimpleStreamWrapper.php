@@ -275,11 +275,16 @@ class SimpleStreamWrapper implements WrapperInterface
      */
     public function getStreamDataContents()
     {
-        $this->streamContentResponseRaw = file_get_contents(
+        // When requests are failing, this MAY throw warnings.
+        // Usually we don't want this method to do this, on for example 404
+        // errors, etc as we have our own exception handler below, which does
+        // this in a correct way.
+        $this->streamContentResponseRaw = @file_get_contents(
             $this->CONFIG->getRequestUrl(),
             false,
             $this->CONFIG->getStreamContext()
         );
+
 
         $this->streamContentResponseHeader = $http_response_header;
 

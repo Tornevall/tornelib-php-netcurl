@@ -84,15 +84,6 @@ class curlWrapperTest extends TestCase
 
     /**
      * @test
-     * @throws ReflectionException
-     */
-    public function getOtherVersion() {
-        (new TorneLIB\Utils\Generic())->getVersionByClassDoc('TorneLIB\Module\Network\Fail');
-        (new TorneLIB\Utils\Generic())->getVersionByClassDoc('TorneLIB\Module\Network\NetWrapper');
-    }
-
-    /**
-     * @test
      */
     public function safeMode()
     {

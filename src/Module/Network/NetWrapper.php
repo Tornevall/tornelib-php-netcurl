@@ -245,7 +245,6 @@ class NetWrapper implements WrapperInterface
                     return $returnable;
                 }
             } catch (ExceptionHandler $requestexternalExecute) {
-
             }
         }
 
@@ -334,7 +333,8 @@ class NetWrapper implements WrapperInterface
      * @throws ExceptionHandler
      * @since 6.1.0
      */
-    private function getProperInstanceWrapper($wrapperName) {
+    private function getProperInstanceWrapper($wrapperName)
+    {
         $this->instance = WrapperDriver::getWrapperAllowed($wrapperName, true);
 
         if (!is_null($this->instance)) {

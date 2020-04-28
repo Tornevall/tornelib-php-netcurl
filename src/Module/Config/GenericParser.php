@@ -34,10 +34,10 @@ class GenericParser
             // Make sure there is no extras when starting to extract this data.
             if (!is_numeric($headContent[0]) &&
                 preg_match('/^http/i', $headContent[0]) &&
-                preg_match('/\s/', $headContent[1])
+                (preg_match('/\s/', $headContent[1]) || intval($headContent[1]) > 0)
             ) {
                 // Drop one to the left, and retry.
-                $headContent = explode(' ', $headContent[1], 2);
+                $headContent = explode(' ', trim($headContent[1]), 2);
             }
 
             switch ($returnData) {

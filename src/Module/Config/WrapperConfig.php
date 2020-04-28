@@ -1,5 +1,8 @@
 <?php
-
+/**
+ * Copyright © Tomas Tornevall / Tornevall Networks. All rights reserved.
+ * See LICENSE for license details.
+ */
 namespace TorneLIB\Module\Config;
 
 use Exception;
@@ -243,8 +246,7 @@ class WrapperConfig
             $this->throwableHttpCodes = [];
         }
         foreach ($this->throwableHttpCodes as $codeListArray => $codeArray) {
-            if ((
-                    isset($codeArray[1]) &&
+            if ((isset($codeArray[1]) &&
                     $httpCode >= intval($codeArray[0]) &&
                     $httpCode <= intval($codeArray[1])
                 ) || $forceException

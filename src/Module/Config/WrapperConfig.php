@@ -243,8 +243,7 @@ class WrapperConfig
             $this->throwableHttpCodes = [];
         }
         foreach ($this->throwableHttpCodes as $codeListArray => $codeArray) {
-            if (
-                (
+            if ((
                     isset($codeArray[1]) &&
                     $httpCode >= intval($codeArray[0]) &&
                     $httpCode <= intval($codeArray[1])

@@ -285,11 +285,15 @@ class SimpleStreamWrapper implements WrapperInterface
             $this->CONFIG->getStreamContext()
         );
 
+        $httpExceptionMessage = $this->getHttpMessage();
+        if (isset($php_errormsg) && !empty($php_errormsg)) {
+            $httpExceptionMessage = $php_errormsg;
+        }
 
         $this->streamContentResponseHeader = $http_response_header;
 
         $this->CONFIG->getHttpException(
-            $this->getHttpMessage(),
+            $httpExceptionMessage,
             $this->getCode()
         );
     }

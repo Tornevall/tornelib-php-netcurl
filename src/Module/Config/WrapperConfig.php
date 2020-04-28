@@ -177,6 +177,11 @@ class WrapperConfig
     }
 
     /**
+     * @var
+     */
+    private $authSource;
+
+    /**
      * Preparing curl defaults in a way we like.
      * @return $this
      * @since 6.1.0
@@ -910,6 +915,7 @@ class WrapperConfig
      * @param $password
      * @param int $authType
      * @param int $authSource
+     * @return WrapperConfig
      * @since 6.1.0
      */
     public function setAuthentication(
@@ -918,6 +924,8 @@ class WrapperConfig
         $authType = authType::BASIC,
         $authSource = authSource::NORMAL
     ) {
+        $this->authSource = $authSource;
+
         switch ($authSource) {
             case authSource::STREAM:
                 if ($authType === authType::BASIC) {
@@ -943,6 +951,28 @@ class WrapperConfig
                 $this->setStreamOption('password', $this->authData['password']);
                 break;
         }
+
+        return $this;
+    }
+
+    /**
+     * Replace current authdata manually to stream source if the default is set by mistake.
+     *
+     * @return $this
+     * @since 6.1.0
+     */
+    public function setAuthStream()
+    {
+        if ($this->authSource === authSource::NORMAL) {
+            $this->setAuthentication(
+                $this->authData['username'],
+                $this->authData['password'],
+                $this->authData['type'],
+                authSource::STREAM
+            );
+        }
+
+        return $this;
     }
 
     /**

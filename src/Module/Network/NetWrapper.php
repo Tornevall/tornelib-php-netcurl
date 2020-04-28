@@ -318,7 +318,10 @@ class NetWrapper implements WrapperInterface
             $this->instance->setConfig($this->getConfig());
             $return = $this->instance->request($url, $data, $method, $dataType);
         } elseif ($this->getProperInstanceWrapper('SimpleStreamWrapper')) {
-            $this->instance->setConfig($this->getConfig());
+            $currentConfig = $this->getConfig();
+            // Check if auth is properly set, in case default setup is used.
+            $currentConfig->setAuthStream();
+            $this->instance->setConfig($currentConfig);
             $return = $this->instance->request($url, $data, $method, $dataType);
         }
 

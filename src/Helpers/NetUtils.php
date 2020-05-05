@@ -110,7 +110,7 @@ class NetUtils {
     public function getGitTagsByUrl($url, $numericsOnly = false, $numericsSanitized = false)
     {
         $url .= "/info/refs?service=git-upload-pack";
-        $gitRequest = (new NetWrapper())->request($url);
+        $gitRequest = (new NetWrapper())->setTimeout(10)->request($url);
         return $this->getGitsTagsRegEx($gitRequest->getBody());
     }
 

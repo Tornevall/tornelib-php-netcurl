@@ -6,6 +6,7 @@
 
 namespace TorneLIB\Module\Network;
 
+use ReflectionException;
 use TorneLIB\Exception\Constants;
 use TorneLIB\Exception\ExceptionHandler;
 use TorneLIB\IO\Data\Content;
@@ -79,7 +80,7 @@ class NetWrapper implements WrapperInterface
 
     /**
      * @inheritDoc
-     * @throws \ReflectionException
+     * @throws ReflectionException
      */
     public function getVersion()
     {

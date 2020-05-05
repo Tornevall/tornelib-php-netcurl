@@ -7,6 +7,7 @@
 namespace TorneLIB\Helpers;
 
 use Exception;
+use TorneLIB\Exception\Constants;
 
 /**
  * Class Version netcurl version guard, throws errors when running too low PHP-versions (below 5.4).
@@ -27,13 +28,13 @@ class Version
         if (version_compare(PHP_VERSION, $lowest, $op)) {
             throw new Exception(
                 sprintf(
-                    'Your PHP version is way too old (%s)!! It is time to upgrade. ' .
+                    'Your PHP version is way too old (%s)! It is time to upgrade. ' .
                     'Try somthing above PHP 7.2 where PHP still has support. ' .
                     'If you still have no idea what this is, check out %s.',
                     PHP_VERSION,
                     'https://docs.tornevall.net/x/DoBPAw'
                 ),
-                500
+                Constants::LIB_TOO_OLD_PHP
             );
         }
     }

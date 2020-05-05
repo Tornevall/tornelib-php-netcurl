@@ -7,11 +7,16 @@ use TorneLIB\Config\Flag;
 use TorneLIB\Exception\ExceptionHandler;
 use TorneLIB\Helpers\Version;
 use TorneLIB\Module\Network\Wrappers\SoapClientWrapper;
+use TorneLIB\Utils\Security;
 
 try {
     Version::getRequiredVersion('5.6');
 } catch (Exception $e) {
     die($e->getMessage());
+}
+
+if (Security::getCurrentClassState('SoapClient', false)) {
+    die('Skipping SoapClient tests as they are missing.');
 }
 
 /**

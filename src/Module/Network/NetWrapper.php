@@ -534,5 +534,7 @@ class NetWrapper implements WrapperInterface
                 );
                 break;
         }
+
+        return $this;
     }
 }

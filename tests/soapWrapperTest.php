@@ -333,6 +333,8 @@ class soapWrapperTest extends TestCase
     public function setSoapValue()
     {
         try {
+            $diffTestStamp = time() - 600;
+
             // Expected result.
             $currentTimeStamp = time();
 
@@ -364,7 +366,7 @@ class soapWrapperTest extends TestCase
                 $uriTemplate
             );
 
-            static::assertTrue((int)$uriTemplate['ts'] === $currentTimeStamp);
+            static::assertTrue((int)$uriTemplate['ts'] > $diffTestStamp);
         } catch (Exception $e) {
             static::markTestSkipped(
                 sprintf(

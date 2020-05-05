@@ -70,32 +70,6 @@ pipelines:
               - composer install
               - composer require phpunit/phpunit
               - vendor/bin/phpunit --configuration ./phpunit.xml
-        - step:
-            name: NetCURL 6.1/PHP 5.5
-            image: php:5.5
-            caches:
-              - composer
-            script:
-              - apt-get update && apt-get install -y unzip libxml2-dev git ca-certificates openssl libssl-dev
-              - docker-php-ext-install soap
-              - docker-php-ext-enable soap
-              - curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
-              - composer install
-              - composer require phpunit/phpunit
-              - vendor/bin/phpunit --configuration ./phpunit.xml
-        - step:
-            name: NetCURL 6.1/PHP 5.4
-            image: php:5.4
-            caches:
-              - composer
-            script:
-              - apt-get update && apt-get install -y unzip libxml2-dev git ca-certificates
-              - docker-php-ext-install soap
-              - docker-php-ext-enable soap
-              - curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
-              - composer install
-              - composer require phpunit/phpunit
-              - vendor/bin/phpunit --configuration ./phpunit.xml
   definitions:
     services:
       docker:

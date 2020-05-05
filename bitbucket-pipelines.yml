@@ -4,11 +4,12 @@
 
 pipelines:
   default:
+    caches:
+      - composer
+  parallel:
     - step:
         name: NetCURL 6.1/PHP 7.4
         image: php:7.4
-        caches:
-          - composer
         script:
           - apt-get update && apt-get install -y unzip libxml2-dev git
           - docker-php-ext-install soap
@@ -44,8 +45,8 @@ pipelines:
           - composer require phpunit/phpunit
           - vendor/bin/phpunit --configuration ./phpunit.xml
     - step:
-        name: NetCURL 6.1/PHP 7.1.11 - or when dockerhub is inconsistent
-        image: php:7.1.11
+        name: NetCURL 6.1/PHP 7.1
+        image: php:7.1
         caches:
           - composer
         script:

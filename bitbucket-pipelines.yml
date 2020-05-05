@@ -58,6 +58,16 @@ pipelines:
               - composer require phpunit/phpunit
               - vendor/bin/phpunit --configuration ./phpunit.xml
         - step:
+            name: NetCURL 6.1/PHP 7.1-NoDriver.
+            image: php:7.1
+            caches:
+              - composer
+            script:
+              - curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
+              - composer install
+              - composer require phpunit/phpunit
+              - vendor/bin/phpunit --configuration ./phpunit.xml
+        - step:
             name: NetCURL 6.1/PHP 5.6
             image: php:5.6
             caches:

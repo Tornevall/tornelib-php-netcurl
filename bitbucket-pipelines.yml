@@ -81,7 +81,7 @@ pipelines:
               - composer install
               - composer require phpunit/phpunit
               - vendor/bin/phpunit --configuration ./phpunit.xml
-  definitions:
-    services:
-      docker:
-        memory: 4096
+    definitions:
+      services:
+        docker:
+          memory: 4096

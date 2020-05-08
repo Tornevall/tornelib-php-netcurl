@@ -16,7 +16,8 @@ try {
 }
 
 if (Security::getCurrentClassState('SoapClient', false)) {
-    die('Skipping SoapClient tests as they are missing.');
+    //die('Skipping SoapClient tests as they are missing.');
+    define('SKIP_SOAP', true);
 }
 
 /**
@@ -37,6 +38,10 @@ class soapWrapperTest extends TestCase
      */
     public function basicSoapClient()
     {
+        if (defined('SKIP_SOAP')) {
+            static::markTestSkipped('SoapClient is missing or disabled on demand. Test marked as skipped.');
+            return;
+        }
         $soapWrapper = new SoapClientWrapper();
         static::assertTrue(is_object($soapWrapper));
     }
@@ -47,6 +52,10 @@ class soapWrapperTest extends TestCase
      */
     public function getSoapUninitialized()
     {
+        if (defined('SKIP_SOAP')) {
+            static::markTestSkipped('SoapClient is missing or disabled on demand. Test marked as skipped.');
+            return;
+        }
         $soapWrapper = (new SoapClientWrapper());
         static::assertTrue(
             is_object($soapWrapper)
@@ -59,6 +68,10 @@ class soapWrapperTest extends TestCase
      */
     public function getStreamContext()
     {
+        if (defined('SKIP_SOAP')) {
+            static::markTestSkipped('SoapClient is missing or disabled on demand. Test marked as skipped.');
+            return;
+        }
         $soapWrapper = new SoapClientWrapper();
         $soapContext = $soapWrapper->getStreamContext();
         static::assertTrue(!empty($soapContext['http']));
@@ -70,6 +83,10 @@ class soapWrapperTest extends TestCase
      */
     public function getSoapEmbeddedRandomRequest()
     {
+        if (defined('SKIP_SOAP')) {
+            static::markTestSkipped('SoapClient is missing or disabled on demand. Test marked as skipped.');
+            return;
+        }
         // Note: We could've been chaining this one, but in this case, there's other stuff to test.
         $soapWrapper = (new SoapClientWrapper($this->netcurlWsdl));
         $soapWrapper->setAuthentication($this->rEcomPipeU, $this->rEcomPipeP);
@@ -98,6 +115,10 @@ class soapWrapperTest extends TestCase
      */
     public function getSoapEmbeddedRandomRequestInstantStream()
     {
+        if (defined('SKIP_SOAP')) {
+            static::markTestSkipped('SoapClient is missing or disabled on demand. Test marked as skipped.');
+            return;
+        }
         $directStreamUserAgent = 'stream_context_agent_request';
         $realDirectStreamUserAgent = 'stream_context_agent_request_ov';
 
@@ -135,6 +156,10 @@ class soapWrapperTest extends TestCase
      */
     public function getSoapEmbeddedRandomRequestProxy()
     {
+        if (defined('SKIP_SOAP')) {
+            static::markTestSkipped('SoapClient is missing or disabled on demand. Test marked as skipped.');
+            return;
+        }
         // Note: We could've been chaining this one, but in this case, there's other stuff to test.
         $soapWrapper = (new SoapClientWrapper($this->netcurlWsdl))
             ->setAuthentication($this->rEcomPipeU, $this->rEcomPipeP)
@@ -156,6 +181,10 @@ class soapWrapperTest extends TestCase
      */
     public function getSoapEmbeddedReal()
     {
+        if (defined('SKIP_SOAP')) {
+            static::markTestSkipped('SoapClient is missing or disabled on demand. Test marked as skipped.');
+            return;
+        }
         try {
             $soapWrapper = (new SoapClientWrapper($this->wsdl))->setWsdlCache(WSDL_CACHE_DISK);
             $soapWrapper->setAuthentication($this->rEcomPipeU, $this->rEcomPipeP);
@@ -190,6 +219,10 @@ class soapWrapperTest extends TestCase
      */
     public function getSoapEmbeddedAuthFailCache()
     {
+        if (defined('SKIP_SOAP')) {
+            static::markTestSkipped('SoapClient is missing or disabled on demand. Test marked as skipped.');
+            return;
+        }
         try {
             // NOTE: By setting cached wsdl here, authentication failures can not be cached.
             $soapWrapper = (new SoapClientWrapper($this->wsdl))->setWsdlCache(WSDL_CACHE_DISK);
@@ -220,6 +253,10 @@ class soapWrapperTest extends TestCase
      */
     public function getSoapEmbeddedAuthFailUnCached()
     {
+        if (defined('SKIP_SOAP')) {
+            static::markTestSkipped('SoapClient is missing or disabled on demand. Test marked as skipped.');
+            return;
+        }
         try {
             // NOTE: By setting cached wsdl here, authentication failures can not be cached.
             $soapWrapper = (new SoapClientWrapper($this->wsdl));
@@ -249,6 +286,10 @@ class soapWrapperTest extends TestCase
      */
     public function getSoapEmbeddedNoWsdl()
     {
+        if (defined('SKIP_SOAP')) {
+            static::markTestSkipped('SoapClient is missing or disabled on demand. Test marked as skipped.');
+            return;
+        }
         try {
             // Service bails out on error 500 when ?wsdl is excluded.
             // For older PHP versions this renders a very noisy fatal.
@@ -269,6 +310,10 @@ class soapWrapperTest extends TestCase
      */
     public function getSoapEmbeddedRequest()
     {
+        if (defined('SKIP_SOAP')) {
+            static::markTestSkipped('SoapClient is missing or disabled on demand. Test marked as skipped.');
+            return;
+        }
         $wrapper = (new SoapClientWrapper())->setWsdlCache(WSDL_CACHE_DISK);
         $wrapper->setAuthentication(
             $this->rEcomPipeU,
@@ -288,6 +333,10 @@ class soapWrapperTest extends TestCase
      */
     public function getSoapEmbeddedRequestTimeoutUncached()
     {
+        if (defined('SKIP_SOAP')) {
+            static::markTestSkipped('SoapClient is missing or disabled on demand. Test marked as skipped.');
+            return;
+        }
         $wrapper = (new SoapClientWrapper())->setTimeout(0);
         $wrapper->setAuthentication(
             $this->rEcomPipeU,
@@ -311,6 +360,10 @@ class soapWrapperTest extends TestCase
      */
     public function setWsdlCache()
     {
+        if (defined('SKIP_SOAP')) {
+            static::markTestSkipped('SoapClient is missing or disabled on demand. Test marked as skipped.');
+            return;
+        }
         $wrapper = new SoapClientWrapper($this->wsdl);
         $wrapper->setWsdlCache(WSDL_CACHE_DISK)->setAuthentication(
             $this->rEcomPipeU,
@@ -337,6 +390,10 @@ class soapWrapperTest extends TestCase
      */
     public function setSoapValue()
     {
+        if (defined('SKIP_SOAP')) {
+            static::markTestSkipped('SoapClient is missing or disabled on demand. Test marked as skipped.');
+            return;
+        }
         try {
             $diffTestStamp = time() - 600;
 

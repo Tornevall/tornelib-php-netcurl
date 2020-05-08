@@ -15,8 +15,7 @@ try {
     die($e->getMessage());
 }
 
-if (Security::getCurrentClassState('SoapClient', false)) {
-    //die('Skipping SoapClient tests as they are missing.');
+if (!Security::getCurrentClassState('SoapClient', false)) {
     define('SKIP_SOAP', true);
 }
 

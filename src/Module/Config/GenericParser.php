@@ -79,6 +79,9 @@ class GenericParser
 
         switch ($contentType) {
             case (!empty($contentType) && preg_match('/\/xml|\+xml/i', $contentType) ? true : false):
+                // More detection possibilites.
+                /* <?xml version="1.0" encoding="UTF-8"?><rss version="2.0"*/
+
                 // If Laminas is available, prefer that engine before simple xml.
                 if (preg_match('/\/xml|\+xml/i', $contentType) && class_exists('Laminas\Feed\Reader\Reader')) {
                     $return = (new RssWrapper())->getParsed($content);

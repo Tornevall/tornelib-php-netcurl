@@ -17,6 +17,7 @@ pipelines:
               - curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
               - composer install
               - composer require phpunit/phpunit
+              - composer require laminas/laminas-feed
               - vendor/bin/phpunit --configuration ./phpunit.xml
         - step:
             name: NetCURL 6.1/PHP 7.3
@@ -30,6 +31,7 @@ pipelines:
               - curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
               - composer install
               - composer require phpunit/phpunit
+              - composer require laminas/laminas-feed
               - vendor/bin/phpunit --configuration ./phpunit.xml
         - step:
             name: NetCURL 6.1/PHP 7.2
@@ -43,6 +45,7 @@ pipelines:
               - curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
               - composer install
               - composer require phpunit/phpunit
+              - composer require laminas/laminas-feed
               - vendor/bin/phpunit --configuration ./phpunit.xml
         - step:
             name: NetCURL 6.1/PHP 7.1
@@ -56,6 +59,7 @@ pipelines:
               - curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
               - composer install
               - composer require phpunit/phpunit
+              - composer require laminas/laminas-feed
               - vendor/bin/phpunit --configuration ./phpunit.xml
         - step:
             name: NetCURL 6.1/PHP 7.1-NoDriver.
@@ -67,6 +71,7 @@ pipelines:
               - curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
               - composer install
               - composer require phpunit/phpunit
+              - composer require laminas/laminas-feed
               - vendor/bin/phpunit --configuration ./phpunit.xml
         - step:
             name: NetCURL 6.1/PHP 5.6
@@ -80,8 +85,5 @@ pipelines:
               - curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
               - composer install
               - composer require phpunit/phpunit
+              - composer require laminas/laminas-feed
               - vendor/bin/phpunit --configuration ./phpunit.xml
-#  definitions:
-#    services:
-#      docker:
-#        memory: 4096

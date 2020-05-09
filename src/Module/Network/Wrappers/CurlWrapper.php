@@ -17,6 +17,7 @@ use TorneLIB\Model\Type\dataType;
 use TorneLIB\Model\Type\requestMethod;
 use TorneLIB\Module\Config\GenericParser;
 use TorneLIB\Module\Config\WrapperConfig;
+use TorneLIB\Module\Config\WrapperCurlOpt;
 use TorneLIB\Utils\Generic;
 use TorneLIB\Utils\Security;
 
@@ -174,7 +175,9 @@ class CurlWrapper implements WrapperInterface
         $this->setCurlPostData($curlHandle);
         $this->setCurlRequestMethod($curlHandle);
         $this->setCurlCustomHeaders($curlHandle);
-        $this->setOptionCurl($curlHandle, CURLOPT_URL, $url);
+        if (!empty($url)) {
+            $this->setOptionCurl($curlHandle, CURLOPT_URL, $url);
+        }
 
         return $this;
     }
@@ -485,6 +488,19 @@ class CurlWrapper implements WrapperInterface
     }
 
     /**
+     * @param $proxyAddress
+     * @param int $proxyType Default: 0 = HTTP
+     * @return CurlWrapper
+     */
+    public function setProxy($proxyAddress, $proxyType = 0)
+    {
+        $this->CONFIG->setOption(WrapperCurlOpt::NETCURL_CURLOPT_PROXY, $proxyAddress);
+        $this->CONFIG->setOption(WrapperCurlOpt::NETCURL_CURLOPT_PROXYTYPE, $proxyType);
+
+        return $this;
+    }
+
+    /**
      * @param $url
      * @throws ExceptionHandler
      */
@@ -526,7 +542,9 @@ class CurlWrapper implements WrapperInterface
                 $this->curlHandle = curl_init();
                 $this->setupHandle($this->curlHandle, $this->CONFIG->getRequestUrl());
             } else {
-                $this->throwExceptionInvalidUrl($this->CONFIG->getRequestUrl());
+                $this->curlHandle = curl_init();
+                $this->setupHandle($this->curlHandle, null);
+                //$this->throwExceptionInvalidUrl($this->CONFIG->getRequestUrl());
             }
         } else {
             // Prepare for multiple curl requests.

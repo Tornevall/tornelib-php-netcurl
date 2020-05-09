@@ -60,6 +60,24 @@ class SoapClientWrapper implements WrapperInterface
     ];
 
     /**
+     * @var string
+     * @since 6.1.0
+     */
+    private $soapProxyHost = '';
+
+    /**
+     * @var int
+     * @since 6.1.0
+     */
+    private $soapProxyPort = 80;
+
+    /**
+     * @var array
+     * @since 6.1.0
+     */
+    private $soapProxyOptions = [];
+
+    /**
      * The header that the soapResponse are returning, converted to an array.
      *
      * @var array $responseHeaderArray
@@ -234,18 +252,38 @@ class SoapClientWrapper implements WrapperInterface
     {
         $this->CONFIG->getOptions();
         $this->getSoapInitErrorHandler();
+        $streamOpt = $this->getPreparedProxyOptions($this->getConfig()->getStreamOptions());
         if (version_compare(PHP_VERSION, '7.1.0', '>=')) {
             $this->soapClient = new SoapClient(
                 $this->getConfig()->getRequestUrl(),
-                $this->getConfig()->getStreamOptions()
+                $streamOpt
             );
         } else {
             // Suppress fatals in older releases.
             $this->soapClient = @(new SoapClient(
                 $this->getConfig()->getRequestUrl(),
-                $this->getConfig()->getStreamOptions()
+                $streamOpt
             ));
         }
+    }
+
+    /**
+     * @param $streamOptions
+     * @return mixed
+     * @since 6.1.0
+     */
+    private function getPreparedProxyOptions($streamOptions)
+    {
+        if (!empty($this->soapProxyHost)) {
+            $streamOptions['proxy_host'] = $this->soapProxyHost;
+            $streamOptions['proxy_port'] = $this->soapProxyPort;
+        }
+
+        if (is_array($this->soapProxyOptions)) {
+            $streamOptions += $this->soapProxyOptions;
+        }
+
+        return $streamOptions;
     }
 
     /**
@@ -670,6 +708,31 @@ class SoapClientWrapper implements WrapperInterface
         $splitName = !$lCase ? $headSplit[0] : strtolower($headSplit[0]);
         $this->responseHeaderArray[$splitName][] = trim($headSplit[1]);
         return strlen($header);
+    }
+
+    /**
+     * @param $proxyAddress
+     * @param array $proxyOptions
+     * @return $this
+     * @since 6.1.0
+     */
+    public function setProxy($proxyAddress, $proxyOptions = [])
+    {
+        $this->CONFIG->setCurrentWrapper(__CLASS__);
+
+        // Add user specific proxy options here as they are not pushed into any stream_context.
+        // This is used for proxy authentications.
+        $this->soapProxyOptions = $proxyOptions;
+
+        $proxyData = explode(':', $proxyAddress);
+        if (isset($proxyData[1])) {
+            // SoapClient does not accept stream_context setups, so we'll split it up here and pushing
+            // the proxy in from another direction.
+            $this->soapProxyHost = $proxyData[0];
+            $this->soapProxyPort = $proxyData[1];
+        }
+
+        return $this;
     }
 
     /**

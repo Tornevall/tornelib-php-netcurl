@@ -105,6 +105,11 @@ class WrapperConfig
      */
     private $isCustomUserAgent = false;
 
+    /** @var string */
+    private $proxyAddress = '';
+    /** @var int */
+    private $proxyType = 0;
+
     /**
      * @var array Initial SoapOptions
      *
@@ -753,6 +758,50 @@ class WrapperConfig
         }
 
         return $this;
+    }
+
+    /**
+     * @param $proxyAddress
+     * @param int $proxyType
+     * @return WrapperConfig
+     * @since 6.1.0
+     */
+    public function setProxy($proxyAddress, $proxyType = 0)
+    {
+        $this->proxyAddress = $proxyAddress;
+        $this->proxyType = $proxyType;
+
+        $this->setOption(WrapperCurlOpt::NETCURL_CURLOPT_PROXY, $proxyAddress);
+        $this->setOption(WrapperCurlOpt::NETCURL_CURLOPT_PROXYTYPE, $proxyType);
+
+        // If the current wrapper class that is used is. Saved for later use.
+        //if ($this->getCurrentWrapperClass(true) === 'SimpleStreamWrapper') {}
+        $this->setDualStreamHttp('proxy', sprintf(
+                'tcp://%s',
+                $proxyAddress
+            )
+        );
+        $this->setDualStreamHttp('request_fulluri', true);
+
+        return $this;
+    }
+
+    /**
+     * @return string
+     * @since 6.1.0
+     */
+    public function getProxy()
+    {
+        return $this->proxyAddress;
+    }
+
+    /**
+     * @return int
+     * @since 6.1.0
+     */
+    public function getProxyType()
+    {
+        return $this->proxyType;
     }
 
     /**

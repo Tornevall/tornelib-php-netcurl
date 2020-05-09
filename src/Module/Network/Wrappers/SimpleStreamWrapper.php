@@ -99,7 +99,8 @@ class SimpleStreamWrapper implements WrapperInterface
      * @return mixed
      * @since 6.1.0
      */
-    private function getInheritedConfig($config) {
+    private function getInheritedConfig($config)
+    {
         $config->setCurrentWrapper($this->CONFIG->getCurrentWrapper());
 
         return $config;
@@ -210,6 +211,20 @@ class SimpleStreamWrapper implements WrapperInterface
         }
 
         return $return;
+    }
+
+    /**
+     * @param $proxyAddress
+     * @param null $proxyType
+     * @return $this
+     * @since 6.1.0
+     */
+    public function setProxy($proxyAddress, $proxyType = null)
+    {
+        $this->CONFIG->setCurrentWrapper(__CLASS__);
+        $this->CONFIG->setProxy($proxyAddress, $proxyType);
+
+        return $this;
     }
 
     /**

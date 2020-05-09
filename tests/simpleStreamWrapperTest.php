@@ -8,10 +8,39 @@ use TorneLIB\Model\Type\dataType;
 use TorneLIB\Model\Type\requestMethod;
 use TorneLIB\Module\Config\WrapperConfig;
 use TorneLIB\Module\Network\NetWrapper;
+use TorneLIB\Module\Network\Wrappers\CurlWrapper;
 use TorneLIB\Module\Network\Wrappers\SimpleStreamWrapper;
 
 class simpleStreamWrapperTest extends TestCase
 {
+    /**
+     * @return bool
+     * @throws ExceptionHandler
+     */
+    private function canProxy()
+    {
+        $return = false;
+
+        $ipList = [
+            '212.63.208.',
+            '10.1.1.',
+        ];
+
+        $wrapperData = (new CurlWrapper())
+            ->setConfig((new WrapperConfig())->setUserAgent('ProxyTestAgent'))
+            ->request('https://ipv4.netcurl.org')->getParsed();
+        if (isset($wrapperData->ip)) {
+            foreach ($ipList as $ip) {
+                if (preg_match('/' . $ip . '/', $wrapperData->ip)) {
+                    $return = true;
+                    break;
+                }
+            }
+        }
+
+        return $return;
+    }
+
     /**
      * @test
      */
@@ -143,7 +172,7 @@ class simpleStreamWrapperTest extends TestCase
     public function getBasicNetwrapperClient()
     {
         $stream = (new NetWrapper());
-        $stream->setIdentifiers(true,true); // spoofable advanced
+        $stream->setIdentifiers(true, true); // spoofable advanced
         $stream->setUserAgent('World Dominator');
         $stream->request('http://ipv4.netcurl.org/')->getParsed();
         $content = $stream->getParsed();
@@ -151,6 +180,30 @@ class simpleStreamWrapperTest extends TestCase
         static::assertTrue(
             isset($content->HTTP_USER_AGENT) &&
             preg_match('/world dominator/i', $content->HTTP_USER_AGENT) ? true : false
+        );
+    }
+
+    /**
+     * @test
+     * @throws ExceptionHandler
+     */
+    public function streamProxy()
+    {
+        if (!$this->canProxy()) {
+            static::markTestSkipped('Can not perform proxy tests with this client. Skipped.');
+            return;
+        }
+
+        $response = (new SimpleStreamWrapper())
+            ->setProxy('212.63.208.8:80')
+            ->request('http://identifier.tornevall.net/?inTheProxy')
+            ->getParsed();
+
+        static::assertTrue(
+            isset($response->ip) &&
+            (
+                $response->ip === '212.63.208.8'
+            )
         );
     }
 }

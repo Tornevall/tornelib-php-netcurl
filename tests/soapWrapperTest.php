@@ -6,6 +6,8 @@ use PHPUnit\Framework\TestCase;
 use TorneLIB\Config\Flag;
 use TorneLIB\Exception\ExceptionHandler;
 use TorneLIB\Helpers\Version;
+use TorneLIB\Module\Config\WrapperConfig;
+use TorneLIB\Module\Network\Wrappers\CurlWrapper;
 use TorneLIB\Module\Network\Wrappers\SoapClientWrapper;
 use TorneLIB\Utils\Security;
 
@@ -31,6 +33,34 @@ class soapWrapperTest extends TestCase
     private $wsdl_config = 'https://test.resurs.com/ecommerce-test/ws/V4/ConfigurationService?wsdl';
     private $no_wsdl = 'https://test.resurs.com/ecommerce-test/ws/V4/SimplifiedShopFlowService';
     private $netcurlWsdl = 'https://tests.netcurl.org/tornevall_network/index.wsdl?wsdl';
+
+    /**
+     * @return bool
+     * @throws ExceptionHandler
+     */
+    private function canProxy()
+    {
+        $return = false;
+
+        $ipList = [
+            '212.63.208.',
+            '10.1.1.',
+        ];
+
+        $wrapperData = (new CurlWrapper())
+            ->setConfig((new WrapperConfig())->setUserAgent('ProxyTestAgent'))
+            ->request('https://ipv4.netcurl.org')->getParsed();
+        if (isset($wrapperData->ip)) {
+            foreach ($ipList as $ip) {
+                if (preg_match('/' . $ip . '/', $wrapperData->ip)) {
+                    $return = true;
+                    break;
+                }
+            }
+        }
+
+        return $return;
+    }
 
     /**
      * @test
@@ -314,6 +344,36 @@ class soapWrapperTest extends TestCase
             return;
         }
         $wrapper = (new SoapClientWrapper())->setWsdlCache(WSDL_CACHE_DISK);
+        $wrapper->setAuthentication(
+            $this->rEcomPipeU,
+            $this->rEcomPipeP
+        );
+        $result = $wrapper->request($this->wsdl)->getPaymentMethods();
+        static::assertTrue(
+            is_array($result) &&
+            count($result)
+        );
+    }
+
+    /**
+     * @test
+     * @testdox Delayed request.
+     */
+    public function getSoapEmbeddedProxy()
+    {
+        if (!$this->canProxy()) {
+            static::markTestSkipped('Can not perform proxy tests with this client. Skipped.');
+            return;
+        }
+
+        if (defined('SKIP_SOAP')) {
+            static::markTestSkipped('SoapClient is missing or disabled on demand. Test marked as skipped.');
+            return;
+        }
+        // ['proxy_login' => 'not_necessary']
+        $wrapper = (new SoapClientWrapper())
+            ->setProxy('212.63.208.8:80')
+            ->setWsdlCache(WSDL_CACHE_BOTH);
         $wrapper->setAuthentication(
             $this->rEcomPipeU,
             $this->rEcomPipeP

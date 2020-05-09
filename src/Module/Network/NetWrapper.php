@@ -336,6 +336,19 @@ class NetWrapper implements WrapperInterface
     }
 
     /**
+     * @param $proxyAddress
+     * @param int $proxyType Default: 0 = HTTP
+     * @return $this
+     * @since 6.1.0
+     */
+    public function setProxy($proxyAddress, $proxyType = 0)
+    {
+        $this->CONFIG->setProxy($proxyAddress, $proxyType);
+
+        return $this;
+    }
+
+    /**
      * @param $wrapperName
      * @return mixed|WrapperInterface
      * @throws ExceptionHandler

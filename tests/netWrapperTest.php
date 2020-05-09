@@ -16,6 +16,34 @@ use TorneLIB\Module\Network\Wrappers\CurlWrapper;
 class netWrapperTest extends TestCase
 {
     /**
+     * @return bool
+     * @throws ExceptionHandler
+     */
+    private function canProxy()
+    {
+        $return = false;
+
+        $ipList = [
+            '212.63.208.',
+            '10.1.1.',
+        ];
+
+        $wrapperData = (new CurlWrapper())
+            ->setConfig((new WrapperConfig())->setUserAgent('ProxyTestAgent'))
+            ->request('https://ipv4.netcurl.org')->getParsed();
+        if (isset($wrapperData->ip)) {
+            foreach ($ipList as $ip) {
+                if (preg_match('/' . $ip . '/', $wrapperData->ip)) {
+                    $return = true;
+                    break;
+                }
+            }
+        }
+
+        return $return;
+    }
+
+    /**
      * @return WrapperConfig
      */
     private function setTestAgent()
@@ -96,6 +124,28 @@ class netWrapperTest extends TestCase
             isset($rss[0]) &&
             isset($rss[0][0]) &&
             strlen($rss[0][0]) > 5
+        );
+    }
+
+    /**
+     * @test
+     */
+    public function netWrapperProxy()
+    {
+        if (!$this->canProxy()) {
+            static::markTestSkipped('Can not perform proxy tests with this client. Skipped.');
+            return;
+        }
+
+        /** @var NetWrapper $wrapper */
+        $response = $this->getBasicWrapper()
+            ->setProxy('212.63.208.8:80')
+            ->request('http://identifier.tornevall.net/?inTheProxy')
+            ->getParsed();
+
+        static::assertTrue(
+            isset($response->ip) &&
+            $response->ip === '212.63.208.8'
         );
     }
 }

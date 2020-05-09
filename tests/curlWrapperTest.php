@@ -28,6 +28,34 @@ class curlWrapperTest extends TestCase
     private $curlWrapper;
 
     /**
+     * @return bool
+     * @throws ExceptionHandler
+     */
+    private function canProxy()
+    {
+        $return = false;
+
+        $ipList = [
+            '212.63.208.',
+            '10.1.1.',
+        ];
+
+        $wrapperData = (new CurlWrapper())
+            ->setConfig((new WrapperConfig())->setUserAgent('ProxyTestAgent'))
+            ->request('https://ipv4.netcurl.org')->getParsed();
+        if (isset($wrapperData->ip)) {
+            foreach ($ipList as $ip) {
+                if (preg_match('/' . $ip . '/', $wrapperData->ip)) {
+                    $return = true;
+                    break;
+                }
+            }
+        }
+
+        return $return;
+    }
+
+    /**
      * @test
      * Test initial curl wrapper with predefined http request.
      */
@@ -446,5 +474,49 @@ class curlWrapperTest extends TestCase
                 (bool)$gTimeout['MILLISEC']
             );
         }
+    }
+
+    /**
+     * @test
+     * Setting proxy the hard way.
+     */
+    public function proxyPrimary()
+    {
+        if (!$this->canProxy()) {
+            static::markTestSkipped('Can not perform proxy tests with this client. Skipped.');
+            return;
+        }
+
+        $wrapper = new CurlWrapper();
+        $wrapper->setConfig((new WrapperConfig())->setUserAgent('InTheProxy'));
+        $wrapper->setOptionCurl($wrapper->getCurlHandle(), CURLOPT_PROXY, '212.63.208.8:80');
+        $wrapper->setOptionCurl($wrapper->getCurlHandle(), CURLOPT_PROXYTYPE, CURLPROXY_HTTP);
+        $response = $wrapper->request('http://identifier.tornevall.net/?inTheProxy')->getParsed();
+        static::assertTrue(
+            isset($response->ip) &&
+            $response->ip === '212.63.208.8'
+        );
+    }
+
+    /**
+     * @test
+     * Setting proxy the easy way.
+     * @throws ExceptionHandler
+     */
+    public function proxyInternal()
+    {
+        if (!$this->canProxy()) {
+            static::markTestSkipped('Can not perform proxy tests with this client. Skipped.');
+            return;
+        }
+
+        $wrapperResponse = (new CurlWrapper())->setProxy('212.63.208.8:80')
+            ->request('http://identifier.tornevall.net/?inTheProxy')
+            ->getParsed();
+
+        static::assertTrue(
+            isset($wrapperResponse->ip) &&
+            $wrapperResponse->ip === '212.63.208.8'
+        );
     }
 }

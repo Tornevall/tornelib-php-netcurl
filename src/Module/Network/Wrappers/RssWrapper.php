@@ -29,13 +29,26 @@ try {
  */
 class RssWrapper implements WrapperInterface
 {
-    /** @var string */
+    /**
+     * @var string
+     * @since 6.1.0
+     */
     private $requestResponseRaw;
 
+    /**
+     * @var
+     * @since 6.1.0
+     */
     private $requestResponse;
 
     /**
-     * @inheritDoc
+     * @var WrapperConfig
+     */
+    private $CONFIG;
+
+    /**
+     * RssWrapper constructor.
+     * @since 6.1.0
      */
     public function __construct()
     {

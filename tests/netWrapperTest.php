@@ -116,15 +116,27 @@ class netWrapperTest extends TestCase
      */
     public function rssBasic()
     {
+        if (!class_exists('Laminas\Feed\Reader\Feed\Rss')) {
+            static::markTestSkipped('Laminas\Feed\Reader\Feed\Rss is not available for this test.');
+            return;
+        }
         /** @var CurlWrapper $wrapper */
         $wrapper = $this->getBasicWrapper();
         $rss = $wrapper->request('https://www.tornevalls.se/feed/')->getParsed();
-        // Weak assertion.
-        static::assertTrue(
-            isset($rss[0]) &&
-            isset($rss[0][0]) &&
-            strlen($rss[0][0]) > 5
-        );
+
+        // Class dependent request.
+        if (is_array($rss)) {
+            // Weak assertion.
+            static::assertTrue(
+                isset($rss[0]) &&
+                isset($rss[0][0]) &&
+                strlen($rss[0][0]) > 5
+            );
+        } else {
+            static::assertTrue(
+                method_exists($rss, 'getTitle')
+            );
+        }
     }
 
     /**

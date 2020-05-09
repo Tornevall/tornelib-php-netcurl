@@ -393,7 +393,11 @@ class curlWrapperTest extends TestCase
             $wrapper = new CurlWrapper();
             $wrapper->getCurlRequest();
         } catch (\Exception $e) {
-            static::assertTrue($e->getCode() == Constants::LIB_EMPTY_URL);
+            // curl or netcurl will throw something here.
+            static::assertTrue(
+                $e->getCode() == Constants::LIB_EMPTY_URL ||
+                $e->getCode() === 3
+            );
         }
     }
 

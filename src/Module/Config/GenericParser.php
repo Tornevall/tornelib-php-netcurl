@@ -77,8 +77,7 @@ class GenericParser
         $return = $content;
 
         switch ($contentType) {
-            case (!empty($contentType) &&
-            preg_match('/\/xml|\+xml/i', $contentType) ? true : false):
+            case (!empty($contentType) && preg_match('/\/xml|\+xml/i', $contentType) ? true : false):
                 $return = (new Content())->getFromXml($content);
                 break;
             case (preg_match('/\/json/i', $contentType) ? true : false):

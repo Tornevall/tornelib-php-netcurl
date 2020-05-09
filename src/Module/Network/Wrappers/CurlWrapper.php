@@ -658,6 +658,18 @@ class CurlWrapper implements WrapperInterface
     }
 
     /**
+     * @param $config
+     * @return mixed
+     * @since 6.1.0
+     */
+    private function getInheritedConfig($config)
+    {
+        $config->setCurrentWrapper($this->CONFIG->getCurrentWrapper());
+
+        return $config;
+    }
+
+    /**
      * @param WrapperConfig $config
      * @return CurlWrapper
      * @since 6.1.0
@@ -667,17 +679,6 @@ class CurlWrapper implements WrapperInterface
         $this->CONFIG = $this->getInheritedConfig($config);
 
         return $this;
-    }
-
-    /**
-     * @param $config
-     * @return mixed
-     * @since 6.1.0
-     */
-    private function getInheritedConfig($config) {
-        $config->setCurrentWrapper($this->CONFIG->getCurrentWrapper());
-
-        return $config;
     }
 
     /**

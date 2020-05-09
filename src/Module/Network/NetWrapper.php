@@ -318,6 +318,9 @@ class NetWrapper implements WrapperInterface
             $this->isSoapRequest = true;
             $this->instance->setConfig($this->getConfig());
             $return = $this->instance->request($url, $data, $method, $dataType);
+        } elseif ($dataType === dataType::RSS_XML && $this->getProperInstanceWrapper('RssWrapper')) {
+            $this->instance->setConfig($this->getConfig());
+            $return = $this->instance->request($url, $data, $method, $dataType);
         } elseif ($this->getProperInstanceWrapper('CurlWrapper')) {
             $this->instance->setConfig($this->getConfig());
             $return = $this->instance->request($url, $data, $method, $dataType);

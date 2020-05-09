@@ -4,7 +4,7 @@ use PHPUnit\Framework\TestCase;
 use TorneLIB\Helpers\NetUtils;
 use TorneLIB\Module\Network\NetWrapper;
 
-require_once(NETCURL_BASE . '/../vendor/autoload.php');
+require_once(__DIR__ . '/../vendor/autoload.php');
 
 class genericTest extends TestCase
 {

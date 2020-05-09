@@ -5,7 +5,7 @@ use TorneLIB\Flags;
 use TorneLIB\Module\Config\WrapperSSL;
 use TorneLIB\Helpers\Version;
 
-require_once(NETCURL_BASE . '/../vendor/autoload.php');
+require_once(__DIR__ . '/../vendor/autoload.php');
 
 try {
     Version::getRequiredVersion();

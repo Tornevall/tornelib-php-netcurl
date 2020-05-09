@@ -7,6 +7,7 @@ use TorneLIB\Exception\ExceptionHandler;
 use TorneLIB\Module\Config\WrapperConfig;
 use TorneLIB\Module\Config\WrapperDriver;
 use TorneLIB\Module\Network\NetWrapper;
+use TorneLIB\Module\Network\Wrappers\CurlWrapper;
 
 /**
  * Class netcurlTest
@@ -22,6 +23,14 @@ class netWrapperTest extends TestCase
         return (new WrapperConfig())->setUserAgent(
             sprintf('netcurl-%s', NETCURL_VERSION)
         );
+    }
+
+    /**
+     * @return NetWrapper
+     */
+    private function getBasicWrapper()
+    {
+        return (new NetWrapper())->setConfig($this->setTestAgent());
     }
 
     /**
@@ -72,5 +81,21 @@ class netWrapperTest extends TestCase
         WrapperConfig::deleteSignature();
 
         static::assertTrue($parsed->HTTP_USER_AGENT === 'Korven skriker.');
+    }
+
+    /**
+     * @test
+     */
+    public function rssBasic()
+    {
+        /** @var CurlWrapper $wrapper */
+        $wrapper = $this->getBasicWrapper();
+        $rss = $wrapper->request('https://www.tornevalls.se/feed/')->getParsed();
+        // Weak assertion.
+        static::assertTrue(
+            isset($rss[0]) &&
+            isset($rss[0][0]) &&
+            strlen($rss[0][0]) > 5
+        );
     }
 }

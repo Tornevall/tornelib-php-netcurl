@@ -33,6 +33,7 @@ class WrapperDriver
         'TorneLIB\Module\Network\Wrappers\CurlWrapper',
         'TorneLIB\Module\Network\Wrappers\SoapClientWrapper',
         'TorneLIB\Module\Network\Wrappers\SimpleStreamWrapper',
+        'TorneLIB\Module\Network\Wrappers\RssWrapper',
     ];
 
     /**

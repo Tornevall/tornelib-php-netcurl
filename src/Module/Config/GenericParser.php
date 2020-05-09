@@ -8,6 +8,7 @@ namespace TorneLIB\Module\Config;
 
 use TorneLIB\Exception\ExceptionHandler;
 use TorneLIB\IO\Data\Content;
+use TorneLIB\Module\Network\Wrappers\RssWrapper;
 
 /**
  * Class GenericParser A generic parser which is shared over many classes.
@@ -78,6 +79,11 @@ class GenericParser
 
         switch ($contentType) {
             case (!empty($contentType) && preg_match('/\/xml|\+xml/i', $contentType) ? true : false):
+                // If Laminas is available, prefer that engine before simple xml.
+                if (preg_match('/\/xml|\+xml/i', $contentType) && class_exists('Laminas\Feed\Reader\Reader')) {
+                    $return = (new RssWrapper())->getParsed($content);
+                    break;
+                }
                 $return = (new Content())->getFromXml($content);
                 break;
             case (preg_match('/\/json/i', $contentType) ? true : false):
@@ -89,5 +95,4 @@ class GenericParser
 
         return $return;
     }
-
 }

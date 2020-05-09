@@ -19,4 +19,5 @@ class dataType
     const SOAP = 2;
     const XML = 3;
     const SOAP_XML = 4;
+    const RSS_XML = 5;
 }

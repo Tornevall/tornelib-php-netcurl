@@ -72,19 +72,32 @@ To keep compatibility with v6.0 the plan is to keep the primary class MODULE_CUR
   
 In its initial state, there are basically no requirements as this module tries to pick the best available driver in runtime.
 
-### Library Support
+## Using real RSS feeds
 
-#### Current
+When using composer to install netcurl, also add the following to composer by for example this:
+
+    composer require laminas/laminas-feed
+
+If you prefer to use laminas http driver, you should also install it with laminas/laminas-http:
+
+    composer require laminas/laminas-http
+
+It is however not necessary with that driver, since netcurl will fall back to its own drivers if laminas is missing that driver. You should also know that if you use laminas-http it runs on pretty much defaults and therefore probably also uses **Laminas\\Http\\Client** as User-Agent.
+
+### Remember
+
+You can request RSS feeds without laminas, however you're kind of on your own by doing this. In that case, you'll get the entries in SimpleXML formatting. 
+
+## Library Support
+
+### Current
 
 * curl
 * The simplest form of streamdriver and the binary safe file_get_contents (instead of the fopen-drivers that is based on the same system).
 * SoapClient
-
-##### Pending/In progress
-
 * RSS feeds
 
-#### Removed
+### Removed
 
 * Guzzle
 * Zend
@@ -93,11 +106,11 @@ In its initial state, there are basically no requirements as this module tries t
 
 The reason of the above removals is simple: Both guzzle, zend and wordpress drivers are actually based on the same methods that is already implemented in this package in the form of curl and stream-support. Wordpress for example, first tries to utilize curl support is available and then fails over to the stream support. This package is using file_get_contents after an important decision to be binary safe, as this method is. The fopen/fread-methods are not necessarily binary safe so in the first release, this support has been skipped. As for the other drivers, zend and guzzle, there are similar ways of running curl=>stream.
 
-##### How about sockets?
+#### How about sockets?
 
 This driver requires more, so this is put on hold.
 
-#### Dependencies, not required, but recommended
+### Dependencies, not required, but recommended
 
 * SSL: OpenSSL or similar (if doing https requests).
 * SOAP: SoapClient and XML-drivers (if doing https requests).

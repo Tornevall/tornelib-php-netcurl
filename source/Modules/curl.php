@@ -6,10 +6,10 @@ if (!class_exists('MODULE_CURL', NETCURL_CLASS_EXISTS_AUTOLOAD) &&
     !class_exists('TorneLIB\MODULE_CURL', NETCURL_CLASS_EXISTS_AUTOLOAD)
 ) {
     if (!defined('NETCURL_CURL_RELEASE')) {
-        define('NETCURL_CURL_RELEASE', '6.0.26');
+        define('NETCURL_CURL_RELEASE', '6.0.28');
     }
     if (!defined('NETCURL_CURL_MODIFY')) {
-        define('NETCURL_CURL_MODIFY', '20200418');
+        define('NETCURL_CURL_MODIFY', '20200511');
     }
     if (!defined('NETCURL_CURL_CLIENTNAME')) {
         define('NETCURL_CURL_CLIENTNAME', 'MODULE_CURL');
@@ -23,7 +23,7 @@ if (!class_exists('MODULE_CURL', NETCURL_CLASS_EXISTS_AUTOLOAD) &&
      * @link    https://bitbucket.tornevall.net/projects/LIB/repos/tornelib-php-netcurl/browse Sources of TorneLIB
      * @link    https://docs.tornevall.net/x/KwCy Network & Curl v5 and v6 Library usage
      * @link    https://docs.tornevall.net/x/FoBU TorneLIB Full documentation
-     * @version 6.0.27
+     * @version 6.0.28
      * @since   6.0.20
      * @deprecated MODULE_CURL is still present in v6.1 but will be raised as a backward compatible module.
      */
@@ -456,8 +456,8 @@ if (!class_exists('MODULE_CURL', NETCURL_CLASS_EXISTS_AUTOLOAD) &&
         }
 
         /**
-         * @deprecated 6.0.20
          * @throws \Exception
+         * @deprecated 6.0.20
          */
         public function init()
         {
@@ -521,8 +521,8 @@ if (!class_exists('MODULE_CURL', NETCURL_CLASS_EXISTS_AUTOLOAD) &&
         /**
          * Set up authentication
          *
-         * @since 6.0.20
          * @throws \Exception
+         * @since 6.0.20
          */
         private function setPreparedAuthentication()
         {
@@ -1096,16 +1096,22 @@ if (!class_exists('MODULE_CURL', NETCURL_CLASS_EXISTS_AUTOLOAD) &&
          * Enable chained mode ($Module->doGet(URL)->getParsedResponse()"
          *
          * @param bool $enable
+         * @return MODULE_CURL
          * @throws \Exception
          * @since 6.0.14
          */
         public function setChain($enable = true)
         {
             if ($enable) {
-                $this->setFlag('CHAIN');
-            } else {
-                $this->unsetFlag('CHAIN');
+                // LIB_METHOD_OBSOLETE = 1007 (v6.1 import).
+                throw new \Exception(
+                    'Chaining has been removed from all netcurl releases. ' .
+                    'Do not use it, unchainable classes belongs to another world!',
+                    1007
+                );
             }
+            $this->unsetFlag('CHAIN');
+            return $this;
         }
 
         /**
@@ -3647,7 +3653,7 @@ if (!class_exists('MODULE_CURL', NETCURL_CLASS_EXISTS_AUTOLOAD) &&
                         'opt' => $this->getCurlOptByKeys(),
                         'success' => true,
                         'exception' => null,
-                        'curlinfo' => curl_getinfo($this->NETCURL_CURL_SESSION)
+                        'curlinfo' => curl_getinfo($this->NETCURL_CURL_SESSION),
                     ];
                 } catch (\Exception $e) {
                     throw new \Exception(NETCURL_CURL_CLIENTNAME . " exception from PHP/CURL at " . __FUNCTION__ . ": " . $e->getMessage(),

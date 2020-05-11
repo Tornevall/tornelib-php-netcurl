@@ -26,21 +26,25 @@ class MODULE_CURL
 {
     /**
      * @var WrapperConfig $CONFIG
+     * @since 6.1.0
      */
     private $CONFIG;
 
     /**
      * @var NetWrapper
+     * @since 6.1.0
      */
     private $netWrapper;
 
     /**
      * @var Flags
+     * @since 6.1.0
      */
     private $flags;
 
     /**
      * @var array
+     * @since 6.1.0
      */
     private $deprecatedRequest = [
         'get' => requestMethod::METHOD_GET,
@@ -51,10 +55,20 @@ class MODULE_CURL
         'request' => requestMethod::METHOD_REQUEST,
     ];
 
+    /**
+     * Obsolete or deprecated methods removed from netcurl that still wants errormessages.
+     *
+     * @var array
+     * @since 6.1.0
+     */
     private $deprecatedMethod = [
         'setChain',
     ];
 
+    /**
+     * MODULE_CURL constructor.
+     * @since 6.1.0
+     */
     public function __construct()
     {
         $this->netWrapper = new NetWrapper();
@@ -69,6 +83,7 @@ class MODULE_CURL
      * @param int $postDataType
      * @return mixed|null
      * @deprecated Avoid this method. Use request.
+     * @since 6.1.0
      */
     public function doGet($url = '', $postDataType = dataType::NORMAL)
     {
@@ -92,6 +107,7 @@ class MODULE_CURL
     /**
      * @param $requestType
      * @return requestMethod
+     * @since 6.1.0
      */
     private function getDeprecatedRequest($requestType)
     {
@@ -102,8 +118,10 @@ class MODULE_CURL
      * @param $name
      * @return $this
      * @throws ExceptionHandler
+     * @since 6.1.0
      */
-    private function isObsolete($name) {
+    private function isObsolete($name)
+    {
         if (in_array($name, $this->deprecatedMethod)) {
             throw new ExceptionHandler(
                 sprintf(
@@ -118,6 +136,15 @@ class MODULE_CURL
         return $this;
     }
 
+    /**
+     * Callable functions that should be propagated (eventually) to other wrapper parts.
+     *
+     * @param $name
+     * @param $arguments
+     * @return mixed|null
+     * @throws ExceptionHandler
+     * @since 6.1.0
+     */
     public function __call($name, $arguments)
     {
         // Ignore failures.

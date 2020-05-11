@@ -6,12 +6,12 @@
 
 namespace TorneLIB;
 
+use TorneLIB\Exception\Constants;
+use TorneLIB\Exception\ExceptionHandler;
 use TorneLIB\Model\Type\dataType;
 use TorneLIB\Model\Type\requestMethod;
 use TorneLIB\Module\Config\WrapperConfig;
 use TorneLIB\Module\Network\NetWrapper;
-
-//use Zend\Http\Client;
 
 /**
  * Class MODULE_CURL
@@ -51,6 +51,10 @@ class MODULE_CURL
         'request' => requestMethod::METHOD_REQUEST,
     ];
 
+    private $deprecatedMethod = [
+        'setChain',
+    ];
+
     public function __construct()
     {
         $this->netWrapper = new NetWrapper();
@@ -86,28 +90,32 @@ class MODULE_CURL
     }
 
     /**
-     * @param bool $chainable
-     * @return MODULE_CURL
-     * @deprecated Obsolete method, in future releases this method will throw something else.
-     */
-    private function setChain($chainable = false)
-    {
-        if ($chainable) {
-            throw new ExceptionHandler(
-                'Chaining is no longer a part of netcurl.',
-                Constants::LIB_METHOD_OBSOLETE
-            );
-        }
-        return $this;
-    }
-
-    /**
      * @param $requestType
      * @return requestMethod
      */
     private function getDeprecatedRequest($requestType)
     {
         return isset($this->deprecatedRequest[$requestType]) ? $this->deprecatedRequest[$requestType] : requestMethod::METHOD_GET;
+    }
+
+    /**
+     * @param $name
+     * @return $this
+     * @throws ExceptionHandler
+     */
+    private function isObsolete($name) {
+        if (in_array($name, $this->deprecatedMethod)) {
+            throw new ExceptionHandler(
+                sprintf(
+                    'This method (%s) is obsolete and no longer part of %s.',
+                    $name,
+                    __CLASS__
+                ),
+                Constants::LIB_METHOD_OBSOLETE
+            );
+        }
+
+        return $this;
     }
 
     public function __call($name, $arguments)
@@ -117,6 +125,8 @@ class MODULE_CURL
         $requestName = lcfirst(substr($name, 3));
         $deprecatedRequest = substr($name, 0, 2);
         $deprecatedRequestName = lcfirst(substr($name, 2));
+
+        $this->isObsolete($name);
 
         if (method_exists($this, $name)) {
             return call_user_func_array(

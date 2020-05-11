@@ -48,6 +48,12 @@ class NetWrapper implements WrapperInterface
      */
     private $selectedWrapper;
 
+    /**
+     * @var bool
+     * @since 6.1.0
+     */
+    private $instantMultCurlErrors = false;
+
     public function __construct()
     {
         $this->initializeWrappers();
@@ -297,7 +303,7 @@ class NetWrapper implements WrapperInterface
     ) {
         $return = null;
 
-        if (preg_match('/\?wsdl|\&wsdl/i', $url)) {
+        if (!is_array($url) && preg_match('/\?wsdl|\&wsdl/i', $url)) {
             try {
                 Security::getCurrentClassState('SoapClient');
                 $dataType = dataType::SOAP;
@@ -323,6 +329,7 @@ class NetWrapper implements WrapperInterface
             $return = $this->instance->request($url, $data, $method, $dataType);
         } elseif ($this->getProperInstanceWrapper('CurlWrapper')) {
             $this->instance->setConfig($this->getConfig());
+            $this->instance->setMultiCurlInstantException($this->instantMultCurlErrors);
             $return = $this->instance->request($url, $data, $method, $dataType);
         } elseif ($this->getProperInstanceWrapper('SimpleStreamWrapper')) {
             $currentConfig = $this->getConfig();
@@ -345,6 +352,17 @@ class NetWrapper implements WrapperInterface
     {
         $this->CONFIG->setProxy($proxyAddress, $proxyType);
 
+        return $this;
+    }
+
+    /**
+     * @param bool $throwInstant
+     * @return $this
+     * @since 6.1.0
+     */
+    public function setMultiCurlInstantException($throwInstant = true)
+    {
+        $this->instantMultCurlErrors = $throwInstant;
         return $this;
     }
 

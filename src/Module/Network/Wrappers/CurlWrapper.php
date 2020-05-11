@@ -42,67 +42,92 @@ class CurlWrapper implements WrapperInterface
 
     /**
      * @var WrapperConfig $CONFIG
+     * @since 6.1.0
      */
     private $CONFIG;
 
     /**
      * @var resource cURL simple handle
+     * @since 6.1.0
      */
     private $curlHandle;
 
     /**
      * @var
+     * @since 6.1.0
      */
     private $curlResponse;
 
     /**
      * @var int
+     * @since 6.1.0
      */
     private $curlHttpCode = 0;
 
     /**
      * @var array
+     * @since 6.1.0
      */
     private $curlResponseHeaders = [];
 
     /**
      * @var bool
+     * @since 6.1.0
      */
     private $isMultiCurl = false;
 
     /**
      * @var resource cURL multi handle
+     * @since 6.1.0
      */
     private $multiCurlHandle;
 
     /**
+     * @var
+     * @since 6.1.0
+     */
+    private $multiCurlErrors;
+
+    /**
+     * @var bool
+     * @since 6.1.0
+     */
+    private $instantMultCurlErrors = false;
+
+    /**
      * @var array
+     * @since 6.1.0
      */
     private $multiCurlHandleObjects = [];
 
     /**
      * @var
+     * @since 6.1.0
      */
     private $curlMultiResponse;
 
     /**
      * Data that probably should be added to the user-agent.
      * @var string
+     * @since 6.1.0
      */
     private $curlVersion;
 
     /**
      * @var array
+     * @since 6.1.0
      */
     private $customPreHeaders = [];
 
     /**
      * @var array
+     * @since 6.1.0
      */
     private $customHeaders = [];
 
     /**
      * @var string Custom content type.
+     * @since 6.1.0
      */
     private $contentType = '';
 
@@ -111,6 +136,7 @@ class CurlWrapper implements WrapperInterface
      *
      * @throws ExceptionHandler
      * @throws Exception
+     * @since 6.1.0
      */
     public function __construct()
     {
@@ -456,10 +482,16 @@ class CurlWrapper implements WrapperInterface
 
         if (count($headSplit) < 2) {
             if (count($spacedSplit) > 1) {
-                $this->curlResponseHeaders[$spacedSplit[0]][] = trim($spacedSplit[1]);
+                if (!$this->isMultiCurl) {
+                    $this->curlResponseHeaders[$spacedSplit[0]][] = trim($spacedSplit[1]);
+                } else {
+                    $urlinfo = curl_getinfo($curlHandle, CURLINFO_EFFECTIVE_URL);
+                    $this->curlResponseHeaders[$urlinfo][$spacedSplit[0]][] = trim($spacedSplit[1]);
+                }
             }
             return strlen($header);
         }
+
         if (!$this->isMultiCurl) {
             $this->curlResponseHeaders[$headSplit[0]][] = trim($headSplit[1]);
         } else {
@@ -568,6 +600,7 @@ class CurlWrapper implements WrapperInterface
 
     /**
      * @return array
+     * @throws ExceptionHandler
      */
     private function getMultiCurlRequest()
     {
@@ -582,12 +615,117 @@ class CurlWrapper implements WrapperInterface
 
         foreach ($this->multiCurlHandleObjects as $url => $curlHandleObject) {
             $return[$url] = curl_multi_getcontent($curlHandleObject);
+            $this->getMultiCurlErrors($curlHandleObject, $url);
             curl_multi_remove_handle($this->multiCurlHandle, $curlHandleObject);
         }
-        //curl_multi_close($this->multiCurlHandle);
 
         return $return;
     }
+
+    /**
+     * @param bool $throw
+     * @return $this
+     * @throws ExceptionHandler
+     */
+    public function getCurlExceptions($throw = false)
+    {
+        if (is_array($this->multiCurlErrors)) {
+            if (count($this->multiCurlErrors) === 1) {
+                /** @var ExceptionHandler $exceptionHandler */
+                $exceptionHandler = array_pop($this->multiCurlErrors);
+                throw new ExceptionHandler(
+                    sprintf(
+                        'multicurl request found one error in %s: %s',
+                        key($this->multiCurlErrors),
+                        $exceptionHandler->getMessage()
+                    ),
+                    $exceptionHandler->getCode(),
+                    $exceptionHandler,
+                    null,
+                    null,
+                    $this
+                );
+            } elseif (count($this->multiCurlErrors) > 1) {
+                throw new ExceptionHandler(
+                    'Multiple errors discovered in multicurl request. Details are attached to this ExceptionHandler.',
+                    Constants::LIB_NETCURL_MULTICURL_EXCEPTION_DISCOVERY,
+                    null,
+                    null,
+                    null,
+                    $this
+                );
+            } else {
+                return $this;
+            }
+        }
+        return $this;
+    }
+
+    /**
+     * Enable instant exceptions on multicurl errors.
+     * @param bool $throwInstant
+     * @return CurlWrapper
+     * @since 6.1.0
+     */
+    public function setMultiCurlInstantException($throwInstant = true)
+    {
+        $this->instantMultCurlErrors = $throwInstant;
+        return $this;
+    }
+
+    /**
+     * Get errors from a multicurl handle.
+     * Use getCurlException in future, if possible.
+     *
+     * @param $multiCurlHandle
+     * @return CurlWrapper
+     * @throws ExceptionHandler
+     * @since 6.1.0
+     */
+    private function getMultiCurlErrors($multiCurlHandle, $url)
+    {
+        $internalCurlErrorCode = curl_errno($multiCurlHandle);
+        $internalCurlErrorMessage = curl_error($multiCurlHandle);
+
+        $curlHttpDataCode = GenericParser::getHttpHead($this->getHeader('http', $url));
+        $curlHttpDataMessage = GenericParser::getHttpHead($this->getHeader('http', $url), 'message');
+
+        if ($internalCurlErrorCode) {
+            try {
+                $this->CONFIG->getHttpException(
+                    $internalCurlErrorMessage,
+                    $internalCurlErrorCode,
+                    null,
+                    $this,
+                    true
+                );
+            } catch (ExceptionHandler $multiCurlException) {
+                $this->multiCurlErrors[$url] = $multiCurlException;
+                // If instant curl errors are requested, throw on first error.
+                if ($this->instantMultCurlErrors) {
+                    throw $multiCurlException;
+                }
+            }
+        }
+
+        try {
+            $this->CONFIG->getHttpException(
+                $curlHttpDataMessage,
+                $curlHttpDataCode,
+                null,
+                $this
+            );
+        } catch (ExceptionHandler $multiCurlException) {
+            $this->multiCurlErrors[$url] = $multiCurlException;
+            // If instant curl errors are requested, throw on first error.
+            if ($this->instantMultCurlErrors) {
+                throw $multiCurlException;
+            }
+        }
+
+        return $this;
+    }
+
 
     /**
      * @param $curlHandle
@@ -644,6 +782,7 @@ class CurlWrapper implements WrapperInterface
             $this->getCurlException($this->curlHandle, $this->curlHttpCode);
         } elseif (is_resource($this->multiCurlHandle)) {
             $this->curlMultiResponse = $this->getMultiCurlRequest();
+            $this->getCurlExceptions();
         }
 
         return $this;
@@ -818,6 +957,7 @@ class CurlWrapper implements WrapperInterface
     /**
      * @param string $url
      * @return mixed
+     * @throws ExceptionHandler
      * @since 6.0
      */
     public function getBody($url = '')
@@ -827,6 +967,14 @@ class CurlWrapper implements WrapperInterface
         } elseif (isset($this->curlMultiResponse[$url])) {
             $return = $this->curlMultiResponse[$url];
         } else {
+            if (empty($url)) {
+                throw new ExceptionHandler(
+                    sprintf(
+                        'Can not use %s without an url in a multicurl request.',
+                        __FUNCTION__
+                    )
+                );
+            }
             $return = $this->curlMultiResponse;
         }
 
@@ -836,16 +984,17 @@ class CurlWrapper implements WrapperInterface
     /**
      * Get parsed response. No longer using IO.
      *
+     * @param string $url
      * @return mixed
      * @throws ExceptionHandler
      * @since 6.0
      * @noinspection PhpComposerExtensionStubsInspection
      */
-    public function getParsed()
+    public function getParsed($url = '')
     {
         return GenericParser::getParsed(
-            $this->getBody(),
-            $this->getHeader('content-type')
+            $this->getBody($url),
+            $this->getHeader('content-type', $url)
         );
     }
 

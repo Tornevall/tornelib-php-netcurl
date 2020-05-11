@@ -1,6 +1,8 @@
 <?php
 
 use PHPUnit\Framework\TestCase;
+use TorneLIB\Exception\Constants;
+use TorneLIB\Exception\ExceptionHandler;
 use TorneLIB\Helpers\NetUtils;
 use TorneLIB\Module\Network\NetWrapper;
 
@@ -109,4 +111,103 @@ class genericTest extends TestCase
         );
     }
 
+    /**
+     * @test
+     */
+    public function fyrahundrafyra()
+    {
+        try {
+            (new NetWrapper())->request('http://ipv4.netcurl.org/http.php?code=500&message=Det+sket+sig');
+        } catch (ExceptionHandler $e) {
+            print_r($e->getMessage());
+            static::assertTrue($e->getMessage() === 'Error 500 returned from server: "500 Det sket sig".');
+        }
+    }
+
+    /**
+     * @test
+     */
+    public function multiCurlErrorHandlingOneError() {
+        $extendedException = null;
+        try {
+            (new NetWrapper())->request(
+                [
+                    'http://ipv4.netcurl.org/http.php?code=200&message=Funktionsduglig',
+                    'http://ipv4.netcurl.org/http.php?code=500&message=Kass',
+                    'http://ipv4.netcurl.org/http.php?code=201&message=Mittemellan'
+                ]
+            );
+        } catch (ExceptionHandler $e) {
+            // If one fails, responses can be extracted from here, but should normally be analyzed instead.
+            /** @var ExceptionHandler $extendedException */
+            $extendedException = $e->getExtendException();
+        }
+
+        $properParsed = $extendedException->getParsed('http://ipv4.netcurl.org/http.php?code=200&message=Funktionsduglig');
+
+        static::assertTrue(
+            isset($properParsed->response_is_not_empty)
+        );
+    }
+
+    /**
+     * @test
+     */
+    public function multiCurlErrorHandlingMultiError()
+    {
+        $code = 0;
+        $extendedException = null;
+        try {
+            (new NetWrapper())->request(
+                [
+                    'http://ipv4.netcurl.org/http.php?code=200&message=Funktionsduglig',
+                    'http://ipv4.netcurl.org/http.php?code=500&message=Kass',
+                    'http://ipv4.netcurl.org/http.php?code=500&message=Trasig',
+                    'http://ipv4.netcurl.org/http.php?code=201&message=Mittemellan',
+                ]
+            );
+        } catch (ExceptionHandler $e) {
+            // If one fails, responses can be extracted from here, but should normally be analyzed instead.
+            /** @var ExceptionHandler $extendedException */
+            $extendedException = $e->getExtendException();
+            $code = $e->getCode();
+        }
+
+        $properParsed = $extendedException->getParsed('http://ipv4.netcurl.org/http.php?code=200&message=Funktionsduglig');
+
+        static::assertTrue(
+            isset($properParsed->response_is_not_empty) &&
+            $code === Constants::LIB_NETCURL_CURL_MULTI_EXCEPTION_DISCOVERY
+        );
+    }
+
+    /**
+     * @test
+     * Instant exceptions with stop after first error.
+     */
+    public function multiCurlInstantExceptions()
+    {
+        $code = 0;
+        $extendedException = null;
+        try {
+            (new NetWrapper())->setCurlMultiInstantException()->request(
+                [
+                    'http://ipv4.netcurl.org/http.php?code=500&message=Kass',
+                    'http://ipv4.netcurl.org/http.php?code=200&message=Funktionsduglig',
+                ]
+            );
+        } catch (ExceptionHandler $e) {
+            // If one fails, responses can be extracted from here, but should normally be analyzed instead.
+            /** @var ExceptionHandler $extendedException */
+            $extendedException = $e->getExtendException();
+            $code = $e->getCode();
+        }
+
+        $properParsed = $extendedException->getParsed('http://ipv4.netcurl.org/http.php?code=200&message=Funktionsduglig');
+
+        static::assertTrue(
+            is_null($properParsed) &&
+            $code === 500
+        );
+    }
 }

@@ -119,7 +119,8 @@ class genericTest extends TestCase
         try {
             (new NetWrapper())->request('http://ipv4.netcurl.org/http.php?code=500&message=Det+sket+sig');
         } catch (ExceptionHandler $e) {
-            static::assertTrue($e->getMessage() === 'Error 404 returned from server: "500 Det sket sig".');
+            print_r($e->getMessage());
+            static::assertTrue($e->getMessage() === 'Error 500 returned from server: "500 Det sket sig".');
         }
     }
 
@@ -176,7 +177,7 @@ class genericTest extends TestCase
 
         static::assertTrue(
             isset($properParsed->response_is_not_empty) &&
-            $code === Constants::LIB_NETCURL_MULTICURL_EXCEPTION_DISCOVERY
+            $code === Constants::LIB_NETCURL_CURL_MULTI_EXCEPTION_DISCOVERY
         );
     }
 
@@ -184,12 +185,12 @@ class genericTest extends TestCase
      * @test
      * Instant exceptions with stop after first error.
      */
-    public function multiCurlErrorHandlingMultiInstant()
+    public function multiCurlInstantExceptions()
     {
         $code = 0;
         $extendedException = null;
         try {
-            (new NetWrapper())->setMultiCurlInstantException()->request(
+            (new NetWrapper())->setCurlMultiInstantException()->request(
                 [
                     'http://ipv4.netcurl.org/http.php?code=500&message=Kass',
                     'http://ipv4.netcurl.org/http.php?code=200&message=Funktionsduglig',

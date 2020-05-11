@@ -52,7 +52,7 @@ class NetWrapper implements WrapperInterface
      * @var bool
      * @since 6.1.0
      */
-    private $instantMultCurlErrors = false;
+    private $instantCurlMultiErrors = false;
 
     public function __construct()
     {
@@ -329,7 +329,7 @@ class NetWrapper implements WrapperInterface
             $return = $this->instance->request($url, $data, $method, $dataType);
         } elseif ($this->getProperInstanceWrapper('CurlWrapper')) {
             $this->instance->setConfig($this->getConfig());
-            $this->instance->setMultiCurlInstantException($this->instantMultCurlErrors);
+            $this->instance->setCurlMultiInstantException($this->instantCurlMultiErrors);
             $return = $this->instance->request($url, $data, $method, $dataType);
         } elseif ($this->getProperInstanceWrapper('SimpleStreamWrapper')) {
             $currentConfig = $this->getConfig();
@@ -360,9 +360,9 @@ class NetWrapper implements WrapperInterface
      * @return $this
      * @since 6.1.0
      */
-    public function setMultiCurlInstantException($throwInstant = true)
+    public function setCurlMultiInstantException($throwInstant = true)
     {
-        $this->instantMultCurlErrors = $throwInstant;
+        $this->instantCurlMultiErrors = $throwInstant;
         return $this;
     }
 

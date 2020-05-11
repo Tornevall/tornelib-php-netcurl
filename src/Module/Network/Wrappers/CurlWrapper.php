@@ -158,6 +158,7 @@ class CurlWrapper implements WrapperInterface
      * @return string
      * @throws ReflectionException
      * @noinspection PhpSingleStatementWithBracesInspection
+     * @since 6.1.0
      */
     public function getVersion()
     {
@@ -191,6 +192,7 @@ class CurlWrapper implements WrapperInterface
      * @param $url
      * @return $this
      * @throws ExceptionHandler
+     * @since 6.1.0
      */
     private function setupHandle($curlHandle, $url)
     {
@@ -211,6 +213,7 @@ class CurlWrapper implements WrapperInterface
     /**
      * @param $curlHandle
      * @return CurlWrapper
+     * @since 6.1.0
      */
     private function setCurlRequestMethod($curlHandle)
     {
@@ -273,6 +276,7 @@ class CurlWrapper implements WrapperInterface
      * @param $curlHandle
      * @param $requestData
      * @return $this
+     * @since 6.1.0
      */
     private function setCurlPostJsonHeader($curlHandle, $requestData)
     {
@@ -440,6 +444,7 @@ class CurlWrapper implements WrapperInterface
      *
      * @param $curlHandle
      * @return $this
+     * @since 6.1.0
      */
     private function setCurlStaticValues($curlHandle)
     {
@@ -455,6 +460,7 @@ class CurlWrapper implements WrapperInterface
     /**
      * @param $curlHandle
      * @return CurlWrapper
+     * @since 6.1.0
      */
     private function setCurlAuthentication($curlHandle)
     {
@@ -474,6 +480,7 @@ class CurlWrapper implements WrapperInterface
      * @param $curlHandle
      * @param $header
      * @return int
+     * @since 6.1.0
      */
     private function getCurlHeaderRow($curlHandle, $header)
     {
@@ -512,6 +519,7 @@ class CurlWrapper implements WrapperInterface
      * @param $curlOpt
      * @param $value
      * @return bool
+     * @since 6.1.0
      */
     public function setOptionCurl($curlHandle, $curlOpt, $value)
     {
@@ -523,6 +531,7 @@ class CurlWrapper implements WrapperInterface
      * @param $proxyAddress
      * @param int $proxyType Default: 0 = HTTP
      * @return CurlWrapper
+     * @since 6.1.0
      */
     public function setProxy($proxyAddress, $proxyType = 0)
     {
@@ -535,6 +544,7 @@ class CurlWrapper implements WrapperInterface
     /**
      * @param $url
      * @throws ExceptionHandler
+     * @since 6.1.0
      */
     private function throwExceptionInvalidUrl($url)
     {
@@ -559,6 +569,7 @@ class CurlWrapper implements WrapperInterface
      *
      * @return $this
      * @throws ExceptionHandler
+     * @since 6.1.0
      */
     private function initCurlHandle()
     {
@@ -601,6 +612,7 @@ class CurlWrapper implements WrapperInterface
     /**
      * @return array
      * @throws ExceptionHandler
+     * @since 6.1.0
      */
     private function getMultiCurlRequest()
     {
@@ -626,6 +638,7 @@ class CurlWrapper implements WrapperInterface
      * @param bool $throw
      * @return $this
      * @throws ExceptionHandler
+     * @since 6.1.0
      */
     public function getCurlExceptions($throw = false)
     {
@@ -763,7 +776,7 @@ class CurlWrapper implements WrapperInterface
      * The curl_exec part.
      * @return $this
      * @throws ExceptionHandler
-     * @todo Handle multicurl exceptions.
+     * @since 6.1.0
      */
     public function getCurlRequest()
     {
@@ -794,6 +807,7 @@ class CurlWrapper implements WrapperInterface
      * @param array $funcArgs
      * @return bool
      * @throws Exception
+     * @since 6.1.0
      */
     private function getPriorCompatibilityArguments($funcArgs = [])
     {

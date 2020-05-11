@@ -30,21 +30,26 @@ class NetWrapper implements WrapperInterface
 {
     /**
      * @var WrapperConfig $CONFIG
+     * @since 6.1.0
      */
     private $CONFIG;
 
     /**
      * @var bool
+     * @since 6.1.0
      */
     private $isSoapRequest = false;
 
     /**
      * @var string $version Internal version.
+     * @since 6.1.0
      */
     private $version;
 
     /**
+     * Chosen wrapper.
      * @var string $selectedWrapper
+     * @since 6.1.0
      */
     private $selectedWrapper;
 
@@ -87,6 +92,7 @@ class NetWrapper implements WrapperInterface
     /**
      * @inheritDoc
      * @throws ReflectionException
+     * @since 6.1.0
      */
     public function getVersion()
     {
@@ -181,6 +187,8 @@ class NetWrapper implements WrapperInterface
     }
 
     /**
+     * Return body of the request.
+     *
      * @return mixed
      * @throws ExceptionHandler
      * @since 6.1.0
@@ -222,6 +230,7 @@ class NetWrapper implements WrapperInterface
 
     /**
      * @inheritDoc
+     * @since 6.1.0
      */
     public function getCode()
     {
@@ -241,6 +250,7 @@ class NetWrapper implements WrapperInterface
 
     /**
      * @inheritDoc
+     * @since 6.1.0
      */
     public function request($url, $data = [], $method = requestMethod::METHOD_GET, $dataType = dataType::NORMAL)
     {
@@ -288,12 +298,15 @@ class NetWrapper implements WrapperInterface
     }
 
     /**
+     * Make request from built in wrappers (the internally supported).
+     *
      * @param $url
      * @param array $data
      * @param int $method
      * @param int $dataType
      * @return mixed|null
      * @throws ExceptionHandler
+     * @since 6.1.0
      */
     private function getResultFromInternals(
         $url,
@@ -343,7 +356,9 @@ class NetWrapper implements WrapperInterface
     }
 
     /**
-     * @param $proxyAddress
+     * Set up proxy.
+     *
+     * @param $proxyAddress Normal usage is address:post.
      * @param int $proxyType Default: 0 = HTTP
      * @return $this
      * @since 6.1.0
@@ -356,6 +371,8 @@ class NetWrapper implements WrapperInterface
     }
 
     /**
+     * Set up so that curlwrapper makes instant exceptions on curl_multi requests, if they occur. Mirrormethod.
+     *
      * @param bool $throwInstant
      * @return $this
      * @since 6.1.0
@@ -367,6 +384,8 @@ class NetWrapper implements WrapperInterface
     }
 
     /**
+     * Get proper instance.
+     *
      * @param $wrapperName
      * @return mixed|WrapperInterface
      * @throws ExceptionHandler
@@ -384,6 +403,7 @@ class NetWrapper implements WrapperInterface
     }
 
     /**
+     * Get current used wrapper class name (short or with full namespace).
      * @param bool $short
      * @return string
      * @since 6.1.0
@@ -449,7 +469,7 @@ class NetWrapper implements WrapperInterface
                 $method,
                 $dataType
             );
-        } catch (\Exception $externalRequestException) {
+        } catch (ExceptionHandler $externalRequestException) {
             // Ignore errors here as we have more to go.
             $externalHasErrors = true;
         }
@@ -468,7 +488,7 @@ class NetWrapper implements WrapperInterface
     }
 
     /**
-     * request external execution looper.
+     * Make a request with help from external wrappers.
      *
      * @param $url
      * @param array $data
@@ -534,7 +554,8 @@ class NetWrapper implements WrapperInterface
      * @param $name
      * @param $arguments
      * @return mixed
-     * @throws \Exception
+     * @throws ExceptionHandler
+     * @since 6.1.0
      */
     public function __call($name, $arguments)
     {
@@ -563,8 +584,12 @@ class NetWrapper implements WrapperInterface
                     );
                     break;
                 }
-                throw new \Exception(
-                    sprintf('Undefined function: %s', $name)
+                throw new ExceptionHandler(
+                    sprintf('Undefined function: %s', $name),
+                    Constants::LIB_METHOD_OR_LIBRARY_UNAVAILABLE,
+                    null,
+                    null,
+                    $name
                 );
                 break;
         }

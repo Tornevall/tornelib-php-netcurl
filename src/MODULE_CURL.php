@@ -86,20 +86,19 @@ class MODULE_CURL
     }
 
     /**
-     * @return bool
-     * @deprecated Will throw an error in future.
+     * @param bool $chainable
+     * @return MODULE_CURL
+     * @deprecated Obsolete method, in future releases this method will throw something else.
      */
-    private function setChain()
+    private function setChain($chainable = false)
     {
-        /*throw new ExceptionHandler(
-            'Chaining has been removed from netcurl 6.1!',
-            Constants::LIB_METHOD_OBSOLETE
-        );*/
-        return false;
-    }
-
-    public function __get($name)
-    {
+        if ($chainable) {
+            throw new ExceptionHandler(
+                'Chaining is no longer a part of netcurl.',
+                Constants::LIB_METHOD_OBSOLETE
+            );
+        }
+        return $this;
     }
 
     /**

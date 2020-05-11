@@ -183,6 +183,7 @@ class CurlWrapper implements WrapperInterface
         if ($this->isCurlMulti) {
             curl_multi_close($this->curlMultiHandle);
         }
+        $this->resetCurlRequest();
     }
 
     /**
@@ -776,6 +777,21 @@ class CurlWrapper implements WrapperInterface
     }
 
     /**
+     * Reset curl on each new curlrequest to make sure old responses is no longer present.
+     * @since 6.1.0
+     */
+    private function resetCurlRequest()
+    {
+        $this->customHeaders = [];
+        $this->curlResponseHeaders = [];
+        $this->curlMultiErrors = null;
+        $this->curlMultiResponse = null;
+        $this->curlMultiHandle = null;
+        $this->curlMultiHandleObjects = [];
+        return $this;
+    }
+
+    /**
      * The curl_exec part.
      * @return $this
      * @throws ExceptionHandler
@@ -783,10 +799,7 @@ class CurlWrapper implements WrapperInterface
      */
     public function getCurlRequest()
     {
-        // Reset responseheader on each request.
-        $this->customHeaders = [];
-        $this->curlResponseHeaders = [];
-        $this->curlMultiErrors = [];
+        $this->resetCurlRequest();
         $this->initCurlHandle();
 
         if (!$this->isCurlMulti && is_resource($this->getCurlHandle())) {

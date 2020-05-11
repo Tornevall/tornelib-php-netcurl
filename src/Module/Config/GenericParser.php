@@ -90,6 +90,10 @@ class GenericParser
                 $return = (new Content())->getFromXml($content);
                 break;
             case (preg_match('/\/json/i', $contentType) ? true : false):
+                if (is_array($content)) {
+                    // Did we get bad content?
+                    $content = json_encode($content);
+                }
                 $return = json_decode($content);
                 break;
             default:

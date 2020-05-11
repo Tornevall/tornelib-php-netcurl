@@ -120,7 +120,6 @@ class genericTest extends TestCase
         try {
             (new NetWrapper())->request('http://ipv4.netcurl.org/http.php?code=500&message=Det+sket+sig');
         } catch (ExceptionHandler $e) {
-            print_r($e->getMessage());
             static::assertTrue($e->getMessage() === 'Error 500 returned from server: "500 Det sket sig".');
         }
     }

@@ -4,10 +4,13 @@ require_once(__DIR__ . '/../vendor/autoload.php');
 
 use PHPUnit\Framework\TestCase;
 use TorneLIB\Exception\ExceptionHandler;
+use TorneLIB\Model\Type\dataType;
+use TorneLIB\Model\Type\requestMethod;
 use TorneLIB\Module\Config\WrapperConfig;
 use TorneLIB\Module\Config\WrapperDriver;
 use TorneLIB\Module\Network\NetWrapper;
 use TorneLIB\Module\Network\Wrappers\CurlWrapper;
+use TorneLIB\Module\Network\Wrappers\SoapClientWrapper;
 
 /**
  * Class netcurlTest
@@ -181,11 +184,46 @@ class netWrapperTest extends TestCase
      */
     public function multiNetWrapper()
     {
-        $info = (new NetWrapper())->request([
-            'https://ipv4.netcurl.org/?1',
-            'https://ipv4.netcurl.org/?2',
-        ]);
+        // Separate array to make it easier to see what we're doing.
+        $reqUrlData = [
+            'https://ipv4.netcurl.org/?1' => [
+                [],
+                requestMethod::METHOD_POST,
+                dataType::NORMAL,
+                (new WrapperConfig())->setUserAgent('Client1'),
+            ],
+            'https://ipv4.netcurl.org/?2' => [
+                [],
+                requestMethod::METHOD_POST,
+                dataType::NORMAL,
+                (new WrapperConfig())
+                    ->setUserAgent('Client2')
+                    ->setAuthentication($this->rEcomPipeU, $this->rEcomPipeP),
+            ],
+            $this->wsdl => [],
+        ];
 
-        static::assertTrue($info->getCode("https://ipv4.netcurl.org/?2") === 200);
+        $info = (new NetWrapper())->request($reqUrlData);
+        $p = $info->getParsed('https://ipv4.netcurl.org/?2');
+
+        $soapError = false;
+        $paymentMethods = [];
+        try {
+            /** @var SoapClientWrapper $wrapper */
+            $wrapper = $info->getWrapper($this->wsdl);
+            $paymentMethods = $wrapper->getPaymentMethods();
+        } catch (ExceptionHandler $e) {
+            $soapError = true;
+            // Internal server error protection.
+        }
+        static::assertTrue(
+            isset($p->HTTP_USER_AGENT) &&
+            $p->HTTP_USER_AGENT === 'Client2' &&
+            (
+                is_array($paymentMethods) &&
+                count($paymentMethods) || $soapError
+            ) &&
+            $info->getCode("https://ipv4.netcurl.org/?2") === 200
+        );
     }
 }

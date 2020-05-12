@@ -154,6 +154,24 @@ class genericTest extends TestCase
     /**
      * @test
      */
+    public function multiCurlErrorHandlingOneErrorNonAssoc()
+    {
+        $extendedException = null;
+        static::expectException('TorneLIB\Exception\ExceptionHandler');
+        (new NetWrapper())
+            ->setAllowInternalMulti(true)
+            ->request(
+                [
+                    'http://ipv4.netcurl.org/http.php?code=200&message=Funktionsduglig',
+                    'http://ipv4.netcurl.org/http.php?code=500&message=Kass',
+                    'http://ipv4.netcurl.org/http.php?code=201&message=Mittemellan',
+                ]
+            );
+    }
+
+    /**
+     * @test
+     */
     public function multiCurlErrorHandlingMultiError()
     {
         $code = 0;

@@ -770,7 +770,11 @@ class CurlWrapper implements WrapperInterface
                     $errorCode,
                     $errorString
                 ),
-                $errorCode
+                $errorCode,
+                null,
+                null,
+                null,
+                $this
             );
         }
 

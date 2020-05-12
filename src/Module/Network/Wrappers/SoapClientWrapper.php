@@ -99,6 +99,11 @@ class SoapClientWrapper implements WrapperInterface
     private $reuseSoapClient = false;
 
     /**
+     * @var
+     */
+    private $currentErrorHandler;
+
+    /**
      * SoapClientWrapper constructor.
      * @throws ExceptionHandler
      */
@@ -343,9 +348,17 @@ class SoapClientWrapper implements WrapperInterface
      */
     private function getSoapInitErrorHandler()
     {
-        set_error_handler(function ($errNo, $errStr) {
-            $this->soapWarningException['code'] = $errNo;
-            $this->soapWarningException['string'] = $errStr;
+        if (!is_null($this->currentErrorHandler)) {
+            restore_error_handler();
+            $this->currentErrorHandler = null;
+            $this->soapWarningException['code'] = null;
+            $this->soapWarningException['string'] = null;
+        }
+        $this->currentErrorHandler = set_error_handler(function ($errNo, $errStr) {
+            if (empty($this->soapWarningException['string'])) {
+                $this->soapWarningException['code'] = $errNo;
+                $this->soapWarningException['string'] = $errStr;
+            }
             restore_error_handler();
             return false;
         }, E_WARNING);

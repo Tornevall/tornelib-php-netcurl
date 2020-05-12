@@ -26,6 +26,10 @@ class GenericParser
      */
     public static function getHttpHead($string, $returnData = 'code')
     {
+        if (!is_string($string)) {
+            // Casting is probably not the right way to handle this so we'll reset it instead.
+            $string = '';
+        }
         $return = $string;
         $headString = preg_replace(
             '/(.*?)\sHTTP\/(.*?)\s(.*)$/is',

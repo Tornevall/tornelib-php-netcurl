@@ -9,6 +9,7 @@ namespace TorneLIB\Module\Network;
 use ReflectionException;
 use TorneLIB\Exception\Constants;
 use TorneLIB\Exception\ExceptionHandler;
+use TorneLIB\IO\Data\Arrays;
 use TorneLIB\IO\Data\Content;
 use TorneLIB\Model\Interfaces\WrapperInterface;
 use TorneLIB\Model\Type\authType;
@@ -55,8 +56,15 @@ class NetWrapper implements WrapperInterface
 
     /**
      * @var array
+     * @since 6.1.0
      */
     private $multiRequest = [];
+
+    /**
+     * @var bool
+     * @since 6.1.0
+     */
+    private $allowInternalMulti = false;
 
     /**
      * @var bool
@@ -95,7 +103,7 @@ class NetWrapper implements WrapperInterface
     }
 
     /**
-     * @inheritDoc
+     * @return string
      * @throws ReflectionException
      * @since 6.1.0
      */
@@ -134,6 +142,27 @@ class NetWrapper implements WrapperInterface
     public function getWrappers()
     {
         return WrapperDriver::getWrappers();
+    }
+
+    /**
+     * @return bool
+     * @since 6.1.0
+     */
+    public function getAllowInternalMulti()
+    {
+        return $this->allowInternalMulti;
+    }
+
+    /**
+     * @param bool $allowInternalMulti
+     * @return NetWrapper
+     * @since 6.1.0
+     */
+    public function setAllowInternalMulti($allowInternalMulti = false)
+    {
+        $this->allowInternalMulti = $allowInternalMulti;
+
+        return $this;
     }
 
     /**
@@ -251,6 +280,8 @@ class NetWrapper implements WrapperInterface
         $return = null;
         if (isset($this->multiRequest[$url])) {
             $return = $this->multiRequest[$url];
+        } elseif (is_object($this->instance)) {
+            $return = $this->instance;
         }
 
         return $return;
@@ -298,12 +329,20 @@ class NetWrapper implements WrapperInterface
     private function handleMultiUrl($requestArray)
     {
         $return = [];
+        $isAssocList = (new Arrays())->isAssoc($requestArray);
         foreach ($requestArray as $requestUrl => $requestData) {
-            if (isset($requestData[3]) && get_class($requestData[3]) === 'TorneLIB\Module\Config\WrapperConfig') {
+            $currentRequestUrl = $requestUrl;
+            if (!$isAssocList) {
+                $currentRequestUrl = $requestData;
+            }
+            if (isset($requestData[3]) &&
+                is_object($requestData[3]) &&
+                get_class($requestData[3]) === 'TorneLIB\Module\Config\WrapperConfig'
+            ) {
                 $this->CONFIG = $requestData[3];
             }
-            $return[$requestUrl] = $this->request(
-                $requestUrl,
+            $return[$currentRequestUrl] = $this->request(
+                $currentRequestUrl,
                 isset($requestData[0]) ? $requestData[0] : [],
                 isset($requestData[1]) ? $requestData[1] : requestMethod::METHOD_GET,
                 isset($requestData[2]) ? $requestData[2] : dataType::NORMAL
@@ -313,14 +352,33 @@ class NetWrapper implements WrapperInterface
     }
 
     /**
+     * @param $url
+     * @return NetWrapper
+     * @since 6.1.0
+     */
+    private function getMultiInternalRequest($url)
+    {
+        $this->multiRequest = $this->handleMultiUrl($url);
+        return $this;
+    }
+
+    /**
      * @inheritDoc
      * @since 6.1.0
      */
     public function request($url, $data = [], $method = requestMethod::METHOD_GET, $dataType = dataType::NORMAL)
     {
         if (is_array($url)) {
-            $this->multiRequest = $this->handleMultiUrl($url);
-            return $this;
+            // If url list an associative array or allowed to run arrays that is not associative, run this
+            // kind of request instead of the default. The regular indexed arraylist will be passed over to
+            // curl_multi requests instead of collecting the requests. Besides error handling in non-assoc
+            // is not collected, any exception will be thrown immediately.
+            if ($this->getAllowInternalMulti() || (new Arrays())->isAssoc($url)) {
+                // As those requests are arrayed differently, the regular parameters above do not apply here.
+                // If they are not associative, they will also lose all attributes which is why we want them
+                // associative or not at all.
+                return $this->getMultiInternalRequest($url);
+            }
         }
 
         $this->CONFIG->setNetWrapper(true);

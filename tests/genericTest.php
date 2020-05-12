@@ -127,14 +127,15 @@ class genericTest extends TestCase
     /**
      * @test
      */
-    public function multiCurlErrorHandlingOneError() {
+    public function multiCurlErrorHandlingOneError()
+    {
         $extendedException = null;
         try {
             (new NetWrapper())->request(
                 [
                     'http://ipv4.netcurl.org/http.php?code=200&message=Funktionsduglig',
                     'http://ipv4.netcurl.org/http.php?code=500&message=Kass',
-                    'http://ipv4.netcurl.org/http.php?code=201&message=Mittemellan'
+                    'http://ipv4.netcurl.org/http.php?code=201&message=Mittemellan',
                 ]
             );
         } catch (ExceptionHandler $e) {
@@ -214,9 +215,32 @@ class genericTest extends TestCase
     /**
      * @test
      */
-    public function prohibitChain() {
+    public function prohibitChain()
+    {
         static::expectException(ExceptionHandler::class);
 
         (new MODULE_CURL())->setChain(true);
+    }
+
+    /**
+     * @test
+     * Both the wrapper and the exception returns the same errorcode when the main wrapper is placed outside the try-catch block.
+     * @throws ExceptionHandler
+     */
+    public function regularExceptionTest()
+    {
+        $code = 0;
+        $wrapper = new NetWrapper();
+        try {
+            $wrapper->request('http://ipv4.netcurl.org/http.php?code=404&message=Error404+Generated');
+        } catch (ExceptionHandler $e) {
+            $code = $e->getCode();
+        }
+        $reqCode = $wrapper->getCode();
+
+        static::assertTrue(
+            $reqCode === 404 &&
+            $code === 404
+        );
     }
 }

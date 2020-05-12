@@ -54,6 +54,11 @@ class NetWrapper implements WrapperInterface
     private $selectedWrapper;
 
     /**
+     * @var array
+     */
+    private $multiRequest = [];
+
+    /**
      * @var bool
      * @since 6.1.0
      */
@@ -189,14 +194,17 @@ class NetWrapper implements WrapperInterface
     /**
      * Return body of the request.
      *
+     * @param string $url
      * @return mixed
      * @throws ExceptionHandler
      * @since 6.1.0
      */
-    public function getBody()
+    public function getBody($url = '')
     {
-        if (method_exists($this->instance, 'getBody')) {
-            return $this->instance->getBody();
+        if (($mInstance = $this->getMultiInstance($url)) && method_exists($mInstance, __FUNCTION__)) {
+            return $mInstance->{__FUNCTION__}();
+        } elseif (method_exists($this->instance, __FUNCTION__)) {
+            return $this->instance->{__FUNCTION__}();
         }
 
         throw new ExceptionHandler(
@@ -210,13 +218,16 @@ class NetWrapper implements WrapperInterface
     }
 
     /**
+     * @param string $url
      * @return mixed
      * @throws ExceptionHandler
      * @since 6.1.0
      */
-    public function getParsed()
+    public function getParsed($url = '')
     {
-        if (method_exists($this->instance, 'getBody')) {
+        if (($mInstance = $this->getMultiInstance($url)) && method_exists($mInstance, 'getParsed')) {
+            return $mInstance->getParsed();
+        } elseif (method_exists($this->instance, 'getBody')) {
             return $this->instance->getParsed();
         }
 
@@ -231,13 +242,32 @@ class NetWrapper implements WrapperInterface
     }
 
     /**
-     * @inheritDoc
+     * @param string $url
+     * @return mixed|null
      * @since 6.1.0
      */
-    public function getCode()
+    private function getMultiInstance($url = '')
     {
-        if (method_exists($this->instance, 'getCode')) {
-            return $this->instance->getCode();
+        $return = null;
+        if (isset($this->multiRequest[$url])) {
+            $return = $this->multiRequest[$url];
+        }
+
+        return $return;
+    }
+
+    /**
+     * @param string $url
+     * @return mixed
+     * @throws ExceptionHandler
+     * @since 6.1.0
+     */
+    public function getCode($url = '')
+    {
+        if (($mInstance = $this->getMultiInstance($url)) && method_exists($mInstance, __FUNCTION__)) {
+            return $mInstance->{__FUNCTION__}();
+        } elseif (method_exists($this->instance, __FUNCTION__)) {
+            return $this->instance->{__FUNCTION__}();
         }
 
         throw new ExceptionHandler(
@@ -251,11 +281,48 @@ class NetWrapper implements WrapperInterface
     }
 
     /**
+     * @param $url
+     * @return WrapperInterface
+     * @since 6.1.0
+     */
+    public function getWrapper($url)
+    {
+        return $this->getMultiInstance($url);
+    }
+
+    /**
+     * @param $requestArray
+     * @return array
+     * @since 6.1.0
+     */
+    private function handleMultiUrl($requestArray)
+    {
+        $return = [];
+        foreach ($requestArray as $requestUrl => $requestData) {
+            if (isset($requestData[3]) && get_class($requestData[3]) === 'TorneLIB\Module\Config\WrapperConfig') {
+                $this->CONFIG = $requestData[3];
+            }
+            $return[$requestUrl] = $this->request(
+                $requestUrl,
+                isset($requestData[0]) ? $requestData[0] : [],
+                isset($requestData[1]) ? $requestData[1] : requestMethod::METHOD_GET,
+                isset($requestData[2]) ? $requestData[2] : dataType::NORMAL
+            );
+        }
+        return $return;
+    }
+
+    /**
      * @inheritDoc
      * @since 6.1.0
      */
     public function request($url, $data = [], $method = requestMethod::METHOD_GET, $dataType = dataType::NORMAL)
     {
+        if (is_array($url)) {
+            $this->multiRequest = $this->handleMultiUrl($url);
+            return $this;
+        }
+
         $this->CONFIG->setNetWrapper(true);
         $return = null;
         $requestexternalExecute = null;

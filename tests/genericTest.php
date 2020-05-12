@@ -5,6 +5,7 @@ use TorneLIB\Exception\Constants;
 use TorneLIB\Exception\ExceptionHandler;
 use TorneLIB\Helpers\NetUtils;
 use TorneLIB\Module\Network\NetWrapper;
+use TorneLIB\MODULE_CURL;
 
 require_once(__DIR__ . '/../vendor/autoload.php');
 
@@ -119,7 +120,6 @@ class genericTest extends TestCase
         try {
             (new NetWrapper())->request('http://ipv4.netcurl.org/http.php?code=500&message=Det+sket+sig');
         } catch (ExceptionHandler $e) {
-            print_r($e->getMessage());
             static::assertTrue($e->getMessage() === 'Error 500 returned from server: "500 Det sket sig".');
         }
     }
@@ -209,5 +209,14 @@ class genericTest extends TestCase
             is_null($properParsed) &&
             $code === 500
         );
+    }
+
+    /**
+     * @test
+     */
+    public function prohibitChain() {
+        static::expectException(ExceptionHandler::class);
+
+        (new MODULE_CURL())->setChain(true);
     }
 }

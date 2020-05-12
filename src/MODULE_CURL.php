@@ -6,12 +6,12 @@
 
 namespace TorneLIB;
 
+use TorneLIB\Exception\Constants;
+use TorneLIB\Exception\ExceptionHandler;
 use TorneLIB\Model\Type\dataType;
 use TorneLIB\Model\Type\requestMethod;
 use TorneLIB\Module\Config\WrapperConfig;
 use TorneLIB\Module\Network\NetWrapper;
-
-//use Zend\Http\Client;
 
 /**
  * Class MODULE_CURL
@@ -26,21 +26,25 @@ class MODULE_CURL
 {
     /**
      * @var WrapperConfig $CONFIG
+     * @since 6.1.0
      */
     private $CONFIG;
 
     /**
      * @var NetWrapper
+     * @since 6.1.0
      */
     private $netWrapper;
 
     /**
      * @var Flags
+     * @since 6.1.0
      */
     private $flags;
 
     /**
      * @var array
+     * @since 6.1.0
      */
     private $deprecatedRequest = [
         'get' => requestMethod::METHOD_GET,
@@ -51,6 +55,20 @@ class MODULE_CURL
         'request' => requestMethod::METHOD_REQUEST,
     ];
 
+    /**
+     * Obsolete or deprecated methods removed from netcurl that still wants errormessages.
+     *
+     * @var array
+     * @since 6.1.0
+     */
+    private $deprecatedMethod = [
+        'setChain',
+    ];
+
+    /**
+     * MODULE_CURL constructor.
+     * @since 6.1.0
+     */
     public function __construct()
     {
         $this->netWrapper = new NetWrapper();
@@ -65,6 +83,7 @@ class MODULE_CURL
      * @param int $postDataType
      * @return mixed|null
      * @deprecated Avoid this method. Use request.
+     * @since 6.1.0
      */
     public function doGet($url = '', $postDataType = dataType::NORMAL)
     {
@@ -86,31 +105,46 @@ class MODULE_CURL
     }
 
     /**
-     * @return bool
-     * @deprecated Will throw an error in future.
-     */
-    private function setChain()
-    {
-        /*throw new ExceptionHandler(
-            'Chaining has been removed from netcurl 6.1!',
-            Constants::LIB_METHOD_OBSOLETE
-        );*/
-        return false;
-    }
-
-    public function __get($name)
-    {
-    }
-
-    /**
      * @param $requestType
      * @return requestMethod
+     * @since 6.1.0
      */
     private function getDeprecatedRequest($requestType)
     {
         return isset($this->deprecatedRequest[$requestType]) ? $this->deprecatedRequest[$requestType] : requestMethod::METHOD_GET;
     }
 
+    /**
+     * @param $name
+     * @return $this
+     * @throws ExceptionHandler
+     * @since 6.1.0
+     */
+    private function isObsolete($name)
+    {
+        if (in_array($name, $this->deprecatedMethod)) {
+            throw new ExceptionHandler(
+                sprintf(
+                    'This method (%s) is obsolete and no longer part of %s.',
+                    $name,
+                    __CLASS__
+                ),
+                Constants::LIB_METHOD_OBSOLETE
+            );
+        }
+
+        return $this;
+    }
+
+    /**
+     * Callable functions that should be propagated (eventually) to other wrapper parts.
+     *
+     * @param $name
+     * @param $arguments
+     * @return mixed|null
+     * @throws ExceptionHandler
+     * @since 6.1.0
+     */
     public function __call($name, $arguments)
     {
         // Ignore failures.
@@ -118,6 +152,8 @@ class MODULE_CURL
         $requestName = lcfirst(substr($name, 3));
         $deprecatedRequest = substr($name, 0, 2);
         $deprecatedRequestName = lcfirst(substr($name, 2));
+
+        $this->isObsolete($name);
 
         if (method_exists($this, $name)) {
             return call_user_func_array(

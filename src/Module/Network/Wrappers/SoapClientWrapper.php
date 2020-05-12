@@ -538,6 +538,11 @@ class SoapClientWrapper implements WrapperInterface
     {
         $return = null;
 
+        /*$soapMethods = [];
+        if (method_exists($this->soapClient, '__getFunctions')) {
+            $soapMethods = $this->soapClient->__getFunctions();
+        }*/
+
         try {
             // Giving the soapcall a more natural touch with call_user_func_array. Besides, this also means
             // we don't have to check for arguments.

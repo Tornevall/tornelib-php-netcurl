@@ -216,6 +216,7 @@ class netWrapperTest extends TestCase
             $soapError = true;
             // Internal server error protection.
         }
+
         static::assertTrue(
             isset($p->HTTP_USER_AGENT) &&
             $p->HTTP_USER_AGENT === 'Client2' &&

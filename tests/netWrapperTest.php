@@ -10,6 +10,7 @@ use TorneLIB\Module\Config\WrapperConfig;
 use TorneLIB\Module\Config\WrapperDriver;
 use TorneLIB\Module\Network\NetWrapper;
 use TorneLIB\Module\Network\Wrappers\CurlWrapper;
+use TorneLIB\Module\Network\Wrappers\SoapClientWrapper;
 
 /**
  * Class netcurlTest
@@ -208,7 +209,9 @@ class netWrapperTest extends TestCase
         $soapError = false;
         $paymentMethods = [];
         try {
-            $paymentMethods = (($info->getWrapper($this->wsdl))->getPaymentMethods());
+            /** @var SoapClientWrapper $wrapper */
+            $wrapper = $info->getWrapper($this->wsdl);
+            $paymentMethods = $wrapper->getPaymentMethods();
         } catch (ExceptionHandler $e) {
             $soapError = true;
             // Internal server error protection.

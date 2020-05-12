@@ -210,6 +210,8 @@ class NetWrapper implements WrapperInterface
     }
 
     /**
+     * @return mixed
+     * @throws ExceptionHandler
      * @since 6.1.0
      */
     public function getParsed()

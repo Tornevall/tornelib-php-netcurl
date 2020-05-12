@@ -15,6 +15,10 @@ use TorneLIB\Module\Network\Wrappers\CurlWrapper;
  */
 class netWrapperTest extends TestCase
 {
+    private $rEcomPipeU = 'tornevall';
+    private $rEcomPipeP = '2suyqJRXyd8YBGxTz42xr7g1tCWW6M2R';
+    private $wsdl = 'https://test.resurs.com/ecommerce-test/ws/V4/SimplifiedShopFlowService?wsdl';
+
     /**
      * @return bool
      * @throws ExceptionHandler
@@ -170,5 +174,18 @@ class netWrapperTest extends TestCase
             isset($response->ip) &&
             $response->ip === '212.63.208.8'
         );
+    }
+
+    /**
+     * @test
+     */
+    public function multiNetWrapper()
+    {
+        $info = (new NetWrapper())->request([
+            'https://ipv4.netcurl.org/?1',
+            'https://ipv4.netcurl.org/?2',
+        ]);
+
+        static::assertTrue($info->getCode("https://ipv4.netcurl.org/?2") === 200);
     }
 }

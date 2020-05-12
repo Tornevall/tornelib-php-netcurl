@@ -68,6 +68,12 @@ class CurlWrapper implements WrapperInterface
      * @var array
      * @since 6.1.0
      */
+    private $curlMultiHttpCode = [];
+
+    /**
+     * @var array
+     * @since 6.1.0
+     */
     private $curlResponseHeaders = [];
 
     /**
@@ -631,6 +637,7 @@ class CurlWrapper implements WrapperInterface
 
         foreach ($this->curlMultiHandleObjects as $url => $curlHandleObject) {
             $return[$url] = curl_multi_getcontent($curlHandleObject);
+            $this->curlMultiHttpCode[$url] = GenericParser::getHttpHead($this->getHeader('http', $url));
             $this->getCurlMultiErrors($curlHandleObject, $url);
             curl_multi_remove_handle($this->curlMultiHandle, $curlHandleObject);
         }
@@ -977,12 +984,36 @@ class CurlWrapper implements WrapperInterface
     }
 
     /**
+     * @param string $url
      * @return int
+     * @throws ExceptionHandler
      * @since 6.0
      */
-    public function getCode()
+    public function getCode($url = '')
     {
-        return $this->curlHttpCode;
+        if (is_array($this->curlMultiResponse) &&
+            count($this->curlMultiResponse) === 1
+        ) {
+            $url = key($this->curlMultiResponse);
+        }
+
+        if (!$this->isCurlMulti) {
+            $return = $this->curlHttpCode;
+        } elseif (isset($this->curlMultiHttpCode[$url])) {
+            $return = $this->curlMultiHttpCode[$url];
+        } else {
+            if (empty($url)) {
+                throw new ExceptionHandler(
+                    sprintf(
+                        'Can not use %s without an url in a curl_multi request.',
+                        __FUNCTION__
+                    )
+                );
+            }
+            $return = $this->curlMultiHttpCode;
+        }
+
+        return $return;
     }
 
     /**
@@ -993,11 +1024,16 @@ class CurlWrapper implements WrapperInterface
      */
     public function getBody($url = '')
     {
+        if (is_array($this->curlMultiResponse) && count($this->curlMultiResponse) === 1) {
+            $url = key($this->curlMultiResponse);
+        }
+
         if (!$this->isCurlMulti) {
             $return = $this->curlResponse;
         } elseif (isset($this->curlMultiResponse[$url])) {
             $return = $this->curlMultiResponse[$url];
         } else {
+            // Sort out one request.
             if (empty($url)) {
                 throw new ExceptionHandler(
                     sprintf(
@@ -1023,6 +1059,10 @@ class CurlWrapper implements WrapperInterface
      */
     public function getParsed($url = '')
     {
+        if (is_array($this->curlMultiResponse) && count($this->curlMultiResponse) === 1) {
+            $url = key($this->curlMultiResponse);
+        }
+
         return GenericParser::getParsed(
             $this->getBody($url),
             $this->getHeader('content-type', $url)

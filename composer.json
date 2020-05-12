@@ -4,6 +4,7 @@
     "minimum-stability": "stable",
     "license": "Apache-2.0",
     "require": {
+        "tornevall/tornelib-php-network": "^6.1",
         "tornevall/tornelib-php-errorhandler": "^6.1",
         "tornevall/tornelib-php-crypto": "^6.1",
         "tornevall/tornelib-php-io": "^6.1",

@@ -4,11 +4,11 @@
     "minimum-stability": "dev",
     "license": "Apache-2.0",
     "require": {
-        "tornevall/tornelib-php-errorhandler": "^6.1.4",
-        "tornevall/tornelib-php-crypto": "^6.1.1",
-        "tornevall/tornelib-php-io": "^6.1.0",
-        "tornevall/tornelib-php-flags": "^6.1.3",
-        "tornevall/tornelib-php-utils": "^6.1.2"
+        "tornevall/tornelib-php-errorhandler": "6.1.*",
+        "tornevall/tornelib-php-crypto": "6.1.*",
+        "tornevall/tornelib-php-io": "^6.1.*",
+        "tornevall/tornelib-php-flags": "^6.1.*",
+        "tornevall/tornelib-php-utils": "^6.1.*"
     },
     "authors": [
         {

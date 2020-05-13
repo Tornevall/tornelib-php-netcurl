@@ -440,7 +440,10 @@ class soapWrapperTest extends TestCase
             return;
         }
         $wrapper = new SoapClientWrapper($this->wsdl);
-        $wrapper->setWsdlCache(WSDL_CACHE_DISK)->setAuthentication(
+        $wrapper->setStaging(false);
+        $wrapper->setProduction(true);
+        $isProduction = $wrapper->getProduction();
+        $wrapper->setAuthentication(
             $this->rEcomPipeU,
             $this->rEcomPipeP
         )->getPaymentMethods();

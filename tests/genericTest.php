@@ -4,6 +4,7 @@ use PHPUnit\Framework\TestCase;
 use TorneLIB\Exception\Constants;
 use TorneLIB\Exception\ExceptionHandler;
 use TorneLIB\Helpers\NetUtils;
+use TorneLIB\Module\Config\WrapperConfig;
 use TorneLIB\Module\Network\NetWrapper;
 use TorneLIB\MODULE_CURL;
 
@@ -259,6 +260,20 @@ class genericTest extends TestCase
         static::assertTrue(
             $reqCode === 404 &&
             $code === 404
+        );
+    }
+
+    /**
+     * @test
+     */
+    public function configurables() {
+        $config = new WrapperConfig();
+        $defaultStaging = $config->getStaging();
+        $isStaging = $config->isStaging();
+
+        static::assertTrue(
+            $defaultStaging === false &&
+            $isStaging === false
         );
     }
 }

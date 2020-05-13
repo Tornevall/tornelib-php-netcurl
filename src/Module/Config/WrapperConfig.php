@@ -1493,9 +1493,10 @@ class WrapperConfig
     {
         $methodType = '';
         $cutAfter = 3;
-        foreach (['get', 'is'] as $item) {
+        $allowedTypes = ['get', 'is', 'set'];
+        foreach ($allowedTypes as $item) {
             $testItem = @substr($name, 0, strlen($item));
-            if (in_array($testItem, ['get', 'is'])) {
+            if (in_array($testItem, $allowedTypes)) {
                 $methodType = $testItem;
                 $cutAfter = strlen($item);
             }
@@ -1503,6 +1504,19 @@ class WrapperConfig
         $methodName = (new Strings())->getCamelCase(substr($name, $cutAfter));
 
         switch (strtolower($methodType)) {
+            case 'set':
+                if (method_exists($this, sprintf('set%s', ucfirst($methodName)))) {
+                    call_user_func_array(
+                        [
+                            $this,
+                            sprintf('set%s', ucfirst($methodName)),
+                        ],
+                        $arguments
+                    );
+                }
+
+                $this->configData[$methodName] = array_pop($arguments);
+                break;
             case 'get' || 'is':
                 if (method_exists($this, sprintf('%s%s', 'get', ucfirst($methodName))) ||
                     method_exists($this, sprintf('%s%s', 'is', ucfirst($methodName)))
@@ -1524,19 +1538,6 @@ class WrapperConfig
                 }
 
                 throw new ExceptionHandler('Variable not set.', Constants::LIB_CONFIGWRAPPER_VAR_NOT_SET);
-                break;
-            case 'set':
-                if (method_exists($this, sprintf('set%s', ucfirst($methodName)))) {
-                    call_user_func_array(
-                        [
-                            $this,
-                            sprintf('set%s', ucfirst($methodName)),
-                        ],
-                        $arguments
-                    );
-                }
-
-                $this->configData[$methodName] = array_pop($arguments);
                 break;
             default:
                 break;

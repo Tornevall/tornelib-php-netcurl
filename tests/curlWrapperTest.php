@@ -461,7 +461,7 @@ class curlWrapperTest extends TestCase
     public function setMilliTimeout()
     {
         $config = new WrapperConfig();
-
+        $errorCode = 0;
         $config->setTimeout(100, true);
         // No need to pre-set any timeout as WrapperConfig makes sure the timeouts are properly set.
         $gTimeout = $config->getTimeout();
@@ -471,13 +471,14 @@ class curlWrapperTest extends TestCase
             // The last request will make WrapperConfig throw an exception as getEmptySetting does not exist
             // in the magics setup. So we'll check the other values from here. Floats are returned regardless
             // of seconds and milliseconds, so we'll cast the values into integers here.
-            static::assertTrue(
-                $e->getCode() === Constants::LIB_CONFIGWRAPPER_VAR_NOT_SET &&
-                (int)$gTimeout['REQUEST'] === 100 &&
-                (int)$gTimeout['CONNECT'] === 50 &&
-                (bool)$gTimeout['MILLISEC']
-            );
+            $errorCode = $e->getCode();
         }
+        static::assertTrue(
+            $errorCode === Constants::LIB_CONFIGWRAPPER_VAR_NOT_SET &&
+            (int)$gTimeout['REQUEST'] === 100 &&
+            (int)$gTimeout['CONNECT'] === 50 &&
+            (bool)$gTimeout['MILLISEC']
+        );
     }
 
     /**

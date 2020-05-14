@@ -4,7 +4,7 @@ namespace TorneLIB;
 
 // Library Release Information
 if (!defined('NETCURL_RELEASE')) {
-    define('NETCURL_RELEASE', '6.0.30');
+    define('NETCURL_RELEASE', '6.0.31');
 }
 if (!defined('NETCURL_MODIFY')) {
     define('NETCURL_MODIFY', '20200514');

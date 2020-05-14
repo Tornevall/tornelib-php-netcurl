@@ -5,10 +5,10 @@ namespace TorneLIB;
 if (!class_exists('MODULE_NETWORK', NETCURL_CLASS_EXISTS_AUTOLOAD) && !class_exists('TorneLIB\MODULE_NETWORK',
         NETCURL_CLASS_EXISTS_AUTOLOAD)) {
     if (!defined('NETCURL_NETWORK_RELEASE')) {
-        define('NETCURL_NETWORK_RELEASE', '6.0.8');
+        define('NETCURL_NETWORK_RELEASE', '6.0.9');
     }
     if (!defined('NETCURL_NETWORK_MODIFY')) {
-        define('NETCURL_NETWORK_MODIFY', '20180822');
+        define('NETCURL_NETWORK_MODIFY', '20200514');
     }
 
     /**

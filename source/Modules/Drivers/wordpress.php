@@ -2,8 +2,6 @@
 
 namespace TorneLIB;
 
-use Exception;
-
 if (!class_exists('NETCURL_DRIVER_WORDPRESS',
         NETCURL_CLASS_EXISTS_AUTOLOAD) && !class_exists('TorneLIB\NETCURL_DRIVER_WORDPRESS',
         NETCURL_CLASS_EXISTS_AUTOLOAD)
@@ -203,7 +201,7 @@ if (!class_exists('NETCURL_DRIVER_WORDPRESS',
                 $httpResponseObject = $httpResponse->get_response_object();
                 $this->RESPONSE_RAW = isset($httpResponseObject->raw) ? $httpResponseObject->raw : null;
             } else {
-                throw new Exception(
+                throw new \Exception(
                     sprintf(
                         '%s %s exception: Wordpress driver seem to miss get_response_object',
                         NETCURL_CURL_CLIENTNAME,

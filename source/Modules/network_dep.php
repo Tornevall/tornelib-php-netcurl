@@ -2,9 +2,8 @@
 
 namespace TorneLIB;
 
-if (!class_exists('TorneLIB_Network', NETCURL_CLASS_EXISTS_AUTOLOAD) &&
-    !class_exists('TorneLIB\TorneLIB_Network', NETCURL_CLASS_EXISTS_AUTOLOAD)
-) {
+if (!class_exists('TorneLIB_Network', NETCURL_CLASS_EXISTS_AUTOLOAD) && !class_exists('TorneLIB\TorneLIB_Network',
+        NETCURL_CLASS_EXISTS_AUTOLOAD)) {
     /**
      * Class MODULE_CURL
      *

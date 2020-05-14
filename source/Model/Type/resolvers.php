@@ -2,9 +2,8 @@
 
 namespace TorneLIB;
 
-if (!class_exists('NETCURL_RESOLVER', NETCURL_CLASS_EXISTS_AUTOLOAD) &&
-    !class_exists('TorneLIB\NETCURL_RESOLVER', NETCURL_CLASS_EXISTS_AUTOLOAD)
-) {
+if (!class_exists('NETCURL_RESOLVER', NETCURL_CLASS_EXISTS_AUTOLOAD) && !class_exists('TorneLIB\NETCURL_RESOLVER',
+        NETCURL_CLASS_EXISTS_AUTOLOAD)) {
     /**
      * Class NETCURL_RESOLVER Class definitions on how to resolve things on lookups
      *
@@ -20,9 +19,8 @@ if (!class_exists('NETCURL_RESOLVER', NETCURL_CLASS_EXISTS_AUTOLOAD) &&
     }
 }
 
-if (!class_exists('CURL_RESOLVER', NETCURL_CLASS_EXISTS_AUTOLOAD) &&
-    !class_exists('TorneLIB\CURL_RESOLVER', NETCURL_CLASS_EXISTS_AUTOLOAD)
-) {
+if (!class_exists('CURL_RESOLVER', NETCURL_CLASS_EXISTS_AUTOLOAD) && !class_exists('TorneLIB\CURL_RESOLVER',
+        NETCURL_CLASS_EXISTS_AUTOLOAD)) {
     /**
      * @package    TorneLIB
      * @deprecated 6.0.20 Use NETCURL_RESOLVER

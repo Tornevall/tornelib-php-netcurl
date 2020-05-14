@@ -2,9 +2,9 @@
 
 namespace TorneLIB;
 
-if (!class_exists('NETCURL_IP_PROTOCOLS', NETCURL_CLASS_EXISTS_AUTOLOAD) &&
-    !class_exists('TorneLIB\NETCURL_IP_PROTOCOLS', NETCURL_CLASS_EXISTS_AUTOLOAD)
-) {
+if (!class_exists('NETCURL_IP_PROTOCOLS',
+        NETCURL_CLASS_EXISTS_AUTOLOAD) && !class_exists('TorneLIB\NETCURL_IP_PROTOCOLS',
+        NETCURL_CLASS_EXISTS_AUTOLOAD)) {
     /**
      * Class NETCURL_IP_PROTOCOLS IP Address Types class
      *
@@ -20,9 +20,8 @@ if (!class_exists('NETCURL_IP_PROTOCOLS', NETCURL_CLASS_EXISTS_AUTOLOAD) &&
     }
 
 }
-if (!class_exists('TorneLIB_Network_IP', NETCURL_CLASS_EXISTS_AUTOLOAD) &&
-    !class_exists('TorneLIB\TorneLIB_Network_IP', NETCURL_CLASS_EXISTS_AUTOLOAD)
-) {
+if (!class_exists('TorneLIB_Network_IP', NETCURL_CLASS_EXISTS_AUTOLOAD) && !class_exists('TorneLIB\TorneLIB_Network_IP',
+        NETCURL_CLASS_EXISTS_AUTOLOAD)) {
     /**
      * Class TorneLIB_Network_IP
      *
@@ -37,9 +36,9 @@ if (!class_exists('TorneLIB_Network_IP', NETCURL_CLASS_EXISTS_AUTOLOAD) &&
     }
 }
 
-if (!class_exists('TorneLIB_Network_IP_Protocols', NETCURL_CLASS_EXISTS_AUTOLOAD) &&
-    !class_exists('TorneLIB\TorneLIB_Network_IP_Protocols', NETCURL_CLASS_EXISTS_AUTOLOAD)
-) {
+if (!class_exists('TorneLIB_Network_IP_Protocols',
+        NETCURL_CLASS_EXISTS_AUTOLOAD) && !class_exists('TorneLIB\TorneLIB_Network_IP_Protocols',
+        NETCURL_CLASS_EXISTS_AUTOLOAD)) {
     /** @noinspection PhpDeprecationInspection */
 
     /**

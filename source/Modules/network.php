@@ -2,11 +2,10 @@
 
 namespace TorneLIB;
 
-if (!class_exists('MODULE_NETWORK', NETCURL_CLASS_EXISTS_AUTOLOAD) &&
-    !class_exists('TorneLIB\MODULE_NETWORK', NETCURL_CLASS_EXISTS_AUTOLOAD)
-) {
+if (!class_exists('MODULE_NETWORK', NETCURL_CLASS_EXISTS_AUTOLOAD) && !class_exists('TorneLIB\MODULE_NETWORK',
+        NETCURL_CLASS_EXISTS_AUTOLOAD)) {
     if (!defined('NETCURL_NETWORK_RELEASE')) {
-        define('NETCURL_NETWORK_RELEASE', '6.0.7RC1');
+        define('NETCURL_NETWORK_RELEASE', '6.0.8');
     }
     if (!defined('NETCURL_NETWORK_MODIFY')) {
         define('NETCURL_NETWORK_MODIFY', '20180822');
@@ -664,7 +663,7 @@ if (!class_exists('MODULE_NETWORK', NETCURL_CLASS_EXISTS_AUTOLOAD) &&
          */
         public function isIpInRange($IP, $CIDR)
         {
-            list ($net, $mask) = explode("/", $CIDR);
+            [$net, $mask] = explode("/", $CIDR);
             $ip_net = ip2long($net);
             $ip_mask = ~((1 << (32 - $mask)) - 1);
             $ip_ip = ip2long($IP);

@@ -2,9 +2,9 @@
 
 namespace TorneLIB;
 
-if (!class_exists('NETCURL_DRIVER_CONTROLLER', NETCURL_CLASS_EXISTS_AUTOLOAD) &&
-    !class_exists('TorneLIB\NETCURL_DRIVER_CONTROLLER', NETCURL_CLASS_EXISTS_AUTOLOAD)
-) {
+if (!class_exists('NETCURL_DRIVER_CONTROLLER',
+        NETCURL_CLASS_EXISTS_AUTOLOAD) && !class_exists('TorneLIB\NETCURL_DRIVER_CONTROLLER',
+        NETCURL_CLASS_EXISTS_AUTOLOAD)) {
     /**
      * Class NETCURL_DRIVERS Network communications driver detection
      *

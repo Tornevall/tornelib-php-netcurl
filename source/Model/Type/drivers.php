@@ -2,9 +2,9 @@
 
 namespace TorneLIB;
 
-if (!class_exists('NETCURL_NETWORK_DRIVERS', NETCURL_CLASS_EXISTS_AUTOLOAD) &&
-    !class_exists('TorneLIB\NETCURL_NETWORK_DRIVERS', NETCURL_CLASS_EXISTS_AUTOLOAD)
-) {
+if (!class_exists('NETCURL_NETWORK_DRIVERS',
+        NETCURL_CLASS_EXISTS_AUTOLOAD) && !class_exists('TorneLIB\NETCURL_NETWORK_DRIVERS',
+        NETCURL_CLASS_EXISTS_AUTOLOAD)) {
     /**
      * Class NETCURL_NETWORK_DRIVERS Supported network Addons
      *
@@ -32,9 +32,9 @@ if (!class_exists('NETCURL_NETWORK_DRIVERS', NETCURL_CLASS_EXISTS_AUTOLOAD) &&
     }
 }
 
-if (!class_exists('TORNELIB_CURL_DRIVERS', NETCURL_CLASS_EXISTS_AUTOLOAD) &&
-    !class_exists('TorneLIB\TORNELIB_CURL_DRIVERS', NETCURL_CLASS_EXISTS_AUTOLOAD)
-) {
+if (!class_exists('TORNELIB_CURL_DRIVERS',
+        NETCURL_CLASS_EXISTS_AUTOLOAD) && !class_exists('TorneLIB\TORNELIB_CURL_DRIVERS',
+        NETCURL_CLASS_EXISTS_AUTOLOAD)) {
     /**
      * Class TORNELIB_CURL_DRIVERS
      *

@@ -2,9 +2,9 @@
 
 namespace TorneLIB;
 
-if (!class_exists('Tornevall_SimpleSoap', NETCURL_CLASS_EXISTS_AUTOLOAD) &&
-    !class_exists('TorneLIB\Tornevall_SimpleSoap', NETCURL_CLASS_EXISTS_AUTOLOAD)
-) {
+if (!class_exists('Tornevall_SimpleSoap',
+        NETCURL_CLASS_EXISTS_AUTOLOAD) && !class_exists('TorneLIB\Tornevall_SimpleSoap',
+        NETCURL_CLASS_EXISTS_AUTOLOAD)) {
     /**
      * Class MODULE_CURL
      *

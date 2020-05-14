@@ -2,9 +2,9 @@
 
 namespace TorneLIB;
 
-if (!class_exists('NETCURL_POST_DATATYPES', NETCURL_CLASS_EXISTS_AUTOLOAD) &&
-    !class_exists('TorneLIB\NETCURL_POST_DATATYPES', NETCURL_CLASS_EXISTS_AUTOLOAD)
-) {
+if (!class_exists('NETCURL_POST_DATATYPES',
+        NETCURL_CLASS_EXISTS_AUTOLOAD) && !class_exists('TorneLIB\NETCURL_POST_DATATYPES',
+        NETCURL_CLASS_EXISTS_AUTOLOAD)) {
     /**
      * Class NETCURL_POST_DATATYPES
      * Prepared formatting for POST-content in this library (Also available from for example PUT)
@@ -22,9 +22,8 @@ if (!class_exists('NETCURL_POST_DATATYPES', NETCURL_CLASS_EXISTS_AUTOLOAD) &&
         const DATATYPE_SOAP_XML = 4;
     }
 }
-if (!class_exists('CURL_POST_AS', NETCURL_CLASS_EXISTS_AUTOLOAD) &&
-    !class_exists('TorneLIB\CURL_POST_AS', NETCURL_CLASS_EXISTS_AUTOLOAD)
-) {
+if (!class_exists('CURL_POST_AS', NETCURL_CLASS_EXISTS_AUTOLOAD) && !class_exists('TorneLIB\CURL_POST_AS',
+        NETCURL_CLASS_EXISTS_AUTOLOAD)) {
     /**
      * @package TorneLIB
      * @deprecated 6.0.20 Use NETCURL_POST_DATATYPES

@@ -2,9 +2,9 @@
 
 namespace TorneLIB;
 
-if (!class_exists('NETCURL_DRIVER_GUZZLEHTTP', NETCURL_CLASS_EXISTS_AUTOLOAD) &&
-    !class_exists('TorneLIB\NETCURL_DRIVER_GUZZLEHTTP', NETCURL_CLASS_EXISTS_AUTOLOAD)
-) {
+if (!class_exists('NETCURL_DRIVER_GUZZLEHTTP',
+        NETCURL_CLASS_EXISTS_AUTOLOAD) && !class_exists('TorneLIB\NETCURL_DRIVER_GUZZLEHTTP',
+        NETCURL_CLASS_EXISTS_AUTOLOAD)) {
     /**
      * Class NETCURL_DRIVER_GUZZLEHTTP Network communications driver detection
      * Inspections for classes and namespaces is ignored as they are dynamically loaded when they do exist.

@@ -2,9 +2,8 @@
 
 namespace TorneLIB;
 
-if (!class_exists('MODULE_SOAP', NETCURL_CLASS_EXISTS_AUTOLOAD) &&
-    !class_exists('TorneLIB\MODULE_SOAP', NETCURL_CLASS_EXISTS_AUTOLOAD)
-) {
+if (!class_exists('MODULE_SOAP', NETCURL_CLASS_EXISTS_AUTOLOAD) && !class_exists('TorneLIB\MODULE_SOAP',
+        NETCURL_CLASS_EXISTS_AUTOLOAD)) {
     if (!defined('NETCURL_SIMPLESOAP_RELEASE')) {
         define('NETCURL_SIMPLESOAP_RELEASE', '6.0.6');
     }

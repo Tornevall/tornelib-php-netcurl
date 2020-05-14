@@ -2,9 +2,8 @@
 
 namespace TorneLIB;
 
-if (!class_exists('MODULE_CURL', NETCURL_CLASS_EXISTS_AUTOLOAD) &&
-    !class_exists('TorneLIB\MODULE_CURL', NETCURL_CLASS_EXISTS_AUTOLOAD)
-) {
+if (!class_exists('MODULE_CURL', NETCURL_CLASS_EXISTS_AUTOLOAD) && !class_exists('TorneLIB\MODULE_CURL',
+        NETCURL_CLASS_EXISTS_AUTOLOAD)) {
     if (!defined('NETCURL_CURL_RELEASE')) {
         define('NETCURL_CURL_RELEASE', '6.0.28');
     }

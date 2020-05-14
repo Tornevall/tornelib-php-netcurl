@@ -663,13 +663,20 @@ if (!class_exists('MODULE_NETWORK', NETCURL_CLASS_EXISTS_AUTOLOAD) && !class_exi
          */
         public function isIpInRange($IP, $CIDR)
         {
-            [$net, $mask] = explode("/", $CIDR);
-            $ip_net = ip2long($net);
-            $ip_mask = ~((1 << (32 - $mask)) - 1);
-            $ip_ip = ip2long($IP);
-            $ip_ip_net = $ip_ip & $ip_mask;
+            $return = false;
+            //[$net, $mask] = explode("/", $CIDR);
+            $slashed = explode('/', $CIDR);
+            if (isset($slashed[1])) {
+                $net = $slashed[0];
+                $mask = $slashed[1];
+                $ip_net = ip2long($net);
+                $ip_mask = ~((1 << (32 - $mask)) - 1);
+                $ip_ip = ip2long($IP);
+                $ip_ip_net = $ip_ip & $ip_mask;
+                $return = $ip_ip_net === $ip_net;
+            }
 
-            return ($ip_ip_net == $ip_net);
+            return $return;
         }
 
         /**

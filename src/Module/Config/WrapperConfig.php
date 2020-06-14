@@ -402,6 +402,15 @@ class WrapperConfig
     }
 
     /**
+     * @return mixed
+     * @since 6.1.1
+     */
+    public function getRequestDataContainer()
+    {
+        return $this->requestDataContainer;
+    }
+
+    /**
      * Handle json. Legacy. Maybe.
      *
      * @param $transformData
@@ -1204,7 +1213,8 @@ class WrapperConfig
      * @return $this
      * @since 6.1.0
      */
-    public function setProduction($isProduction = true) {
+    public function setProduction($isProduction = true)
+    {
         $this->setStaging($isProduction ? false : true);
         return $this;
     }
@@ -1213,7 +1223,8 @@ class WrapperConfig
      * @return bool
      * @since 6.1.0
      */
-    public function getProduction() {
+    public function getProduction()
+    {
         return !$this->getStaging() ? true : false;
     }
 

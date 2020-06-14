@@ -258,10 +258,10 @@ class netWrapperTest extends TestCase
             isset($p->HTTP_USER_AGENT) &&
             $p->HTTP_USER_AGENT === 'Client2' &&
             (
-            (
-                is_array($paymentMethods) &&
-                count($paymentMethods)
-            )
+                (
+                    is_array($paymentMethods) &&
+                    count($paymentMethods)
+                ) || $soapError
             ) &&
             $info->getCode($secondUrl) === 200
         );

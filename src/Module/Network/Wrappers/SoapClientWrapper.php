@@ -25,7 +25,7 @@ use TorneLIB\Utils\Security;
  * Class SoapClientWrapper
  *
  * @package TorneLIB\Module\Network\Wrappers
- * @version 6.1.0
+ * @version 6.1.1
  */
 class SoapClientWrapper implements WrapperInterface
 {

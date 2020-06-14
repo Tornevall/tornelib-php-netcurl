@@ -29,13 +29,13 @@ try {
  * Class SimpleWrapper Fetching tool in the simplest form. Using file_get_contents.
  *
  * @package TorneLIB\Module\Network\Wrappers
- * @version 6.1.0
+ * @version 6.1.1
  */
 class SimpleStreamWrapper implements WrapperInterface
 {
     /**
      * @var WrapperConfig $CONFIG
-     * @version 6.1.0
+     * @version 6.1.1
      */
     private $CONFIG;
 
@@ -354,7 +354,7 @@ class SimpleStreamWrapper implements WrapperInterface
      * @param int $method
      * @param int $dataType
      * @return SimpleStreamWrapper
-     * @version 6.1.0
+     * @version 6.1.1
      */
     public function request($url, $data = [], $method = requestMethod::METHOD_GET, $dataType = dataType::NORMAL)
     {

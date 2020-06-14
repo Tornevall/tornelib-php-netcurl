@@ -18,7 +18,7 @@ use TorneLIB\Module\Network\NetWrapper;
  * Passthrough client that v6.0 remember.
  *
  * @package TorneLIB
- * @version 6.1.0
+ * @version 6.1.1
  * @since   6.0.20
  * @deprecated You should consider NetWrapper instead.
  */

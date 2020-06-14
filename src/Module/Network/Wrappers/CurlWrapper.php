@@ -34,7 +34,7 @@ try {
  * preferred way to fetch data.
  *
  * @package TorneLIB\Module\Network\Wrappers
- * @version 6.1.0
+ * @version 6.1.1
  */
 class CurlWrapper implements WrapperInterface
 {

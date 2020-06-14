@@ -25,7 +25,7 @@ try {
  * Class RssWrapper
  * @package TorneLIB\Module\Network\Wrappers
  * @link https://docs.laminas.dev/laminas-feed/consuming-rss/
- * @version 6.1.0
+ * @version 6.1.1
  */
 class RssWrapper implements WrapperInterface
 {

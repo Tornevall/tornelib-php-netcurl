@@ -25,7 +25,7 @@ use TorneLIB\Utils\Security;
  * Taking over from v6.0 MODULE_CURL.
  *
  * @package TorneLIB\Module\Network
- * @version 6.1.0
+ * @version 6.1.1
  */
 class NetWrapper implements WrapperInterface
 {
@@ -34,6 +34,13 @@ class NetWrapper implements WrapperInterface
      * @since 6.1.0
      */
     private $CONFIG;
+
+    /**
+     * Chosen wrapper.
+     * @var string $selectedWrapper
+     * @since 6.1.0
+     */
+    private $selectedWrapper;
 
     /**
      * @var bool
@@ -46,13 +53,6 @@ class NetWrapper implements WrapperInterface
      * @since 6.1.0
      */
     private $version;
-
-    /**
-     * Chosen wrapper.
-     * @var string $selectedWrapper
-     * @since 6.1.0
-     */
-    private $selectedWrapper;
 
     /**
      * @var array
@@ -296,7 +296,9 @@ class NetWrapper implements WrapperInterface
     {
         if (($mInstance = $this->getMultiInstance($url)) && method_exists($mInstance, __FUNCTION__)) {
             return $mInstance->{__FUNCTION__}();
-        } elseif (method_exists($this->instance, __FUNCTION__)) {
+        }
+
+        if (method_exists($this->instance, __FUNCTION__)) {
             return $this->instance->{__FUNCTION__}();
         }
 
@@ -526,6 +528,15 @@ class NetWrapper implements WrapperInterface
         }
 
         return $this->instance;
+    }
+
+    /**
+     * @return string
+     * @since 6.1.1
+     */
+    public function getSelectedWrapper()
+    {
+        return $this->selectedWrapper;
     }
 
     /**

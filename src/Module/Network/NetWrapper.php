@@ -649,19 +649,12 @@ class NetWrapper implements WrapperInterface
         foreach ($externalWrapperList as $wrapperClass) {
             $returnable = null;
             try {
-                $this->CONFIG->setCurrentWrapper(get_class($wrapperClass));
-                $returnable = call_user_func_array(
-                    [
-                        $wrapperClass,
-                        'request',
-                    ],
-                    [
-                        $url,
-                        $data,
-                        $method,
-                        $dataType,
-                    ]
-                );
+                // Assuming request is always available via registered implementations, we don't need
+                // to use call_user_func_array at all.
+                if (method_exists($wrapperClass, 'request')) {
+                    $this->CONFIG->setCurrentWrapper(get_class($wrapperClass));
+                    $returnable = $wrapperClass->request($url, $data, $method, $dataType);
+                }
             } catch (\Exception $externalException) {
             }
             // Break on first success.

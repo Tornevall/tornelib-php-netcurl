@@ -1,4 +1,5 @@
-<?php
+<?php /** @noinspection PhpComposerExtensionStubsInspection */
+
 /**
  * Copyright © Tomas Tornevall / Tornevall Networks. All rights reserved.
  * See LICENSE for license details.
@@ -234,8 +235,8 @@ class WrapperConfig
      */
     public function setThrowableHttpCodes($throwableMin = 400, $throwableMax = 599)
     {
-        $throwableMin = intval($throwableMin) > 0 ? $throwableMin : 400;
-        $throwableMax = intval($throwableMax) > 0 ? $throwableMax : 599;
+        $throwableMin = (int)$throwableMin > 0 ? $throwableMin : 400;
+        $throwableMax = (int)$throwableMax > 0 ? $throwableMax : 599;
         $this->throwableHttpCodes[] = [$throwableMin, $throwableMax];
 
         return $this;
@@ -263,10 +264,11 @@ class WrapperConfig
             $this->throwableHttpCodes = [];
         }
         foreach ($this->throwableHttpCodes as $codeListArray => $codeArray) {
-            if ((isset($codeArray[1]) &&
-                    $httpCode >= intval($codeArray[0]) &&
-                    $httpCode <= intval($codeArray[1])
-                ) || $forceException
+            if ((
+                isset($codeArray[1]) &&
+                    $httpCode >= (int)$codeArray[0] &&
+                    $httpCode <= (int)$codeArray[1]
+            ) || $forceException
             ) {
                 throw new ExceptionHandler(
                     sprintf(
@@ -402,6 +404,8 @@ class WrapperConfig
     }
 
     /**
+     * Entry point.
+     *
      * @return mixed
      * @since 6.1.1
      */
@@ -422,7 +426,7 @@ class WrapperConfig
         $return = $transformData;
 
         if (is_string($transformData)) {
-            $stringTest = json_decode($transformData);
+            $stringTest = json_decode($transformData, false);
             if (is_object($stringTest) || is_array($stringTest)) {
                 $return = $transformData;
             }
@@ -657,13 +661,15 @@ class WrapperConfig
         $dynamicOverwrites = Flag::getFlag('canoverwrite');
 
         $return = in_array(
-            $key, array_map('strtolower', $this->irreplacable)
+            $key,
+            array_map('strtolower', $this->irreplacable)
         ) ? false : true;
 
         // Dynamic override.
         if (is_array($dynamicOverwrites) && in_array(
-                $key, $dynamicOverwrites
-            )
+            $key,
+            $dynamicOverwrites
+        )
         ) {
             $return = true;
         }
@@ -796,10 +802,12 @@ class WrapperConfig
 
         // If the current wrapper class that is used is. Saved for later use.
         //if ($this->getCurrentWrapperClass(true) === 'SimpleStreamWrapper') {}
-        $this->setDualStreamHttp('proxy', sprintf(
-                'tcp://%s',
-                $proxyAddress
-            )
+        $this->setDualStreamHttp(
+            'proxy',
+            sprintf(
+            'tcp://%s',
+            $proxyAddress
+        )
         );
         $this->setDualStreamHttp('request_fulluri', true);
 

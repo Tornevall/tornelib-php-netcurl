@@ -3,8 +3,8 @@
 use PHPUnit\Framework\TestCase;
 use TorneLIB\Exception\Constants;
 use TorneLIB\Flags;
-use TorneLIB\Module\Config\WrapperSSL;
 use TorneLIB\Helpers\Version;
+use TorneLIB\Module\Config\WrapperSSL;
 
 require_once(__DIR__ . '/../vendor/autoload.php');
 
@@ -30,7 +30,7 @@ class sslWrapperTest extends TestCase
         Flags::_setFlag('NETCURL_NOSSL_TEST');
         try {
             (new WrapperSSL())->getSslCapabilities();
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             static::assertSame($e->getCode(), Constants::LIB_SSL_UNAVAILABLE);
         }
 
@@ -67,9 +67,12 @@ class sslWrapperTest extends TestCase
          */
         static::assertTrue(
             !(bool)$sslAction->getContext()['verify_peer'] &&
-            (bool)!(new WrapperSSL())->getContext()['allow_self_signed'] &&
+            !(new WrapperSSL())->getContext()['allow_self_signed'] &&
             (new WrapperSSL())->setContext('passphrase', 'simple_phrase')->getContext()['passphrase'] &&
-            (new WrapperSSL())->setContext('passphrase', 'simple_phrase')->getContext('passphrase') === 'simple_phrase' &&
+            (new WrapperSSL())->setContext(
+                'passphrase',
+                'simple_phrase'
+            )->getContext('passphrase') === 'simple_phrase' &&
             is_array($verifyPeerChange) &&
             count($verifyPeerChange) === 1
         );

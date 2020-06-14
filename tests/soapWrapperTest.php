@@ -489,7 +489,8 @@ class soapWrapperTest extends TestCase
                 [
                     'eventType' => 'BOOKED',
                     'uriTemplate' => sprintf(
-                        'https://www.netcurl.org/?callback=BOOKED&ts=%d', $currentTimeStamp
+                        'https://www.netcurl.org/?callback=BOOKED&ts=%d',
+                        $currentTimeStamp
                     ),
                 ]
             );
@@ -499,7 +500,8 @@ class soapWrapperTest extends TestCase
                 parse_url(
                     $rWrapper->getRegisteredEventCallback(
                         ['eventType' => 'BOOKED']
-                    )->uriTemplate)['query'],
+                    )->uriTemplate
+                )['query'],
                 $uriTemplate
             );
 

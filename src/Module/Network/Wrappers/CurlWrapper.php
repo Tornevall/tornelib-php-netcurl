@@ -484,6 +484,7 @@ class CurlWrapper implements WrapperInterface
      * @param $header
      * @return int
      * @since 6.1.0
+     * @noinspection PhpUnusedPrivateMethodInspection
      */
     private function getCurlHeaderRow($curlHandle, $header)
     {
@@ -548,6 +549,7 @@ class CurlWrapper implements WrapperInterface
      * @param $url
      * @throws ExceptionHandler
      * @since 6.1.0
+     * @noinspection PhpUnusedPrivateMethodInspection
      */
     private function throwExceptionInvalidUrl($url)
     {

@@ -6,6 +6,7 @@
 
 namespace TorneLIB\Module\Network\Wrappers;
 
+use Exception;
 use ReflectionException;
 use TorneLIB\Exception\Constants;
 use TorneLIB\Exception\ExceptionHandler;
@@ -22,7 +23,7 @@ use TorneLIB\Utils\Security;
 
 try {
     Version::getRequiredVersion();
-} catch (\Exception $e) {
+} catch (Exception $e) {
     die($e->getMessage());
 }
 
@@ -365,6 +366,7 @@ class SimpleStreamWrapper implements WrapperInterface
      * @param int $method
      * @param int $dataType
      * @return SimpleStreamWrapper
+     * @throws ExceptionHandler
      * @version 6.1.1
      */
     public function request($url, $data = [], $method = requestMethod::METHOD_GET, $dataType = dataType::NORMAL)

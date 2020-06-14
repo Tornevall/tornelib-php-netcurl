@@ -8,6 +8,7 @@
 /** @noinspection PhpUndefinedClassInspection */
 /** @noinspection PhpSingleStatementWithBracesInspection */
 /** @noinspection PhpFullyQualifiedNameUsageInspection */
+/** @noinspection PhpUndefinedNamespaceInspection */
 
 namespace TorneLIB\Module\Network\Wrappers;
 

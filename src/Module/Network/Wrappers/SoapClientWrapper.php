@@ -107,6 +107,7 @@ class SoapClientWrapper implements WrapperInterface
     /**
      * SoapClientWrapper constructor.
      * @throws ExceptionHandler
+     * @throws Exception
      */
     public function __construct()
     {
@@ -159,6 +160,7 @@ class SoapClientWrapper implements WrapperInterface
 
     /**
      * @inheritDoc
+     * @throws \ReflectionException
      */
     public function getVersion()
     {
@@ -337,6 +339,7 @@ class SoapClientWrapper implements WrapperInterface
      *
      * @return $this
      * @throws ExceptionHandler
+     * @throws Exception
      * @since 6.1.0
      */
     private function getSoapInit()
@@ -846,6 +849,7 @@ class SoapClientWrapper implements WrapperInterface
      * @param $arguments
      * @return SoapClientWrapper
      * @throws ExceptionHandler
+     * @throws Exception
      * @since 6.1.0
      */
     public function __call($name, $arguments)

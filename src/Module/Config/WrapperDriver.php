@@ -6,6 +6,7 @@
 
 namespace TorneLIB\Module\Config;
 
+use Exception;
 use TorneLIB\Exception\Constants;
 use TorneLIB\Exception\ExceptionHandler;
 
@@ -133,9 +134,8 @@ class WrapperDriver
         $allWrappers = self::getWrappers();
         foreach ($allWrappers as $wrapperClass) {
             $currentWrapperClass = @get_class($wrapperClass);
-            if (
-                $currentWrapperClass === sprintf('TorneLIB\Module\Network\Wrappers\%s', $wrapperNameClass) ||
-                $currentWrapperClass === $wrapperNameClass
+            if ($currentWrapperClass === $wrapperNameClass ||
+                $currentWrapperClass === sprintf('TorneLIB\Module\Network\Wrappers\%s', $wrapperNameClass)
             ) {
                 self::$instanceClass = $wrapperNameClass;
                 $return = $wrapperClass;
@@ -198,7 +198,7 @@ class WrapperDriver
             ) {
                 try {
                     self::$wrappers[$wrapperClass] = new $wrapperClass();
-                } catch (\Exception $wrapperLoadException) {
+                } catch (Exception $wrapperLoadException) {
                 }
             }
         }

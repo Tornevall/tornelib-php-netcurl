@@ -17,6 +17,8 @@ try {
     die($e->getMessage());
 }
 
+/** @noinspection PhpUnhandledExceptionInspection */
+// Second argument transform check into true/false instead of exception.
 if (!Security::getCurrentClassState('SoapClient', false)) {
     define('SKIP_SOAP', true);
 }
@@ -37,6 +39,7 @@ class soapWrapperTest extends TestCase
     /**
      * @return bool
      * @throws ExceptionHandler
+     * @noinspection DuplicatedCode
      */
     private function canProxy()
     {

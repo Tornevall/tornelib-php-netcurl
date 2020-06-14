@@ -6,6 +6,7 @@
 
 namespace TorneLIB\Module\Network;
 
+use Exception;
 use ReflectionException;
 use TorneLIB\Exception\Constants;
 use TorneLIB\Exception\ExceptionHandler;
@@ -212,6 +213,10 @@ class NetWrapper implements WrapperInterface
     /**
      * Register an external wrapper/module/communicator.
      *
+     * @param $wrapperClass
+     * @param bool $tryFirst
+     * @return string
+     * @throws ExceptionHandler
      * @since 6.1.0
      */
     public function register($wrapperClass, $tryFirst = false)
@@ -231,7 +236,9 @@ class NetWrapper implements WrapperInterface
     {
         if (($mInstance = $this->getMultiInstance($url)) && method_exists($mInstance, __FUNCTION__)) {
             return $mInstance->{__FUNCTION__}();
-        } elseif (method_exists($this->instance, __FUNCTION__)) {
+        }
+
+        if (method_exists($this->instance, __FUNCTION__)) {
             return $this->instance->{__FUNCTION__}();
         }
 
@@ -255,7 +262,9 @@ class NetWrapper implements WrapperInterface
     {
         if (($mInstance = $this->getMultiInstance($url)) && method_exists($mInstance, 'getParsed')) {
             return $mInstance->getParsed();
-        } elseif (method_exists($this->instance, 'getBody')) {
+        }
+
+        if (method_exists($this->instance, 'getBody')) {
             return $this->instance->getParsed();
         }
 
@@ -325,6 +334,7 @@ class NetWrapper implements WrapperInterface
     /**
      * @param $requestArray
      * @return array
+     * @throws ExceptionHandler
      * @since 6.1.0
      */
     private function handleMultiUrl($requestArray)
@@ -355,6 +365,7 @@ class NetWrapper implements WrapperInterface
     /**
      * @param $url
      * @return NetWrapper
+     * @throws ExceptionHandler
      * @since 6.1.0
      */
     private function getMultiInternalRequest($url)
@@ -365,6 +376,7 @@ class NetWrapper implements WrapperInterface
 
     /**
      * @inheritDoc
+     * @throws ExceptionHandler
      * @since 6.1.0
      */
     public function request($url, $data = [], $method = requestMethod::METHOD_GET, $dataType = dataType::NORMAL)
@@ -405,7 +417,7 @@ class NetWrapper implements WrapperInterface
             $dataType
         )) {
             $return = $hasReturnedRequest;
-        };
+        }
 
         $externalWrapperList = WrapperDriver::getExternalWrappers();
         // Internal handles are usually throwing execptions before landing here.
@@ -444,13 +456,14 @@ class NetWrapper implements WrapperInterface
     ) {
         $return = null;
 
-        if (!is_array($url) && preg_match('/\?wsdl|\&wsdl/i', $url)) {
+        if (!is_array($url) && preg_match('/\?wsdl|&wsdl/i', $url)) {
             try {
                 Security::getCurrentClassState('SoapClient');
                 $dataType = dataType::SOAP;
             } catch (ExceptionHandler $e) {
                 $method = requestMethod::METHOD_POST;
                 $dataType = dataType::XML;
+                /** @noinspection CallableParameterUseCaseInTypeContextInspection */
                 if (!is_string($data) && !empty($data)) {
                     $data = (new Content())->getXmlFromArray($data);
                 }
@@ -470,6 +483,8 @@ class NetWrapper implements WrapperInterface
             $return = $this->instance->request($url, $data, $method, $dataType);
         } elseif ($this->getProperInstanceWrapper('CurlWrapper')) {
             $this->instance->setConfig($this->getConfig());
+            /** @noinspection PhpPossiblePolymorphicInvocationInspection */
+            // No inspection since assuming this is always a curl-based call.
             $this->instance->setCurlMultiInstantException($this->instantCurlMultiErrors);
             $return = $this->instance->request($url, $data, $method, $dataType);
         } elseif ($this->getProperInstanceWrapper('SimpleStreamWrapper')) {
@@ -486,7 +501,7 @@ class NetWrapper implements WrapperInterface
     /**
      * Set up proxy.
      *
-     * @param $proxyAddress Normal usage is address:post.
+     * @param string $proxyAddress Normal usage is address:post.
      * @param int $proxyType Default: 0 = HTTP
      * @return $this
      * @since 6.1.0
@@ -531,6 +546,8 @@ class NetWrapper implements WrapperInterface
     }
 
     /**
+     * Entry point.
+     *
      * @return string
      * @since 6.1.1
      */
@@ -643,26 +660,18 @@ class NetWrapper implements WrapperInterface
     ) {
         $return = null;
         $hasInternalSuccess = false;
-
         $externalWrapperList = WrapperDriver::getExternalWrappers();
         // Walk through external wrappers.
         foreach ($externalWrapperList as $wrapperClass) {
             $returnable = null;
             try {
-                $this->CONFIG->setCurrentWrapper(get_class($wrapperClass));
-                $returnable = call_user_func_array(
-                    [
-                        $wrapperClass,
-                        'request',
-                    ],
-                    [
-                        $url,
-                        $data,
-                        $method,
-                        $dataType,
-                    ]
-                );
-            } catch (\Exception $externalException) {
+                // Assuming request is always available via registered implementations, we don't need
+                // to use call_user_func_array at all.
+                if (method_exists($wrapperClass, 'request')) {
+                    $this->CONFIG->setCurrentWrapper(get_class($wrapperClass));
+                    $returnable = $wrapperClass->request($url, $data, $method, $dataType);
+                }
+            } catch (Exception $externalException) {
             }
             // Break on first success.
             if (!is_null($returnable)) {
@@ -695,40 +704,31 @@ class NetWrapper implements WrapperInterface
      */
     public function __call($name, $arguments)
     {
-        $requestType = substr($name, 0, 3);
-
-        switch ($name) {
-            case 'setAuth':
-                // Abbreviation for setAuthentication.
-                return call_user_func_array([$this, 'setAuthentication'], $arguments);
-            default:
-                break;
+        if ($name === 'setAuth') {
+            // Abbreviation for setAuthentication.
+            return call_user_func_array([$this, 'setAuthentication'], $arguments);
         }
 
-        switch ($requestType) {
-            default:
-                if (method_exists($this->instance, $name)) {
-                    if ($instanceRequest = call_user_func_array([$this->instance, $name], $arguments)) {
-                        return $instanceRequest;
-                    }
-                } elseif (method_exists($this->CONFIG, $name)) {
-                    call_user_func_array(
-                        [
-                            $this->CONFIG,
-                            $name,
-                        ],
-                        $arguments
-                    );
-                    break;
-                }
-                throw new ExceptionHandler(
-                    sprintf('Undefined function: %s', $name),
-                    Constants::LIB_METHOD_OR_LIBRARY_UNAVAILABLE,
-                    null,
-                    null,
-                    $name
-                );
-                break;
+        if (method_exists($this->instance, $name)) {
+            if ($instanceRequest = call_user_func_array([$this->instance, $name], $arguments)) {
+                return $instanceRequest;
+            }
+        } elseif (method_exists($this->CONFIG, $name)) {
+            call_user_func_array(
+                [
+                    $this->CONFIG,
+                    $name,
+                ],
+                $arguments
+            );
+        } else {
+            throw new ExceptionHandler(
+                sprintf('Undefined function: %s', $name),
+                Constants::LIB_METHOD_OR_LIBRARY_UNAVAILABLE,
+                null,
+                null,
+                $name
+            );
         }
 
         return $this;

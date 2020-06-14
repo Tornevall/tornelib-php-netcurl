@@ -222,7 +222,7 @@ class MODULE_CURL
         }
 
         if ($deprecatedRequest === 'do') {
-            return $this->getDeprecatedRequestResult($deprecatedRequest, $arguments);
+            return $this->getDeprecatedRequestResult($deprecatedRequestName, $arguments);
         }
     }
 }

@@ -138,7 +138,7 @@ class SoapClientWrapper implements WrapperInterface
 
     /**
      * @param bool $production
-     * @return
+     * @return WrapperConfig
      * @since 6.1.0
      */
     public function setProduction($production = true) {

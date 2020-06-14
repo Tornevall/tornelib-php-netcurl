@@ -304,6 +304,7 @@ class SimpleStreamWrapper implements WrapperInterface
             $this->CONFIG->getStreamContext()
         );
 
+        /** @noinspection IssetArgumentExistenceInspection */
         $this->streamContentResponseHeader = isset($http_response_header) ? $http_response_header : [];
 
         $httpExceptionMessage = $this->getHttpMessage();
@@ -315,6 +316,8 @@ class SimpleStreamWrapper implements WrapperInterface
             $httpExceptionMessage,
             $this->getCode()
         );
+
+        return $this;
     }
 
     /**

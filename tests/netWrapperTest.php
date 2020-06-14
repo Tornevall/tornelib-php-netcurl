@@ -11,6 +11,7 @@ use TorneLIB\Module\Config\WrapperDriver;
 use TorneLIB\Module\Network\NetWrapper;
 use TorneLIB\Module\Network\Wrappers\CurlWrapper;
 use TorneLIB\Module\Network\Wrappers\SoapClientWrapper;
+use TorneLIB\Utils\Security;
 
 /**
  * Class netcurlTest
@@ -209,13 +210,19 @@ class netWrapperTest extends TestCase
             $info = (new NetWrapper())->request($reqUrlData);
             $p = $info->getParsed('https://ipv4.netcurl.org/?2');
         } catch (ExceptionHandler $e) {
+            $f = (new Security())->getIniArray('disable_functions');
+
+            // Currently happens on driverless instances.
             static::markTestIncomplete(
                 sprintf(
-                    'Exception %d aborted test: %s',
+                    "Exception %d aborted test: %s\nFunctions disabled during test: %s.\nallow_url_fopen=%s",
                     $e->getCode(),
-                    $e->getMessage()
+                    $e->getMessage(),
+                    implode(',', $f),
+                    (new Security())->getIniBoolean('allow_url_fopen')
                 )
             );
+            return;
         }
 
         $soapError = false;

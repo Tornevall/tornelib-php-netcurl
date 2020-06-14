@@ -128,7 +128,7 @@ class WrapperSSL
             $streamWrappers = [];
             $this->capabilities[] = 'stream';
         }
-        if (in_array('https', array_map("strtolower", $streamWrappers))) {
+        if (in_array('https', array_map("strtolower", $streamWrappers), false)) {
             $return = true;
             $this->capabilities[] = 'curl';
         }

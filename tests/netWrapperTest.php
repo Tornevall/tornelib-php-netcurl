@@ -186,6 +186,8 @@ class netWrapperTest extends TestCase
      */
     public function multiNetWrapper()
     {
+        $secondUrl = 'https://ipv4.netcurl.org/?2&PHP=' . PHP_VERSION;
+
         // Separate array to make it easier to see what we're doing.
         $reqUrlData = [
             'https://ipv4.netcurl.org/?1' => [
@@ -194,7 +196,7 @@ class netWrapperTest extends TestCase
                 dataType::NORMAL,
                 (new WrapperConfig())->setUserAgent('Client1'),
             ],
-            'https://ipv4.netcurl.org/?2' => [
+            $secondUrl => [
                 [],
                 requestMethod::METHOD_POST,
                 dataType::NORMAL,
@@ -208,17 +210,18 @@ class netWrapperTest extends TestCase
         $p = new stdClass();
         try {
             $info = (new NetWrapper())->request($reqUrlData);
-            $p = $info->getParsed('https://ipv4.netcurl.org/?2');
+            $p = $info->getParsed($secondUrl);
         } catch (ExceptionHandler $e) {
             $f = (new Security())->getIniArray('disable_functions');
 
             // Currently happens on driverless instances.
             static::markTestIncomplete(
                 sprintf(
-                    "Exception %d aborted test: %s\nFunctions disabled during test: %s.\nallow_url_fopen=%s",
+                    "Exception %d aborted test: %s\nFunctions disabled during operation: %s.\nreqUrlData: %s\nallow_url_fopen=%s",
                     $e->getCode(),
                     $e->getMessage(),
-                    implode(',', $f),
+                    print_r($f, true),
+                    print_r($reqUrlData, true),
                     (new Security())->getIniBoolean('allow_url_fopen')
                 )
             );
@@ -245,7 +248,7 @@ class netWrapperTest extends TestCase
                     count($paymentMethods)
                 ) || $soapError
             ) &&
-            $info->getCode("https://ipv4.netcurl.org/?2") === 200
+            $info->getCode($secondUrl) === 200
         );
     }
 }

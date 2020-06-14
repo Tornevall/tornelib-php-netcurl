@@ -546,6 +546,8 @@ class NetWrapper implements WrapperInterface
     }
 
     /**
+     * Entry point.
+     *
      * @return string
      * @since 6.1.1
      */

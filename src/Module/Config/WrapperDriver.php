@@ -9,6 +9,11 @@ namespace TorneLIB\Module\Config;
 use Exception;
 use TorneLIB\Exception\Constants;
 use TorneLIB\Exception\ExceptionHandler;
+use TorneLIB\Module\Network\Wrappers\CurlWrapper;
+use TorneLIB\Module\Network\Wrappers\SoapClientWrapper;
+use TorneLIB\Module\Network\Wrappers\SimpleStreamWrapper;
+use TorneLIB\Module\Network\Wrappers\RssWrapper;
+use TorneLIB\Model\Interfaces\WrapperInterface;
 
 /**
  * Class WrapperDriver
@@ -31,10 +36,10 @@ class WrapperDriver
      * @since 6.1.0
      */
     private static $internalWrapperList = [
-        'TorneLIB\Module\Network\Wrappers\CurlWrapper',
-        'TorneLIB\Module\Network\Wrappers\SoapClientWrapper',
-        'TorneLIB\Module\Network\Wrappers\SimpleStreamWrapper',
-        'TorneLIB\Module\Network\Wrappers\RssWrapper',
+        CurlWrapper::class,
+        SoapClientWrapper::class,
+        SimpleStreamWrapper::class,
+        RssWrapper::class,
     ];
 
     /**
@@ -113,7 +118,7 @@ class WrapperDriver
     {
         $implements = class_implements($wrapperClass);
 
-        return in_array('TorneLIB\Model\Interfaces\WrapperInterface', $implements);
+        return in_array(WrapperInterface::class, $implements, false);
     }
 
     /**

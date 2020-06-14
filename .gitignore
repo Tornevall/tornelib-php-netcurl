@@ -7,4 +7,5 @@ runit.sh
 merge.sh
 build
 .phpunit.result.cache
+.php_cs.cache
 coverage

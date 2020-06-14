@@ -29,8 +29,7 @@ class sslWrapperTest extends TestCase
         /** @noinspection PhpUndefinedMethodInspection */
         Flags::_setFlag('NETCURL_NOSSL_TEST');
         try {
-            $SSL = new WrapperSSL();
-            $SSL->getSslCapabilities();
+            (new WrapperSSL())->getSslCapabilities();
         } catch (\Exception $e) {
             static::assertSame($e->getCode(), Constants::LIB_SSL_UNAVAILABLE);
         }

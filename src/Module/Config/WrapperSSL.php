@@ -134,6 +134,7 @@ class WrapperSSL
     /**
      * @return bool
      * @since 6.1.0
+     * @noinspection PhpComposerExtensionStubsInspection
      */
     private function getCurlSsl()
     {
@@ -142,7 +143,7 @@ class WrapperSSL
             $curlVersionRequest = curl_version();
 
             if (isset($curlVersionRequest['features'])) {
-                $return = ($curlVersionRequest['features'] & CURL_VERSION_SSL ? true : false);
+                $return = ((bool)($curlVersionRequest['features'] & CURL_VERSION_SSL));
             }
         }
 

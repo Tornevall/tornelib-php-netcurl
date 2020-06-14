@@ -41,12 +41,14 @@ class GenericParser
             $headContent = explode(' ', $headString, 2);
 
             // Make sure there is no extras when starting to extract this data.
-            if (!is_numeric($headContent[0]) &&
-                preg_match('/^http/i', $headContent[0]) &&
-                preg_match('/\s/', $headContent[1]) || (
+            if (
+                (
                     $returnData === 'code' &&
                     intval($headContent[1]) > 0
-                )
+                ) ||
+                (!is_numeric($headContent[0]) &&
+                    preg_match('/^http/i', $headContent[0]) &&
+                    preg_match('/\s/', $headContent[1]))
             ) {
                 // Drop one to the left, and retry.
                 $headContent = explode(' ', trim($headContent[1]), 2);

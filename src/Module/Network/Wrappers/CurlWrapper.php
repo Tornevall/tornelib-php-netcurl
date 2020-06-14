@@ -923,12 +923,10 @@ class CurlWrapper implements WrapperInterface
 
         if (is_resource($this->curlHandle)) {
             $return = $this->curlHandle;
+        } elseif (is_resource($this->curlMultiHandle) && count($this->curlMultiHandleObjects)) {
+            $return = $this->curlMultiHandle;
         } else {
-            if (is_resource($this->curlMultiHandle) && count($this->curlMultiHandleObjects)) {
-                $return = $this->curlMultiHandle;
-            } else {
-                $return = $this->initCurlHandle()->getCurlHandle();
-            }
+            $return = $this->initCurlHandle()->getCurlHandle();
         }
 
         return $return;

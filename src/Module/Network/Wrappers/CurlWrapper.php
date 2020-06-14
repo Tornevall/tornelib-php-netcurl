@@ -3,6 +3,7 @@
  * Copyright © Tomas Tornevall / Tornevall Networks. All rights reserved.
  * See LICENSE for license details.
  */
+
 /** @noinspection PhpComposerExtensionStubsInspection */
 
 namespace TorneLIB\Module\Network\Wrappers;
@@ -284,7 +285,7 @@ class CurlWrapper implements WrapperInterface
         $jsonContentType = 'application/json; charset=utf-8';
 
         $testContentType = $this->getContentType();
-        if (preg_match("/json/i", $testContentType)) {
+        if (false !== stripos($testContentType, "json")) {
             $jsonContentType = $testContentType;
         }
 
@@ -353,7 +354,7 @@ class CurlWrapper implements WrapperInterface
     }
 
     /**
-     * @param string $key
+     * @param mixed $key
      * @param string $value
      * @return CurlWrapper
      * @since 6.0
@@ -471,7 +472,8 @@ class CurlWrapper implements WrapperInterface
         if (!empty($authData['password'])) {
             $this->setOptionCurl($curlHandle, CURLOPT_HTTPAUTH, $authData['type']);
             $this->setOptionCurl(
-                $curlHandle, CURLOPT_USERPWD,
+                $curlHandle,
+                CURLOPT_USERPWD,
                 sprintf('%s:%s', $authData['username'], $authData['password'])
             );
         }
@@ -561,12 +563,12 @@ class CurlWrapper implements WrapperInterface
                 ),
                 Constants::LIB_INVALID_URL
             );
-        } else {
-            throw new ExceptionHandler(
-                'URL must not be empty.',
-                Constants::LIB_EMPTY_URL
-            );
         }
+
+        throw new ExceptionHandler(
+            'URL must not be empty.',
+            Constants::LIB_EMPTY_URL
+        );
     }
 
     /**
@@ -630,7 +632,7 @@ class CurlWrapper implements WrapperInterface
             if ($active) {
                 curl_multi_select($this->curlMultiHandle);
             }
-        } while ($active && $status == CURLM_OK);
+        } while ($active && $status === CURLM_OK);
 
         foreach ($this->curlMultiHandleObjects as $url => $curlHandleObject) {
             $return[$url] = curl_multi_getcontent($curlHandleObject);
@@ -676,10 +678,9 @@ class CurlWrapper implements WrapperInterface
                     null,
                     $this
                 );
-            } else {
-                return $this;
             }
         }
+
         return $this;
     }
 
@@ -972,7 +973,7 @@ class CurlWrapper implements WrapperInterface
                     } elseif (strtolower($specificKey) === strtolower($headKey)) {
                         $return[] = sprintf("%s", array_pop($headArray));
                     } elseif (strtolower($specificKey) === 'http') {
-                        if (preg_match('/^http/i', $headKey)) {
+                        if (0 === stripos($headKey, "http")) {
                             $return[] = sprintf("%s", array_pop($headArray));
                         }
                     }
@@ -994,7 +995,7 @@ class CurlWrapper implements WrapperInterface
         if (is_array($this->curlMultiResponse) &&
             count($this->curlMultiResponse) === 1
         ) {
-            $url = key($this->curlMultiResponse);
+            $url = (string)key($this->curlMultiResponse);
         }
 
         if (!$this->isCurlMulti) {
@@ -1025,7 +1026,7 @@ class CurlWrapper implements WrapperInterface
     public function getBody($url = '')
     {
         if (is_array($this->curlMultiResponse) && count($this->curlMultiResponse) === 1) {
-            $url = key($this->curlMultiResponse);
+            $url = (string)key($this->curlMultiResponse);
         }
 
         if (!$this->isCurlMulti) {
@@ -1059,7 +1060,7 @@ class CurlWrapper implements WrapperInterface
     public function getParsed($url = '')
     {
         if (is_array($this->curlMultiResponse) && count($this->curlMultiResponse) === 1) {
-            $url = key($this->curlMultiResponse);
+            $url = (string)key($this->curlMultiResponse);
         }
 
         return GenericParser::getParsed(

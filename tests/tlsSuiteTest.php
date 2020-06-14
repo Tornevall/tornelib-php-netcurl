@@ -8,8 +8,6 @@ use TorneLIB\Helpers\Version;
 use TorneLIB\Module\Config\WrapperConfig;
 use TorneLIB\Module\Network\Wrappers\CurlWrapper;
 
-define('LIB_ERROR_HTTP', true);
-
 try {
     Version::getRequiredVersion();
 } catch (Exception $e) {

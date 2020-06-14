@@ -14,8 +14,6 @@ use TorneLIB\Module\Config\WrapperConfig;
 use TorneLIB\Module\Network\Wrappers\CurlWrapper;
 use TorneLIB\Utils\Security;
 
-define('LIB_ERROR_HTTP', true);
-
 try {
     Version::getRequiredVersion();
 } catch (Exception $e) {

@@ -704,38 +704,31 @@ class NetWrapper implements WrapperInterface
     {
         $requestType = substr($name, 0, 3);
 
-        switch ($name) {
-            case 'setAuth':
-                // Abbreviation for setAuthentication.
-                return call_user_func_array([$this, 'setAuthentication'], $arguments);
-            default:
-                break;
+        if ($name === 'setAuth') {
+            // Abbreviation for setAuthentication.
+            return call_user_func_array([$this, 'setAuthentication'], $arguments);
         }
 
-        switch ($requestType) {
-            default:
-                if (method_exists($this->instance, $name)) {
-                    if ($instanceRequest = call_user_func_array([$this->instance, $name], $arguments)) {
-                        return $instanceRequest;
-                    }
-                } elseif (method_exists($this->CONFIG, $name)) {
-                    call_user_func_array(
-                        [
-                            $this->CONFIG,
-                            $name,
-                        ],
-                        $arguments
-                    );
-                    break;
-                }
-                throw new ExceptionHandler(
-                    sprintf('Undefined function: %s', $name),
-                    Constants::LIB_METHOD_OR_LIBRARY_UNAVAILABLE,
-                    null,
-                    null,
-                    $name
-                );
-                break;
+        if (method_exists($this->instance, $name)) {
+            if ($instanceRequest = call_user_func_array([$this->instance, $name], $arguments)) {
+                return $instanceRequest;
+            }
+        } elseif (method_exists($this->CONFIG, $name)) {
+            call_user_func_array(
+                [
+                    $this->CONFIG,
+                    $name,
+                ],
+                $arguments
+            );
+        } else {
+            throw new ExceptionHandler(
+                sprintf('Undefined function: %s', $name),
+                Constants::LIB_METHOD_OR_LIBRARY_UNAVAILABLE,
+                null,
+                null,
+                $name
+            );
         }
 
         return $this;

@@ -9,6 +9,7 @@
 /** @noinspection PhpSingleStatementWithBracesInspection */
 /** @noinspection PhpFullyQualifiedNameUsageInspection */
 /** @noinspection PhpUndefinedNamespaceInspection */
+/** @noinspection NotOptimalIfConditionsInspection */
 
 namespace TorneLIB\Module\Network\Wrappers;
 
@@ -154,6 +155,7 @@ class RssWrapper implements WrapperInterface
      */
     public function getVersion()
     {
+        /** @noinspection PhpUndefinedFieldInspection */
         $return = $this->version;
 
         if (empty($return)) {
@@ -179,6 +181,7 @@ class RssWrapper implements WrapperInterface
         } elseif (class_exists('Laminas\Feed\Reader\Reader')) {
             // If the http client in laminas is missing, fall back on our local wrappers. But instead of using
             // the netwrapper type RSS, we'll fetch the data as a regular data request to disable parts of the automation.
+            /** @noinspection NullPointerExceptionInspection */
             $this->requestResponseRaw = (new NetWrapper())
                 ->request(
                     $url,

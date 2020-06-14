@@ -80,6 +80,7 @@ class SimpleStreamWrapper implements WrapperInterface
      */
     public function getVersion()
     {
+        /** @noinspection PhpUndefinedFieldInspection */
         $return = $this->version;
 
         if (empty($return)) {
@@ -202,8 +203,8 @@ class SimpleStreamWrapper implements WrapperInterface
     {
         $return = '';
 
-        if (strtolower($key) === 'http' &&
-            isset($this->streamContentResponseHeader[0]) &&
+        if (isset($this->streamContentResponseHeader[0]) &&
+            strtolower($key) === 'http' &&
             preg_match('/^http\//i', $this->streamContentResponseHeader[0])
         ) {
             return (string)$this->streamContentResponseHeader[0];

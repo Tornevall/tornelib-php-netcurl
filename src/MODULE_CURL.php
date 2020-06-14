@@ -74,8 +74,6 @@ class MODULE_CURL
         $this->netWrapper = new NetWrapper();
         $this->flags = new Flags();
         $this->CONFIG = $this->netWrapper->getConfig();
-
-        return $this;
     }
 
     /**

@@ -199,8 +199,6 @@ class WrapperConfig
         $this->SSL = new WrapperSSL();
         $this->setThrowableHttpCodes();
         $this->setCurlDefaults();
-
-        return $this;
     }
 
     /**

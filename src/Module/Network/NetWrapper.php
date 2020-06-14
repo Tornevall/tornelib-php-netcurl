@@ -75,7 +75,6 @@ class NetWrapper implements WrapperInterface
     public function __construct()
     {
         $this->initializeWrappers();
-        return $this;
     }
 
     /**
@@ -653,7 +652,6 @@ class NetWrapper implements WrapperInterface
                     ]
                 );
             } catch (\Exception $externalException) {
-
             }
             // Break on first success.
             if (!is_null($returnable)) {
@@ -707,7 +705,8 @@ class NetWrapper implements WrapperInterface
                         [
                             $this->CONFIG,
                             $name,
-                        ], $arguments
+                        ],
+                        $arguments
                     );
                     break;
                 }

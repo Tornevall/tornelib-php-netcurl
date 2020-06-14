@@ -61,8 +61,6 @@ class WrapperSSL
         }
 
         $this->setContextUserAgent();
-
-        return $this;
     }
 
     /**

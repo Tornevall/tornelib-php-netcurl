@@ -8,6 +8,7 @@
 namespace TorneLIB\Module\Network\Wrappers;
 
 use Exception;
+use ReflectionException;
 use SoapClient;
 use SoapFault;
 use TorneLIB\Exception\ExceptionHandler;
@@ -107,6 +108,7 @@ class SoapClientWrapper implements WrapperInterface
     /**
      * SoapClientWrapper constructor.
      * @throws ExceptionHandler
+     * @throws Exception
      */
     public function __construct()
     {
@@ -159,9 +161,11 @@ class SoapClientWrapper implements WrapperInterface
 
     /**
      * @inheritDoc
+     * @throws ReflectionException
      */
     public function getVersion()
     {
+        /** @noinspection PhpUndefinedFieldInspection */
         $return = $this->version;
 
         if (empty($return)) {
@@ -298,7 +302,8 @@ class SoapClientWrapper implements WrapperInterface
         $this->CONFIG->getOptions();
         $this->getSoapInitErrorHandler();
         $streamOpt = $this->getPreparedProxyOptions($this->getConfig()->getStreamOptions());
-        if (version_compare(PHP_VERSION, '7.1.0', '>=')) {
+        // version_compare(PHP_VERSION, '7.1.0', '>=')
+        if (PHP_VERSION_ID >= 70100) {
             $this->soapClient = new SoapClient(
                 $this->getConfig()->getRequestUrl(),
                 $streamOpt
@@ -325,6 +330,8 @@ class SoapClientWrapper implements WrapperInterface
         }
 
         if (is_array($this->soapProxyOptions)) {
+            /** @noinspection AdditionOperationOnArraysInspection */
+            // + is intended.
             $streamOptions += $this->soapProxyOptions;
         }
 
@@ -337,6 +344,7 @@ class SoapClientWrapper implements WrapperInterface
      *
      * @return $this
      * @throws ExceptionHandler
+     * @throws Exception
      * @since 6.1.0
      */
     private function getSoapInit()
@@ -493,6 +501,7 @@ class SoapClientWrapper implements WrapperInterface
      * @param $userAgentString
      * @return WrapperConfig
      * @since 6.1.0
+     * @noinspection PhpUnusedPrivateMethodInspection
      */
     private function setUserAgent($userAgentString)
     {
@@ -503,6 +512,7 @@ class SoapClientWrapper implements WrapperInterface
      * @return mixed
      * @throws ExceptionHandler
      * @since 6.1.0
+     * @noinspection PhpUnusedPrivateMethodInspection
      */
     private function getUserAgent()
     {
@@ -662,13 +672,13 @@ class SoapClientWrapper implements WrapperInterface
             case 'get':
                 $getResponse = $this->getMagicGettableCall($methodContent, $name, $arguments);
                 if (!is_null($getResponse)) {
-                    return $getResponse;
+                    $return = $getResponse;
                 }
                 break;
             case 'set':
                 $getResponse = $this->getMagicSettableCall($name, $arguments);
                 if (!is_null($getResponse)) {
-                    return $getResponse;
+                    $return = $getResponse;
                 }
                 break;
             default:
@@ -844,6 +854,7 @@ class SoapClientWrapper implements WrapperInterface
      * @param $arguments
      * @return SoapClientWrapper
      * @throws ExceptionHandler
+     * @throws Exception
      * @since 6.1.0
      */
     public function __call($name, $arguments)

@@ -493,6 +493,7 @@ class SoapClientWrapper implements WrapperInterface
      * @param $userAgentString
      * @return WrapperConfig
      * @since 6.1.0
+     * @noinspection PhpUnusedPrivateMethodInspection
      */
     private function setUserAgent($userAgentString)
     {
@@ -503,6 +504,7 @@ class SoapClientWrapper implements WrapperInterface
      * @return mixed
      * @throws ExceptionHandler
      * @since 6.1.0
+     * @noinspection PhpUnusedPrivateMethodInspection
      */
     private function getUserAgent()
     {

@@ -641,12 +641,11 @@ class CurlWrapper implements WrapperInterface
     }
 
     /**
-     * @param bool $throw
      * @return $this
      * @throws ExceptionHandler
      * @since 6.1.0
      */
-    public function getCurlExceptions($throw = false)
+    public function getCurlExceptions()
     {
         if (is_array($this->curlMultiErrors)) {
             if (count($this->curlMultiErrors) === 1) {
@@ -664,7 +663,9 @@ class CurlWrapper implements WrapperInterface
                     null,
                     $this
                 );
-            } elseif (count($this->curlMultiErrors) > 1) {
+            }
+
+            if (count($this->curlMultiErrors) > 1) {
                 throw new ExceptionHandler(
                     'Multiple errors discovered in curl_multi request. Details are attached to this ExceptionHandler.',
                     Constants::LIB_NETCURL_CURL_MULTI_EXCEPTION_DISCOVERY,
@@ -750,12 +751,11 @@ class CurlWrapper implements WrapperInterface
     /**
      * @param $curlHandle
      * @param $httpCode
-     * @param Exception $previousException
      * @return CurlWrapper
      * @throws ExceptionHandler
      * @since 6.1.0
      */
-    private function getCurlException($curlHandle, $httpCode, $previousException = null)
+    private function getCurlException($curlHandle, $httpCode)
     {
         $errorString = curl_error($curlHandle);
         $errorCode = curl_errno($curlHandle);

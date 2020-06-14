@@ -201,8 +201,7 @@ class netWrapperTest extends TestCase
                 requestMethod::METHOD_POST,
                 dataType::NORMAL,
                 (new WrapperConfig())
-                    ->setUserAgent('Client2')
-                    ->setAuthentication($this->rEcomPipeU, $this->rEcomPipeP),
+                    ->setUserAgent('Client2'),
             ],
             $this->wsdl => [],
         ];
@@ -214,18 +213,23 @@ class netWrapperTest extends TestCase
         } catch (ExceptionHandler $e) {
             $f = (new Security())->getIniArray('disable_functions');
 
-            // Currently happens on driverless instances.
-            static::markTestIncomplete(
-                sprintf(
-                    "Exception %d aborted test: %s\nFunctions disabled during operation: %s.\nreqUrlData: %s\nallow_url_fopen=%s",
-                    $e->getCode(),
-                    $e->getMessage(),
-                    print_r($f, true),
-                    print_r($reqUrlData, true),
-                    (new Security())->getIniBoolean('allow_url_fopen')
-                )
+            $marktest = sprintf(
+                "Exception %d aborted test: %s\nFunctions disabled during operation: %s.\nallow_url_fopen=%s",
+                $e->getCode(),
+                $e->getMessage(),
+                print_r($f, true),
+                (new Security())->getIniBoolean('allow_url_fopen')
             );
-            return;
+
+            if (!function_exists('curl_version')) {
+                // Currently happens on driverless instances.
+                static::markTestIncomplete(
+                    $marktest
+                );
+                return;
+            }
+
+            throw $e;
         }
 
         $soapError = false;

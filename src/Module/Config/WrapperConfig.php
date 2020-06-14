@@ -1,4 +1,6 @@
-<?php /** @noinspection PhpComposerExtensionStubsInspection */
+<?php
+/** @noinspection PhpUndefinedMethodInspection */
+/** @noinspection PhpComposerExtensionStubsInspection */
 
 /**
  * Copyright © Tomas Tornevall / Tornevall Networks. All rights reserved.
@@ -852,10 +854,8 @@ class WrapperConfig
             if (isset($this->options[$key])) {
                 return $this->options[$key];
             }
-        } else {
-            if (isset($this->streamOptions[$key])) {
-                return $this->streamOptions[$key];
-            }
+        } elseif (isset($this->streamOptions[$key])) {
+            return $this->streamOptions[$key];
         }
 
         throw new ExceptionHandler(
@@ -1064,7 +1064,7 @@ class WrapperConfig
      */
     public function getAuthentication()
     {
-        return (array)$this->authData;
+        return $this->authData;
     }
 
     /**
@@ -1171,7 +1171,7 @@ class WrapperConfig
      */
     public function getUserAgent()
     {
-        $globalSignature = WrapperConfig::getSignature();
+        $globalSignature = self::getSignature();
         if (!empty($globalSignature)) {
             return $globalSignature;
         }
@@ -1235,7 +1235,7 @@ class WrapperConfig
      */
     public function getProduction()
     {
-        return !$this->getStaging() ? true : false;
+        return !$this->getStaging();
     }
 
     /**
@@ -1289,11 +1289,11 @@ class WrapperConfig
     public function setWsdlCache($cacheSet = 0, $ttlCache = null)
     {
         $this->streamOptions['cache_wsdl'] = $cacheSet;
-        if ((new Ini())->getIniSettable('soap.wsdl_cache_ttl') &&
-            !empty($ttlCache) &&
-            (int)$ttlCache
+        // Noinspection set to avoid unnecessary setups.
+        if ((int)$ttlCache > 0 &&
+            (new Ini())->getIniSettable('soap.wsdl_cache_ttl')
         ) {
-            ini_set('soap.wsdl_cache_ttl', 1);
+            ini_set('soap.wsdl_cache_ttl', $ttlCache);
         }
 
         return $this;

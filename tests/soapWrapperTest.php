@@ -115,7 +115,6 @@ class soapWrapperTest extends TestCase
     /**
      * @test
      * @throws ExceptionHandler
-     * @noinspection PhpUnhandledExceptionInspection
      */
     public function getSoapEmbeddedRandomRequest()
     {
@@ -325,6 +324,7 @@ class soapWrapperTest extends TestCase
 
     /**
      * @test
+     * @throws Exception
      */
     public function getSoapEmbeddedNoWsdl()
     {

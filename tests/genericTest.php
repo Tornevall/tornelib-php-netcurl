@@ -1,4 +1,4 @@
-<?php
+<?php /** @noinspection PhpDeprecationInspection */
 
 use PHPUnit\Framework\TestCase;
 use TorneLIB\Exception\Constants;

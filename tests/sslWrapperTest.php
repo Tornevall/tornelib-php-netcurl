@@ -84,6 +84,7 @@ class sslWrapperTest extends TestCase
      */
     public function getPreparedSslContext()
     {
+        /** @noinspection PhpUnitTestsInspection */
         static::assertTrue(is_resource((new WrapperSSL())->getSslStreamContext()['stream_context']));
     }
 }

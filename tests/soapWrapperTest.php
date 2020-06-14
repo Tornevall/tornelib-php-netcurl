@@ -67,6 +67,7 @@ class soapWrapperTest extends TestCase
 
     /**
      * @test
+     * @noinspection PhpUnitTestsInspection
      */
     public function basicSoapClient()
     {
@@ -75,12 +76,13 @@ class soapWrapperTest extends TestCase
             return;
         }
         $soapWrapper = new SoapClientWrapper();
+        // assertIsObject does not always exist
         static::assertTrue(is_object($soapWrapper));
     }
 
     /**
      * @test
-     * @throws ExceptionHandler
+     * @noinspection PhpUnitTestsInspection
      */
     public function getSoapUninitialized()
     {
@@ -89,9 +91,8 @@ class soapWrapperTest extends TestCase
             return;
         }
         $soapWrapper = (new SoapClientWrapper());
-        static::assertTrue(
-            is_object($soapWrapper)
-        );
+        // assertIsObject does not always exist
+        static::assertTrue(is_object($soapWrapper));
     }
 
     /**
@@ -106,12 +107,14 @@ class soapWrapperTest extends TestCase
         }
         $soapWrapper = new SoapClientWrapper();
         $soapContext = $soapWrapper->getStreamContext();
-        static::assertTrue(!empty($soapContext['http']));
+        static::assertNotEmpty($soapContext['http']);
     }
 
     /**
      * @test
      * @throws ExceptionHandler
+     * @noinspection PhpUnhandledExceptionInspection
+     * @noinspection PhpUndefinedMethodInspection
      */
     public function getSoapEmbeddedRandomRequest()
     {
@@ -144,6 +147,7 @@ class soapWrapperTest extends TestCase
      * Test writing directly to stream_context instead of going through WrapperConfig. Also trying to use
      * overwritable flagset, as user_agent is normally internally protected from overwriting when going this way.
      * @throws ExceptionHandler
+     * @noinspection PhpUndefinedMethodInspection
      */
     public function getSoapEmbeddedRandomRequestInstantStream()
     {
@@ -203,7 +207,7 @@ class soapWrapperTest extends TestCase
             $message = $e->getMessage(); // expect: failed to open stream: Unable to find the socket transport
             static::assertTrue(
                 $e->getCode() === 2 &&
-                preg_match('/unable(.*?)transport/is', $message) ? true : false
+                (bool)preg_match('/unable(.*?)transport/is', $message)
             );
         }
     }

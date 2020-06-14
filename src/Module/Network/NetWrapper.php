@@ -6,6 +6,7 @@
 
 namespace TorneLIB\Module\Network;
 
+use Exception;
 use ReflectionException;
 use TorneLIB\Exception\Constants;
 use TorneLIB\Exception\ExceptionHandler;
@@ -462,6 +463,7 @@ class NetWrapper implements WrapperInterface
             } catch (ExceptionHandler $e) {
                 $method = requestMethod::METHOD_POST;
                 $dataType = dataType::XML;
+                /** @noinspection CallableParameterUseCaseInTypeContextInspection */
                 if (!is_string($data) && !empty($data)) {
                     $data = (new Content())->getXmlFromArray($data);
                 }
@@ -481,6 +483,8 @@ class NetWrapper implements WrapperInterface
             $return = $this->instance->request($url, $data, $method, $dataType);
         } elseif ($this->getProperInstanceWrapper('CurlWrapper')) {
             $this->instance->setConfig($this->getConfig());
+            /** @noinspection PhpPossiblePolymorphicInvocationInspection */
+            // No inspection since assuming this is always a curl-based call.
             $this->instance->setCurlMultiInstantException($this->instantCurlMultiErrors);
             $return = $this->instance->request($url, $data, $method, $dataType);
         } elseif ($this->getProperInstanceWrapper('SimpleStreamWrapper')) {
@@ -497,7 +501,7 @@ class NetWrapper implements WrapperInterface
     /**
      * Set up proxy.
      *
-     * @param $proxyAddress Normal usage is address:post.
+     * @param string $proxyAddress Normal usage is address:post.
      * @param int $proxyType Default: 0 = HTTP
      * @return $this
      * @since 6.1.0
@@ -665,7 +669,7 @@ class NetWrapper implements WrapperInterface
                     $this->CONFIG->setCurrentWrapper(get_class($wrapperClass));
                     $returnable = $wrapperClass->request($url, $data, $method, $dataType);
                 }
-            } catch (\Exception $externalException) {
+            } catch (Exception $externalException) {
             }
             // Break on first success.
             if (!is_null($returnable)) {

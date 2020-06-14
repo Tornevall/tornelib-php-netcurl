@@ -26,6 +26,7 @@ class netWrapperTest extends TestCase
     /**
      * @return bool
      * @throws ExceptionHandler
+     * @noinspection DuplicatedCode
      */
     private function canProxy()
     {
@@ -77,12 +78,9 @@ class netWrapperTest extends TestCase
     {
         $netWrap = new NetWrapper();
         $realWrap = WrapperDriver::getWrappers();
-        static::assertTrue(
-            (
-            count($netWrap->getWrappers()) > 0 ? true : false &&
-            count($realWrap) > 0 ? true : false
-            ) ? true : false
-        );
+        $hasWrappers = count($netWrap->getWrappers()) > 0;
+        $hasWrappersReal = count($realWrap) > 0;
+        static::assertTrue($hasWrappers && $hasWrappersReal);
     }
 
     /**
@@ -108,15 +106,11 @@ class netWrapperTest extends TestCase
     public function sigGet()
     {
         WrapperConfig::setSignature('Korven skriker.');
-
         $wrapper = (new NetWrapper())
             ->request(sprintf('https://ipv4.netcurl.org/?func=%s', __FUNCTION__));
-
         $parsed = $wrapper->getParsed();
-
         WrapperConfig::deleteSignature();
-
-        static::assertTrue($parsed->HTTP_USER_AGENT === 'Korven skriker.');
+        static::assertSame($parsed->HTTP_USER_AGENT, 'Korven skriker.');
     }
 
     /**
@@ -186,7 +180,13 @@ class netWrapperTest extends TestCase
      */
     public function multiNetWrapper()
     {
+        /** @noinspection PhpUnusedLocalVariableInspection */
+        $p = new stdClass();
+
         $secondUrl = 'https://ipv4.netcurl.org/?2&PHP=' . PHP_VERSION;
+        if (!function_exists('curl_version')) {
+            $secondUrl .= "&isDriverLess=true";
+        }
 
         // Separate array to make it easier to see what we're doing.
         $reqUrlData = [
@@ -203,10 +203,16 @@ class netWrapperTest extends TestCase
                 (new WrapperConfig())
                     ->setUserAgent('Client2'),
             ],
-            $this->wsdl => [],
+            $this->wsdl => [
+                [],
+                null,
+                null,
+                (new WrapperConfig())
+                    ->setUserAgent('Client3')
+                    ->setAuthentication($this->rEcomPipeU, $this->rEcomPipeP),
+            ],
         ];
 
-        $p = new stdClass();
         try {
             $info = (new NetWrapper())->request($reqUrlData);
             $p = $info->getParsed($secondUrl);
@@ -214,10 +220,11 @@ class netWrapperTest extends TestCase
             $f = (new Security())->getIniArray('disable_functions');
 
             $marktest = sprintf(
-                "Exception %d aborted test: %s\nFunctions disabled during operation: %s.\nallow_url_fopen=%s",
+                "Exception %d aborted test: %s\nFunctions disabled during operation: %s.\nSecondURL: %s\nallow_url_fopen=%s",
                 $e->getCode(),
                 $e->getMessage(),
                 print_r($f, true),
+                $secondUrl,
                 (new Security())->getIniBoolean('allow_url_fopen')
             );
 
@@ -250,7 +257,7 @@ class netWrapperTest extends TestCase
                 (
                     is_array($paymentMethods) &&
                     count($paymentMethods)
-                ) || $soapError
+                )
             ) &&
             $info->getCode($secondUrl) === 200
         );

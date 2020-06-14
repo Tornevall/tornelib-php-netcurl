@@ -643,7 +643,6 @@ class NetWrapper implements WrapperInterface
     ) {
         $return = null;
         $hasInternalSuccess = false;
-
         $externalWrapperList = WrapperDriver::getExternalWrappers();
         // Walk through external wrappers.
         foreach ($externalWrapperList as $wrapperClass) {

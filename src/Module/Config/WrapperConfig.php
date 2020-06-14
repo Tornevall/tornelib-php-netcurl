@@ -266,12 +266,7 @@ class WrapperConfig
             $this->throwableHttpCodes = [];
         }
         foreach ($this->throwableHttpCodes as $codeListArray => $codeArray) {
-            if ((
-                    isset($codeArray[1]) &&
-                    $httpCode >= (int)$codeArray[0] &&
-                    $httpCode <= (int)$codeArray[1]
-                ) || $forceException
-            ) {
+            if ((isset($codeArray[1]) && $httpCode >= (int)$codeArray[0] && $httpCode <= (int)$codeArray[1]) || $forceException) {
                 throw new ExceptionHandler(
                     sprintf(
                         'Error %d returned from server: "%s".',
@@ -1243,6 +1238,7 @@ class WrapperConfig
      *
      * @return array
      * @since 6.1.0
+     * @noinspection PhpUnusedPrivateMethodInspection
      */
     private function getTimeout()
     {
@@ -1404,7 +1400,7 @@ class WrapperConfig
      */
     public function setUserAgentSignature($userAgentSignatureString)
     {
-        WrapperConfig::setSignature($userAgentSignatureString);
+        self::setSignature($userAgentSignatureString);
         return $this;
     }
 
@@ -1414,7 +1410,7 @@ class WrapperConfig
      */
     public function getUserAgentSignature()
     {
-        return WrapperConfig::getSignature();
+        return self::getSignature();
     }
 
     /**
@@ -1482,9 +1478,9 @@ class WrapperConfig
         if (!empty($url)) {
             $this->setRequestUrl($url);
         }
-        if ((is_array($data) && count($data)) ||
-            (is_string($data) && strlen($data) > 0)
-        ) {
+        /** @noinspection CallableParameterUseCaseInTypeContextInspection */
+        /** @var mixed $data */
+        if ((is_string($data) && $data !== '') || (is_array($data) && count($data))) {
             $this->setRequestData($data);
         }
 
@@ -1515,7 +1511,7 @@ class WrapperConfig
         $allowedTypes = ['get', 'is', 'set'];
         foreach ($allowedTypes as $item) {
             $testItem = @substr($name, 0, strlen($item));
-            if (in_array($testItem, $allowedTypes)) {
+            if (in_array($testItem, $allowedTypes, false)) {
                 $methodType = $testItem;
                 $cutAfter = strlen($item);
             }

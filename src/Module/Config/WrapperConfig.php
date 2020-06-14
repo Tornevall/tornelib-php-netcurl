@@ -265,10 +265,10 @@ class WrapperConfig
         }
         foreach ($this->throwableHttpCodes as $codeListArray => $codeArray) {
             if ((
-                isset($codeArray[1]) &&
+                    isset($codeArray[1]) &&
                     $httpCode >= (int)$codeArray[0] &&
                     $httpCode <= (int)$codeArray[1]
-            ) || $forceException
+                ) || $forceException
             ) {
                 throw new ExceptionHandler(
                     sprintf(
@@ -632,13 +632,11 @@ class WrapperConfig
                 ) {
                     if (!isset($currentStreamContext[$subKey][$key])) {
                         $currentStreamContext[$subKey][$key] = $value;
+                    } elseif ($key === 'header') {
+                        $currentStreamContext[$subKey][$key] .= "\r\n" . $value;
                     } else {
-                        if ($key === 'header') {
-                            $currentStreamContext[$subKey][$key] .= "\r\n" . $value;
-                        } else {
-                            // Overwrite if not header context.
-                            $currentStreamContext[$subKey][$key] = $value;
-                        }
+                        // Overwrite if not header context.
+                        $currentStreamContext[$subKey][$key] = $value;
                     }
                 }
             }
@@ -662,14 +660,18 @@ class WrapperConfig
 
         $return = in_array(
             $key,
-            array_map('strtolower', $this->irreplacable)
+            array_map('strtolower', $this->irreplacable),
+            false
         ) ? false : true;
 
         // Dynamic override.
-        if (is_array($dynamicOverwrites) && in_array(
-            $key,
-            $dynamicOverwrites
-        )
+        if (
+            is_array($dynamicOverwrites) &&
+            in_array(
+                $key,
+                $dynamicOverwrites,
+                false
+            )
         ) {
             $return = true;
         }
@@ -753,7 +755,7 @@ class WrapperConfig
     {
         $return = null;
 
-        if (preg_match('/CURL/', $key)) {
+        if (false !== strpos($key, 'CURL')) {
             $constantValue = @constant('TorneLIB\Module\Config\WrapperCurlOpt::NETCURL_' . $key);
             if (!empty($constantValue)) {
                 $return = $constantValue;
@@ -805,9 +807,9 @@ class WrapperConfig
         $this->setDualStreamHttp(
             'proxy',
             sprintf(
-            'tcp://%s',
-            $proxyAddress
-        )
+                'tcp://%s',
+                $proxyAddress
+            )
         );
         $this->setDualStreamHttp('request_fulluri', true);
 

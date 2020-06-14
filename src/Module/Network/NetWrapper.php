@@ -702,8 +702,6 @@ class NetWrapper implements WrapperInterface
      */
     public function __call($name, $arguments)
     {
-        $requestType = substr($name, 0, 3);
-
         if ($name === 'setAuth') {
             // Abbreviation for setAuthentication.
             return call_user_func_array([$this, 'setAuthentication'], $arguments);

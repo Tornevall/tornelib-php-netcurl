@@ -1,4 +1,5 @@
-<?php
+<?php /** @noinspection PhpComposerExtensionStubsInspection */
+
 /**
  * Copyright © Tomas Tornevall / Tornevall Networks. All rights reserved.
  * See LICENSE for license details.
@@ -44,7 +45,7 @@ class GenericParser
             if (
                 (
                     $returnData === 'code' &&
-                    intval($headContent[1]) > 0
+                    (int)$headContent[1] > 0
                 ) ||
                 (
                     !is_numeric($headContent[0]) &&
@@ -89,7 +90,7 @@ class GenericParser
         $return = $content;
 
         switch ($contentType) {
-            case (!empty($contentType) && preg_match('/\/xml|\+xml/i', $contentType) ? true : false):
+            case !empty($contentType) && preg_match('/\/xml|\+xml/i', $contentType):
                 // More detection possibilites.
                 /* <?xml version="1.0" encoding="UTF-8"?><rss version="2.0"*/
 
@@ -100,12 +101,13 @@ class GenericParser
                 }
                 $return = (new Content())->getFromXml($content);
                 break;
-            case (preg_match('/\/json/i', $contentType) ? true : false):
+            case (bool)preg_match('/\/json/i', $contentType):
+                // If this check is not a typecasted check, things will break bad.
                 if (is_array($content)) {
                     // Did we get bad content?
                     $content = json_encode($content);
                 }
-                $return = json_decode($content);
+                $return = json_decode($content, false);
                 break;
             default:
                 break;

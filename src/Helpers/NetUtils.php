@@ -34,10 +34,8 @@ class NetUtils
                         if (($currentTag = $this->getGitTagsSanitized($tag, $numericsSanitized))) {
                             $return[] = $currentTag;
                         }
-                    } else {
-                        if (!isset($return[$tag])) {
-                            $return[$tag] = $tag;
-                        }
+                    } elseif (!isset($return[$tag])) {
+                        $return[$tag] = $tag;
                     }
                 }
             }
@@ -84,12 +82,10 @@ class NetUtils
         foreach ($splitTag as $tagValue) {
             if (is_numeric($tagValue)) {
                 $tagArrayUnCombined[] = $tagValue;
-            } else {
-                if ($numericsSanitized) {
-                    // Sanitize string if content is dual.
-                    $numericStringOnly = preg_replace("/[^0-9$]/is", '', $tagValue);
-                    $tagArrayUnCombined[] = $numericStringOnly;
-                }
+            } elseif ($numericsSanitized) {
+                // Sanitize string if content is dual.
+                $numericStringOnly = preg_replace("/[^0-9$]/", '', $tagValue);
+                $tagArrayUnCombined[] = $numericStringOnly;
             }
         }
 

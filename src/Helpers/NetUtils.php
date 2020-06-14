@@ -17,6 +17,8 @@ use TorneLIB\Module\Network\NetWrapper;
 class NetUtils {
     /**
      * @param $gitRequest
+     * @param bool $numericsOnly
+     * @param bool $numericsSanitized
      * @return array
      * @since 6.1.0
      */

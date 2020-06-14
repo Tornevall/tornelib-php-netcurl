@@ -46,9 +46,14 @@ class GenericParser
                     $returnData === 'code' &&
                     intval($headContent[1]) > 0
                 ) ||
-                (!is_numeric($headContent[0]) &&
-                    preg_match('/^http/i', $headContent[0]) &&
-                    preg_match('/\s/', $headContent[1]))
+                (
+                    !is_numeric($headContent[0]) &&
+                    0 === stripos($headContent[0], "http") &&
+                    preg_match(
+                        '/\s/',
+                        $headContent[1]
+                    )
+                )
             ) {
                 // Drop one to the left, and retry.
                 $headContent = explode(' ', trim($headContent[1]), 2);

@@ -16,6 +16,7 @@ class simpleStreamWrapperTest extends TestCase
     /**
      * @return bool
      * @throws ExceptionHandler
+     * @noinspection DuplicatedCode
      */
     private function canProxy()
     {
@@ -49,11 +50,13 @@ class simpleStreamWrapperTest extends TestCase
         // Base streamwrapper (file_get_contents, fopen, etc) is only allowed if allow_url_fopen is available.
         $stream = (new SimpleStreamWrapper());
 
+        /** @noinspection PhpUnitTestsInspection */
         static::assertTrue(is_object($stream));
     }
 
     /**
      * @test
+     * @throws ExceptionHandler
      */
     public function getBasicUrl()
     {
@@ -66,12 +69,8 @@ class simpleStreamWrapperTest extends TestCase
         $parsed = $response->getParsed();
 
         static::assertTrue(
-            strlen($body) > 100 &&
-            isset($parsed->ip) &&
-            (
-                isset($parsed->HTTP_USER_AGENT) &&
-                $parsed->HTTP_USER_AGENT === 'SimpleStreamWrapper'
-            )
+            isset($parsed->ip, $parsed->HTTP_USER_AGENT) && strlen($body) > 100 &&
+            $parsed->HTTP_USER_AGENT === 'SimpleStreamWrapper'
         );
     }
 
@@ -84,7 +83,8 @@ class simpleStreamWrapperTest extends TestCase
         $stream = (new SimpleStreamWrapper())->setConfig(
             (new WrapperConfig())->setUserAgent('SimpleStreamWrapper')
         )->setAuthentication(
-            'testUser', 'hasNoEffectHere'
+            'testUser',
+            'hasNoEffectHere'
         );
         $response = $stream->request(
             'http://ipv4.netcurl.org/',
@@ -95,19 +95,21 @@ class simpleStreamWrapperTest extends TestCase
         )->getParsed();
 
         static::assertTrue(
-            isset($response->PARAMS_POST) && isset($response->PARAMS_POST->postData)
+            isset($response->PARAMS_POST, $response->PARAMS_POST->postData)
         );
     }
 
     /**
      * @test
+     * @throws ExceptionHandler
      */
     public function getBasicJson()
     {
         $stream = (new SimpleStreamWrapper())->setConfig(
             (new WrapperConfig())->setUserAgent('SimpleStreamWrapper')
         )->setAuthentication(
-            'testUser', 'hasNoEffectHere'
+            'testUser',
+            'hasNoEffectHere'
         );
         $response = $stream->request(
             'http://ipv4.netcurl.org/',
@@ -132,7 +134,8 @@ class simpleStreamWrapperTest extends TestCase
         $stream = (new SimpleStreamWrapper())->setConfig(
             (new WrapperConfig())->setUserAgent('SimpleStreamWrapper')
         )->setAuthentication(
-            'testUser', 'hasNoEffectHere'
+            'testUser',
+            'hasNoEffectHere'
         );
         $response = $stream->request(
             'http://ipv4.netcurl.org/',
@@ -153,6 +156,7 @@ class simpleStreamWrapperTest extends TestCase
      * To get access to simplestreamwrapper, set below:
      * allow_url_fopen = Off
      * disable_functions = curl_exec,curl_init,openssl_encrypt
+     * @throws ExceptionHandler
      */
     public function getBasicNetwrapper()
     {
@@ -161,25 +165,27 @@ class simpleStreamWrapperTest extends TestCase
         $stream->request('http://ipv4.netcurl.org/')->getParsed();
         $currentWrapper = $stream->getCurrentWrapperClass(true);
 
-        static::assertTrue(
-            !empty($currentWrapper)
+        static::assertNotEmpty(
+            $currentWrapper
         );
     }
 
     /**
      * @test
+     * @throws ExceptionHandler
      */
     public function getBasicNetwrapperClient()
     {
         $stream = (new NetWrapper());
         $stream->setIdentifiers(true, true); // spoofable advanced
+        /** @noinspection PhpUndefinedMethodInspection */
         $stream->setUserAgent('World Dominator');
         $stream->request('http://ipv4.netcurl.org/')->getParsed();
         $content = $stream->getParsed();
 
         static::assertTrue(
             isset($content->HTTP_USER_AGENT) &&
-            preg_match('/world dominator/i', $content->HTTP_USER_AGENT) ? true : false
+            preg_match('/world dominator/i', $content->HTTP_USER_AGENT)
         );
     }
 

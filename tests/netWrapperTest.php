@@ -4,14 +4,10 @@ require_once(__DIR__ . '/../vendor/autoload.php');
 
 use PHPUnit\Framework\TestCase;
 use TorneLIB\Exception\ExceptionHandler;
-use TorneLIB\Model\Type\dataType;
-use TorneLIB\Model\Type\requestMethod;
 use TorneLIB\Module\Config\WrapperConfig;
 use TorneLIB\Module\Config\WrapperDriver;
 use TorneLIB\Module\Network\NetWrapper;
 use TorneLIB\Module\Network\Wrappers\CurlWrapper;
-use TorneLIB\Module\Network\Wrappers\SoapClientWrapper;
-use TorneLIB\Utils\Security;
 
 /**
  * Class netcurlTest
@@ -19,10 +15,6 @@ use TorneLIB\Utils\Security;
  */
 class netWrapperTest extends TestCase
 {
-    private $rEcomPipeU = 'tornevall';
-    private $rEcomPipeP = '2suyqJRXyd8YBGxTz42xr7g1tCWW6M2R';
-    private $wsdl = 'https://test.resurs.com/ecommerce-test/ws/V4/SimplifiedShopFlowService?wsdl';
-
     /**
      * @return bool
      * @throws ExceptionHandler
@@ -85,6 +77,7 @@ class netWrapperTest extends TestCase
 
     /**
      * @test
+     * @throws ExceptionHandler
      */
     public function basicGet()
     {
@@ -131,9 +124,7 @@ class netWrapperTest extends TestCase
             if (is_array($rss)) {
                 // Weak assertion.
                 static::assertTrue(
-                    isset($rss[0]) &&
-                    isset($rss[0][0]) &&
-                    strlen($rss[0][0]) > 5
+                    isset($rss[0][0]) && strlen($rss[0][0]) > 5
                 );
             } else {
                 static::assertTrue(
@@ -154,6 +145,7 @@ class netWrapperTest extends TestCase
 
     /**
      * @test
+     * @throws ExceptionHandler
      */
     public function netWrapperProxy()
     {

@@ -78,8 +78,9 @@ class MODULE_CURL
 
     /**
      * @param string $url
-     * @param int $postDataType
+     * @param dataType|int $postDataType
      * @return mixed|null
+     * @throws ExceptionHandler
      * @deprecated Avoid this method. Use request.
      * @since 6.1.0
      */
@@ -104,12 +105,42 @@ class MODULE_CURL
 
     /**
      * @param $requestType
-     * @return requestMethod
+     * @return int|requestMethod
      * @since 6.1.0
      */
     private function getDeprecatedRequest($requestType)
     {
         return isset($this->deprecatedRequest[$requestType]) ? $this->deprecatedRequest[$requestType] : requestMethod::METHOD_GET;
+    }
+
+    /**
+     * @param $deprecatedRequestName
+     * @param $arguments
+     * @return mixed|NetWrapper|null
+     * @throws ExceptionHandler
+     * @since 6.1.1
+     */
+    private function getDeprecatedRequestResult($deprecatedRequestName, $arguments)
+    {
+        if ($deprecatedRequestName == 'get') {
+            $return = $this->netWrapper->request(
+                isset($arguments[0]) ? $arguments[0] : null,
+                [],
+                $this->getDeprecatedRequest('get'),
+                isset($arguments[1]) ? $arguments[1] : null
+            );
+        } else {
+            $return = $this->netWrapper->request(
+                isset($arguments[0]) ? $arguments[0] : null,
+                isset($arguments[1]) ? $arguments[1] : null,
+                isset($deprecatedRequestName) ? $this->getDeprecatedRequest(
+                    $deprecatedRequestName
+                ) : $this->getDeprecatedRequest('post'),
+                isset($arguments[2]) ? $arguments[2] : null
+            );
+        }
+
+        return $return;
     }
 
     /**
@@ -120,7 +151,7 @@ class MODULE_CURL
      */
     private function isObsolete($name)
     {
-        if (in_array($name, $this->deprecatedMethod)) {
+        if (in_array($name, $this->deprecatedMethod, false)) {
             throw new ExceptionHandler(
                 sprintf(
                     'This method (%s) is obsolete and no longer part of %s.',
@@ -158,17 +189,25 @@ class MODULE_CURL
                 [$this, $name],
                 $arguments
             );
-        } elseif (method_exists($this->CONFIG, $name)) {
+        }
+
+        if (method_exists($this->CONFIG, $name)) {
             return call_user_func_array(
                 [$this->CONFIG, $name],
                 $arguments
             );
-        } elseif (preg_match('/^(.*)Flag$/', $name)) {
+        }
+
+        if (preg_match('/^(.*)Flag$/', $name)) {
             return call_user_func_array([$this->flags, $name], $arguments);
-        } elseif ($requestType === 'set') {
+        }
+
+        if ($requestType === 'set') {
             $arguments = array_merge([$requestName], $arguments);
             return call_user_func_array([$this->flags, 'setFlag'], $arguments);
-        } elseif ($requestType === 'get') {
+        }
+
+        if ($requestType === 'get') {
             $arguments = array_merge([$requestName], $arguments);
             $getFlagResponse = call_user_func_array([$this->flags, 'getFlag'], $arguments);
 
@@ -180,28 +219,10 @@ class MODULE_CURL
             }
 
             return $getFlagResponse;
-        } elseif ($deprecatedRequest === 'do') {
-            switch ($deprecatedRequestName) {
-                case 'get':
-                    $return = $this->netWrapper->request(
-                        isset($arguments[0]) ? $arguments[0] : null,
-                        [],
-                        $this->getDeprecatedRequest('get'),
-                        isset($arguments[1]) ? $arguments[1] : null
-                    );
-                    break;
-                default:
-                    $return = $this->netWrapper->request(
-                        isset($arguments[0]) ? $arguments[0] : null,
-                        isset($arguments[1]) ? $arguments[1] : null,
-                        isset($deprecatedRequestName) ? $this->getDeprecatedRequest(
-                            $deprecatedRequestName
-                        ) : $this->getDeprecatedRequest('post'),
-                        isset($arguments[2]) ? $arguments[2] : null
-                    );
-                    break;
-            }
-            return $return;
+        }
+
+        if ($deprecatedRequest === 'do') {
+            return $this->getDeprecatedRequestResult($deprecatedRequestName, $arguments);
         }
     }
 }

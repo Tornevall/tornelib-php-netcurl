@@ -6,7 +6,6 @@
 
 namespace TorneLIB\Helpers;
 
-use TorneLIB\Exception\ExceptionHandler;
 use TorneLIB\Module\Network\NetWrapper;
 
 /**
@@ -14,7 +13,8 @@ use TorneLIB\Module\Network\NetWrapper;
  * @package TorneLIB\Helpers
  * @since 6.1.0
  */
-class NetUtils {
+class NetUtils
+{
     /**
      * @param $gitRequest
      * @param bool $numericsOnly

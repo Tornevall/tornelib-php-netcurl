@@ -104,12 +104,11 @@ class NetUtils
      * getGitTagsByUrl (From 6.1, the $keepCredentials has no effect).
      *
      * @param $url
-     * @param bool $numericsOnly
-     * @param bool $numericsSanitized
      * @return array
      * @since 6.0.4 Moved from Network Library.
+     * @noinspection PhpUndefinedMethodInspection
      */
-    public function getGitTagsByUrl($url, $numericsOnly = false, $numericsSanitized = false)
+    public function getGitTagsByUrl($url)
     {
         $url .= "/info/refs?service=git-upload-pack";
         $gitRequest = (new NetWrapper())->setTimeout(10)->request($url);
@@ -120,10 +119,9 @@ class NetUtils
      * @param $giturl
      * @param $version1
      * @param $version2
-     * @param $operator
      * @return array
      */
-    public function getGitTagsByVersion($giturl, $version1, $version2, $operator)
+    public function getGitTagsByVersion($giturl, $version1, $version2)
     {
         $return = [];
         $versionList = $this->getGitTagsByUrl($giturl);
@@ -131,7 +129,7 @@ class NetUtils
             foreach ($versionList as $versionNum) {
                 if (version_compare($versionNum, $version1, '>=') &&
                     version_compare($versionNum, $version2, '<=') &&
-                    !in_array($versionNum, $return)
+                    !in_array($versionNum, $return, false)
                 ) {
                     $return[] = $versionNum;
                 }
@@ -148,7 +146,7 @@ class NetUtils
      */
     public function getHigherVersions($gitUrl, $yourVersion = '')
     {
-        $versionArray = $this->getGitTagsByUrl($gitUrl, true, true);
+        $versionArray = $this->getGitTagsByUrl($gitUrl);
         $versionsHigher = [];
         foreach ($versionArray as $tagVersion) {
             if (version_compare($tagVersion, $yourVersion, ">")) {

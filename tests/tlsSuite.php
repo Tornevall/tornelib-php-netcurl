@@ -19,7 +19,7 @@ try {
  * Class curlWrapperTest
  * @version 6.1.0
  */
-class curlWrapperTest extends TestCase
+class tlsSuiteTest extends TestCase
 {
     /**
      * @test

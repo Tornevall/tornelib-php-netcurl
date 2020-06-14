@@ -333,6 +333,7 @@ class NetWrapper implements WrapperInterface
     /**
      * @param $requestArray
      * @return array
+     * @throws ExceptionHandler
      * @since 6.1.0
      */
     private function handleMultiUrl($requestArray)
@@ -363,6 +364,7 @@ class NetWrapper implements WrapperInterface
     /**
      * @param $url
      * @return NetWrapper
+     * @throws ExceptionHandler
      * @since 6.1.0
      */
     private function getMultiInternalRequest($url)
@@ -373,6 +375,7 @@ class NetWrapper implements WrapperInterface
 
     /**
      * @inheritDoc
+     * @throws ExceptionHandler
      * @since 6.1.0
      */
     public function request($url, $data = [], $method = requestMethod::METHOD_GET, $dataType = dataType::NORMAL)
@@ -413,7 +416,7 @@ class NetWrapper implements WrapperInterface
             $dataType
         )) {
             $return = $hasReturnedRequest;
-        };
+        }
 
         $externalWrapperList = WrapperDriver::getExternalWrappers();
         // Internal handles are usually throwing execptions before landing here.
@@ -452,7 +455,7 @@ class NetWrapper implements WrapperInterface
     ) {
         $return = null;
 
-        if (!is_array($url) && preg_match('/\?wsdl|\&wsdl/i', $url)) {
+        if (!is_array($url) && preg_match('/\?wsdl|&wsdl/i', $url)) {
             try {
                 Security::getCurrentClassState('SoapClient');
                 $dataType = dataType::SOAP;

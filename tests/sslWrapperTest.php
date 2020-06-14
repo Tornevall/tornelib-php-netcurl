@@ -1,6 +1,7 @@
 <?php
 
 use PHPUnit\Framework\TestCase;
+use TorneLIB\Exception\Constants;
 use TorneLIB\Flags;
 use TorneLIB\Module\Config\WrapperSSL;
 use TorneLIB\Helpers\Version;
@@ -28,11 +29,10 @@ class sslWrapperTest extends TestCase
         /** @noinspection PhpUndefinedMethodInspection */
         Flags::_setFlag('NETCURL_NOSSL_TEST');
         try {
-            /** @var WrapperSSL $SSL */
             $SSL = new WrapperSSL();
             $SSL->getSslCapabilities();
         } catch (\Exception $e) {
-            static::assertTrue($e->getCode() === 500);
+            static::assertSame($e->getCode(), Constants::LIB_SSL_UNAVAILABLE);
         }
 
         /** @noinspection PhpUndefinedMethodInspection */

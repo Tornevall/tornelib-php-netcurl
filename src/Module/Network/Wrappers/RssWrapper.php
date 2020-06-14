@@ -4,8 +4,15 @@
  * See LICENSE for license details.
  */
 
+// Inspections should be ignored here as this is a depending-environment-based class.
+/** @noinspection PhpUndefinedClassInspection */
+/** @noinspection PhpSingleStatementWithBracesInspection */
+/** @noinspection PhpFullyQualifiedNameUsageInspection */
+
 namespace TorneLIB\Module\Network\Wrappers;
 
+use Exception;
+use TorneLIB\Exception\ExceptionHandler;
 use TorneLIB\Helpers\Version;
 use TorneLIB\Model\Interfaces\WrapperInterface;
 use TorneLIB\Model\Type\authType;
@@ -142,6 +149,7 @@ class RssWrapper implements WrapperInterface
 
     /**
      * @inheritDoc
+     * @throws \ReflectionException
      */
     public function getVersion()
     {
@@ -156,6 +164,7 @@ class RssWrapper implements WrapperInterface
 
     /**
      * @inheritDoc
+     * @throws ExceptionHandler
      */
     public function request(
         $url,

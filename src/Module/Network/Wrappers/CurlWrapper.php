@@ -1,9 +1,9 @@
-<?php /** @noinspection PhpComposerExtensionStubsInspection */
-
+<?php
 /**
  * Copyright © Tomas Tornevall / Tornevall Networks. All rights reserved.
  * See LICENSE for license details.
  */
+/** @noinspection PhpComposerExtensionStubsInspection */
 
 namespace TorneLIB\Module\Network\Wrappers;
 
@@ -112,13 +112,6 @@ class CurlWrapper implements WrapperInterface
      * @since 6.1.0
      */
     private $curlMultiResponse;
-
-    /**
-     * Data that probably should be added to the user-agent.
-     * @var string
-     * @since 6.1.0
-     */
-    private $curlVersion;
 
     /**
      * @var array
@@ -583,10 +576,9 @@ class CurlWrapper implements WrapperInterface
      */
     private function initCurlHandle()
     {
-        if (function_exists('curl_version')) {
+        /*if (function_exists('curl_version')) {
             $this->curlVersion = curl_version();
-        }
-
+        }*/
         // Always reset.
         $this->isCurlMulti = false;
 
@@ -1063,7 +1055,6 @@ class CurlWrapper implements WrapperInterface
      * @return mixed
      * @throws ExceptionHandler
      * @since 6.0
-     * @noinspection PhpComposerExtensionStubsInspection
      */
     public function getParsed($url = '')
     {

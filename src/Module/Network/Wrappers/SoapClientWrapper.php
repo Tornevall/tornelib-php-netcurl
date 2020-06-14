@@ -662,13 +662,13 @@ class SoapClientWrapper implements WrapperInterface
             case 'get':
                 $getResponse = $this->getMagicGettableCall($methodContent, $name, $arguments);
                 if (!is_null($getResponse)) {
-                    return $getResponse;
+                    $return = $getResponse;
                 }
                 break;
             case 'set':
                 $getResponse = $this->getMagicSettableCall($name, $arguments);
                 if (!is_null($getResponse)) {
-                    return $getResponse;
+                    $return = $getResponse;
                 }
                 break;
             default:

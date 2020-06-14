@@ -6,6 +6,7 @@
 
 namespace TorneLIB\Module\Network\Wrappers;
 
+use ReflectionException;
 use TorneLIB\Exception\Constants;
 use TorneLIB\Exception\ExceptionHandler;
 use TorneLIB\Helpers\Version;
@@ -21,7 +22,7 @@ use TorneLIB\Utils\Security;
 
 try {
     Version::getRequiredVersion();
-} catch (Exception $e) {
+} catch (\Exception $e) {
     die($e->getMessage());
 }
 
@@ -50,6 +51,10 @@ class SimpleStreamWrapper implements WrapperInterface
      */
     private $streamContentResponseHeader = [];
 
+    /**
+     * SimpleStreamWrapper constructor.
+     * @throws ExceptionHandler
+     */
     public function __construct()
     {
         // Base streamwrapper (file_get_contents, fopen, etc) is only allowed if allow_url_fopen is available.
@@ -70,6 +75,7 @@ class SimpleStreamWrapper implements WrapperInterface
 
     /**
      * @inheritDoc
+     * @throws ReflectionException
      */
     public function getVersion()
     {
@@ -148,6 +154,7 @@ class SimpleStreamWrapper implements WrapperInterface
 
     /**
      * @inheritDoc
+     * @throws ExceptionHandler
      */
     public function getParsed()
     {
@@ -228,6 +235,7 @@ class SimpleStreamWrapper implements WrapperInterface
     }
 
     /**
+     * @throws ExceptionHandler
      * @since 6.1.0
      */
     public function getStreamRequest()

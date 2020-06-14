@@ -1,4 +1,5 @@
-<?php
+<?php /** @noinspection PhpComposerExtensionStubsInspection */
+
 /**
  * Copyright © Tomas Tornevall / Tornevall Networks. All rights reserved.
  * See LICENSE for license details.
@@ -10,12 +11,12 @@ use Exception;
 use ReflectionException;
 use TorneLIB\Exception\Constants;
 use TorneLIB\Exception\ExceptionHandler;
+use TorneLIB\Helpers\GenericParser;
 use TorneLIB\Helpers\Version;
 use TorneLIB\Model\Interfaces\WrapperInterface;
 use TorneLIB\Model\Type\authType;
 use TorneLIB\Model\Type\dataType;
 use TorneLIB\Model\Type\requestMethod;
-use TorneLIB\Helpers\GenericParser;
 use TorneLIB\Module\Config\WrapperConfig;
 use TorneLIB\Module\Config\WrapperCurlOpt;
 use TorneLIB\Utils\Generic;
@@ -436,12 +437,14 @@ class CurlWrapper implements WrapperInterface
      */
     private function setCurlSslValues($curlHandle)
     {
-        if (version_compare(PHP_VERSION, '5.4.11', ">=")) {
-            $this->setOptionCurl($curlHandle, CURLOPT_SSL_VERIFYHOST, 2);
+        // version_compare(PHP_VERSION, '5.4.11', ">=")
+        if (PHP_VERSION_ID >= 50411) {
+            $this->setOptionCurl($curlHandle, WrapperCurlOpt::NETCURL_CURLOPT_SSL_VERIFYHOST, 2);
         } else {
-            $this->setOptionCurl($curlHandle, CURLOPT_SSL_VERIFYHOST, 1);
+            $this->setOptionCurl($curlHandle, WrapperCurlOpt::NETCURL_CURLOPT_SSL_VERIFYHOST, 1);
         }
-        $this->setOptionCurl($curlHandle, CURLOPT_SSL_VERIFYPEER, 1);
+        // CURLOPT_SSL_VERIFYPEER is available starting with PHP 7.1
+        $this->setOptionCurl($curlHandle, WrapperCurlOpt::NETCURL_CURLOPT_SSL_VERIFYPEER, 1);
 
         return $this;
     }
@@ -702,6 +705,7 @@ class CurlWrapper implements WrapperInterface
      * Use getCurlException in future, if possible.
      *
      * @param $curlMultiHandle
+     * @param $url
      * @return CurlWrapper
      * @throws ExceptionHandler
      * @since 6.1.0

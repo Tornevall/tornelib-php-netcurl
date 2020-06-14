@@ -214,11 +214,9 @@ class WrapperSSL
     public function getSslStreamContext()
     {
         // Create the stream with full context.
-        $streamContext = [
+        return [
             'stream_context' => stream_context_create($this->context),
         ];
-
-        return $streamContext;
     }
 
     /**
@@ -230,7 +228,7 @@ class WrapperSSL
     {
         $return = $this->context['ssl'];
 
-        if (!is_null($key) && isset($this->context['ssl'][$key])) {
+        if (!empty($key) && isset($this->context['ssl'][$key])) {
             $return = $this->context['ssl'][$key];
         }
 

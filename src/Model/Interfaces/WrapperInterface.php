@@ -8,6 +8,7 @@ namespace TorneLIB\Model\Interfaces;
 
 use TorneLIB\Model\Type\authType;
 use TorneLIB\Model\Type\dataType;
+use TorneLIB\Model\Type\requestMethod;
 use TorneLIB\Module\Config\WrapperConfig;
 
 // Avoid conflicts and use what we have.

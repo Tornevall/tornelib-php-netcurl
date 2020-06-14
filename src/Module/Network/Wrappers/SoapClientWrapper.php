@@ -1,4 +1,5 @@
-<?php
+<?php /** @noinspection PhpComposerExtensionStubsInspection */
+
 /**
  * Copyright © Tomas Tornevall / Tornevall Networks. All rights reserved.
  * See LICENSE for license details.
@@ -132,16 +133,18 @@ class SoapClientWrapper implements WrapperInterface
      * @return bool
      * @since 6.1.0
      */
-    public function getStaging() {
+    public function getStaging()
+    {
         return $this->CONFIG->getStaging();
     }
 
     /**
      * @param bool $production
-     * @return
+     * @return WrapperConfig
      * @since 6.1.0
      */
-    public function setProduction($production = true) {
+    public function setProduction($production = true)
+    {
         return $this->CONFIG->setProduction($production);
     }
 
@@ -149,7 +152,8 @@ class SoapClientWrapper implements WrapperInterface
      * @return mixed
      * @since 6.1.0
      */
-    public function getProduction() {
+    public function getProduction()
+    {
         return $this->CONFIG->getProduction();
     }
 
@@ -381,9 +385,12 @@ class SoapClientWrapper implements WrapperInterface
      *
      * @return $this
      * @since 6.1.0
+     * @noinspection SuspiciousAssignmentsInspection
      */
     private function getSoapInitErrorHandler()
     {
+        // No inspections on this, it is handled properly handled despite the immediate overrider.
+        // The overrider is present as it has to be nulled out after each use.
         if (!is_null($this->currentErrorHandler)) {
             restore_error_handler();
             $this->currentErrorHandler = null;

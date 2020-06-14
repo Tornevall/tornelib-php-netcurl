@@ -54,10 +54,7 @@ class genericTest extends TestCase
     public function getGitTagsByVersion()
     {
         $info = (new NetUtils())->getGitTagsByVersion(
-            'https://bitbucket.tornevall.net/scm/lib/tornelib-php-netcurl.git',
-            '6.0.8',
-            '6.0.13',
-            '>='
+            'https://bitbucket.tornevall.net/scm/lib/tornelib-php-netcurl.git', '6.0.8', '6.0.13'
         );
 
         static::assertGreaterThan(

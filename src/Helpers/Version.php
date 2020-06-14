@@ -7,6 +7,7 @@
 namespace TorneLIB\Helpers;
 
 use Exception;
+use RuntimeException;
 use TorneLIB\Exception\Constants;
 
 /**
@@ -26,7 +27,7 @@ class Version
     public static function getRequiredVersion($lowest = '5.5', $op = '<')
     {
         if (version_compare(PHP_VERSION, $lowest, $op)) {
-            throw new Exception(
+            throw new RuntimeException(
                 sprintf(
                     'Your PHP version is way too old (%s)! It is time to upgrade. ' .
                     'Try somthing above PHP 7.2 where PHP still has support. ' .

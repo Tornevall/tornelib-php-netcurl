@@ -1,4 +1,6 @@
 <?php
+/** @noinspection PhpComposerExtensionStubsInspection */
+/** @noinspection PhpUndefinedMethodInspection */
 
 require_once(__DIR__ . '/../vendor/autoload.php');
 
@@ -6,10 +8,7 @@ use PHPUnit\Framework\TestCase;
 use TorneLIB\Config\Flag;
 use TorneLIB\Exception\ExceptionHandler;
 use TorneLIB\Helpers\Version;
-use TorneLIB\Model\Type\dataType;
-use TorneLIB\Model\Type\requestMethod;
 use TorneLIB\Module\Config\WrapperConfig;
-use TorneLIB\Module\Network\NetWrapper;
 use TorneLIB\Module\Network\Wrappers\CurlWrapper;
 use TorneLIB\Module\Network\Wrappers\SoapClientWrapper;
 use TorneLIB\Utils\Security;
@@ -20,6 +19,8 @@ try {
     die($e->getMessage());
 }
 
+/** @noinspection PhpUnhandledExceptionInspection */
+// Second argument transform check into true/false instead of exception.
 if (!Security::getCurrentClassState('SoapClient', false)) {
     define('SKIP_SOAP', true);
 }
@@ -40,6 +41,7 @@ class soapWrapperTest extends TestCase
     /**
      * @return bool
      * @throws ExceptionHandler
+     * @noinspection DuplicatedCode
      */
     private function canProxy()
     {
@@ -67,6 +69,7 @@ class soapWrapperTest extends TestCase
 
     /**
      * @test
+     * @noinspection PhpUnitTestsInspection
      */
     public function basicSoapClient()
     {
@@ -75,12 +78,13 @@ class soapWrapperTest extends TestCase
             return;
         }
         $soapWrapper = new SoapClientWrapper();
+        // assertIsObject does not always exist
         static::assertTrue(is_object($soapWrapper));
     }
 
     /**
      * @test
-     * @throws ExceptionHandler
+     * @noinspection PhpUnitTestsInspection
      */
     public function getSoapUninitialized()
     {
@@ -89,9 +93,8 @@ class soapWrapperTest extends TestCase
             return;
         }
         $soapWrapper = (new SoapClientWrapper());
-        static::assertTrue(
-            is_object($soapWrapper)
-        );
+        // assertIsObject does not always exist
+        static::assertTrue(is_object($soapWrapper));
     }
 
     /**
@@ -106,12 +109,13 @@ class soapWrapperTest extends TestCase
         }
         $soapWrapper = new SoapClientWrapper();
         $soapContext = $soapWrapper->getStreamContext();
-        static::assertTrue(!empty($soapContext['http']));
+        static::assertNotEmpty($soapContext['http']);
     }
 
     /**
      * @test
      * @throws ExceptionHandler
+     * @noinspection PhpUnhandledExceptionInspection
      */
     public function getSoapEmbeddedRandomRequest()
     {
@@ -203,13 +207,14 @@ class soapWrapperTest extends TestCase
             $message = $e->getMessage(); // expect: failed to open stream: Unable to find the socket transport
             static::assertTrue(
                 $e->getCode() === 2 &&
-                preg_match('/unable(.*?)transport/is', $message) ? true : false
+                (bool)preg_match('/unable(.*?)transport/is', $message)
             );
         }
     }
 
     /**
      * @test
+     * @noinspection PhpComposerExtensionStubsInspection
      */
     public function getSoapEmbeddedReal()
     {
@@ -231,7 +236,7 @@ class soapWrapperTest extends TestCase
                 is_array($functions) &&
                 (
                     is_string($lastRequest) &&
-                    strlen($lastRequest) > 0
+                    $lastRequest !== ''
                 )
             );
         } catch (Exception $e) {
@@ -248,6 +253,7 @@ class soapWrapperTest extends TestCase
     /**
      * @test
      * Fail request with wrong credentials. Do cache wsdl on disk.
+     * @noinspection PhpComposerExtensionStubsInspection
      */
     public function getSoapEmbeddedAuthFailCache()
     {
@@ -260,6 +266,8 @@ class soapWrapperTest extends TestCase
             $soapWrapper = (new SoapClientWrapper($this->wsdl))->setWsdlCache(WSDL_CACHE_DISK);
             $soapWrapper->setAuthentication('fail', 'doubleFail')->getPaymentMethods();
         } catch (Exception $e) {
+            /** @noinspection NotOptimalIfConditionsInspection */
+            // Skip test if this is not the expected error as API could fail.
             if ($e->getCode() !== 401 && $e->getCode() !== 2) {
                 static::markTestSkipped(
                     sprintf(
@@ -294,6 +302,8 @@ class soapWrapperTest extends TestCase
             $soapWrapper = (new SoapClientWrapper($this->wsdl));
             $soapWrapper->setAuthentication('fail', 'doubleFail')->getPaymentMethods();
         } catch (Exception $e) {
+            /** @noinspection NotOptimalIfConditionsInspection */
+            // Skip test if this is not the expected error as API could fail.
             if ($e->getCode() !== 401 && $e->getCode() !== 2) {
                 static::markTestSkipped(
                     sprintf(
@@ -332,7 +342,7 @@ class soapWrapperTest extends TestCase
                     $this->rEcomPipeP
                 )->getPaymentMethods();
         } catch (ExceptionHandler $e) {
-            static::assertTrue($e->getCode() === 500);
+            static::assertSame($e->getCode(), 500);
         }
     }
 
@@ -361,6 +371,7 @@ class soapWrapperTest extends TestCase
     /**
      * @test
      * @testdox Delayed request.
+     * @throws ExceptionHandler
      */
     public function getSoapEmbeddedProxy()
     {
@@ -403,7 +414,6 @@ class soapWrapperTest extends TestCase
 
     /**
      * @test
-     * @throws ExceptionHandler
      * @link https://www.php.net/manual/en/context.http.php
      */
     public function getSoapEmbeddedRequestTimeoutUncached()
@@ -424,7 +434,7 @@ class soapWrapperTest extends TestCase
                 count($result)
             );
         } catch (Exception $e) {
-            static::assertTrue($e->getCode() === 2);
+            static::assertSame($e->getCode(), 2);
         }
     }
 
@@ -442,7 +452,6 @@ class soapWrapperTest extends TestCase
         $wrapper = new SoapClientWrapper($this->wsdl);
         $wrapper->setStaging(false);
         $wrapper->setProduction(true);
-        $isProduction = $wrapper->getProduction();
         $wrapper->setAuthentication(
             $this->rEcomPipeU,
             $this->rEcomPipeP
@@ -451,6 +460,7 @@ class soapWrapperTest extends TestCase
         $parsed = $wrapper->getParsed();
         $body = $wrapper->getBody();
         $headers = $wrapper->getHeaders(true, true);
+        /** @noinspection StrlenInEmptyStringCheckContextInspection */
         static::assertTrue(
             is_array($parsed) && count($parsed) &&
             is_string($body) && strlen($body) &&
@@ -492,7 +502,8 @@ class soapWrapperTest extends TestCase
                 [
                     'eventType' => 'BOOKED',
                     'uriTemplate' => sprintf(
-                        'https://www.netcurl.org/?callback=BOOKED&ts=%d', $currentTimeStamp
+                        'https://www.netcurl.org/?callback=BOOKED&ts=%d',
+                        $currentTimeStamp
                     ),
                 ]
             );
@@ -502,7 +513,8 @@ class soapWrapperTest extends TestCase
                 parse_url(
                     $rWrapper->getRegisteredEventCallback(
                         ['eventType' => 'BOOKED']
-                    )->uriTemplate)['query'],
+                    )->uriTemplate
+                )['query'],
                 $uriTemplate
             );
 

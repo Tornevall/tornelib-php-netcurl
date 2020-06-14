@@ -122,7 +122,7 @@ class MODULE_CURL
      */
     private function getDeprecatedRequestResult($deprecatedRequestName, $arguments)
     {
-        if ($deprecatedRequestName == 'get') {
+        if ($deprecatedRequestName === 'get') {
             $return = $this->netWrapper->request(
                 isset($arguments[0]) ? $arguments[0] : null,
                 [],
@@ -224,5 +224,7 @@ class MODULE_CURL
         if ($deprecatedRequest === 'do') {
             return $this->getDeprecatedRequestResult($deprecatedRequestName, $arguments);
         }
+
+        return null;
     }
 }

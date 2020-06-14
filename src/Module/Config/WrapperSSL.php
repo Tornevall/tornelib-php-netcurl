@@ -7,6 +7,8 @@
 namespace TorneLIB\Module\Config;
 
 use Exception;
+use TorneLIB\Exception\Constants;
+use TorneLIB\Exception\ExceptionHandler;
 use TorneLIB\Flags;
 
 /**
@@ -75,7 +77,10 @@ class WrapperSSL
     public function getSslCapabilities()
     {
         if (!($return = $this->capable)) {
-            throw new Exception('NETCURL Exception: SSL capabilities is missing.', 500);
+            throw new ExceptionHandler(
+                'NETCURL Exception: SSL capabilities is missing.',
+                Constants::LIB_SSL_UNAVAILABLE
+            );
         }
 
         return $return;
@@ -123,7 +128,7 @@ class WrapperSSL
             $streamWrappers = [];
             $this->capabilities[] = 'stream';
         }
-        if (in_array('https', array_map("strtolower", $streamWrappers))) {
+        if (in_array('https', array_map("strtolower", $streamWrappers), false)) {
             $return = true;
             $this->capabilities[] = 'curl';
         }
@@ -134,6 +139,7 @@ class WrapperSSL
     /**
      * @return bool
      * @since 6.1.0
+     * @noinspection PhpComposerExtensionStubsInspection
      */
     private function getCurlSsl()
     {
@@ -142,7 +148,7 @@ class WrapperSSL
             $curlVersionRequest = curl_version();
 
             if (isset($curlVersionRequest['features'])) {
-                $return = ($curlVersionRequest['features'] & CURL_VERSION_SSL ? true : false);
+                $return = ((bool)($curlVersionRequest['features'] & CURL_VERSION_SSL));
             }
         }
 

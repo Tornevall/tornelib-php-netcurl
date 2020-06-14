@@ -54,7 +54,9 @@ class genericTest extends TestCase
     public function getGitTagsByVersion()
     {
         $info = (new NetUtils())->getGitTagsByVersion(
-            'https://bitbucket.tornevall.net/scm/lib/tornelib-php-netcurl.git', '6.0.8', '6.0.13'
+            'https://bitbucket.tornevall.net/scm/lib/tornelib-php-netcurl.git',
+            '6.0.8',
+            '6.0.13'
         );
 
         static::assertGreaterThan(
@@ -83,6 +85,7 @@ class genericTest extends TestCase
     /**
      * @test
      * Test latest tag with latest release. List should be empty.
+     * @throws ReflectionException
      */
     public function getMyVersion()
     {
@@ -118,7 +121,7 @@ class genericTest extends TestCase
         try {
             (new NetWrapper())->request('http://ipv4.netcurl.org/http.php?code=500&message=Det+sket+sig');
         } catch (ExceptionHandler $e) {
-            static::assertTrue($e->getMessage() === 'Error 500 returned from server: "500 Det sket sig".');
+            static::assertSame($e->getMessage(), 'Error 500 returned from server: "500 Det sket sig".');
         }
     }
 
@@ -142,7 +145,10 @@ class genericTest extends TestCase
             $extendedException = $e->getExtendException();
         }
 
-        $properParsed = $extendedException->getParsed('http://ipv4.netcurl.org/http.php?code=200&message=Funktionsduglig');
+        /** @noinspection PhpUndefinedMethodInspection */
+        $properParsed = $extendedException->getParsed(
+            'http://ipv4.netcurl.org/http.php?code=200&message=Funktionsduglig'
+        );
 
         static::assertTrue(
             isset($properParsed->response_is_not_empty)
@@ -155,7 +161,9 @@ class genericTest extends TestCase
     public function multiCurlErrorHandlingOneErrorNonAssoc()
     {
         $extendedException = null;
-        static::expectException('TorneLIB\Exception\ExceptionHandler');
+        /** @noinspection DynamicInvocationViaScopeResolutionInspection */
+        /** @noinspection PhpParamsInspection */
+        static::expectException(ExceptionHandler::class);
         (new NetWrapper())
             ->setAllowInternalMulti(true)
             ->request(
@@ -190,7 +198,10 @@ class genericTest extends TestCase
             $code = $e->getCode();
         }
 
-        $properParsed = $extendedException->getParsed('http://ipv4.netcurl.org/http.php?code=200&message=Funktionsduglig');
+        /** @noinspection PhpUndefinedMethodInspection */
+        $properParsed = $extendedException->getParsed(
+            'http://ipv4.netcurl.org/http.php?code=200&message=Funktionsduglig'
+        );
 
         static::assertTrue(
             isset($properParsed->response_is_not_empty) &&
@@ -220,7 +231,10 @@ class genericTest extends TestCase
             $code = $e->getCode();
         }
 
-        $properParsed = $extendedException->getParsed('http://ipv4.netcurl.org/http.php?code=200&message=Funktionsduglig');
+        /** @noinspection PhpUndefinedMethodInspection */
+        $properParsed = $extendedException->getParsed(
+            'http://ipv4.netcurl.org/http.php?code=200&message=Funktionsduglig'
+        );
 
         static::assertTrue(
             is_null($properParsed) &&
@@ -233,8 +247,12 @@ class genericTest extends TestCase
      */
     public function prohibitChain()
     {
+        /** @noinspection DynamicInvocationViaScopeResolutionInspection */
+        /** @noinspection PhpParamsInspection */
         static::expectException(ExceptionHandler::class);
 
+        /** @noinspection PhpUndefinedMethodInspection */
+        /** @noinspection PhpDeprecationInspection */
         (new MODULE_CURL())->setChain(true);
     }
 
@@ -263,9 +281,11 @@ class genericTest extends TestCase
     /**
      * @test
      */
-    public function configurables() {
+    public function configurables()
+    {
         $config = new WrapperConfig();
         $defaultStaging = $config->getStaging();
+        /** @noinspection PhpUndefinedMethodInspection */
         $isStaging = $config->isStaging();
 
         static::assertTrue(

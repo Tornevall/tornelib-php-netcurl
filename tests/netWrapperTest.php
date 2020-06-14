@@ -177,6 +177,7 @@ class netWrapperTest extends TestCase
     /**
      * @test
      * @throws ExceptionHandler
+     * @noinspection PhpComposerExtensionStubsInspection
      */
     public function multiNetWrapper()
     {
@@ -184,7 +185,9 @@ class netWrapperTest extends TestCase
         $p = new stdClass();
 
         $secondUrl = 'https://ipv4.netcurl.org/?2&PHP=' . PHP_VERSION;
+        $driverLess = '';
         if (!function_exists('curl_version')) {
+            $driverLess = 'driverLess';
             $secondUrl .= "&isDriverLess=true";
         }
 
@@ -208,8 +211,9 @@ class netWrapperTest extends TestCase
                 null,
                 null,
                 (new WrapperConfig())
-                    ->setUserAgent('Client3')
-                    ->setAuthentication($this->rEcomPipeU, $this->rEcomPipeP),
+                    ->setUserAgent('Client3/' . $driverLess)
+                    ->setAuthentication($this->rEcomPipeU, $this->rEcomPipeP)
+                    ->setWsdlCache(WSDL_CACHE_NONE),
             ],
         ];
 
@@ -254,10 +258,10 @@ class netWrapperTest extends TestCase
             isset($p->HTTP_USER_AGENT) &&
             $p->HTTP_USER_AGENT === 'Client2' &&
             (
-                (
-                    is_array($paymentMethods) &&
-                    count($paymentMethods)
-                )
+            (
+                is_array($paymentMethods) &&
+                count($paymentMethods)
+            )
             ) &&
             $info->getCode($secondUrl) === 200
         );

@@ -212,6 +212,10 @@ class NetWrapper implements WrapperInterface
     /**
      * Register an external wrapper/module/communicator.
      *
+     * @param $wrapperClass
+     * @param bool $tryFirst
+     * @return string
+     * @throws ExceptionHandler
      * @since 6.1.0
      */
     public function register($wrapperClass, $tryFirst = false)
@@ -231,7 +235,9 @@ class NetWrapper implements WrapperInterface
     {
         if (($mInstance = $this->getMultiInstance($url)) && method_exists($mInstance, __FUNCTION__)) {
             return $mInstance->{__FUNCTION__}();
-        } elseif (method_exists($this->instance, __FUNCTION__)) {
+        }
+
+        if (method_exists($this->instance, __FUNCTION__)) {
             return $this->instance->{__FUNCTION__}();
         }
 
@@ -255,7 +261,9 @@ class NetWrapper implements WrapperInterface
     {
         if (($mInstance = $this->getMultiInstance($url)) && method_exists($mInstance, 'getParsed')) {
             return $mInstance->getParsed();
-        } elseif (method_exists($this->instance, 'getBody')) {
+        }
+
+        if (method_exists($this->instance, 'getBody')) {
             return $this->instance->getParsed();
         }
 

@@ -7,6 +7,8 @@
 namespace TorneLIB\Module\Config;
 
 use Exception;
+use TorneLIB\Exception\Constants;
+use TorneLIB\Exception\ExceptionHandler;
 use TorneLIB\Flags;
 
 /**
@@ -75,7 +77,10 @@ class WrapperSSL
     public function getSslCapabilities()
     {
         if (!($return = $this->capable)) {
-            throw new Exception('NETCURL Exception: SSL capabilities is missing.', 500);
+            throw new ExceptionHandler(
+                'NETCURL Exception: SSL capabilities is missing.',
+                Constants::LIB_SSL_UNAVAILABLE
+            );
         }
 
         return $return;

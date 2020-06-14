@@ -181,6 +181,7 @@ class netWrapperTest extends TestCase
 
     /**
      * @test
+     * @throws ExceptionHandler
      */
     public function multiNetWrapper()
     {
@@ -203,8 +204,19 @@ class netWrapperTest extends TestCase
             $this->wsdl => [],
         ];
 
-        $info = (new NetWrapper())->request($reqUrlData);
-        $p = $info->getParsed('https://ipv4.netcurl.org/?2');
+        $p = new stdClass();
+        try {
+            $info = (new NetWrapper())->request($reqUrlData);
+            $p = $info->getParsed('https://ipv4.netcurl.org/?2');
+        } catch (ExceptionHandler $e) {
+            static::markTestIncomplete(
+                sprintf(
+                    'Exception %d aborted test: %s',
+                    $e->getCode(),
+                    $e->getMessage()
+                )
+            );
+        }
 
         $soapError = false;
         $paymentMethods = [];
@@ -221,8 +233,10 @@ class netWrapperTest extends TestCase
             isset($p->HTTP_USER_AGENT) &&
             $p->HTTP_USER_AGENT === 'Client2' &&
             (
-                is_array($paymentMethods) &&
-                count($paymentMethods) || $soapError
+                (
+                    is_array($paymentMethods) &&
+                    count($paymentMethods)
+                ) || $soapError
             ) &&
             $info->getCode("https://ipv4.netcurl.org/?2") === 200
         );

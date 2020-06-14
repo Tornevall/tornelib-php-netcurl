@@ -239,8 +239,6 @@ class netWrapperTest extends TestCase
                 );
                 return;
             }
-
-            throw $e;
         }
 
         $soapError = false;

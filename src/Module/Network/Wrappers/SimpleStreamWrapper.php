@@ -205,7 +205,7 @@ class SimpleStreamWrapper implements WrapperInterface
 
         if (isset($this->streamContentResponseHeader[0]) &&
             strtolower($key) === 'http' &&
-            preg_match('/^http\//i', $this->streamContentResponseHeader[0])
+            (bool)preg_match('/^http\//i', $this->streamContentResponseHeader[0])
         ) {
             return (string)$this->streamContentResponseHeader[0];
         }

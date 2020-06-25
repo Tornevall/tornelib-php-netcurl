@@ -32,7 +32,7 @@ class simpleStreamWrapperTest extends TestCase
             ->request('https://ipv4.netcurl.org')->getParsed();
         if (isset($wrapperData->ip)) {
             foreach ($ipList as $ip) {
-                if (preg_match('/' . $ip . '/', $wrapperData->ip)) {
+                if ((bool)preg_match('/' . $ip . '/', $wrapperData->ip)) {
                     $return = true;
                     break;
                 }
@@ -185,7 +185,7 @@ class simpleStreamWrapperTest extends TestCase
 
         static::assertTrue(
             isset($content->HTTP_USER_AGENT) &&
-            preg_match('/world dominator/i', $content->HTTP_USER_AGENT)
+            (bool)preg_match('/world dominator/i', $content->HTTP_USER_AGENT)
         );
     }
 

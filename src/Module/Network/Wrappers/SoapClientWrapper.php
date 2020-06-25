@@ -760,7 +760,7 @@ class SoapClientWrapper implements WrapperInterface
             if (count($spacedSplit) > 1) {
                 $splitName = !$lCase ? $spacedSplit[0] : strtolower($spacedSplit[0]);
 
-                if (preg_match('/^http\/(.*?)$/i', $splitName)) {
+                if ((bool)preg_match('/^http\/(.*?)$/i', $splitName)) {
                     $httpSplitName = explode("/", $splitName, 2);
                     $realSplitName = !$lCase ? $httpSplitName[0] : strtolower($httpSplitName[0]);
 

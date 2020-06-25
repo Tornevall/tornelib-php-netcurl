@@ -45,7 +45,7 @@ class curlWrapperTest extends TestCase
             ->request('https://ipv4.netcurl.org')->getParsed();
         if (isset($wrapperData->ip)) {
             foreach ($ipList as $ip) {
-                if (preg_match('/' . $ip . '/', $wrapperData->ip)) {
+                if ((bool)preg_match('/' . $ip . '/', $wrapperData->ip)) {
                     $return = true;
                     break;
                 }
@@ -145,8 +145,8 @@ class curlWrapperTest extends TestCase
     {
         // Making sure output lloks the same in both ends.
         static::assertTrue(
-            preg_match('/^mozilla|^netcurl/i', (new Browsers())->getBrowser()) &&
-            preg_match('/^mozilla|^netcurl/i', (new WrapperConfig())->getOptions()['10018'])
+            (bool)preg_match('/^mozilla|^netcurl/i', (new Browsers())->getBrowser()) &&
+            (bool)preg_match('/^mozilla|^netcurl/i', (new WrapperConfig())->getOptions()['10018'])
         );
     }
 

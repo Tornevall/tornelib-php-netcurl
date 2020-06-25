@@ -198,7 +198,7 @@ class MODULE_CURL
             );
         }
 
-        if (preg_match('/^(.*)Flag$/', $name)) {
+        if ((bool)preg_match('/^(.*)Flag$/', $name)) {
             return call_user_func_array([$this->flags, $name], $arguments);
         }
 

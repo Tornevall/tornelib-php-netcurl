@@ -38,7 +38,7 @@ class GenericParser
             trim($string)
         );
 
-        if (preg_match('/\s/', $headString)) {
+        if ((bool)preg_match('/\s/', $headString)) {
             $headContent = explode(' ', $headString, 2);
 
             // Make sure there is no extras when starting to extract this data.
@@ -50,7 +50,7 @@ class GenericParser
                 (
                     !is_numeric($headContent[0]) &&
                     0 === stripos($headContent[0], "http") &&
-                    preg_match(
+                    (bool)preg_match(
                         '/\s/',
                         $headContent[1]
                     )
@@ -90,12 +90,12 @@ class GenericParser
         $return = $content;
 
         switch ($contentType) {
-            case !empty($contentType) && preg_match('/\/xml|\+xml/i', $contentType):
+            case !empty($contentType) && (bool)preg_match('/\/xml|\+xml/i', $contentType):
                 // More detection possibilites.
                 /* <?xml version="1.0" encoding="UTF-8"?><rss version="2.0"*/
 
                 // If Laminas is available, prefer that engine before simple xml.
-                if (preg_match('/\/xml|\+xml/i', $contentType) && class_exists('Laminas\Feed\Reader\Reader')) {
+                if ((bool)preg_match('/\/xml|\+xml/i', $contentType) && class_exists('Laminas\Feed\Reader\Reader')) {
                     $return = (new RssWrapper())->getParsed($content);
                     break;
                 }

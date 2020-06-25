@@ -57,7 +57,7 @@ class soapWrapperTest extends TestCase
             ->request('https://ipv4.netcurl.org')->getParsed();
         if (isset($wrapperData->ip)) {
             foreach ($ipList as $ip) {
-                if (preg_match('/' . $ip . '/', $wrapperData->ip)) {
+                if ((bool)preg_match('/' . $ip . '/', $wrapperData->ip)) {
                     $return = true;
                     break;
                 }

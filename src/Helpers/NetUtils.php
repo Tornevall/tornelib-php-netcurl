@@ -29,7 +29,7 @@ class NetUtils
         if (isset($tagMatches[1]) && is_array($tagMatches[1])) {
             $tagList = $tagMatches[1];
             foreach ($tagList as $tag) {
-                if (!preg_match("/\^/", $tag)) {
+                if (!(bool)preg_match("/\^/", $tag)) {
                     if ($numericsOnly) {
                         if (($currentTag = $this->getGitTagsSanitized($tag, $numericsSanitized))) {
                             $return[] = $currentTag;

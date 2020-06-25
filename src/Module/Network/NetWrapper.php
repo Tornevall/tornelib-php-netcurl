@@ -456,7 +456,7 @@ class NetWrapper implements WrapperInterface
     ) {
         $return = null;
 
-        if (!is_array($url) && preg_match('/\?wsdl|&wsdl/i', $url)) {
+        if (!is_array($url) && (bool)preg_match('/\?wsdl|&wsdl/i', $url)) {
             try {
                 Security::getCurrentClassState('SoapClient');
                 $dataType = dataType::SOAP;

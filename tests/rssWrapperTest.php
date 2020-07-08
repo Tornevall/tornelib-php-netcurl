@@ -3,6 +3,7 @@
 require_once(__DIR__ . '/../vendor/autoload.php');
 
 use PHPUnit\Framework\TestCase;
+use TorneLIB\IO\Data\Arrays;
 use TorneLIB\Model\Type\dataType;
 use TorneLIB\Model\Type\requestMethod;
 use TorneLIB\Module\Network\NetWrapper;
@@ -15,6 +16,10 @@ class rssWrapperTest extends TestCase
      */
     public function consumeLaminasRss()
     {
+        if (!class_exists('\Laminas\Feed\Reader\Reader')) {
+            static::markTestSkipped('Laminas is not present.');
+            return;
+        }
         try {
             $rssFeed = (new RssWrapper())->request('https://www.tornevalls.se/feed/')->getParsed();
             if (method_exists($rssFeed, 'getTitle')) {
@@ -54,6 +59,7 @@ class rssWrapperTest extends TestCase
             if (method_exists($rssFeed, 'getTitle')) {
                 static::assertNotSame($rssFeed->getTitle(), '');
             } else {
+                $rssFeed = (new Arrays())->objectsIntoArray($rssFeed);
                 static::assertTrue(
                     isset($rssFeed[0][0]) && strlen($rssFeed[0][0]) > 5
                 );
@@ -75,6 +81,11 @@ class rssWrapperTest extends TestCase
      */
     public function consumeByNetWrapperLaminasChoice()
     {
+        if (!class_exists('\Laminas\Feed\Reader\Reader')) {
+            static::markTestSkipped('Laminas is not present.');
+            return;
+        }
+
         /** @noinspection DuplicatedCode */
         try {
             $rssFeed = (new NetWrapper())

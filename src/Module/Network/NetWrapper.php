@@ -709,7 +709,8 @@ class NetWrapper implements WrapperInterface
             return call_user_func_array([$this, 'setAuthentication'], $arguments);
         }
 
-        if (method_exists($this->instance, $name)) {
+        // From PHP 8.0 just checking instance content will fail if it is null here.
+        if (!empty($this->instance) && method_exists($this->instance, $name)) {
             if ($instanceRequest = call_user_func_array([$this->instance, $name], $arguments)) {
                 return $instanceRequest;
             }

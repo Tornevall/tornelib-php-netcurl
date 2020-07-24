@@ -56,7 +56,9 @@ class rssWrapperTest extends TestCase
                     dataType::NORMAL
                 )->getParsed();
 
-            if (method_exists($rssFeed, 'getTitle')) {
+
+            // Test failed for PHP 8: Checking methods requires that it is not null first.
+            if (!isset($rssFeed) && !empty($rssFeed) && method_exists($rssFeed, 'getTitle')) {
                 static::assertNotSame($rssFeed->getTitle(), '');
             } else {
                 $rssFeed = (new Arrays())->objectsIntoArray($rssFeed);

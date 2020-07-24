@@ -24,10 +24,13 @@ use TorneLIB\Module\Config\WrapperConfig;
 use TorneLIB\Module\Network\NetWrapper;
 use TorneLIB\Utils\Generic;
 
-try {
-    Version::getRequiredVersion();
-} catch (Exception $e) {
-    die($e->getMessage());
+// If 8 or higher, don't bother.
+if (PHP_VERSION_ID < 80000) {
+    try {
+        Version::getRequiredVersion();
+    } catch (Exception $e) {
+        die($e->getMessage());
+    }
 }
 
 /**
@@ -66,15 +69,12 @@ class RssWrapper implements WrapperInterface
     }
 
     /**
-     * @param $config
-     * @return mixed
+     * @return WrapperConfig
      * @since 6.1.0
      */
-    private function getInheritedConfig($config)
+    public function getConfig()
     {
-        $config->setCurrentWrapper($this->CONFIG->getCurrentWrapper());
-
-        return $config;
+        return $this->CONFIG;
     }
 
     /**
@@ -90,12 +90,15 @@ class RssWrapper implements WrapperInterface
     }
 
     /**
-     * @return WrapperConfig
+     * @param $config
+     * @return mixed
      * @since 6.1.0
      */
-    public function getConfig()
+    private function getInheritedConfig($config)
     {
-        return $this->CONFIG;
+        $config->setCurrentWrapper($this->CONFIG->getCurrentWrapper());
+
+        return $config;
     }
 
     /**

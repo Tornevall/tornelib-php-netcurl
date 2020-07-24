@@ -6,6 +6,7 @@
 
 namespace TorneLIB\Helpers;
 
+use TorneLIB\Exception\ExceptionHandler;
 use TorneLIB\Module\Network\NetWrapper;
 
 /**
@@ -101,13 +102,14 @@ class NetUtils
      *
      * @param $url
      * @return array
+     * @throws ExceptionHandler
      * @since 6.0.4 Moved from Network Library.
      * @noinspection PhpUndefinedMethodInspection
      */
     public function getGitTagsByUrl($url)
     {
         $url .= "/info/refs?service=git-upload-pack";
-        $gitRequest = (new NetWrapper())->setTimeout(10)->request($url);
+        $gitRequest = (new NetWrapper())->request($url);
         return $this->getGitsTagsRegEx($gitRequest->getBody());
     }
 
@@ -116,6 +118,7 @@ class NetUtils
      * @param $version1
      * @param $version2
      * @return array
+     * @throws ExceptionHandler
      */
     public function getGitTagsByVersion($giturl, $version1, $version2)
     {
@@ -139,6 +142,7 @@ class NetUtils
      * @param $gitUrl
      * @param string $yourVersion
      * @return array
+     * @throws ExceptionHandler
      */
     public function getHigherVersions($gitUrl, $yourVersion = '')
     {
@@ -159,6 +163,7 @@ class NetUtils
      * @param $gitUrl
      * @param string $yourVersion
      * @return bool
+     * @throws ExceptionHandler
      */
     public function getVersionLatest($gitUrl, $yourVersion = '')
     {

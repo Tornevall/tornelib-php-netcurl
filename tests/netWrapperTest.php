@@ -103,6 +103,7 @@ class netWrapperTest extends TestCase
             ->request(sprintf('https://ipv4.netcurl.org/?func=%s', __FUNCTION__));
         $parsed = $wrapper->getParsed();
         WrapperConfig::deleteSignature();
+
         static::assertSame($parsed->HTTP_USER_AGENT, 'Korven skriker.');
     }
 

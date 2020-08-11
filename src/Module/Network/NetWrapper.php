@@ -7,7 +7,6 @@
 namespace TorneLIB\Module\Network;
 
 use Exception;
-use ReflectionException;
 use TorneLIB\Exception\Constants;
 use TorneLIB\Exception\ExceptionHandler;
 use TorneLIB\IO\Data\Arrays;
@@ -222,11 +221,14 @@ class NetWrapper implements WrapperInterface
      */
     public function getBody($url = '')
     {
-        if (($mInstance = $this->getMultiInstance($url)) && method_exists($mInstance, __FUNCTION__)) {
+        if (($mInstance = $this->getMultiInstance($url)) &&
+            !empty($mInstance) &&
+            method_exists($mInstance, __FUNCTION__)
+        ) {
             return $mInstance->{__FUNCTION__}();
         }
 
-        if (method_exists($this->instance, __FUNCTION__)) {
+        if (!empty($this->instance) && method_exists($this->instance, __FUNCTION__)) {
             return $this->instance->{__FUNCTION__}();
         }
 
@@ -248,11 +250,14 @@ class NetWrapper implements WrapperInterface
      */
     public function getParsed($url = '')
     {
-        if (($mInstance = $this->getMultiInstance($url)) && method_exists($mInstance, 'getParsed')) {
+        if (($mInstance = $this->getMultiInstance($url)) &&
+            !empty($mInstance) &&
+            method_exists($mInstance, 'getParsed')
+        ) {
             return $mInstance->getParsed();
         }
 
-        if (method_exists($this->instance, 'getBody')) {
+        if (!empty($this->instance) && method_exists($this->instance, 'getBody')) {
             return $this->instance->getParsed();
         }
 
@@ -288,14 +293,20 @@ class NetWrapper implements WrapperInterface
      * @return mixed
      * @throws ExceptionHandler
      * @since 6.1.0
+     * @noinspection DuplicatedCode
      */
     public function getCode($url = '')
     {
-        if (($mInstance = $this->getMultiInstance($url)) && method_exists($mInstance, __FUNCTION__)) {
+        if (($mInstance = $this->getMultiInstance($url)) &&
+            !empty($mInstance) &&
+            method_exists($mInstance, __FUNCTION__)
+        ) {
             return $mInstance->{__FUNCTION__}();
         }
 
-        if (method_exists($this->instance, __FUNCTION__)) {
+        if (!empty($this->instance) &&
+            method_exists($this->instance, __FUNCTION__)
+        ) {
             return $this->instance->{__FUNCTION__}();
         }
 

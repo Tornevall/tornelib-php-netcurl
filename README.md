@@ -4,9 +4,12 @@ Documentation for v6.1 is located [here](https://docs.tornevall.net/display/TORN
 
 ## Installation
 
-Recommended solution: Composer.
+Recommended solution: Composer:
+
+    require tornevall/tornevall/tornelib-php-netcurl
 
 The packages linked to composer is currently not pointing at the primary [bitbucket repository](https://bitbucket.tornevall.net/projects/LIB/repos/tornelib-php-netcurl/browse), to make upgrading more stable. It is mirrored to [github](https://github.com/Tornevall/tornelib-php-netcurl) and when new releases are ready, they are pushed over there. By means, you can clone it from both github and bitbucket. However, pull requests should go via bitbucket.
+Avoid removing composer.json as it is used to identify current version internally.
 
 Feel free to join the project from [JIRA](https://tracker.tornevall.net/projects/NETCURL). And don't be afraid of leaving feedback!
 

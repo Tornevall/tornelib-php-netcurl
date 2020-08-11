@@ -6,6 +6,7 @@
 
 namespace TorneLIB;
 
+use ReflectionException;
 use TorneLIB\Exception\Constants;
 use TorneLIB\Exception\ExceptionHandler;
 use TorneLIB\Model\Type\dataType;
@@ -77,6 +78,9 @@ class MODULE_CURL
     }
 
     /**
+     * @return string|null
+     * @throws ExceptionHandler
+     * @throws ReflectionException
      * @since 6.1.2
      */
     public function getVersion()

@@ -13,6 +13,7 @@ use TorneLIB\Module\Config\WrapperConfig;
 
 // Avoid conflicts and use what we have.
 if (!defined('NETCURL_VERSION')) {
+    // Normally, you should not need to use this definition. Use getVersion for each class instead.
     define('NETCURL_VERSION', '6.1.2');
 }
 

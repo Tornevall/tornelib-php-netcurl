@@ -12,6 +12,7 @@ use TorneLIB\Helpers\Version;
 use TorneLIB\Model\Type\requestMethod;
 use TorneLIB\Module\Config\WrapperConfig;
 use TorneLIB\Module\Network\Wrappers\CurlWrapper;
+use TorneLIB\MODULE_CURL;
 use TorneLIB\Utils\Security;
 
 try {
@@ -22,7 +23,6 @@ try {
 
 /**
  * Class curlWrapperTest
- * @version 6.1.0
  */
 class curlWrapperTest extends TestCase
 {
@@ -94,7 +94,7 @@ class curlWrapperTest extends TestCase
 
     /**
      * @test
-     * @throws ReflectionException
+     * @throws ExceptionHandler
      */
     public function getVersion()
     {
@@ -509,6 +509,21 @@ class curlWrapperTest extends TestCase
         static::assertTrue(
             isset($response->ip) &&
             $response->ip === '212.63.208.8'
+        );
+    }
+
+    /**
+     * @test
+     */
+    public function getLibraryVersion()
+    {
+        // module_curl
+        $mCurl = (new MODULE_CURL())->getVersion();
+        // real curl
+        $rCurl = (new CurlWrapper())->getVersion();
+        static::assertTrue(
+            (bool)preg_match('/^6\.1/', $mCurl) &&
+            (bool)preg_match('/^6\.1/', $rCurl)
         );
     }
 

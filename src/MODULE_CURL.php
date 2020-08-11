@@ -12,14 +12,14 @@ use TorneLIB\Model\Type\dataType;
 use TorneLIB\Model\Type\requestMethod;
 use TorneLIB\Module\Config\WrapperConfig;
 use TorneLIB\Module\Network\NetWrapper;
+use TorneLIB\Utils\Generic;
 
 /**
  * Class MODULE_CURL
  * Passthrough client that v6.0 remember.
  *
  * @package TorneLIB
- * @version 6.1.1
- * @since   6.0.20
+ * @since 6.0.20
  * @deprecated You should consider NetWrapper instead.
  */
 class MODULE_CURL
@@ -74,6 +74,15 @@ class MODULE_CURL
         $this->netWrapper = new NetWrapper();
         $this->flags = new Flags();
         $this->CONFIG = $this->netWrapper->getConfig();
+    }
+
+    /**
+     * @since 6.1.2
+     */
+    public function getVersion()
+    {
+        return isset($this->version) && !empty($this->version) ?
+            $this->version : (new Generic())->getVersionByAny(__DIR__, 3, __CLASS__);
     }
 
     /**

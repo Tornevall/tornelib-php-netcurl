@@ -36,12 +36,9 @@ try {
  * preferred way to fetch data.
  *
  * @package TorneLIB\Module\Network\Wrappers
- * @version 6.1.1
  */
 class CurlWrapper implements WrapperInterface
 {
-    private $version = '6.1.0';
-
     /**
      * @var WrapperConfig $CONFIG
      * @since 6.1.0
@@ -523,19 +520,15 @@ class CurlWrapper implements WrapperInterface
 
     /**
      * @return string
+     * @throws ExceptionHandler
      * @throws ReflectionException
      * @noinspection PhpSingleStatementWithBracesInspection
      * @since 6.1.0
      */
     public function getVersion()
     {
-        $return = $this->version;
-
-        if (empty($return)) {
-            $return = (new Generic())->getVersionByClassDoc(__CLASS__);
-        }
-
-        return $return;
+        return isset($this->version) && !empty($this->version) ?
+            $this->version : (new Generic())->getVersionByAny(__DIR__, 3, __CLASS__);
     }
 
     /**

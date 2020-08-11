@@ -28,7 +28,6 @@ use TorneLIB\Utils\Ini;
  * Configuration handler. All wrapper services that needs shared configuration like credentials, SSL setup, etc.
  *
  * @package Module\Config
- * @version 6.1.1
  * @since 6.1.0
  */
 class WrapperConfig

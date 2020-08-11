@@ -19,7 +19,6 @@ if (!defined('NETCURL_VERSION')) {
 /**
  * Interface Wrapper Interface with basic setup that should be present in all modules included in this package.
  * @package TorneLIB\Module\Network\Model
- * @version 6.1.1
  * @since 6.1.0
  */
 interface WrapperInterface

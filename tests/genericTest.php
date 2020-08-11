@@ -102,6 +102,7 @@ class genericTest extends TestCase
 
     /**
      * @test
+     * @throws ExceptionHandler
      */
     public function getVersionTrueFalse()
     {

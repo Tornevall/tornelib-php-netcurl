@@ -37,7 +37,6 @@ if (PHP_VERSION_ID < 80000) {
  * Class RssWrapper
  * @package TorneLIB\Module\Network\Wrappers
  * @link https://docs.laminas.dev/laminas-feed/consuming-rss/
- * @version 6.1.1
  */
 class RssWrapper implements WrapperInterface
 {
@@ -154,18 +153,13 @@ class RssWrapper implements WrapperInterface
 
     /**
      * @inheritDoc
-     * @throws \ReflectionException
+     * @return string
+     * @throws ExceptionHandler
      */
     public function getVersion()
     {
-        /** @noinspection PhpUndefinedFieldInspection */
-        $return = $this->version;
-
-        if (empty($return)) {
-            $return = (new Generic())->getVersionByClassDoc(__CLASS__);
-        }
-
-        return $return;
+        return isset($this->version) && !empty($this->version) ?
+            $this->version : (new Generic())->getVersionByAny(__DIR__, 3, __CLASS__);
     }
 
     /**

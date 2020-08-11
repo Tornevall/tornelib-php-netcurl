@@ -26,7 +26,6 @@ use TorneLIB\Utils\Security;
  * Taking over from v6.0 MODULE_CURL.
  *
  * @package TorneLIB\Module\Network
- * @version 6.1.1
  */
 class NetWrapper implements WrapperInterface
 {
@@ -48,12 +47,6 @@ class NetWrapper implements WrapperInterface
      * @since 6.1.0
      */
     private $isSoapRequest = false;
-
-    /**
-     * @var string $version Internal version.
-     * @since 6.1.0
-     */
-    private $version;
 
     /**
      * @var array
@@ -104,18 +97,13 @@ class NetWrapper implements WrapperInterface
 
     /**
      * @return string
-     * @throws ReflectionException
+     * @throws ExceptionHandler
      * @since 6.1.0
      */
     public function getVersion()
     {
-        $return = $this->version;
-
-        if (empty($return)) {
-            $return = (new Generic())->getVersionByClassDoc(__CLASS__);
-        }
-
-        return $return;
+        return isset($this->version) && !empty($this->version) ?
+            $this->version : (new Generic())->getVersionByAny(__DIR__, 3, __CLASS__);
     }
 
     /**

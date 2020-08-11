@@ -16,7 +16,6 @@ try {
 
 /**
  * Class curlWrapperTest
- * @version 6.1.0
  */
 class tlsSuiteTest extends TestCase
 {

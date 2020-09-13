@@ -1283,11 +1283,14 @@ class WrapperConfig
      */
     public function setWsdlCache($cacheSet = 0, $ttlCache = null)
     {
-        $this->streamOptions['cache_wsdl'] = $cacheSet;
-        // Noinspection set to avoid unnecessary setups.
-        if ((int)$ttlCache > 0 &&
-            (new Ini())->getIniSettable('soap.wsdl_cache_ttl')
-        ) {
+        if (version_compare(PHP_VERSION, '7.0', '>=') && version_compare(PHP_VERSION, '7.1', '<')) {
+            // PHP 7.0 generates exit code 1 on this row, unless it's a string - don't ask why.
+            $this->streamOptions['cache_wsdl'] = (string)$cacheSet;
+        } else {
+            $this->streamOptions['cache_wsdl'] = $cacheSet;
+        }
+
+        if ((int)$ttlCache > 0 && (new Ini())->getIniSettable('soap.wsdl_cache_ttl')) {
             ini_set('soap.wsdl_cache_ttl', $ttlCache);
         }
 

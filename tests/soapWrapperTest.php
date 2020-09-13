@@ -443,7 +443,7 @@ class soapWrapperTest extends TestCase
      * @testdox While testing the wsdlcache, we also testing header, body and parser.
      * @throws ExceptionHandler
      */
-    /*public function setWsdlCache()
+    public function setWsdlCache()
     {
         if (defined('SKIP_SOAP')) {
             static::markTestSkipped('SoapClient is missing or disabled on demand. Test marked as skipped.');
@@ -470,7 +470,7 @@ class soapWrapperTest extends TestCase
                 ) || is_array($headers)
             )
         );
-    }*/
+    }
 
     /**
      * @test

@@ -195,6 +195,8 @@ class simpleStreamWrapperTest extends TestCase
      */
     public function getParsedResponse()
     {
+        static::expectException(ExceptionHandler::class);
+
         $streamWrapperRequest = new SimpleStreamWrapper();
         $streamWrapperRequest->request('https://ipv4.netcurl.org');
         $p = $streamWrapperRequest->getParsedResponse();

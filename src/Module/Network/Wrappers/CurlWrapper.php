@@ -1066,6 +1066,7 @@ class CurlWrapper implements WrapperInterface
      * @param $name
      * @param $arguments
      * @return mixed
+     * @throws ExceptionHandler
      * @since 6.1.2
      */
     public function __call($name, $arguments)
@@ -1078,7 +1079,13 @@ class CurlWrapper implements WrapperInterface
             $return = call_user_func_array([$this, $name], $arguments);
         }
 
-        return $return;
+        if (!is_null($return)) {
+            return $return;
+        }
+        throw new ExceptionHandler(
+            sprintf('Function "%s" not available.', $name),
+            Constants::LIB_METHOD_OR_LIBRARY_UNAVAILABLE
+        );
     }
 
 

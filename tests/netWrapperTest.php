@@ -113,6 +113,8 @@ class netWrapperTest extends TestCase
      */
     public function getParsedResponse()
     {
+        static::expectException(ExceptionHandler::class);
+
         $netWrapperRequest = new NetWrapper();
         $netWrapperRequest->request('https://ipv4.netcurl.org');
         $p = $netWrapperRequest->getParsedResponse();

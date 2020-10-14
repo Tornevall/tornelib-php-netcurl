@@ -316,10 +316,12 @@ class curlWrapperTest extends TestCase
      */
     public function getParsedResponse()
     {
+        static::expectException(ExceptionHandler::class);
+
         $curlWrapperRequest = new CurlWrapper();
         $curlWrapperRequest->request('https://ipv4.netcurl.org');
-        $p = $curlWrapperRequest->getParsedResponse();
         /** @noinspection ForgottenDebugOutputInspection */
+        $p = $curlWrapperRequest->getParsedResponse();
         static::assertTrue(isset($p->ip));
     }
 

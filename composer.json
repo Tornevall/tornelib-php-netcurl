@@ -3,8 +3,6 @@
     "version": "6.1.2",
     "description": "Yet another Curl Library to handling web calls",
     "license": "Apache-2.0",
-    "prefer-stable": false,
-    "minimum-stability": "dev",
     "require": {
         "tornevall/tornelib-php-errorhandler": "6.1.*",
         "tornevall/tornelib-php-crypto": "6.1.*",

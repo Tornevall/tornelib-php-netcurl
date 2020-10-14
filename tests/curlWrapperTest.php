@@ -95,6 +95,7 @@ class curlWrapperTest extends TestCase
     /**
      * @test
      * @throws ExceptionHandler
+     * @throws ReflectionException
      */
     public function getVersion()
     {
@@ -311,6 +312,19 @@ class curlWrapperTest extends TestCase
 
     /**
      * @test
+     * @throws ExceptionHandler
+     */
+    public function getParsedResponse()
+    {
+        $curlWrapperRequest = new CurlWrapper();
+        $curlWrapperRequest->request('https://ipv4.netcurl.org');
+        $p = $curlWrapperRequest->getParsedResponse();
+        /** @noinspection ForgottenDebugOutputInspection */
+        static::assertTrue(isset($p->ip));
+    }
+
+    /**
+     * @test
      * Ask for multiple urls.
      * @throws ExceptionHandler
      */
@@ -518,8 +532,10 @@ class curlWrapperTest extends TestCase
     public function getLibraryVersion()
     {
         // module_curl
+        /** @noinspection PhpUnhandledExceptionInspection */
         $mCurl = (new MODULE_CURL())->getVersion();
         // real curl
+        /** @noinspection PhpUnhandledExceptionInspection */
         $rCurl = (new CurlWrapper())->getVersion();
         static::assertTrue(
             (bool)preg_match('/^6\.1/', $mCurl) &&

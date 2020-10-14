@@ -1063,6 +1063,26 @@ class CurlWrapper implements WrapperInterface
     }
 
     /**
+     * @param $name
+     * @param $arguments
+     * @return mixed
+     * @since 6.1.2
+     */
+    public function __call($name, $arguments)
+    {
+        $return = null;
+
+        $compatibilityMethods = $this->CONFIG->getCompatibilityMethods();
+        if (isset($compatibilityMethods[$name])) {
+            $name = $compatibilityMethods[$name];
+            $return = call_user_func_array([$this, $name], $arguments);
+        }
+
+        return $return;
+    }
+
+
+    /**
      * @param $url
      * @throws ExceptionHandler
      * @since 6.1.0

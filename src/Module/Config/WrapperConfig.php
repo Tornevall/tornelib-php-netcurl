@@ -238,7 +238,7 @@ class WrapperConfig
             'CURLOPT_HTTPHEADER' => ['Accept-Language: en'],
         ]);
 
-        $this->setTimeout(8);
+        $this->setTimeout(10);
 
         return $this;
     }

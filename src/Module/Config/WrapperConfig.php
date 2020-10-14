@@ -204,6 +204,23 @@ class WrapperConfig
     }
 
     /**
+     * Returns compatibility functions from for example NetCurl 6.0.
+     * @return array
+     * @since 6.1.2
+     * @noinspection PhpFullyQualifiedNameUsageInspection
+     */
+    public function getCompatibilityMethods()
+    {
+        $return = [];
+        /** @noinspection ClassConstantCanBeUsedInspection */
+        if (class_exists('\TorneLIB\Compatibility\NetCurl\Methods')) {
+            $return = \TorneLIB\Compatibility\NetCurl\Methods::getCompatibilityMethods();
+        }
+
+        return $return;
+    }
+
+    /**
      * Preparing curl defaults in a way we like.
      * @return $this
      * @since 6.1.0
@@ -1283,7 +1300,7 @@ class WrapperConfig
      */
     public function setWsdlCache($cacheSet = 0, $ttlCache = null)
     {
-        if (version_compare(PHP_VERSION, '7.0', '>=') && version_compare(PHP_VERSION, '7.1', '<')) {
+        if (PHP_VERSION_ID >= 70000 && PHP_VERSION_ID < 70100) {
             // PHP 7.0 generates exit code 1 on this row, unless it's a string - don't ask why.
             $this->streamOptions['cache_wsdl'] = (string)$cacheSet;
         } else {
@@ -1555,7 +1572,6 @@ class WrapperConfig
                 }
 
                 throw new ExceptionHandler('Variable not set.', Constants::LIB_CONFIGWRAPPER_VAR_NOT_SET);
-                break;
             default:
                 break;
         }

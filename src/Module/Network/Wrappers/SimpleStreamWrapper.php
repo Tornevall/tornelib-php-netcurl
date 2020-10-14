@@ -10,13 +10,13 @@ use Exception;
 use ReflectionException;
 use TorneLIB\Exception\Constants;
 use TorneLIB\Exception\ExceptionHandler;
+use TorneLIB\Helpers\GenericParser;
 use TorneLIB\Helpers\Version;
 use TorneLIB\Model\Interfaces\WrapperInterface;
 use TorneLIB\Model\Type\authSource;
 use TorneLIB\Model\Type\authType;
 use TorneLIB\Model\Type\dataType;
 use TorneLIB\Model\Type\requestMethod;
-use TorneLIB\Helpers\GenericParser;
 use TorneLIB\Module\Config\WrapperConfig;
 use TorneLIB\Utils\Generic;
 use TorneLIB\Utils\Security;
@@ -77,6 +77,7 @@ class SimpleStreamWrapper implements WrapperInterface
      * @inheritDoc
      * @return string
      * @throws ExceptionHandler
+     * @throws ReflectionException
      */
     public function getVersion()
     {
@@ -308,7 +309,6 @@ class SimpleStreamWrapper implements WrapperInterface
             $this->CONFIG->getStreamContext()
         );
 
-        /** @noinspection IssetArgumentExistenceInspection */
         $this->streamContentResponseHeader = isset($http_response_header) ? $http_response_header : [];
 
         $httpExceptionMessage = $this->getHttpMessage();
@@ -384,5 +384,31 @@ class SimpleStreamWrapper implements WrapperInterface
         $this->getStreamRequest();
 
         return $this;
+    }
+
+    /**
+     * @param $name
+     * @param $arguments
+     * @return mixed
+     * @throws ExceptionHandler
+     * @since 6.1.2
+     */
+    public function __call($name, $arguments)
+    {
+        $return = null;
+
+        $compatibilityMethods = $this->CONFIG->getCompatibilityMethods();
+        if (isset($compatibilityMethods[$name])) {
+            $name = $compatibilityMethods[$name];
+            $return = call_user_func_array([$this, $name], $arguments);
+        }
+
+        if (!is_null($return)) {
+            return $return;
+        }
+        throw new ExceptionHandler(
+            sprintf('Function "%s" not available.', $name),
+            Constants::LIB_METHOD_OR_LIBRARY_UNAVAILABLE
+        );
     }
 }

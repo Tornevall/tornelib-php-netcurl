@@ -7,6 +7,7 @@
 namespace TorneLIB\Module\Network;
 
 use Exception;
+use ReflectionException;
 use TorneLIB\Exception\Constants;
 use TorneLIB\Exception\ExceptionHandler;
 use TorneLIB\IO\Data\Arrays;
@@ -97,6 +98,7 @@ class NetWrapper implements WrapperInterface
     /**
      * @return string
      * @throws ExceptionHandler
+     * @throws ReflectionException
      * @since 6.1.0
      */
     public function getVersion()
@@ -347,7 +349,7 @@ class NetWrapper implements WrapperInterface
             }
             if (isset($requestData[3]) &&
                 is_object($requestData[3]) &&
-                get_class($requestData[3]) === 'TorneLIB\Module\Config\WrapperConfig'
+                $requestData[3] instanceof WrapperConfig
             ) {
                 $this->CONFIG = $requestData[3];
             }
@@ -703,6 +705,11 @@ class NetWrapper implements WrapperInterface
      */
     public function __call($name, $arguments)
     {
+        $compatibilityMethods = $this->CONFIG->getCompatibilityMethods();
+        if (isset($compatibilityMethods[$name])) {
+            $name = $compatibilityMethods[$name];
+        }
+
         if ($name === 'setAuth') {
             // Abbreviation for setAuthentication.
             return call_user_func_array([$this, 'setAuthentication'], $arguments);

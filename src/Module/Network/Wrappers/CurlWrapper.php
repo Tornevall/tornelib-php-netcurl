@@ -1063,6 +1063,33 @@ class CurlWrapper implements WrapperInterface
     }
 
     /**
+     * @param $name
+     * @param $arguments
+     * @return mixed
+     * @throws ExceptionHandler
+     * @since 6.1.2
+     */
+    public function __call($name, $arguments)
+    {
+        $return = null;
+
+        $compatibilityMethods = $this->CONFIG->getCompatibilityMethods();
+        if (isset($compatibilityMethods[$name])) {
+            $name = $compatibilityMethods[$name];
+            $return = call_user_func_array([$this, $name], $arguments);
+        }
+
+        if (!is_null($return)) {
+            return $return;
+        }
+        throw new ExceptionHandler(
+            sprintf('Function "%s" not available.', $name),
+            Constants::LIB_METHOD_OR_LIBRARY_UNAVAILABLE
+        );
+    }
+
+
+    /**
      * @param $url
      * @throws ExceptionHandler
      * @since 6.1.0

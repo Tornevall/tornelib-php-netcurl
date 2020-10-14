@@ -109,6 +109,21 @@ class netWrapperTest extends TestCase
 
     /**
      * @test
+     * @throws ExceptionHandler
+     */
+    public function getParsedResponse()
+    {
+        static::expectException(ExceptionHandler::class);
+
+        $netWrapperRequest = new NetWrapper();
+        $netWrapperRequest->request('https://ipv4.netcurl.org');
+        $p = $netWrapperRequest->getParsedResponse();
+        /** @noinspection ForgottenDebugOutputInspection */
+        static::assertTrue(isset($p->ip));
+    }
+
+    /**
+     * @test
      */
     public function rssBasic()
     {

@@ -74,6 +74,14 @@ class SimpleStreamWrapper implements WrapperInterface
     }
 
     /**
+     * @since 6.1.2
+     */
+    public function __destruct()
+    {
+        $this->CONFIG->resetStreamData();
+    }
+
+    /**
      * @inheritDoc
      * @return string
      * @throws ExceptionHandler
@@ -218,6 +226,38 @@ class SimpleStreamWrapper implements WrapperInterface
     }
 
     /**
+     * @param mixed $key
+     * @param string $value
+     * @param false $static
+     * @return SimpleStreamWrapper|WrapperConfig
+     * @since 6.1.2
+     */
+    public function setStreamHeader($key = '', $value = '', $static = false)
+    {
+        if (is_array($key) && empty($value)) {
+            // Handle as bulk if this request (for example) comes from NetWrapper.
+            foreach ($key as $getKey => $getValue) {
+                $this->setStreamHeader($getKey, $getValue, false);
+            }
+            return $this;
+        }
+
+        return $this->CONFIG->setHeader($key, $value, $static);
+    }
+
+    /**
+     * @param string $key
+     * @param string $value
+     * @param false $static
+     * @return WrapperConfig
+     * @since 6.1.2
+     */
+    public function setHeader($key = '', $value = '', $static = false)
+    {
+        return $this->setStreamHeader($key, $value, $static);
+    }
+
+    /**
      * @param $proxyAddress
      * @param null $proxyType
      * @return $this
@@ -240,6 +280,9 @@ class SimpleStreamWrapper implements WrapperInterface
         $this->CONFIG->getStreamOptions();
         $this->setStreamRequestMethod();
         $this->setStreamRequestData();
+
+        // Make sure static headers are joined first.
+        $this->CONFIG->getStreamHeader();
 
         // Finalize.
         $this->getStreamDataContents();
@@ -366,6 +409,7 @@ class SimpleStreamWrapper implements WrapperInterface
      */
     public function request($url, $data = [], $method = requestMethod::METHOD_GET, $dataType = dataType::NORMAL)
     {
+        $this->CONFIG->resetStreamData();
         if (!empty($url)) {
             $this->CONFIG->setRequestUrl($url);
         }

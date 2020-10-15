@@ -18,6 +18,7 @@ use TorneLIB\Model\Type\dataType;
 use TorneLIB\Model\Type\requestMethod;
 use TorneLIB\Module\Config\WrapperConfig;
 use TorneLIB\Module\Config\WrapperDriver;
+use TorneLIB\Module\Network\Wrappers\CurlWrapper;
 use TorneLIB\Utils\Generic;
 use TorneLIB\Utils\Security;
 
@@ -92,6 +93,19 @@ class NetWrapper implements WrapperInterface
     {
         $this->CONFIG->setIdentifiers($activation, $allowPhpRelease);
 
+        return $this;
+    }
+
+    /**
+     * @param string $key
+     * @param string $value
+     * @param false $static
+     * @return NetWrapper
+     * @since 6.1.2
+     */
+    public function setHeader($key = '', $value = '', $static = false)
+    {
+        $this->CONFIG->setHeader($key, $value, $static);
         return $this;
     }
 
@@ -457,6 +471,10 @@ class NetWrapper implements WrapperInterface
     ) {
         $return = null;
 
+        // Header setup is only supported by internal requests. If external requests are used,
+        // the developer is on her/his own.
+        $headerArray = $this->CONFIG->getHeader();
+
         if (!is_array($url) && (bool)preg_match('/\?wsdl|&wsdl/i', $url)) {
             try {
                 Security::getCurrentClassState('SoapClient');
@@ -483,12 +501,14 @@ class NetWrapper implements WrapperInterface
             $this->instance->setConfig($this->getConfig());
             $return = $this->instance->request($url, $data, $method, $dataType);
         } elseif ($this->getProperInstanceWrapper('CurlWrapper')) {
+            $this->instance->setHeader($headerArray, null, null);
             $this->instance->setConfig($this->getConfig());
             /** @noinspection PhpPossiblePolymorphicInvocationInspection */
             // No inspection since assuming this is always a curl-based call.
             $this->instance->setCurlMultiInstantException($this->instantCurlMultiErrors);
             $return = $this->instance->request($url, $data, $method, $dataType);
         } elseif ($this->getProperInstanceWrapper('SimpleStreamWrapper')) {
+            $this->instance->setHeader($headerArray, null, null);
             $currentConfig = $this->getConfig();
             // Check if auth is properly set, in case default setup is used.
             $currentConfig->setAuthStream();
@@ -614,6 +634,7 @@ class NetWrapper implements WrapperInterface
         $method = requestMethod::METHOD_GET,
         $dataType = dataType::NORMAL
     ) {
+        $this->CONFIG->getStreamHeader();
         $externalHasErrors = false;
         $externalRequestException = null;
         $returnable = null;

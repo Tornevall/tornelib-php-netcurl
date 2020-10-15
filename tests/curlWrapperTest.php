@@ -30,6 +30,7 @@ class curlWrapperTest extends TestCase
      * @return bool
      * @throws ExceptionHandler
      * @noinspection DuplicatedCode
+     * @since 6.1.0
      */
     private function canProxy()
     {
@@ -58,6 +59,7 @@ class curlWrapperTest extends TestCase
     /**
      * @test
      * Test initial curl wrapper with predefined http request.
+     * @since 6.1.0
      */
     public function initialCurlWrapper()
     {
@@ -96,6 +98,7 @@ class curlWrapperTest extends TestCase
      * @test
      * @throws ExceptionHandler
      * @throws ReflectionException
+     * @since 6.1.0
      */
     public function getVersion()
     {
@@ -110,6 +113,7 @@ class curlWrapperTest extends TestCase
 
     /**
      * @test
+     * @since 6.1.0
      */
     public function safeMode()
     {
@@ -125,6 +129,7 @@ class curlWrapperTest extends TestCase
     /**
      * @test
      * Check secure mode status.
+     * @since 6.1.0
      */
     public function secureMode()
     {
@@ -141,6 +146,7 @@ class curlWrapperTest extends TestCase
      * @test
      * Check what the Browsers-class are generating.
      * @throws ExceptionHandler
+     * @since 6.1.0
      */
     public function browserSet()
     {
@@ -153,6 +159,7 @@ class curlWrapperTest extends TestCase
 
     /**
      * @return WrapperConfig
+     * @since 6.1.0
      */
     private function setTestAgent()
     {
@@ -165,6 +172,7 @@ class curlWrapperTest extends TestCase
      * @test
      * Make multiple URL request s.
      * @throws ExceptionHandler
+     * @since 6.1.0
      */
     public function basicMultiGet()
     {
@@ -182,6 +190,7 @@ class curlWrapperTest extends TestCase
      * @test
      * Test the curlwrapper constructor with a basic request.
      * @throws ExceptionHandler
+     * @since 6.1.0
      */
     public function curlWrapperConstructor()
     {
@@ -206,6 +215,7 @@ class curlWrapperTest extends TestCase
      * @test
      * Make a basic get and validate response.
      * @throws ExceptionHandler
+     * @since 6.1.0
      */
     public function basicGet()
     {
@@ -224,6 +234,7 @@ class curlWrapperTest extends TestCase
      * @test
      * Run basic request where netcurl is automatically render "correct" request.
      * @throws ExceptionHandler
+     * @since 6.1.0
      */
     public function basicGetHeader()
     {
@@ -238,6 +249,7 @@ class curlWrapperTest extends TestCase
      * @test
      * Run basic post request with parameters.
      * @throws ExceptionHandler
+     * @since 6.1.0
      */
     public function basicPostWithGetData()
     {
@@ -259,6 +271,7 @@ class curlWrapperTest extends TestCase
      * @test
      * Run a basic get request.
      * @throws ExceptionHandler
+     * @since 6.1.0
      */
     public function basicGetWithPost()
     {
@@ -278,6 +291,7 @@ class curlWrapperTest extends TestCase
      * @test
      * Run a basic post request.
      * @throws ExceptionHandler
+     * @since 6.1.0
      */
     public function basicPost()
     {
@@ -297,6 +311,7 @@ class curlWrapperTest extends TestCase
      * @test
      * Create basic request with a specific user agent.
      * @throws ExceptionHandler
+     * @since 6.1.0
      */
     public function basicGetHeaderUserAgent()
     {
@@ -313,6 +328,7 @@ class curlWrapperTest extends TestCase
     /**
      * @test
      * @throws ExceptionHandler
+     * @since 6.1.2
      */
     public function getParsedResponse()
     {
@@ -329,6 +345,7 @@ class curlWrapperTest extends TestCase
      * @test
      * Ask for multiple urls.
      * @throws ExceptionHandler
+     * @since 6.1.0
      */
     public function multiGetHeader()
     {
@@ -362,6 +379,7 @@ class curlWrapperTest extends TestCase
      * Initialize empty curlwrapper - set url after init and request an uninitialized wrapper. Expected result
      * is self initialized wrapper of curl.
      * @throws ExceptionHandler
+     * @since 6.1.0
      */
     public function unInitializedCurlWrapperByConfig()
     {
@@ -384,6 +402,7 @@ class curlWrapperTest extends TestCase
      * @test
      * Initialize netcurl without predefined url.
      * @throws ExceptionHandler
+     * @since 6.1.0
      */
     public function unInitializedCurlWrapperMinorConfig()
     {
@@ -405,6 +424,7 @@ class curlWrapperTest extends TestCase
     /**
      * @test
      * Lowest initializer level, where nothing can be initiated since there is no defined url.
+     * @since 6.1.0
      */
     public function unInitializedCurlWrapperNoConfig()
     {
@@ -423,6 +443,7 @@ class curlWrapperTest extends TestCase
     /**
      * @test
      * Certificate errors like this can obviously render two different kind of errors.
+     * @since 6.1.0
      */
     public function sslCurlePeerCert51()
     {
@@ -439,6 +460,7 @@ class curlWrapperTest extends TestCase
     /**
      * @test
      * Certificate errors like this can obviously render two different kind of errors.
+     * @since 6.1.0
      */
     public function sslCurleCacert60()
     {
@@ -456,6 +478,7 @@ class curlWrapperTest extends TestCase
      * @test
      * Tests WrapperConfig and data setup.
      * @noinspection PhpUndefinedMethodInspection
+     * @since 6.1.0
      */
     public function setConfigData()
     {
@@ -477,8 +500,31 @@ class curlWrapperTest extends TestCase
 
     /**
      * @test
+     * @throws ExceptionHandler
+     * @since 6.1.2
+     */
+    public function setStaticHeaders()
+    {
+        $wrapper = new CurlWrapper();
+        $wrapper->setCurlHeader('myHeaderIsStatic', true, true);
+        $parsed = $wrapper->request(
+            'https://ipv4.netcurl.org'
+        )->getParsed();
+
+        $secondParsed = $wrapper->request(
+            'https://ipv4.netcurl.org/?secondRequest=1'
+        )->getParsed();
+
+        static::assertTrue(
+            isset($parsed->HTTP_MYHEADERISSTATIC, $secondParsed->HTTP_MYHEADERISSTATIC)
+        );
+    }
+
+    /**
+     * @test
      * Test timeout configurations.
      * @noinspection PhpUndefinedMethodInspection
+     * @since 6.1.0
      */
     public function setMilliTimeout()
     {
@@ -509,6 +555,7 @@ class curlWrapperTest extends TestCase
      * @test
      * Setting proxy the hard way.
      * @throws ExceptionHandler
+     * @since 6.1.0
      */
     public function proxyPrimary()
     {
@@ -530,6 +577,7 @@ class curlWrapperTest extends TestCase
 
     /**
      * @test
+     * @since 6.1.0
      */
     public function getLibraryVersion()
     {
@@ -549,6 +597,7 @@ class curlWrapperTest extends TestCase
      * @test
      * Setting proxy the easy way.
      * @throws ExceptionHandler
+     * @since 6.1.0
      */
     public function proxyInternal()
     {

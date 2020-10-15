@@ -2,6 +2,8 @@
 
 namespace TorneLIB;
 
+use Exception;
+
 if (!class_exists('NETCURL_PARSER', NETCURL_CLASS_EXISTS_AUTOLOAD) && !class_exists('TorneLIB\NETCURL_PARSER',
         NETCURL_CLASS_EXISTS_AUTOLOAD)) {
     /**
@@ -132,7 +134,7 @@ if (!class_exists('NETCURL_PARSER', NETCURL_CLASS_EXISTS_AUTOLOAD) && !class_exi
         /**
          * @param bool $returnAsIs
          * @return null|string
-         * @throws \Exception
+         * @throws Exception
          * @since 6.0.0
          * @deprecated Do not use this. It will be removed from version 6.1.0 anyway.
          */
@@ -153,6 +155,7 @@ if (!class_exists('NETCURL_PARSER', NETCURL_CLASS_EXISTS_AUTOLOAD) && !class_exi
         /**
          * @param bool $returnAsIs
          * @return null|string
+         * @throws Exception
          * @since 6.0.0
          * @deprecated This function is not supported in version 6.1.0 and above.
          */
@@ -178,7 +181,7 @@ if (!class_exists('NETCURL_PARSER', NETCURL_CLASS_EXISTS_AUTOLOAD) && !class_exi
          * @param string $serialInput
          * @param bool $assoc
          * @return mixed|null
-         * @throws \Exception
+         * @throws Exception
          * @since 6.0.26
          * @deprecated This function is not supported in version 6.1.0 and above.
          */
@@ -191,16 +194,24 @@ if (!class_exists('NETCURL_PARSER', NETCURL_CLASS_EXISTS_AUTOLOAD) && !class_exi
                 return null;
             }
             if (!$assoc) {
-                return @unserialize($serialInput);
+                try {
+                    return @unserialize($serialInput);
+                } catch (Exception $e) {
+                    return null;
+                }
             } else {
-                return $this->arrayObjectToStdClass(@unserialize($serialInput));
+                try {
+                    return $this->arrayObjectToStdClass(@unserialize($serialInput));
+                } catch (Exception $e) {
+                    return null;
+                }
             }
         }
 
         /**
          * @param array $objectArray
          * @return mixed|null
-         * @throws \Exception
+         * @throws Exception
          */
         public function arrayObjectToStdClass($objectArray = [])
         {
@@ -244,7 +255,7 @@ if (!class_exists('NETCURL_PARSER', NETCURL_CLASS_EXISTS_AUTOLOAD) && !class_exi
 
         /**
          * @return array|null|string
-         * @throws \Exception
+         * @throws Exception
          * @since 6.0.0
          * @deprecated Stop using this. Run by content-type instead.
          */
@@ -392,7 +403,7 @@ if (!class_exists('NETCURL_PARSER', NETCURL_CLASS_EXISTS_AUTOLOAD) && !class_exi
 
         /**
          * @return array
-         * @throws \Exception
+         * @throws Exception
          * @since 6.0.0
          */
         private function getDomElements()

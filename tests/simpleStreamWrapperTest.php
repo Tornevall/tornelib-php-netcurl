@@ -17,6 +17,7 @@ class simpleStreamWrapperTest extends TestCase
      * @return bool
      * @throws ExceptionHandler
      * @noinspection DuplicatedCode
+     * @since 6.1.1
      */
     private function canProxy()
     {
@@ -44,6 +45,7 @@ class simpleStreamWrapperTest extends TestCase
 
     /**
      * @test
+     * @since 6.1.0
      */
     public function getStreamWrapper()
     {
@@ -57,6 +59,7 @@ class simpleStreamWrapperTest extends TestCase
     /**
      * @test
      * @throws ExceptionHandler
+     * @since 6.1.0
      */
     public function getBasicUrl()
     {
@@ -77,6 +80,7 @@ class simpleStreamWrapperTest extends TestCase
     /**
      * @test
      * @throws ExceptionHandler
+     * @since 6.1.0
      */
     public function getBasicPost()
     {
@@ -102,6 +106,7 @@ class simpleStreamWrapperTest extends TestCase
     /**
      * @test
      * @throws ExceptionHandler
+     * @since 6.1.0
      */
     public function getBasicJson()
     {
@@ -128,6 +133,7 @@ class simpleStreamWrapperTest extends TestCase
     /**
      * @test
      * @throws ExceptionHandler
+     * @since 6.1.0
      */
     public function getBasicXml()
     {
@@ -157,6 +163,7 @@ class simpleStreamWrapperTest extends TestCase
      * allow_url_fopen = Off
      * disable_functions = curl_exec,curl_init,openssl_encrypt
      * @throws ExceptionHandler
+     * @since 6.1.0
      */
     public function getBasicNetwrapper()
     {
@@ -173,6 +180,7 @@ class simpleStreamWrapperTest extends TestCase
     /**
      * @test
      * @throws ExceptionHandler
+     * @since 6.1.0
      */
     public function getBasicNetwrapperClient()
     {
@@ -192,9 +200,11 @@ class simpleStreamWrapperTest extends TestCase
     /**
      * @test
      * @throws ExceptionHandler
+     * @since 6.1.2
      */
     public function getParsedResponse()
     {
+        /** @noinspection DynamicInvocationViaScopeResolutionInspection */
         static::expectException(ExceptionHandler::class);
 
         $streamWrapperRequest = new SimpleStreamWrapper();
@@ -206,7 +216,44 @@ class simpleStreamWrapperTest extends TestCase
 
     /**
      * @test
+     * @since 6.1.2
+     */
+    public function getContextExtractor()
+    {
+        $wrapperConfig = new WrapperConfig();
+        // All compatible assertion.
+        /** @noinspection PhpUnitTestsInspection */
+        static::assertTrue(
+            is_array($wrapperConfig->getContentFromStreamContext($wrapperConfig->getStreamContext()))
+        );
+    }
+
+    /**
+     * @test
      * @throws ExceptionHandler
+     * @since 6.1.2
+     */
+    public function setStaticHeaders()
+    {
+        $wrapper = new SimpleStreamWrapper();
+        $wrapper->setHeader('myHeaderIsStatic', true, true);
+        $parsed = $wrapper->request(
+            'https://ipv4.netcurl.org'
+        )->getParsed();
+
+        $secondParsed = $wrapper->request(
+            'https://ipv4.netcurl.org/?secondRequest=1'
+        )->getParsed();
+
+        static::assertTrue(
+            isset($parsed->HTTP_MYHEADERISSTATIC, $secondParsed->HTTP_MYHEADERISSTATIC)
+        );
+    }
+
+    /**
+     * @test
+     * @throws ExceptionHandler
+     * @since 6.1.1
      */
     public function streamProxy()
     {

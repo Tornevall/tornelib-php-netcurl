@@ -118,6 +118,13 @@ class CurlWrapper implements WrapperInterface
     private $customPreHeaders = [];
 
     /**
+     * Static headers that will not reset between each request-init.
+     * @var array
+     * @since 6.1.2
+     */
+    private $customPreHeadersStatic = [];
+
+    /**
      * @var array
      * @since 6.1.0
      */
@@ -477,6 +484,11 @@ class CurlWrapper implements WrapperInterface
      */
     private function setProperCustomHeader()
     {
+        // Merge static header data into customPreHeaders.
+        foreach ($this->customPreHeadersStatic as $headerKey => $headerValue) {
+            $this->customPreHeaders[$headerKey] = $headerValue;
+        }
+
         foreach ($this->customPreHeaders as $headerKey => $headerValue) {
             $testHead = explode(":", $headerValue, 2);
             if (isset($testHead[1])) {
@@ -567,19 +579,47 @@ class CurlWrapper implements WrapperInterface
      * @return CurlWrapper
      * @since 6.0
      */
-    public function setCurlHeader($key = '', $value = '')
+    public function setCurlHeader($key = '', $value = '', $static = false)
     {
+        if (is_array($key) && empty($value)) {
+            // Handle as bulk if this request (for example) comes from NetWrapper.
+            foreach ($key as $getKey => $getValue) {
+                $this->setCurlHeader($getKey, $getValue);
+            }
+            return $this;
+        }
+
         if (!empty($key)) {
             if (!is_array($key)) {
                 $this->customPreHeaders[$key] = $value;
+                if ($static) {
+                    $this->customPreHeadersStatic[$key] = $value;
+                }
             } else {
                 foreach ($key as $arrayKey => $arrayValue) {
                     $this->customPreHeaders[$arrayKey] = $arrayValue;
+                    if ($static) {
+                        $this->customPreHeadersStatic[$arrayKey] = $arrayValue;
+                    }
                 }
             }
         }
 
         return $this;
+    }
+
+    /**
+     * Same as setCurlHeader but streamlined compatibility.
+     *
+     * @param string $key
+     * @param string $value
+     * @param false $static
+     * @return $this
+     * @since 6.1.2
+     */
+    public function setHeader($key = '', $value = '', $static = false)
+    {
+        return $this->setCurlHeader($key, $value, $static);
     }
 
     /**

@@ -136,6 +136,20 @@ class WrapperConfig
     ];
 
     /**
+     * Static header content. Used to replicate through multiple instances but will never reset between requests.
+     * @var array
+     * @since 6.1.2
+     */
+    private $streamContextStatic = [];
+
+    /**
+     * Stored headers, used to replicate through multiple instances when NetWrapper is in use.
+     * @var array
+     * @since 6.1.2
+     */
+    private $storedHeaders = [];
+
+    /**
      * @var array Authentication data.
      * @since 6.1.0
      */
@@ -201,6 +215,21 @@ class WrapperConfig
         $this->SSL = new WrapperSSL();
         $this->setThrowableHttpCodes();
         $this->setCurlDefaults();
+    }
+
+    /**
+     * @since 6.1.2
+     */
+    public function resetStreamData()
+    {
+        $this->streamOptions = [
+            'exceptions' => true,
+            'trace' => true,
+            'cache_wsdl' => 0,
+            'stream_context' => null,
+        ];
+
+        return $this;
     }
 
     /**
@@ -693,12 +722,27 @@ class WrapperConfig
     }
 
     /**
+     * @param bool $decoded
      * @return mixed
      * @since 6.1.0
      */
-    public function getStreamContext()
+    public function getStreamContext($decoded = false)
     {
-        return $this->streamOptions['stream_context'];
+        return !$decoded ? $this->streamOptions['stream_context'] : stream_context_get_options($this->streamOptions['stream_context']);
+    }
+
+    /**
+     * @param $contextBlock
+     * @return array|null
+     * @since 6.1.2
+     */
+    public function getContentFromStreamContext($contextBlock)
+    {
+        $return = null;
+        if (is_resource($contextBlock)) {
+            $return = stream_context_get_options($contextBlock);
+        }
+        return $return;
     }
 
     /**
@@ -924,6 +968,7 @@ class WrapperConfig
     /**
      * @param $key
      * @param $value
+     * @param bool $static
      * @return $this
      */
     public function setDualStreamHttp($key, $value)
@@ -932,6 +977,51 @@ class WrapperConfig
         $this->setStreamContext($key, $value, 'http');
 
         return $this;
+    }
+
+    /**
+     * @param string $key
+     * @param string $value
+     * @param false $static
+     * @return $this
+     * @since 6.1.2
+     */
+    public function setHeader($key = '', $value = '', $static = false)
+    {
+        $this->setDualStreamHttp('header', sprintf('%s: %s', $key, $value));
+        $this->storedHeaders[$key] = $value;
+
+        if ($static) {
+            $this->streamContextStatic[$key] = $value;
+        }
+
+        return $this;
+    }
+
+    /**
+     * If NetWrapper is the primary engine, we need to extract all headers from this section.
+     *
+     * @return array
+     * @since 6.1.2
+     */
+    public function getHeader()
+    {
+        return array_merge($this->storedHeaders, $this->streamContextStatic);
+    }
+
+    /**
+     * @return array
+     * @since 6.1.2
+     */
+    public function getStreamHeader()
+    {
+        if (is_array($this->streamContextStatic)) {
+            foreach ($this->streamContextStatic as $key => $value) {
+                $this->setHeader($key, $value);
+            }
+        }
+
+        return $this->streamContextStatic;
     }
 
     /**

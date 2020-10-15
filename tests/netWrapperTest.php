@@ -163,6 +163,27 @@ class netWrapperTest extends TestCase
      * @test
      * @throws ExceptionHandler
      */
+    public function setStaticHeaders()
+    {
+        $wrapper = new NetWrapper();
+        $wrapper->setHeader('myHeaderIsStatic', true, true);
+        $parsed = $wrapper->request(
+            'https://ipv4.netcurl.org'
+        )->getParsed();
+
+        $secondParsed = $wrapper->request(
+            'https://ipv4.netcurl.org/?secondRequest=1'
+        )->getParsed();
+
+        static::assertTrue(
+            isset($parsed->HTTP_MYHEADERISSTATIC, $secondParsed->HTTP_MYHEADERISSTATIC)
+        );
+    }
+
+    /**
+     * @test
+     * @throws ExceptionHandler
+     */
     public function netWrapperProxy()
     {
         if (!$this->canProxy()) {

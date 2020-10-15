@@ -118,6 +118,7 @@ class CurlWrapper implements WrapperInterface
     private $customPreHeaders = [];
 
     /**
+     * Static headers that will not reset between each request-init.
      * @var array
      * @since 6.1.2
      */

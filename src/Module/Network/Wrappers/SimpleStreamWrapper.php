@@ -34,6 +34,9 @@ try {
  */
 class SimpleStreamWrapper implements WrapperInterface
 {
+    // Note to self: Where are the static headers? Well, they are not here. For all streams
+    // we use WrapperConfig to store header setups.
+
     /**
      * @var WrapperConfig $CONFIG
      * @since 6.1.0

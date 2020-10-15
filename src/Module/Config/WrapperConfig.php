@@ -136,12 +136,14 @@ class WrapperConfig
     ];
 
     /**
+     * Static header content. Used to replicate through multiple instances but will never reset between requests.
      * @var array
      * @since 6.1.2
      */
     private $streamContextStatic = [];
 
     /**
+     * Stored headers, used to replicate through multiple instances when NetWrapper is in use.
      * @var array
      * @since 6.1.2
      */

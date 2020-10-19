@@ -39,11 +39,11 @@ jobs:
       - name: Run test suite
         run: phpunit
 
-  build-unit-8:
+  build-unit-6:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        php-versions: [ '7.2' ]
+        php-versions: [ '7.0', '7.1', '7.2' ]
     name: PHP ${{ matrix.php-versions }}
     steps:
       - uses: actions/checkout@v2
@@ -66,6 +66,6 @@ jobs:
         if: steps.composer-cache.outputs.cache-hit != 'true'
         run: composer install --prefer-dist --no-progress --no-suggest
       - name: Install phpunit
-        run: composer require phpunit/phpunit ^8
+        run: composer require phpunit/phpunit ^6
       - name: Run test suite
         run: phpunit

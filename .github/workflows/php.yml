@@ -22,7 +22,6 @@ jobs:
         with:
           php-version: ${{ matrix.php-versions }}
           tools: phpunit
-          extensions: xml
 
       - name: Validate composer.json and composer.lock
         run: composer validate

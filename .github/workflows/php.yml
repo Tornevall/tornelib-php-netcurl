@@ -11,7 +11,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        php-versions: [ '7.1' ]
+        php-versions: [ '7.3' ]
 
     name: PHP ${{ matrix.php-versions }}
     steps:
@@ -22,6 +22,7 @@ jobs:
         with:
           php-version: ${{ matrix.php-versions }}
           tools: phpunit
+          extensions: xml
 
       - name: Validate composer.json and composer.lock
         run: composer validate
@@ -41,4 +42,4 @@ jobs:
       - name: Install phpunit
         run: composer require phpunit/phpunit
       - name: Run test suite
-        run: which phpunit
+        run: phpunit

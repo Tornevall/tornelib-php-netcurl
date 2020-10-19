@@ -32,7 +32,4 @@ jobs:
     - name: Install phpunit
       run: composer require phpunit/phpunit
     - name: Run test suite
-      run: composer run-script test
-
-    #- name: Run phpunit
-    #  run: vendor/bin/phpunit
+      run: vendor/bin/phpunit

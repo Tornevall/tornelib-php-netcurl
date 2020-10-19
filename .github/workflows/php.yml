@@ -11,7 +11,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        php-versions: [ '7.1', '7.2', '7.3', '7.4' ]
+        php-versions: [ '7.1' ]
 
     name: PHP ${{ matrix.php-versions }}
     steps:
@@ -38,5 +38,7 @@ jobs:
       - name: Install dependencies
         if: steps.composer-cache.outputs.cache-hit != 'true'
         run: composer install --prefer-dist --no-progress --no-suggest
+      - name: Install phpunit
+        run: composer require phpunit/phpunit
       - name: Run test suite
-        run: vendor/bin/phpunit
+        run: which phpunit

@@ -30,7 +30,7 @@ jobs:
       if: steps.composer-cache.outputs.cache-hit != 'true'
       run: composer install --prefer-dist --no-progress --no-suggest
     - name: Install phpunit
-      run: composer install phpunit/phpunit
+      run: composer require phpunit/phpunit
       
 
     # Add a test script to composer.json, for instance: "test": "vendor/bin/phpunit"

@@ -108,6 +108,16 @@ class netWrapperTest extends TestCase
      * @test
      * @throws ExceptionHandler
      */
+    public function extremelyBasicOneLiner()
+    {
+        $parsed = (new NetWrapper())->request(sprintf('https://ipv4.netcurl.org/'))->getParsed();
+        static::assertNotEmpty(filter_var($parsed->ip, FILTER_VALIDATE_IP));
+    }
+
+    /**
+     * @test
+     * @throws ExceptionHandler
+     */
     public function sigGet()
     {
         WrapperConfig::setSignature('Korven skriker.');

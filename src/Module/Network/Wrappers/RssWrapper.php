@@ -155,11 +155,12 @@ class RssWrapper implements WrapperInterface
      * @inheritDoc
      * @return string
      * @throws ExceptionHandler
+     * @throws \ReflectionException
      */
     public function getVersion()
     {
         return isset($this->version) && !empty($this->version) ?
-            $this->version : (new Generic())->getVersionByAny(__DIR__, 3, __CLASS__);
+            $this->version : (new Generic())->getVersionByAny(__DIR__, 3, WrapperConfig::class);
     }
 
     /**

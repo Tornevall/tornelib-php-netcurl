@@ -18,7 +18,6 @@ use TorneLIB\Model\Type\dataType;
 use TorneLIB\Model\Type\requestMethod;
 use TorneLIB\Module\Config\WrapperConfig;
 use TorneLIB\Module\Config\WrapperDriver;
-use TorneLIB\Module\Network\Wrappers\CurlWrapper;
 use TorneLIB\Utils\Generic;
 use TorneLIB\Utils\Security;
 
@@ -501,14 +500,14 @@ class NetWrapper implements WrapperInterface
             $this->instance->setConfig($this->getConfig());
             $return = $this->instance->request($url, $data, $method, $dataType);
         } elseif ($this->getProperInstanceWrapper('CurlWrapper')) {
-            $this->instance->setHeader($headerArray, null, null);
+            $this->instance->setHeader($headerArray, null, false);
             $this->instance->setConfig($this->getConfig());
             /** @noinspection PhpPossiblePolymorphicInvocationInspection */
             // No inspection since assuming this is always a curl-based call.
             $this->instance->setCurlMultiInstantException($this->instantCurlMultiErrors);
             $return = $this->instance->request($url, $data, $method, $dataType);
         } elseif ($this->getProperInstanceWrapper('SimpleStreamWrapper')) {
-            $this->instance->setHeader($headerArray, null, null);
+            $this->instance->setHeader($headerArray, null, false);
             $currentConfig = $this->getConfig();
             // Check if auth is properly set, in case default setup is used.
             $currentConfig->setAuthStream();

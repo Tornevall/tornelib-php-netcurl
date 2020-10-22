@@ -242,8 +242,8 @@ class WrapperConfig
     public function getCompatibilityMethods()
     {
         $return = [];
-        /** @noinspection ClassConstantCanBeUsedInspection */
         if (class_exists('\TorneLIB\Compatibility\NetCurl\Methods')) {
+            /** @noinspection PhpUndefinedClassInspection */
             $return = \TorneLIB\Compatibility\NetCurl\Methods::getCompatibilityMethods();
         }
 
@@ -969,7 +969,6 @@ class WrapperConfig
     /**
      * @param $key
      * @param $value
-     * @param bool $static
      * @return $this
      */
     public function setDualStreamHttp($key, $value)

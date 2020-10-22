@@ -540,7 +540,6 @@ class CurlWrapper implements WrapperInterface
      * @return string
      * @throws ExceptionHandler
      * @throws ReflectionException
-     * @noinspection PhpSingleStatementWithBracesInspection
      * @since 6.1.0
      */
     public function getVersion()
@@ -570,6 +569,7 @@ class CurlWrapper implements WrapperInterface
      */
     private function resetCurlRequest()
     {
+        /** @noinspection PhpUndefinedMethodInspection */
         $this->strictResource = Flag::isFlag('strict_resource');
         $this->customHeaders = [];
         $this->curlResponseHeaders = [];
@@ -583,6 +583,7 @@ class CurlWrapper implements WrapperInterface
     /**
      * @param mixed $key
      * @param string $value
+     * @param bool $static
      * @return CurlWrapper
      * @since 6.0
      */

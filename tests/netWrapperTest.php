@@ -3,11 +3,14 @@
 require_once(__DIR__ . '/../vendor/autoload.php');
 
 use PHPUnit\Framework\TestCase;
+use TorneLIB\Config\Flag;
 use TorneLIB\Exception\ExceptionHandler;
 use TorneLIB\Module\Config\WrapperConfig;
 use TorneLIB\Module\Config\WrapperDriver;
 use TorneLIB\Module\Network\NetWrapper;
 use TorneLIB\Module\Network\Wrappers\CurlWrapper;
+
+Flag::setFlag('strict_resource', false);
 
 /**
  * Class netcurlTest
@@ -106,7 +109,6 @@ class netWrapperTest extends TestCase
 
     /**
      * @test
-     * @throws ExceptionHandler
      */
     public function extremelyBasicOneLiner()
     {

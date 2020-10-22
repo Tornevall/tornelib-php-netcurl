@@ -85,6 +85,7 @@ class genericTest extends TestCase
     /**
      * @test
      * Test latest tag with latest release. List should be empty.
+     * @throws ExceptionHandler
      * @throws ReflectionException
      */
     public function getMyVersion()

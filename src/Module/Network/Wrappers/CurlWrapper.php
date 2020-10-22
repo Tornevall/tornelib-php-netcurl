@@ -10,6 +10,7 @@ namespace TorneLIB\Module\Network\Wrappers;
 
 use Exception;
 use ReflectionException;
+use TorneLIB\Config\Flag;
 use TorneLIB\Exception\Constants;
 use TorneLIB\Exception\ExceptionHandler;
 use TorneLIB\Helpers\GenericParser;
@@ -137,6 +138,12 @@ class CurlWrapper implements WrapperInterface
     private $contentType = '';
 
     /**
+     * @var bool If resources are checked strictly.
+     * @since 6.1.2
+     */
+    private $strictResource = false;
+
+    /**
      * CurlWrapper constructor.
      *
      * @throws ExceptionHandler
@@ -151,7 +158,6 @@ class CurlWrapper implements WrapperInterface
 
         $this->CONFIG = new WrapperConfig();
         $this->CONFIG->setCurrentWrapper(__CLASS__);
-
         $hasConstructorArguments = $this->getPriorCompatibilityArguments(func_get_args());
 
         if ($hasConstructorArguments) {
@@ -564,6 +570,7 @@ class CurlWrapper implements WrapperInterface
      */
     private function resetCurlRequest()
     {
+        $this->strictResource = Flag::isFlag('strict_resource');
         $this->customHeaders = [];
         $this->curlResponseHeaders = [];
         $this->curlMultiErrors = null;
@@ -885,7 +892,12 @@ class CurlWrapper implements WrapperInterface
      */
     private function isCurlResource($resource)
     {
-        return is_resource($resource) || is_object($resource);
+        $return = !empty($resource);
+        if ($this->strictResource) {
+            $return = is_resource($resource) || is_object($resource);
+        }
+
+        return $return;
     }
 
     /**
@@ -898,7 +910,6 @@ class CurlWrapper implements WrapperInterface
     public function getCurlHandle()
     {
         $return = null;
-
         if ($this->isCurlResource($this->curlHandle)) {
             $return = $this->curlHandle;
         } elseif ($this->isCurlResource($this->curlMultiHandle) && count($this->curlMultiHandleObjects)) {

@@ -90,7 +90,7 @@ class curlWrapperTest extends TestCase
             (is_object($curlWrapperArgs) &&
                 is_object($curlWrapper) &&
                 is_object($curlWrapper->getConfig()) &&
-                count(Flags::_getAllFlags()) === 2)
+                count(Flags::_getAllFlags()) >= 2)
         );
     }
 

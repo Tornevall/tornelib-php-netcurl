@@ -147,14 +147,23 @@ class genericTest extends TestCase
             $extendedException = $e->getExtendException();
         }
 
-        /** @noinspection PhpUndefinedMethodInspection */
-        $properParsed = $extendedException->getParsed(
-            'http://ipv4.netcurl.org/http.php?code=200&message=Funktionsduglig'
-        );
+        if ($extendedException !== null) {
+            /** @noinspection PhpUndefinedMethodInspection */
+            $properParsed = $extendedException->getParsed(
+                'http://ipv4.netcurl.org/http.php?code=200&message=Funktionsduglig'
+            );
 
-        static::assertTrue(
-            isset($properParsed->response_is_not_empty)
-        );
+            static::assertTrue(
+                isset($properParsed->response_is_not_empty)
+            );
+        } else {
+            static::markTestIncomplete(
+                sprintf(
+                    '%s expected an exception but received null.',
+                    __FUNCTION__
+                )
+            );
+        }
     }
 
     /**
@@ -200,15 +209,24 @@ class genericTest extends TestCase
             $code = $e->getCode();
         }
 
-        /** @noinspection PhpUndefinedMethodInspection */
-        $properParsed = $extendedException->getParsed(
-            'http://ipv4.netcurl.org/http.php?code=200&message=Funktionsduglig'
-        );
+        if ($extendedException !== null) {
+            /** @noinspection PhpUndefinedMethodInspection */
+            $properParsed = $extendedException->getParsed(
+                'http://ipv4.netcurl.org/http.php?code=200&message=Funktionsduglig'
+            );
 
-        static::assertTrue(
-            isset($properParsed->response_is_not_empty) &&
-            $code === Constants::LIB_NETCURL_CURL_MULTI_EXCEPTION_DISCOVERY
-        );
+            static::assertTrue(
+                isset($properParsed->response_is_not_empty) &&
+                $code === Constants::LIB_NETCURL_CURL_MULTI_EXCEPTION_DISCOVERY
+            );
+        } else {
+            static::markTestIncomplete(
+                sprintf(
+                    '%s expected an exception but received null.',
+                    __FUNCTION__
+                )
+            );
+        }
     }
 
     /**
@@ -233,15 +251,23 @@ class genericTest extends TestCase
             $code = $e->getCode();
         }
 
-        /** @noinspection PhpUndefinedMethodInspection */
-        $properParsed = $extendedException->getParsed(
-            'http://ipv4.netcurl.org/http.php?code=200&message=Funktionsduglig'
-        );
+        if ($extendedException !== null) {
+            /** @noinspection PhpUndefinedMethodInspection */
+            $properParsed = $extendedException->getParsed(
+                'http://ipv4.netcurl.org/http.php?code=200&message=Funktionsduglig'
+            );
 
-        static::assertTrue(
-            is_null($properParsed) &&
-            $code === 500
-        );
+            static::assertTrue(
+                is_null($properParsed) &&
+                $code === 500
+            );
+        } else {
+            static::markTestIncomplete(
+                sprintf(
+                    '%s expected an exception but received null.', __FUNCTION__
+                )
+            );
+        }
     }
 
     /**

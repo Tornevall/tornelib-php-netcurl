@@ -312,7 +312,6 @@ class curlWrapperTest extends TestCase
             )
             ->getParsed();
 
-        print_r($data);
         static::assertTrue(isset($data->PARAMS_POST->hello));
     }
 

@@ -110,8 +110,19 @@ class netWrapperTest extends TestCase
      */
     public function extremelyBasicOneLiner()
     {
-        $parsed = (new NetWrapper())->request(sprintf('https://ipv4.netcurl.org/'))->getParsed();
-        static::assertNotEmpty(filter_var($parsed->ip, FILTER_VALIDATE_IP));
+        try {
+            $parsed = (new NetWrapper())->request(sprintf('https://ipv4.netcurl.org/'))->getParsed();
+            static::assertNotEmpty(filter_var($parsed->ip, FILTER_VALIDATE_IP));
+        } catch (Exception $e) {
+            static::markTestSkipped(
+                sprintf(
+                    'Non critical exception in %s: %s (%s).',
+                    __FUNCTION__,
+                    $e->getMessage(),
+                    $e->getCode()
+                )
+            );
+        }
     }
 
     /**

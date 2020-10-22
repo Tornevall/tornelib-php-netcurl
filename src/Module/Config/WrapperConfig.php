@@ -1384,7 +1384,7 @@ class WrapperConfig
      *   WSDL_CACHE_BOTH = 3
      *
      * @param int $cacheSet
-     * @param int $ttlCache Cache lifetime. If null, this won't be set.
+     * @param null $ttlCache Cache lifetime. If null, this won't be set.
      * @return WrapperConfig
      * @since 6.1.0
      */

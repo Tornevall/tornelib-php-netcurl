@@ -244,7 +244,7 @@ class curlWrapperTest extends TestCase
 
         $contentType = $data->getHeader('content-type');
 
-        if ($contentType !== 'application/json') {
+        if ((bool)preg_match('/application\/json/', $contentType)) {
             $contentControl = $data->getParsed();
             /** @noinspection PhpUnitTestsInspection */
             static::assertTrue(is_object($contentControl));
@@ -312,6 +312,7 @@ class curlWrapperTest extends TestCase
             )
             ->getParsed();
 
+        print_r($data);
         static::assertTrue(isset($data->PARAMS_POST->hello));
     }
 

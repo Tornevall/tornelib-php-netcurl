@@ -242,7 +242,15 @@ class curlWrapperTest extends TestCase
             ->setConfig($this->setTestAgent())
             ->request(sprintf('https://ipv4.netcurl.org/?func=%s', __FUNCTION__));
 
-        static::assertSame($data->getHeader('content-type'), 'application/json');
+        $contentType = $data->getHeader('content-type');
+
+        if ($contentType !== 'application/json') {
+            $contentControl = $data->getParsed();
+            /** @noinspection PhpUnitTestsInspection */
+            static::assertTrue(is_object($contentControl));
+        } else {
+            static::assertSame($contentType, 'application/json');
+        }
     }
 
     /**

@@ -356,16 +356,29 @@ class soapWrapperTest extends TestCase
             static::markTestSkipped('SoapClient is missing or disabled on demand. Test marked as skipped.');
             return;
         }
-        $wrapper = (new SoapClientWrapper())->setWsdlCache(WSDL_CACHE_DISK);
-        $wrapper->setAuthentication(
-            $this->rEcomPipeU,
-            $this->rEcomPipeP
-        );
-        $result = $wrapper->request($this->wsdl)->getPaymentMethods();
-        static::assertTrue(
-            is_array($result) &&
-            count($result)
-        );
+        try {
+            $wrapper = (new SoapClientWrapper())->setWsdlCache(WSDL_CACHE_DISK);
+            $wrapper->setAuthentication(
+                $this->rEcomPipeU,
+                $this->rEcomPipeP
+            );
+            $result = $wrapper->request($this->wsdl)->getPaymentMethods();
+            static::assertTrue(
+                is_array($result) &&
+                count($result)
+            );
+        } catch (ExceptionHandler $e) {
+            if ($e->getCode() >= 500) {
+                static::markTestIncomplete(
+                    sprintf(
+                        '%s test skipped due to not-our-fault--error %s: %s',
+                        __FUNCTION__,
+                        $e->getCode(),
+                        $e->getMessage()
+                    )
+                );
+            }
+        }
     }
 
     /**
@@ -449,27 +462,40 @@ class soapWrapperTest extends TestCase
             static::markTestSkipped('SoapClient is missing or disabled on demand. Test marked as skipped.');
             return;
         }
-        $wrapper = new SoapClientWrapper($this->wsdl);
-	// PHP 7.0 Generates an invisible exit code when touching the wsdl cache.
-        $wrapper->setStaging(false);
-        $wrapper->setProduction(true);
-        $wrapper->setAuthentication(
-            $this->rEcomPipeU,
-            $this->rEcomPipeP
-        )->getPaymentMethods();
+        try {
+            $wrapper = new SoapClientWrapper($this->wsdl);
+            // PHP 7.0 Generates an invisible exit code when touching the wsdl cache.
+            $wrapper->setStaging(false);
+            $wrapper->setProduction(true);
+            $wrapper->setAuthentication(
+                $this->rEcomPipeU,
+                $this->rEcomPipeP
+            )->getPaymentMethods();
 
-        $parsed = $wrapper->getParsed();
-        $body = $wrapper->getBody();
-        $headers = $wrapper->getHeaders(true, true);
-        static::assertTrue(
-            is_array($parsed) && count($parsed) &&
-            is_string($body) && strlen($body) &&
-            (
+            $parsed = $wrapper->getParsed();
+            $body = $wrapper->getBody();
+            $headers = $wrapper->getHeaders(true, true);
+            static::assertTrue(
+                is_array($parsed) && count($parsed) &&
+                is_string($body) && strlen($body) &&
                 (
-                    is_string($headers) && strlen($headers)
-                ) || is_array($headers)
-            )
-        );
+                    (
+                        is_string($headers) && strlen($headers)
+                    ) || is_array($headers)
+                )
+            );
+        } catch (ExceptionHandler $e) {
+            if ($e->getCode() >= 500) {
+                static::markTestIncomplete(
+                    sprintf(
+                        '%s test skipped due to not-our-fault--error %s: %s',
+                        __FUNCTION__,
+                        $e->getCode(),
+                        $e->getMessage()
+                    )
+                );
+            }
+        }
     }
 
     /**

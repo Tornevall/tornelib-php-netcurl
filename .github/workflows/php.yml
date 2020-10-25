@@ -35,6 +35,6 @@ jobs:
         if: steps.composer-cache.outputs.cache-hit != 'true'
         run: composer install --prefer-dist --no-progress --no-suggest
       - name: Install phpunit
-        run: composer require phpunit/phpunit ^9
+        run: composer require phpunit/phpunit:^9
       - name: Run test suite
         run: phpunit

@@ -19,7 +19,7 @@ jobs:
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
-          php-versions: ${{ matrix.php-versions }}
+          php-version: ${{ matrix.php-version }}
           tools: phpunit
       - name: Validate composer.json and composer.lock
         run: composer validate
@@ -35,6 +35,6 @@ jobs:
         if: steps.composer-cache.outputs.cache-hit != 'true'
         run: composer install --prefer-dist --no-progress --no-suggest
       - name: Install phpunit
-        run: composer require phpunit/phpunit
+        run: composer require phpunit/phpunit ^9
       - name: Run test suite
         run: phpunit

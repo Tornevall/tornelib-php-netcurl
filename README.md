@@ -52,9 +52,9 @@ This library do support PHP 5.6 (not lower). However, you should [check here](ht
 
 NetCURL is tested within a few different suites. Due to the lack of "test time", tests are not entirely fulfilled in the Bitbucket cloud, which is why tests also are executed from other places on commits. Below is a list of those instances.
 
-[Atlassian Bamboo](https://bamboo.tornevall.net/browse/TOR-NC60)
-[GitHub Actions](https://github.com/Tornevall/tornelib-php-netcurl/actions)
-[Bitbucket Cloud (Pipelines)](https://bitbucket.org/tornevallnetworks/tornelib-php-netcurl/addon/pipelines/home)
+* [Atlassian Bamboo (5.6 - 8.0)](https://bamboo.tornevall.net/browse/TOR-NC60)
+* [GitHub Actions (5.6 + 7.3 - 8.0)](https://github.com/Tornevall/tornelib-php-netcurl/actions)
+* [Bitbucket Pipelines 7.3 - 8.0](https://bitbucket.org/tornevallnetworks/tornelib-php-netcurl/addon/pipelines/home)
 
 The [Bamboo-server](https://bamboo.tornevall.net) has a history which makes many older PHP versions available. But as of mid-summer 2020, all tests with old versions have been removed. This is also a work that continues. Github tests are only running with non-outdated versions (exception for 5.6) and so are bitbucked targeted. Since bamboo is the flagship of tests, old versions are currently not removed there.
 

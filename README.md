@@ -46,7 +46,17 @@ Installing the network module instead will make features such as getGitTagsByUrl
 
 ## Compatibility
 
-This library do support PHP 5.6 (not lower). However, you should [check here](https://www.php.net/supported-versions.php) to ensure your compatiblity yourself). The [Bamboo-server](https://bamboo.tornevall.net) has a history which makes many older PHP versions available, which also confirms that PHP 5.4 probably no longer works. If you sit over there with such old versions, you can only blame yourself when things stop working. As development walks forward, my intentions is to follow that stream. Not going backwards.  
+This library do support PHP 5.6 (not lower). However, you should [check here](https://www.php.net/supported-versions.php) to ensure your compatiblity yourself).
+
+## Bamboo and pipelines
+
+NetCURL is tested within a few different suites. Due to the lack of "test time", tests are not entirely fulfilled in the Bitbucket cloud, which is why tests also are executed from other places on commits. Below is a list of those instances.
+
+[https://bamboo.tornevall.net/browse/TOR-NC60]Atlassian Bamboo
+[https://github.com/Tornevall/tornelib-php-netcurl/actions]GitHub Actions
+[https://bitbucket.org/tornevallnetworks/tornelib-php-netcurl/addon/pipelines/home]Bitbucket Cloud (Pipelines)
+
+The [Bamboo-server](https://bamboo.tornevall.net) has a history which makes many older PHP versions available. But as of mid-summer 2020, all tests with old versions have been removed. This is also a work that continues. Github tests are only running with non-outdated versions (exception for 5.6) and so are bitbucked targeted. Since bamboo is the flagship of tests, old versions are currently not removed there.
 
 ### What about 6.0?
 

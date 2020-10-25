@@ -48,7 +48,7 @@ Installing the network module instead will make features such as getGitTagsByUrl
 
 This library do support PHP 5.6 (not lower). However, you should [check here](https://www.php.net/supported-versions.php) to ensure your compatiblity yourself).
 
-## Bamboo and pipelines
+## Testing: Bamboo, github actions and bitbucket pipelines
 
 NetCURL is tested within a few different suites. Due to the lack of "test time", tests are not entirely fulfilled in the Bitbucket cloud, which is why tests also are executed from other places on commits. Below is a list of those instances.
 

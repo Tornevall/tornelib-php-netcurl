@@ -191,10 +191,8 @@ class netWrapperTest extends TestCase
      */
     public function wrapperDefaultMisconfiguredTimeout()
     {
-        Flag::setFlag('WRAPPER_DEFAULT_TIMEOUT', 'hello');
         $netWrapper = new NetWrapper();
         $timeout = $netWrapper->getTimeout();
-        Flag::deleteFlag('WRAPPER_DEFAULT_TIMEOUT');
         static::assertTrue(isset($timeout['CONNECT']) && (int)$timeout['CONNECT'] === 5);
     }
 
@@ -203,10 +201,9 @@ class netWrapperTest extends TestCase
      */
     public function wrapperDefaultRealTimeout()
     {
-        Flag::setFlag('WRAPPER_DEFAULT_TIMEOUT', 15);
         $netWrapper = new NetWrapper();
+        $netWrapper->setTimeout(15);
         $timeout = $netWrapper->getTimeout();
-        Flag::deleteFlag('WRAPPER_DEFAULT_TIMEOUT');
         static::assertTrue(isset($timeout['CONNECT']) && (int)$timeout['CONNECT'] === 8);
     }
 
@@ -216,12 +213,9 @@ class netWrapperTest extends TestCase
     public function wrapperDefaultZeroTimeout()
     {
         static::expectException(ExceptionHandler::class);
-        Flag::setFlag('WRAPPER_DEFAULT_TIMEOUT', 0);
-        Flag::setFlag('WRAPPER_DEFAULT_TIMEOUT_MS');
         $netWrapper = new NetWrapper();
+        $netWrapper->setTimeout(1, true);
         $netWrapper->request('https://ipv4.netcurl.org');
-        Flag::deleteFlag('WRAPPER_DEFAULT_TIMEOUT');
-        Flag::deleteFlag('WRAPPER_DEFAULT_TIMEOUT_MS');
     }
 
     /**

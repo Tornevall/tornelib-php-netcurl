@@ -435,7 +435,7 @@ class soapWrapperTest extends TestCase
             static::markTestSkipped('SoapClient is missing or disabled on demand. Test marked as skipped.');
             return;
         }
-        $wrapper = (new SoapClientWrapper())->setTimeout(0);
+        $wrapper = (new SoapClientWrapper())->setTimeout(1, true);
         $wrapper->setAuthentication(
             $this->rEcomPipeU,
             $this->rEcomPipeP
@@ -505,11 +505,11 @@ class soapWrapperTest extends TestCase
     {
         static::expectException(ExceptionHandler::class);
         $wrapper = new SoapClientWrapper($this->wsdl);
+        $wrapper->setTimeout(0, true);
         $wrapper->setAuthentication(
             $this->rEcomPipeU,
             $this->rEcomPipeP
         );
-        $wrapper->setTimeout(0);
         $wrapper->getPaymentMethods();
     }
 

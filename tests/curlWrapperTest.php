@@ -684,8 +684,8 @@ class curlWrapperTest extends TestCase
     {
         Flag::setFlag('WRAPPER_DEFAULT_TIMEOUT', 'hello');
         $curlWrapper = new CurlWrapper();
-        $timeout = $curlWrapper->getTimeout();
         Flag::deleteFlag('WRAPPER_DEFAULT_TIMEOUT');
+        $timeout = $curlWrapper->getTimeout();
         static::assertTrue(isset($timeout['CONNECT']) && (int)$timeout['CONNECT'] === 5);
     }
 

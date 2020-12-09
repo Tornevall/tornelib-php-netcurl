@@ -188,24 +188,11 @@ class simpleStreamWrapperTest extends TestCase
     /**
      * @test
      */
-    public function streamWrapperDefaultMisconfiguredTimeout()
-    {
-        Flag::setFlag('WRAPPER_DEFAULT_TIMEOUT', 'hello');
-        $streamWrapper = new SimpleStreamWrapper();
-        $timeout = $streamWrapper->getTimeout();
-        Flag::deleteFlag('WRAPPER_DEFAULT_TIMEOUT');
-        static::assertTrue(isset($timeout['CONNECT']) && (int)$timeout['CONNECT'] === 5);
-    }
-
-    /**
-     * @test
-     */
     public function streamWrapperDefaultRealTimeout()
     {
-        Flag::setFlag('WRAPPER_DEFAULT_TIMEOUT', 15);
         $streamWrapper = new SimpleStreamWrapper();
+        $streamWrapper->setTimeout(15);
         $timeout = $streamWrapper->getTimeout();
-        Flag::deleteFlag('WRAPPER_DEFAULT_TIMEOUT');
         static::assertTrue(isset($timeout['CONNECT']) && (int)$timeout['CONNECT'] === 8);
     }
 

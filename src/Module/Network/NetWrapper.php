@@ -242,7 +242,7 @@ class NetWrapper implements WrapperInterface
     private function getMultiInstance($url = '')
     {
         $return = null;
-        if (isset($this->multiRequest[$url])) {
+        if (is_string($url) && !empty($url) && isset($this->multiRequest[$url])) {
             $return = $this->multiRequest[$url];
         } elseif (is_object($this->instance)) {
             $return = $this->instance;

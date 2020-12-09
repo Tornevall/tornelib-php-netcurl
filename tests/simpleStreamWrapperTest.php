@@ -39,11 +39,11 @@ class simpleStreamWrapperTest extends TestCase
         );
         $response = $stream->request('http://ipv4.netcurl.org/');
 
-        $body = $response->getBody();
+        //$body = $response->getBody();
         $parsed = $response->getParsed();
 
         static::assertTrue(
-            isset($parsed->ip, $parsed->HTTP_USER_AGENT) && strlen($body) > 100 &&
+            isset($parsed->ip, $parsed->HTTP_USER_AGENT) &&
             $parsed->HTTP_USER_AGENT === 'SimpleStreamWrapper'
         );
     }

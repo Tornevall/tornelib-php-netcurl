@@ -198,8 +198,10 @@ class netWrapperTest extends TestCase
         WrapperConfig::setSignature($uAgent);
         try {
             $parseRequest = (new NetWrapper())->request('https://ipv4.netcurl.org')->getParsed();
+            WrapperConfig::deleteSignature();
             static::assertEquals($theName, $parseRequest->HTTP_USER_AGENT);
         } catch (\Exception $e) {
+            WrapperConfig::deleteSignature();
             static::markTestSkipped(
                 sprintf(
                     '%s is currently not working due to server errors: %s (%d)',

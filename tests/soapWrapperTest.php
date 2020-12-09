@@ -39,35 +39,6 @@ class soapWrapperTest extends TestCase
     private $netcurlWsdl = 'https://tests.netcurl.org/tornevall_network/index.wsdl?wsdl';
 
     /**
-     * @return bool
-     * @throws ExceptionHandler
-     * @noinspection DuplicatedCode
-     */
-    private function canProxy()
-    {
-        $return = false;
-
-        $ipList = [
-            '212.63.208.',
-            '10.1.1.',
-        ];
-
-        $wrapperData = (new CurlWrapper())
-            ->setConfig((new WrapperConfig())->setUserAgent('ProxyTestAgent'))
-            ->request('https://ipv4.netcurl.org')->getParsed();
-        if (isset($wrapperData->ip)) {
-            foreach ($ipList as $ip) {
-                if ((bool)preg_match('/' . $ip . '/', $wrapperData->ip)) {
-                    $return = true;
-                    break;
-                }
-            }
-        }
-
-        return $return;
-    }
-
-    /**
      * @test
      * @noinspection PhpUnitTestsInspection
      */
@@ -426,6 +397,35 @@ class soapWrapperTest extends TestCase
     }
 
     /**
+     * @return bool
+     * @throws ExceptionHandler
+     * @noinspection DuplicatedCode
+     */
+    private function canProxy()
+    {
+        $return = false;
+
+        $ipList = [
+            '212.63.208.',
+            '10.1.1.',
+        ];
+
+        $wrapperData = (new CurlWrapper())
+            ->setConfig((new WrapperConfig())->setUserAgent('ProxyTestAgent'))
+            ->request('https://ipv4.netcurl.org')->getParsed();
+        if (isset($wrapperData->ip)) {
+            foreach ($ipList as $ip) {
+                if ((bool)preg_match('/' . $ip . '/', $wrapperData->ip)) {
+                    $return = true;
+                    break;
+                }
+            }
+        }
+
+        return $return;
+    }
+
+    /**
      * @test
      * @link https://www.php.net/manual/en/context.http.php
      */
@@ -454,7 +454,7 @@ class soapWrapperTest extends TestCase
     /**
      * @test
      * @testdox While testing the wsdlcache, we also testing header, body and parser.
-     * @throws ExceptionHandler
+     * @throws Exception
      */
     public function setWsdlCache()
     {
@@ -496,6 +496,21 @@ class soapWrapperTest extends TestCase
                 );
             }
         }
+    }
+
+    /**
+     * @test
+     */
+    public function setSoapTimeout()
+    {
+        static::expectException(ExceptionHandler::class);
+        $wrapper = new SoapClientWrapper($this->wsdl);
+        $wrapper->setAuthentication(
+            $this->rEcomPipeU,
+            $this->rEcomPipeP
+        );
+        $wrapper->setTimeout(0);
+        $wrapper->getPaymentMethods();
     }
 
     /**

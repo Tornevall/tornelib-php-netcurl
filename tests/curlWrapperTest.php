@@ -12,7 +12,6 @@ use TorneLIB\Helpers\Browsers;
 use TorneLIB\Helpers\Version;
 use TorneLIB\Model\Type\requestMethod;
 use TorneLIB\Module\Config\WrapperConfig;
-use TorneLIB\Module\Network\NetWrapper;
 use TorneLIB\Module\Network\Wrappers\CurlWrapper;
 use TorneLIB\MODULE_CURL;
 use TorneLIB\Utils\Security;
@@ -681,12 +680,35 @@ class curlWrapperTest extends TestCase
     /**
      * @test
      */
-    public function wrapperDefaultTimeout()
+    public function curlWrapperDefaultMisconfiguredTimeout()
     {
         Flag::setFlag('WRAPPER_DEFAULT_TIMEOUT', 'hello');
-        $nw = new NetWrapper();
-        $timeout = $nw->getTimeout();
+        $curlWrapper = new CurlWrapper();
+        $timeout = $curlWrapper->getTimeout();
+        Flag::deleteFlag('WRAPPER_DEFAULT_TIMEOUT');
         static::assertTrue(isset($timeout['CONNECT']) && (int)$timeout['CONNECT'] === 5);
+    }
+
+    /**
+     * @test
+     */
+    public function curlWrapperDefaultRealTimeout()
+    {
+        $curlWrapper = new CurlWrapper();
+        $curlWrapper->setTimeout(15);
+        $timeout = $curlWrapper->getTimeout();
+        static::assertTrue(isset($timeout['CONNECT']) && (int)$timeout['CONNECT'] === 8);
+    }
+
+    /**
+     * @test
+     */
+    public function curlWrapperDefaultZeroTimeout()
+    {
+        static::expectException(ExceptionHandler::class);
+        $curlWrapper = new CurlWrapper();
+        $curlWrapper->setTimeout(1, true);
+        $curlWrapper->request('https://ipv4.netcurl.org');
     }
 
     /**

@@ -823,7 +823,13 @@ class WrapperConfig
             return null;
         }
 
-        return self::$userAgentSignature;
+        $return = self::$userAgentSignature;
+
+        if (is_array($return)) {
+            $return = implode('/', $return);
+        }
+
+        return $return;
     }
 
     /**

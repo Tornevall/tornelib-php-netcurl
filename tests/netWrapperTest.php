@@ -189,6 +189,31 @@ class netWrapperTest extends TestCase
     /**
      * @test
      */
+    public function setSignature()
+    {
+        $theName = sprintf('NETCURL-%s', (new NetWrapper())->getVersion());
+        $uAgent = [
+            sprintf('NETCURL-%s', (new NetWrapper())->getVersion()),
+        ];
+        WrapperConfig::setSignature($uAgent);
+        try {
+            $parseRequest = (new NetWrapper())->request('https://ipv4.netcurl.org')->getParsed();
+            static::assertEquals($theName, $parseRequest->HTTP_USER_AGENT);
+        } catch (\Exception $e) {
+            static::markTestSkipped(
+                sprintf(
+                    '%s is currently not working due to server errors: %s (%d)',
+                    __FUNCTION__,
+                    $e->getMessage(),
+                    $e->getCode()
+                )
+            );
+        }
+    }
+
+    /**
+     * @test
+     */
     public function wrapperDefaultMisconfiguredTimeout()
     {
         $netWrapper = new NetWrapper();

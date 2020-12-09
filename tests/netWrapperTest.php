@@ -19,53 +19,6 @@ Flag::setFlag('strict_resource', false);
 class netWrapperTest extends TestCase
 {
     /**
-     * @return bool
-     * @throws ExceptionHandler
-     * @noinspection DuplicatedCode
-     */
-    private function canProxy()
-    {
-        $return = false;
-
-        $ipList = [
-            '212.63.208.',
-            '10.1.1.',
-        ];
-
-        $wrapperData = (new CurlWrapper())
-            ->setConfig((new WrapperConfig())->setUserAgent('ProxyTestAgent'))
-            ->request('https://ipv4.netcurl.org')->getParsed();
-        if (isset($wrapperData->ip)) {
-            foreach ($ipList as $ip) {
-                if ((bool)preg_match('/' . $ip . '/', $wrapperData->ip)) {
-                    $return = true;
-                    break;
-                }
-            }
-        }
-
-        return $return;
-    }
-
-    /**
-     * @return WrapperConfig
-     */
-    private function setTestAgent()
-    {
-        return (new WrapperConfig())->setUserAgent(
-            sprintf('netcurl-%s', NETCURL_VERSION)
-        );
-    }
-
-    /**
-     * @return NetWrapper
-     */
-    private function getBasicWrapper()
-    {
-        return (new NetWrapper())->setConfig($this->setTestAgent());
-    }
-
-    /**
      * @test
      * Test the primary wrapper controller.
      */
@@ -93,6 +46,16 @@ class netWrapperTest extends TestCase
         if (isset($parsed->ip)) {
             static::assertTrue(filter_var($parsed->ip, FILTER_VALIDATE_IP) ? true : false);
         }
+    }
+
+    /**
+     * @return WrapperConfig
+     */
+    private function setTestAgent()
+    {
+        return (new WrapperConfig())->setUserAgent(
+            sprintf('netcurl-%s', NETCURL_VERSION)
+        );
     }
 
     /**
@@ -195,6 +158,14 @@ class netWrapperTest extends TestCase
     }
 
     /**
+     * @return NetWrapper
+     */
+    private function getBasicWrapper()
+    {
+        return (new NetWrapper())->setConfig($this->setTestAgent());
+    }
+
+    /**
      * @test
      * @throws ExceptionHandler
      */
@@ -213,6 +184,44 @@ class netWrapperTest extends TestCase
         static::assertTrue(
             isset($parsed->HTTP_MYHEADERISSTATIC, $secondParsed->HTTP_MYHEADERISSTATIC)
         );
+    }
+
+    /**
+     * @test
+     */
+    public function wrapperDefaultMisconfiguredTimeout()
+    {
+        Flag::setFlag('WRAPPER_DEFAULT_TIMEOUT', 'hello');
+        $netWrapper = new NetWrapper();
+        $timeout = $netWrapper->getTimeout();
+        Flag::deleteFlag('WRAPPER_DEFAULT_TIMEOUT');
+        static::assertTrue(isset($timeout['CONNECT']) && (int)$timeout['CONNECT'] === 5);
+    }
+
+    /**
+     * @test
+     */
+    public function wrapperDefaultRealTimeout()
+    {
+        Flag::setFlag('WRAPPER_DEFAULT_TIMEOUT', 15);
+        $netWrapper = new NetWrapper();
+        $timeout = $netWrapper->getTimeout();
+        Flag::deleteFlag('WRAPPER_DEFAULT_TIMEOUT');
+        static::assertTrue(isset($timeout['CONNECT']) && (int)$timeout['CONNECT'] === 8);
+    }
+
+    /**
+     * @test
+     */
+    public function wrapperDefaultZeroTimeout()
+    {
+        static::expectException(ExceptionHandler::class);
+        Flag::setFlag('WRAPPER_DEFAULT_TIMEOUT', 0);
+        Flag::setFlag('WRAPPER_DEFAULT_TIMEOUT_MS');
+        $netWrapper = new NetWrapper();
+        $netWrapper->request('https://ipv4.netcurl.org');
+        Flag::deleteFlag('WRAPPER_DEFAULT_TIMEOUT');
+        Flag::deleteFlag('WRAPPER_DEFAULT_TIMEOUT_MS');
     }
 
     /**
@@ -236,5 +245,34 @@ class netWrapperTest extends TestCase
             isset($response->ip) &&
             $response->ip === '212.63.208.8'
         );
+    }
+
+    /**
+     * @return bool
+     * @throws ExceptionHandler
+     * @noinspection DuplicatedCode
+     */
+    private function canProxy()
+    {
+        $return = false;
+
+        $ipList = [
+            '212.63.208.',
+            '10.1.1.',
+        ];
+
+        $wrapperData = (new CurlWrapper())
+            ->setConfig((new WrapperConfig())->setUserAgent('ProxyTestAgent'))
+            ->request('https://ipv4.netcurl.org')->getParsed();
+        if (isset($wrapperData->ip)) {
+            foreach ($ipList as $ip) {
+                if ((bool)preg_match('/' . $ip . '/', $wrapperData->ip)) {
+                    $return = true;
+                    break;
+                }
+            }
+        }
+
+        return $return;
     }
 }

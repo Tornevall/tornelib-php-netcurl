@@ -229,7 +229,8 @@ class WrapperConfig
         ]);
 
         $wrapperDefaultTimeout = (int)Flag::getFlag('WRAPPER_DEFAULT_TIMEOUT') ? Flag::getFlag('WRAPPER_DEFAULT_TIMEOUT') : 10;
-        $this->setTimeout($wrapperDefaultTimeout);
+        $wrapperDefaultIsMs = Flag::isFlag('WRAPPER_DEFAULT_TIMEOUT_MS');
+        $this->setTimeout($wrapperDefaultTimeout, $wrapperDefaultIsMs);
 
         return $this;
     }

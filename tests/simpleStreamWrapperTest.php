@@ -3,6 +3,7 @@
 require_once(__DIR__ . '/../vendor/autoload.php');
 
 use PHPUnit\Framework\TestCase;
+use TorneLIB\Config\Flag;
 use TorneLIB\Exception\ExceptionHandler;
 use TorneLIB\Model\Type\dataType;
 use TorneLIB\Model\Type\requestMethod;
@@ -13,36 +14,6 @@ use TorneLIB\Module\Network\Wrappers\SimpleStreamWrapper;
 
 class simpleStreamWrapperTest extends TestCase
 {
-    /**
-     * @return bool
-     * @throws ExceptionHandler
-     * @noinspection DuplicatedCode
-     * @since 6.1.1
-     */
-    private function canProxy()
-    {
-        $return = false;
-
-        $ipList = [
-            '212.63.208.',
-            '10.1.1.',
-        ];
-
-        $wrapperData = (new CurlWrapper())
-            ->setConfig((new WrapperConfig())->setUserAgent('ProxyTestAgent'))
-            ->request('https://ipv4.netcurl.org')->getParsed();
-        if (isset($wrapperData->ip)) {
-            foreach ($ipList as $ip) {
-                if ((bool)preg_match('/' . $ip . '/', $wrapperData->ip)) {
-                    $return = true;
-                    break;
-                }
-            }
-        }
-
-        return $return;
-    }
-
     /**
      * @test
      * @since 6.1.0
@@ -216,6 +187,41 @@ class simpleStreamWrapperTest extends TestCase
 
     /**
      * @test
+     */
+    public function streamWrapperDefaultMisconfiguredTimeout()
+    {
+        Flag::setFlag('WRAPPER_DEFAULT_TIMEOUT', 'hello');
+        $streamWrapper = new SimpleStreamWrapper();
+        $timeout = $streamWrapper->getTimeout();
+        Flag::deleteFlag('WRAPPER_DEFAULT_TIMEOUT');
+        static::assertTrue(isset($timeout['CONNECT']) && (int)$timeout['CONNECT'] === 5);
+    }
+
+    /**
+     * @test
+     */
+    public function streamWrapperDefaultRealTimeout()
+    {
+        Flag::setFlag('WRAPPER_DEFAULT_TIMEOUT', 15);
+        $streamWrapper = new SimpleStreamWrapper();
+        $timeout = $streamWrapper->getTimeout();
+        Flag::deleteFlag('WRAPPER_DEFAULT_TIMEOUT');
+        static::assertTrue(isset($timeout['CONNECT']) && (int)$timeout['CONNECT'] === 8);
+    }
+
+    /**
+     * @test
+     */
+    public function streamWrapperShortTimeout()
+    {
+        $streamWrapper = new SimpleStreamWrapper();
+        $streamWrapper->setTimeout(1);
+        $timeout = $streamWrapper->getTimeout();
+        static::assertTrue(isset($timeout['CONNECT']) && (int)$timeout['CONNECT'] === 1);
+    }
+
+    /**
+     * @test
      * @since 6.1.2
      */
     public function getContextExtractor()
@@ -273,5 +279,35 @@ class simpleStreamWrapperTest extends TestCase
                 $response->ip === '212.63.208.8'
             )
         );
+    }
+
+    /**
+     * @return bool
+     * @throws ExceptionHandler
+     * @noinspection DuplicatedCode
+     * @since 6.1.1
+     */
+    private function canProxy()
+    {
+        $return = false;
+
+        $ipList = [
+            '212.63.208.',
+            '10.1.1.',
+        ];
+
+        $wrapperData = (new CurlWrapper())
+            ->setConfig((new WrapperConfig())->setUserAgent('ProxyTestAgent'))
+            ->request('https://ipv4.netcurl.org')->getParsed();
+        if (isset($wrapperData->ip)) {
+            foreach ($ipList as $ip) {
+                if ((bool)preg_match('/' . $ip . '/', $wrapperData->ip)) {
+                    $return = true;
+                    break;
+                }
+            }
+        }
+
+        return $return;
     }
 }

@@ -4,6 +4,7 @@
 require_once(__DIR__ . '/../vendor/autoload.php');
 
 use PHPUnit\Framework\TestCase;
+use TorneLIB\Config\Flag;
 use TorneLIB\Exception\Constants;
 use TorneLIB\Exception\ExceptionHandler;
 use TorneLIB\Flags;
@@ -11,6 +12,7 @@ use TorneLIB\Helpers\Browsers;
 use TorneLIB\Helpers\Version;
 use TorneLIB\Model\Type\requestMethod;
 use TorneLIB\Module\Config\WrapperConfig;
+use TorneLIB\Module\Network\NetWrapper;
 use TorneLIB\Module\Network\Wrappers\CurlWrapper;
 use TorneLIB\MODULE_CURL;
 use TorneLIB\Utils\Security;
@@ -26,36 +28,6 @@ try {
  */
 class curlWrapperTest extends TestCase
 {
-    /**
-     * @return bool
-     * @throws ExceptionHandler
-     * @noinspection DuplicatedCode
-     * @since 6.1.0
-     */
-    private function canProxy()
-    {
-        $return = false;
-
-        $ipList = [
-            '212.63.208.',
-            '10.1.1.',
-        ];
-
-        $wrapperData = (new CurlWrapper())
-            ->setConfig((new WrapperConfig())->setUserAgent('ProxyTestAgent'))
-            ->request('https://ipv4.netcurl.org')->getParsed();
-        if (isset($wrapperData->ip)) {
-            foreach ($ipList as $ip) {
-                if ((bool)preg_match('/' . $ip . '/', $wrapperData->ip)) {
-                    $return = true;
-                    break;
-                }
-            }
-        }
-
-        return $return;
-    }
-
     /**
      * @test
      * Test initial curl wrapper with predefined http request.
@@ -158,17 +130,6 @@ class curlWrapperTest extends TestCase
     }
 
     /**
-     * @return WrapperConfig
-     * @since 6.1.0
-     */
-    private function setTestAgent()
-    {
-        return (new WrapperConfig())->setUserAgent(
-            sprintf('netcurl-%s', NETCURL_VERSION)
-        );
-    }
-
-    /**
      * @test
      * Make multiple URL request s.
      * @throws ExceptionHandler
@@ -184,6 +145,17 @@ class curlWrapperTest extends TestCase
         /** @noinspection PhpUnitTestsInspection */
         // This test is relatively inactive.
         static::assertTrue(is_object($wrapper));
+    }
+
+    /**
+     * @return WrapperConfig
+     * @since 6.1.0
+     */
+    private function setTestAgent()
+    {
+        return (new WrapperConfig())->setUserAgent(
+            sprintf('netcurl-%s', NETCURL_VERSION)
+        );
     }
 
     /**
@@ -231,6 +203,23 @@ class curlWrapperTest extends TestCase
     }
 
     /**
+     * @test
+     * Run basic request where netcurl is automatically render "correct" request.
+     * @throws ExceptionHandler
+     * @since 6.1.0
+     */
+    public function basicGetHeader()
+    {
+        $data = (new CurlWrapper())
+            ->setConfig($this->setTestAgent())
+            ->request(sprintf('https://ipv4.netcurl.org/?func=%s', __FUNCTION__));
+
+        $contentType = $data->getHeader('content-type');
+
+        static::assertTrue($this->getMatchingJson($contentType, $data->getParsed()));
+    }
+
+    /**
      * Protect against faulty redirects from server and find out if response is json.
      * @param $contentType
      * @param $content
@@ -253,39 +242,6 @@ class curlWrapperTest extends TestCase
         }
 
         return $return;
-    }
-
-    /**
-     * Find out whether response is based on 300 redirect. This is not an internal error, but
-     * caused randomly as it seems, by remote server for unknown reasons.
-     * @param $wrapperCode
-     * @return bool
-     * @since 6.1.0
-     */
-    private function is300($wrapperCode)
-    {
-        $return = false;
-        if (is_numeric($wrapperCode) && $wrapperCode >= 300 && $wrapperCode < 400) {
-            $return = true;
-        }
-        return $return;
-    }
-
-    /**
-     * @test
-     * Run basic request where netcurl is automatically render "correct" request.
-     * @throws ExceptionHandler
-     * @since 6.1.0
-     */
-    public function basicGetHeader()
-    {
-        $data = (new CurlWrapper())
-            ->setConfig($this->setTestAgent())
-            ->request(sprintf('https://ipv4.netcurl.org/?func=%s', __FUNCTION__));
-
-        $contentType = $data->getHeader('content-type');
-
-        static::assertTrue($this->getMatchingJson($contentType, $data->getParsed()));
     }
 
     /**
@@ -314,6 +270,22 @@ class curlWrapperTest extends TestCase
         static::assertTrue(
             (isset($data->PARAMS_REQUEST->hello, $data->PARAMS_GET->func) && $data->PARAMS_GET->func === __FUNCTION__)
         );
+    }
+
+    /**
+     * Find out whether response is based on 300 redirect. This is not an internal error, but
+     * caused randomly as it seems, by remote server for unknown reasons.
+     * @param $wrapperCode
+     * @return bool
+     * @since 6.1.0
+     */
+    private function is300($wrapperCode)
+    {
+        $return = false;
+        if (is_numeric($wrapperCode) && $wrapperCode >= 300 && $wrapperCode < 400) {
+            $return = true;
+        }
+        return $return;
     }
 
     /**
@@ -636,6 +608,36 @@ class curlWrapperTest extends TestCase
     }
 
     /**
+     * @return bool
+     * @throws ExceptionHandler
+     * @noinspection DuplicatedCode
+     * @since 6.1.0
+     */
+    private function canProxy()
+    {
+        $return = false;
+
+        $ipList = [
+            '212.63.208.',
+            '10.1.1.',
+        ];
+
+        $wrapperData = (new CurlWrapper())
+            ->setConfig((new WrapperConfig())->setUserAgent('ProxyTestAgent'))
+            ->request('https://ipv4.netcurl.org')->getParsed();
+        if (isset($wrapperData->ip)) {
+            foreach ($ipList as $ip) {
+                if ((bool)preg_match('/' . $ip . '/', $wrapperData->ip)) {
+                    $return = true;
+                    break;
+                }
+            }
+        }
+
+        return $return;
+    }
+
+    /**
      * @test
      * @since 6.1.0
      */
@@ -673,6 +675,43 @@ class curlWrapperTest extends TestCase
         static::assertTrue(
             isset($wrapperResponse->ip) &&
             $wrapperResponse->ip === '212.63.208.8'
+        );
+    }
+
+    /**
+     * @test
+     */
+    public function wrapperDefaultTimeout()
+    {
+        Flag::setFlag('WRAPPER_DEFAULT_TIMEOUT', 'hello');
+        $nw = new NetWrapper();
+        $timeout = $nw->getTimeout();
+        static::assertTrue(isset($timeout['CONNECT']) && (int)$timeout['CONNECT'] === 5);
+    }
+
+    /**
+     * @test
+     */
+    public function setSigStandard()
+    {
+        WrapperConfig::setSignature("Sig 1");
+        WrapperConfig::setSignature("Sig 2");
+        $currentSignature = WrapperConfig::getSignature();
+        WrapperConfig::setSignature("Sig 3", false);
+        $nextSignature = WrapperConfig::getSignature();
+        WrapperConfig::setSignature("Sig 4");
+        $overSignature = WrapperConfig::getSignature();
+        Flag::setFlag('PROTECT_FIRST_SIGNATURE', true);
+        WrapperConfig::setSignature("Sig 5");
+        $protectSignature = WrapperConfig::getSignature();
+        Flag::deleteFlag('PROTECT_FIRST_SIGNATURE');
+        WrapperConfig::setSignature("Sig 6");
+        $overWritten = WrapperConfig::getSignature();
+
+        static::assertTrue(
+            $currentSignature === $nextSignature &&
+            $overSignature === $protectSignature &&
+            $protectSignature !== $overWritten
         );
     }
 }

@@ -741,7 +741,7 @@ class NetWrapper implements WrapperInterface
                 return $instanceRequest;
             }
         } elseif (method_exists($this->CONFIG, $name)) {
-            call_user_func_array(
+            return call_user_func_array(
                 [
                     $this->CONFIG,
                     $name,

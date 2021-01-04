@@ -2,7 +2,7 @@
 
 ## Installation
 
-Recommended installation: Composer.
+Recommended installation method: composer install/require. See below.
 
 ### Install as standalone
 
@@ -25,7 +25,6 @@ Depending on your needs, you can start with nothing in your hands. Curl is the p
 * SOAP: SoapClient and XML-drivers (if doing https requests).
 * CURL (if you prefer curl before streams).
 * allow_url_fopen (if you have no access to curl, this has to be enabled).
-
 
 ## Packages
 

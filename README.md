@@ -26,7 +26,6 @@ Depending on your needs, you can start with nothing in your hands. Curl is the p
 * CURL (if you prefer curl before streams).
 * allow_url_fopen (if you have no access to curl, this has to be enabled).
 
-
 ## Packages
 
 Source code can be found at [bitbucket repository](https://bitbucket.tornevall.net/projects/LIB/repos/tornelib-php-netcurl/browse), to make upgrading more stable. It is mirrored to [github](https://github.com/Tornevall/tornelib-php-netcurl) but new releases and tags are submitted (when ready) to [github](https://github.com/Tornevall/tornelib-php-netcurl) to maintain maximum stability (do we trust bitbucket? yes - our own server).

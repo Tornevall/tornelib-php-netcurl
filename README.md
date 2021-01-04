@@ -2,7 +2,7 @@
 
 ## Installation
 
-Recommended solution: Composer.
+Recommended installation: Composer.
 
 ### Install as standalone
 

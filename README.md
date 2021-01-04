@@ -2,7 +2,7 @@
 
 ## Installation
 
-Recommended installation: Composer.
+Recommended installation method: composer install/require. See below.
 
 ### Install as standalone
 

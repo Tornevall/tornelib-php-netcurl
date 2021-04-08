@@ -92,9 +92,11 @@ class MODULE_CURL
     }
 
     /**
+     * Backward compatible request doGet from v6.0.
+     *
      * @param string $url Input URL.
-     * @param dataType|int $postDataType
-     * @return mixed|null
+     * @param dataType|int $postDataType Data type of request (NORMAL, JSON, XML, etc).
+     * @return mixed|null Returns the response.
      * @throws ExceptionHandler
      * @deprecated Avoid this method. Use request.
      * @since 6.1.0

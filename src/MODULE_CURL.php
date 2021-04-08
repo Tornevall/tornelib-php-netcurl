@@ -78,6 +78,8 @@ class MODULE_CURL
     }
 
     /**
+     * Return version from core script.
+     *
      * @return string|null
      * @throws ExceptionHandler
      * @throws ReflectionException
@@ -90,7 +92,7 @@ class MODULE_CURL
     }
 
     /**
-     * @param string $url
+     * @param string $url Input URL.
      * @param dataType|int $postDataType
      * @return mixed|null
      * @throws ExceptionHandler
@@ -104,6 +106,7 @@ class MODULE_CURL
 
     /**
      * Allows strict identification in user-agent header.
+     *
      * @param $activation
      * @param bool $allowPhpRelease
      * @return MODULE_CURL

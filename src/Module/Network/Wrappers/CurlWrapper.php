@@ -1286,11 +1286,10 @@ class CurlWrapper implements WrapperInterface
      */
     private function getCurlResource($resource)
     {
-        if (version_compare(PHP_VERSION, '8.0.0', '<')) {
-            $return = (int)$resource;
-        } else {
-            $return = get_resource_id($resource);
-        }
+        // get_resource_id for PHP 8 works as long as the curl resource really is a resource.
+        // Which it is not. So to maintain everything, we use this method in case of future changes.
+        $return = (int)$resource;
+
         return $return;
     }
 

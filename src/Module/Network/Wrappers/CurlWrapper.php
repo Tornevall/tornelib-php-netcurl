@@ -1232,9 +1232,6 @@ class CurlWrapper implements WrapperInterface
 
         if ($this->isCurlMulti) {
             $curlHandleId = $this->getHandleByResourceId($curlHandle);
-            /*            if ((int)$curlHandleId) {
-                            $this->curlMultiHandleObjects[$curlHandleId]['effective_url'] = curl_getinfo($curlHandle, CURLINFO_EFFECTIVE_URL);
-                        }*/
         }
 
         if (count($headSplit) < 2) {
@@ -1271,9 +1268,9 @@ class CurlWrapper implements WrapperInterface
     private function getHandleByResourceId($resource)
     {
         $return = null;
-        $currentResource = get_resource_id($resource);
+        $currentResource = $this->getCurlResource($resource);
         foreach ($this->curlMultiHandleObjects as $idx => $resourceObject) {
-            if (get_resource_id($resourceObject) === $currentResource) {
+            if ($this->getCurlResource($resourceObject) === $currentResource) {
                 $return = $idx;
                 break;
             }
@@ -1282,6 +1279,20 @@ class CurlWrapper implements WrapperInterface
         return (int)$return;
     }
 
+    /**
+     * @param $resource
+     * @return int
+     * @since 6.1.4
+     */
+    private function getCurlResource($resource)
+    {
+        if (version_compare(PHP_VERSION, '8.0.0', '<')) {
+            $return = (int)$resource;
+        } else {
+            $return = get_resource_id($resource);
+        }
+        return $return;
+    }
 
     /**
      * Get stored (multi) handle index via set URL.

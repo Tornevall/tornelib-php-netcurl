@@ -886,8 +886,10 @@ class CurlWrapper implements WrapperInterface
             $return = $this->curlResponse;
         } elseif (!is_numeric($url) && isset($this->curlMultiResponse[$url])) {
             $return = $this->curlMultiResponse[$url];
-        } else {
+        } elseif (is_array($this->curlMultiResponse)) {
             $return = array_shift($this->curlMultiResponse);
+        } else {
+            $return = $this->curlMultiResponse;
         }
 
         return $return;

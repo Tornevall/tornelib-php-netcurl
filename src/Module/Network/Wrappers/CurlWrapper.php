@@ -89,7 +89,7 @@ class CurlWrapper implements WrapperInterface
     private $curlMultiHandle;
 
     /**
-     * @var
+     * @var array $curlMultiErrors Curl Multi Request Errors.
      * @since 6.1.0
      */
     private $curlMultiErrors;
@@ -105,6 +105,12 @@ class CurlWrapper implements WrapperInterface
      * @since 6.1.0
      */
     private $curlMultiHandleObjects = [];
+
+    /**
+     * @var array
+     * @since 6.1.4
+     */
+    private $curlMultiHandleUrls = [];
 
     /**
      * @var
@@ -142,6 +148,12 @@ class CurlWrapper implements WrapperInterface
      * @since 6.1.2
      */
     private $strictResource = false;
+
+    /**
+     * @var array
+     * @since 6.1.4
+     */
+    private $defaultOptions = [];
 
     /**
      * CurlWrapper constructor.
@@ -202,15 +214,21 @@ class CurlWrapper implements WrapperInterface
             }
         } else {
             // Prepare for multiple curl requests.
-            $requestUrlArray = $this->CONFIG->getRequestUrl();
+            $requestUrlArray = $this->getProperUrlArray($this->CONFIG->getRequestUrl());
             if (is_array($requestUrlArray) && count($requestUrlArray)) {
                 $this->isCurlMulti = true;
                 $this->curlMultiHandle = curl_multi_init();
-                foreach ($requestUrlArray as $url) {
-                    $this->curlMultiHandleObjects[$url] = curl_init();
+
+                $this->defaultOptions = $this->CONFIG->getOptions();
+                foreach ($requestUrlArray as $arr => $urlData) {
+                    $this->curlMultiHandleObjects[$arr] = curl_init();
+                    $this->curlMultiHandleUrls[$arr] = $urlData['url'];
+                    $this->resetMultiCurlRequest();
+
                     $this->setupHandle(
-                        $this->curlMultiHandleObjects[$url],
-                        $url
+                        $this->curlMultiHandleObjects[$arr],
+                        $urlData['url'],
+                        $urlData
                     );
                 }
                 $this->setCurlMultiHandles();
@@ -221,22 +239,49 @@ class CurlWrapper implements WrapperInterface
     }
 
     /**
-     * Major initializer.
+     * Get an array out of a multi request.
+     *
+     * @param $urlArray
+     * @return array
+     * @since 6.1.4
+     */
+    private function getProperUrlArray($urlArray)
+    {
+        $return = [];
+
+        if (is_array($urlArray)) {
+            foreach ($urlArray as $idx => $urlData) {
+                if (is_string($urlData)) {
+                    $return[] = [
+                        'url' => $urlData,
+                    ];
+                } else {
+                    $return[] = $urlData;
+                }
+            }
+        }
+
+        return $return;
+    }
+
+    /**
+     * CurlRequest initializing.
      *
      * @param $curlHandle
      * @param $url
+     * @param null $urlData
      * @return $this
      * @throws ExceptionHandler
      * @since 6.1.0
      */
-    private function setupHandle($curlHandle, $url)
+    private function setupHandle($curlHandle, $url, $urlData = null)
     {
-        $this->setCurlAuthentication($curlHandle);
+        $this->setCurlAuthentication($curlHandle, $urlData);
         $this->setCurlDynamicValues($curlHandle);
         $this->setCurlSslValues($curlHandle);
         $this->setCurlStaticValues($curlHandle);
-        $this->setCurlPostData($curlHandle);
-        $this->setCurlRequestMethod($curlHandle);
+        $this->setCurlPostData($curlHandle, $urlData);
+        $this->setCurlRequestMethod($curlHandle, $urlData);
         $this->setCurlCustomHeaders($curlHandle);
         if (!empty($url)) {
             $this->setOptionCurl($curlHandle, CURLOPT_URL, $url);
@@ -246,13 +291,21 @@ class CurlWrapper implements WrapperInterface
     }
 
     /**
-     * @param $curlHandle
+     * @param mixed $curlHandle
+     * @param null $urlData
      * @return CurlWrapper
      * @since 6.1.0
      */
-    private function setCurlAuthentication($curlHandle)
+    private function setCurlAuthentication($curlHandle, $urlData = null)
     {
         $authData = $this->getAuthentication();
+
+        if (!is_null($urlData)) {
+            if (isset($urlData['auth'])) {
+                $authData = $urlData['auth'];
+            }
+        }
+
         if (!empty($authData['password'])) {
             $this->setOptionCurl($curlHandle, CURLOPT_HTTPAUTH, $authData['type']);
             $this->setOptionCurl(
@@ -305,7 +358,7 @@ class CurlWrapper implements WrapperInterface
     }
 
     /**
-     * @param $curlHandle
+     * @param mixed $curlHandle
      * @return CurlWrapper
      * @since 6.1.0
      */
@@ -326,7 +379,7 @@ class CurlWrapper implements WrapperInterface
     /**
      * Values set here can not be changed via any other part of the wrapper.
      *
-     * @param $curlHandle
+     * @param mixed $curlHandle
      * @return $this
      * @since 6.1.0
      */
@@ -343,15 +396,35 @@ class CurlWrapper implements WrapperInterface
 
     /**
      * @param $curlHandle
+     * @param null $urlData
      * @return CurlWrapper
      * @throws ExceptionHandler
      * @since 6.1.0
      */
-    private function setCurlPostData($curlHandle)
+    private function setCurlPostData($curlHandle, $urlData = null)
     {
+        $dataType = $this->CONFIG->getRequestDataType();
         $requestData = $this->CONFIG->getRequestData();
+        $requestMethod = $this->CONFIG->getRequestMethod();
+        if (!is_null($urlData)) {
+            if (isset($urlData['requestMethod']) &&
+                !empty($urlData['requestMethod'])
+            ) {
+                $requestMethod = $urlData['requestMethod'];
+            }
+            if (isset($urlData['dataType']) &&
+                !empty($urlData['dataType'])
+            ) {
+                $dataType = $urlData['dataType'];
+            }
+            if (isset($urlData['data']) &&
+                !empty($urlData['data'])
+            ) {
+                $requestData = $this->CONFIG->getRequestData($dataType, $urlData['data'], $requestMethod);
+            }
+        }
 
-        switch ($this->CONFIG->getRequestDataType()) {
+        switch ($dataType) {
             case dataType::XML:
                 $this->setCurlPostXmlHeader($curlHandle, $requestData);
                 break;
@@ -359,7 +432,7 @@ class CurlWrapper implements WrapperInterface
                 $this->setCurlPostJsonHeader($curlHandle, $requestData);
                 break;
             default:
-                if ($this->CONFIG->getRequestMethod() === requestMethod::METHOD_POST) {
+                if ($requestMethod === requestMethod::METHOD_POST) {
                     $this->setOptionCurl($curlHandle, CURLOPT_POST, true);
                 }
                 $this->setOptionCurl($curlHandle, CURLOPT_POSTFIELDS, $requestData);
@@ -438,12 +511,21 @@ class CurlWrapper implements WrapperInterface
 
     /**
      * @param $curlHandle
+     * @param null $urlData
      * @return CurlWrapper
      * @since 6.1.0
      */
-    private function setCurlRequestMethod($curlHandle)
+    private function setCurlRequestMethod($curlHandle, $urlData = null)
     {
-        switch ($this->CONFIG->getRequestMethod()) {
+        $requestMethod = $this->CONFIG->getRequestMethod();
+        if (!is_null($urlData) &&
+            isset($urlData['requestMethod']) &&
+            is_numeric($urlData['requestMethod'])
+        ) {
+            $requestMethod = $urlData['requestMethod'];
+        }
+
+        switch ($requestMethod) {
             case requestMethod::METHOD_POST:
                 $this->setOptionCurl($curlHandle, CURLOPT_CUSTOMREQUEST, 'POST');
                 break;
@@ -528,9 +610,9 @@ class CurlWrapper implements WrapperInterface
      */
     private function setCurlMultiHandles()
     {
-        $reqUrlArray = (array)$this->CONFIG->getRequestUrl();
-        foreach ($reqUrlArray as $url) {
-            curl_multi_add_handle($this->curlMultiHandle, $this->curlMultiHandleObjects[$url]);
+        $reqUrlArray = (array)$this->getProperUrlArray($this->CONFIG->getRequestUrl());
+        foreach ($reqUrlArray as $arr => $urlData) {
+            curl_multi_add_handle($this->curlMultiHandle, $this->curlMultiHandleObjects[$arr]);
         }
 
         return $this;
@@ -595,6 +677,21 @@ class CurlWrapper implements WrapperInterface
         $this->curlMultiResponse = null;
         $this->curlMultiHandle = null;
         $this->curlMultiHandleObjects = [];
+        $this->curlMultiHandleUrls = [];
+
+        return $this;
+    }
+
+    /**
+     * @return $this
+     * @since 6.1.4
+     */
+    private function resetMultiCurlRequest()
+    {
+        $this->customPreHeaders = [];
+        $this->customHeaders = [];
+        $this->CONFIG->setOptions($this->defaultOptions);
+
         return $this;
     }
 
@@ -777,7 +874,6 @@ class CurlWrapper implements WrapperInterface
     /**
      * @param string $url
      * @return mixed
-     * @throws ExceptionHandler
      * @since 6.0
      */
     public function getBody($url = '')
@@ -788,19 +884,10 @@ class CurlWrapper implements WrapperInterface
 
         if (!$this->isCurlMulti) {
             $return = $this->curlResponse;
-        } elseif (isset($this->curlMultiResponse[$url])) {
+        } elseif (!is_numeric($url) && isset($this->curlMultiResponse[$url])) {
             $return = $this->curlMultiResponse[$url];
         } else {
-            // Sort out one request.
-            if (empty($url)) {
-                throw new ExceptionHandler(
-                    sprintf(
-                        'Can not use %s without an url in a curl_multi request.',
-                        __FUNCTION__
-                    )
-                );
-            }
-            $return = $this->curlMultiResponse;
+            $return = array_shift($this->curlMultiResponse);
         }
 
         return $return;
@@ -819,16 +906,21 @@ class CurlWrapper implements WrapperInterface
 
         $headerRequest = is_array($this->curlResponseHeaders) ? $this->curlResponseHeaders : [];
 
+        if (!is_null($handleIndexByUrl = $this->getHandleByUrl($specificUrl))) {
+            $specificUrl = $handleIndexByUrl;
+        }
+
         if ($this->isCurlMulti) {
-            if (is_array($this->curlResponseHeaders) && count($this->curlResponseHeaders) === 1) {
+            //if (empty($specificUrl)) {                $specificUrl = 0;            }
+            if (empty($specificUrl)) {
+                $specificUrl = 0;
+            }
+            if (isset($this->curlResponseHeaders[$specificUrl]) &&
+                is_array($this->curlResponseHeaders[$specificUrl]) &&
+                count($this->curlResponseHeaders[$specificUrl]) === 1
+            ) {
                 $headerRequest = array_pop($this->curlResponseHeaders);
             } else {
-                if (empty($specificUrl)) {
-                    throw new ExceptionHandler(
-                        'You must specify the URL from which you want to retrieve headers.',
-                        Constants::LIB_MULTI_HEADER
-                    );
-                }
                 $headerRequest = isset($this->curlResponseHeaders[$specificUrl]) &&
                 is_array($this->curlResponseHeaders[$specificUrl]) ? $this->curlResponseHeaders[$specificUrl] : [];
             }
@@ -973,10 +1065,10 @@ class CurlWrapper implements WrapperInterface
             }
         } while ($active && $status === CURLM_OK);
 
-        foreach ($this->curlMultiHandleObjects as $url => $curlHandleObject) {
-            $return[$url] = curl_multi_getcontent($curlHandleObject);
-            $this->curlMultiHttpCode[$url] = GenericParser::getHttpHead($this->getHeader('http', $url));
-            $this->getCurlMultiErrors($curlHandleObject, $url);
+        foreach ($this->curlMultiHandleObjects as $arr => $curlHandleObject) {
+            $return[$arr] = curl_multi_getcontent($curlHandleObject);
+            $this->curlMultiHttpCode[$arr] = GenericParser::getHttpHead($this->getHeader('http', $arr));
+            $this->getCurlMultiErrors($curlHandleObject, $arr);
             curl_multi_remove_handle($this->curlMultiHandle, $curlHandleObject);
         }
 
@@ -1136,13 +1228,19 @@ class CurlWrapper implements WrapperInterface
         $headSplit = explode(':', $header, 2);
         $spacedSplit = explode(' ', $header, 2);
 
+        if ($this->isCurlMulti) {
+            $curlHandleId = $this->getHandleByResourceId($curlHandle);
+            /*            if ((int)$curlHandleId) {
+                            $this->curlMultiHandleObjects[$curlHandleId]['effective_url'] = curl_getinfo($curlHandle, CURLINFO_EFFECTIVE_URL);
+                        }*/
+        }
+
         if (count($headSplit) < 2) {
             if (count($spacedSplit) > 1) {
                 if (!$this->isCurlMulti) {
                     $this->curlResponseHeaders[$spacedSplit[0]][] = trim($spacedSplit[1]);
                 } else {
-                    $urlinfo = curl_getinfo($curlHandle, CURLINFO_EFFECTIVE_URL);
-                    $this->curlResponseHeaders[$urlinfo][$spacedSplit[0]][] = trim($spacedSplit[1]);
+                    $this->curlResponseHeaders[$curlHandleId][$spacedSplit[0]][] = trim($spacedSplit[1]);
                 }
             }
             return strlen($header);
@@ -1152,13 +1250,57 @@ class CurlWrapper implements WrapperInterface
             $this->curlResponseHeaders[$headSplit[0]][] = trim($headSplit[1]);
         } else {
             $urlinfo = curl_getinfo($curlHandle, CURLINFO_EFFECTIVE_URL);
-            if (!isset($this->curlResponseHeaders[$urlinfo])) {
-                $this->curlResponseHeaders[$urlinfo] = [];
+            if (!isset($this->curlResponseHeaders[$curlHandleId])) {
+                $this->curlResponseHeaders[$curlHandleId] = [];
             }
-            $this->curlResponseHeaders[$urlinfo][$headSplit[0]][] = trim($headSplit[1]);
+            $this->curlResponseHeaders[$curlHandleId][$headSplit[0]][] = trim($headSplit[1]);
         }
 
         return strlen($header);
+    }
+
+    /**
+     * Get stored (multi) resource index via resource id.
+     *
+     * @param mixed $resource
+     * @return int
+     * @since 6.1.4
+     */
+    private function getHandleByResourceId($resource)
+    {
+        $return = null;
+        $currentResource = get_resource_id($resource);
+        foreach ($this->curlMultiHandleObjects as $idx => $resourceObject) {
+            if (get_resource_id($resourceObject) === $currentResource) {
+                $return = $idx;
+                break;
+            }
+        }
+
+        return (int)$return;
+    }
+
+
+    /**
+     * Get stored (multi) handle index via set URL.
+     *
+     * @param string $theUrl
+     * @return int
+     * @return int|string|null
+     * @since 6.1.4
+     */
+    private function getHandleByUrl($theUrl)
+    {
+        $return = null;
+
+        foreach ($this->curlMultiHandleUrls as $idx => $url) {
+            if ($url === $theUrl) {
+                $return = $idx;
+                break;
+            }
+        }
+
+        return $return;
     }
 
     /**

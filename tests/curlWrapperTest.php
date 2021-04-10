@@ -162,7 +162,16 @@ class curlWrapperTest extends TestCase
                 'requestMethod' => requestMethod::METHOD_POST,
                 'dataType' => dataType::NORMAL,
                 'data' => [
-                    'dataRequestMethod' => 'FIRST'
+                    'dataRequestMethod' => 'FIRST',
+                ],
+                'headers' => [
+                    'XHeaderFirst' => 'yes',
+                    'X-Real-IP' => '255.255.255.0',
+                    'Client-IP' => '127.0.0.255',
+                    'X-Forwarded-For' => '127.255.0.0',
+                ],
+                'headers_static' => [
+                    'HeaderIsForever' => 'only-in-non-multi-curls',
                 ],
             ],
             [
@@ -170,16 +179,19 @@ class curlWrapperTest extends TestCase
                 'requestMethod' => requestMethod::METHOD_POST,
                 'dataType' => dataType::NORMAL,
                 'data' => [
-                    'dataRequestMethod' => 'SECOND'
+                    'dataRequestMethod' => 'SECOND',
+                ],
+                'headers' => [
+                    'XHeaderSecond' => 'yes',
                 ],
             ],
             [
                 'url' => 'https://ipv4.netcurl.org/',
                 'requestMethod' => requestMethod::METHOD_GET,
                 'data' => [
-                    'dataRequestMethod' => 'THIRD'
+                    'dataRequestMethod' => 'THIRD',
                 ],
-            ]
+            ],
         ]);
 
         // Second request: Single URL request. No extra data.

@@ -15,6 +15,7 @@ use TorneLIB\Exception\Constants;
 use TorneLIB\Exception\ExceptionHandler;
 use TorneLIB\Helpers\GenericParser;
 use TorneLIB\Helpers\Version;
+use TorneLIB\IO\Data\Arrays;
 use TorneLIB\Model\Interfaces\WrapperInterface;
 use TorneLIB\Model\Type\authType;
 use TorneLIB\Model\Type\dataType;
@@ -277,6 +278,7 @@ class CurlWrapper implements WrapperInterface
     private function setupHandle($curlHandle, $url, $urlData = null)
     {
         $this->setCurlAuthentication($curlHandle, $urlData);
+        $this->setCurlMultiHeaders($urlData);
         $this->setCurlDynamicValues($curlHandle);
         $this->setCurlSslValues($curlHandle);
         $this->setCurlStaticValues($curlHandle);
@@ -287,6 +289,45 @@ class CurlWrapper implements WrapperInterface
             $this->setOptionCurl($curlHandle, CURLOPT_URL, $url);
         }
 
+        return $this;
+    }
+
+    /**
+     * @param $urlData
+     * @return $this
+     * @since 6.1.4
+     */
+    private function setCurlMultiHeaders($urlData)
+    {
+        if (isset($urlData['headers']) && is_array($urlData['headers'])) {
+            $this->setCurlMultiHeaderByArray($urlData['headers'], false);
+        }
+        if (isset($urlData['headers_static']) && is_array($urlData['headers_static'])) {
+            $this->setCurlMultiHeaderByArray($urlData['headers_static'], true);
+        }
+
+        return $this;
+    }
+
+    /**
+     * @param $urlDataHeaders
+     * @param false $static
+     * @return $this
+     * @since 6.1.4
+     */
+    private function setCurlMultiHeaderByArray($urlDataHeaders, $static = false)
+    {
+        if (is_array($urlDataHeaders)) {
+            if ((new Arrays())->isAssoc($urlDataHeaders)) {
+                foreach ($urlDataHeaders as $headerKey => $headerValue) {
+                    $this->setCurlHeader($headerKey, $headerValue);
+                }
+            } else {
+                foreach ($urlDataHeaders as $headerContent) {
+                    $this->setCurlHeader($headerContent);
+                }
+            }
+        }
         return $this;
     }
 

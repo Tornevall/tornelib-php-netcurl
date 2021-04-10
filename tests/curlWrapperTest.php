@@ -10,6 +10,7 @@ use TorneLIB\Exception\ExceptionHandler;
 use TorneLIB\Flags;
 use TorneLIB\Helpers\Browsers;
 use TorneLIB\Helpers\Version;
+use TorneLIB\Model\Type\dataType;
 use TorneLIB\Model\Type\requestMethod;
 use TorneLIB\Module\Config\WrapperConfig;
 use TorneLIB\Module\Network\Wrappers\CurlWrapper;
@@ -144,6 +145,78 @@ class curlWrapperTest extends TestCase
         /** @noinspection PhpUnitTestsInspection */
         // This test is relatively inactive.
         static::assertTrue(is_object($wrapper));
+    }
+
+    /**
+     * @test
+     * Make multiple URL request s.
+     * @throws ExceptionHandler
+     * @since 6.1.4
+     */
+    public function basicMultiIdentical()
+    {
+        // First request: Custom duplicate request (configurable arrays have higher priority in test).
+        $wrapperFirst = (new CurlWrapper())->request([
+            [
+                'url' => 'https://ipv4.netcurl.org/',
+                'requestMethod' => requestMethod::METHOD_POST,
+                'dataType' => dataType::NORMAL,
+                'data' => [
+                    'dataRequestMethod' => 'FIRST',
+                ],
+                'headers' => [
+                    'XHeaderFirst' => 'yes',
+                    'X-Real-IP' => '255.255.255.0',
+                    'Client-IP' => '127.0.0.255',
+                    'X-Forwarded-For' => '127.255.0.0',
+                ],
+                'headers_static' => [
+                    'HeaderIsForever' => 'only-in-non-multi-curls',
+                ],
+            ],
+            [
+                'url' => 'https://ipv4.netcurl.org/',
+                'requestMethod' => requestMethod::METHOD_POST,
+                'dataType' => dataType::NORMAL,
+                'data' => [
+                    'dataRequestMethod' => 'SECOND',
+                ],
+                'headers' => [
+                    'XHeaderSecond' => 'yes',
+                ],
+            ],
+            [
+                'url' => 'https://ipv4.netcurl.org/',
+                'requestMethod' => requestMethod::METHOD_GET,
+                'data' => [
+                    'dataRequestMethod' => 'THIRD',
+                ],
+            ],
+        ]);
+
+        // Second request: Single URL request. No extra data.
+        $wrapperSecond = (new CurlWrapper())->request([
+            'https://ipv4.netcurl.org/',
+            'https://ipv4.netcurl.org/',
+        ]);
+
+        $bodies = [];
+        while ($parsed = $wrapperFirst->getParsed()) {
+            $bodies[] = $parsed;
+        }
+        while ($parsed = $wrapperSecond->getParsed()) {
+            $bodies[] = $parsed;
+        }
+
+        static::assertTrue(
+            count($bodies) === 5 &&
+            $bodies[0]->REQUEST_METHOD === 'POST' &&
+            $bodies[1]->REQUEST_METHOD === 'POST' &&
+            $bodies[2]->REQUEST_METHOD === 'GET' &&
+            $bodies[3]->REQUEST_METHOD === 'GET' &&
+            $bodies[4]->REQUEST_METHOD === 'GET' &&
+            $bodies[0]->PARAMS_REQUEST->dataRequestMethod === 'FIRST'
+        );
     }
 
     /**

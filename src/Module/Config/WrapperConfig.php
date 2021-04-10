@@ -29,7 +29,7 @@ use TorneLIB\Utils\Ini;
  *
  * @package Module\Config
  * @since 6.1.0
- * @version 6.1.3
+ * @version 6.1.4
  */
 class WrapperConfig
 {
@@ -631,16 +631,28 @@ class WrapperConfig
     /**
      * Transform requested data into a proper format based on the content-type.
      *
+     * @param null $dataType
+     * @param null $requestData
+     * @param null $requestMethod
      * @return array
      * @since 6.1.0
      */
-    public function getRequestData()
+    public function getRequestData($dataType = null, $requestData = null, $requestMethod = null)
     {
-        $return = $this->requestData;
+        if (is_null($dataType)) {
+            $dataType = $this->requestDataType;
+        }
+        if (is_null($requestData)) {
+            $requestData = $this->requestData;
+        }
+        if (is_null($requestMethod)) {
+            $requestMethod = $this->requestMethod;
+        }
+        $return = $requestData;
 
         // Return as is on string.
         if (!is_string($return)) {
-            switch ($this->requestDataType) {
+            switch ($dataType) {
                 case dataType::XML:
                     $this->requestDataContainer = (new Content())->getXmlFromArray($return);
                     $return = $this->requestDataContainer;
@@ -651,13 +663,13 @@ class WrapperConfig
                     break;
                 case dataType::NORMAL:
                     $requestQuery = '';
-                    if ($this->requestMethod === requestMethod::METHOD_GET && !empty($this->requestData)) {
+                    if ($requestMethod === requestMethod::METHOD_GET && !empty($requestData)) {
                         // Add POST data to request if anything else follows.
                         $requestQuery = '&';
                     }
-                    $this->requestDataContainer = $this->requestData;
-                    if (is_array($this->requestData) || is_object($this->requestData)) {
-                        $httpQuery = http_build_query($this->requestData);
+                    $this->requestDataContainer = $requestData;
+                    if ($this->hasData($requestData)) {
+                        $httpQuery = http_build_query($requestData);
                         if (!empty($httpQuery)) {
                             $this->requestDataContainer = $requestQuery . $httpQuery;
                         }
@@ -667,6 +679,24 @@ class WrapperConfig
                 default:
                     break;
             }
+        }
+
+        return $return;
+    }
+
+    /**
+     * @param $arrayObject
+     * @return bool
+     * @since 6.1.4
+     */
+    public function hasData($arrayObject)
+    {
+        $return = false;
+
+        if (is_object($arrayObject)) {
+            $return = true;
+        } elseif (is_array($arrayObject) && count($arrayObject)) {
+            $return = true;
         }
 
         return $return;

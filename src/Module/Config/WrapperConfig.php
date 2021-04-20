@@ -57,7 +57,7 @@ class WrapperConfig
      * @var int Default method. Postdata will in the case of GET generate postdata in the link.
      * @since 6.1.0
      */
-    private $requestMethod = requestMethod::METHOD_GET;
+    private $requestMethod = requestMethod::GET;
     /**
      * Datatype to post in (default = uses ?key=value for GET and &key=value in body for POST).
      * @var int
@@ -663,7 +663,7 @@ class WrapperConfig
                     break;
                 case dataType::NORMAL:
                     $requestQuery = '';
-                    if ($requestMethod === requestMethod::METHOD_GET && !empty($requestData)) {
+                    if ($requestMethod === requestMethod::GET && !empty($requestData)) {
                         // Add POST data to request if anything else follows.
                         $requestQuery = '&';
                     }
@@ -1534,7 +1534,7 @@ class WrapperConfig
      * @return $this
      * @since 6.1.0
      */
-    public function request($url = '', $data = [], $method = requestMethod::METHOD_GET, $dataType = dataType::NORMAL)
+    public function request($url = '', $data = [], $method = requestMethod::GET, $dataType = dataType::NORMAL)
     {
         if (!empty($url)) {
             $this->setRequestUrl($url);
@@ -1579,7 +1579,7 @@ class WrapperConfig
         if (is_numeric($requestMethod)) {
             $this->requestMethod = $requestMethod;
         } else {
-            $this->requestMethod = requestMethod::METHOD_GET;
+            $this->requestMethod = requestMethod::GET;
         }
 
         return $this;

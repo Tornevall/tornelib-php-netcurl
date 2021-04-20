@@ -170,7 +170,7 @@ class RssWrapper implements WrapperInterface
     public function request(
         $url,
         $data = [],
-        $method = requestMethod::METHOD_GET,
+        $method = requestMethod::GET,
         $dataType = dataType::NORMAL
     ) {
         // Laminas requires two classes if url should be handled.
@@ -184,7 +184,7 @@ class RssWrapper implements WrapperInterface
                 ->request(
                     $url,
                     [],
-                    requestMethod::METHOD_GET,
+                    requestMethod::GET,
                     dataType::NORMAL
                 )->getBody();
             $this->requestResponse = \Laminas\Feed\Reader\Reader::importString($this->requestResponseRaw);
@@ -193,7 +193,7 @@ class RssWrapper implements WrapperInterface
                 ->request(
                     $url,
                     [],
-                    requestMethod::METHOD_GET,
+                    requestMethod::GET,
                     dataType::NORMAL
                 );
             $this->requestResponseRaw = $naturalRequest->getBody();

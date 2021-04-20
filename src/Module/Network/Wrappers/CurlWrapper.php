@@ -473,7 +473,7 @@ class CurlWrapper implements WrapperInterface
                 $this->setCurlPostJsonHeader($curlHandle, $requestData);
                 break;
             default:
-                if ($requestMethod === requestMethod::METHOD_POST) {
+                if ($requestMethod === requestMethod::POST) {
                     $this->setOptionCurl($curlHandle, CURLOPT_POST, true);
                 }
                 $this->setOptionCurl($curlHandle, CURLOPT_POSTFIELDS, $requestData);
@@ -567,20 +567,23 @@ class CurlWrapper implements WrapperInterface
         }
 
         switch ($requestMethod) {
-            case requestMethod::METHOD_POST:
+            case requestMethod::POST:
                 $this->setOptionCurl($curlHandle, CURLOPT_CUSTOMREQUEST, 'POST');
                 break;
-            case requestMethod::METHOD_DELETE:
+            case requestMethod::DELETE:
                 $this->setOptionCurl($curlHandle, CURLOPT_CUSTOMREQUEST, 'DELETE');
                 break;
-            case requestMethod::METHOD_HEAD:
+            case requestMethod::HEAD:
                 $this->setOptionCurl($curlHandle, CURLOPT_CUSTOMREQUEST, 'HEAD');
                 break;
-            case requestMethod::METHOD_PUT:
+            case requestMethod::PUT:
                 $this->setOptionCurl($curlHandle, CURLOPT_CUSTOMREQUEST, 'PUT');
                 break;
-            case requestMethod::METHOD_REQUEST:
+            case requestMethod::REQUEST:
                 $this->setOptionCurl($curlHandle, CURLOPT_CUSTOMREQUEST, 'REQUEST');
+                break;
+            case requestMethod::PATCH:
+                $this->setOptionCurl($curlHandle, CURLOPT_CUSTOMREQUEST, 'PATCH');
                 break;
             default:
                 // Making sure we send data in proper formatting if there is bad user configuration.
@@ -1001,7 +1004,7 @@ class CurlWrapper implements WrapperInterface
      * @throws ExceptionHandler
      * @since 6.1.0
      */
-    public function request($url = '', $data = [], $method = requestMethod::METHOD_GET, $dataType = dataType::NORMAL)
+    public function request($url = '', $data = [], $method = requestMethod::GET, $dataType = dataType::NORMAL)
     {
         $this->CONFIG->request($url, $data, $method, $dataType);
         $this->getCurlRequest();

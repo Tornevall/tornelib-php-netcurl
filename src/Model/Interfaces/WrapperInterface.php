@@ -108,5 +108,5 @@ interface WrapperInterface
      * @param int $dataType
      * @return mixed
      */
-    public function request($url, $data = [], $method = requestMethod::METHOD_GET, $dataType = dataType::NORMAL);
+    public function request($url, $data = [], $method = requestMethod::GET, $dataType = dataType::NORMAL);
 }

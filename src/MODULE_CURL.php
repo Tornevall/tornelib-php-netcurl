@@ -48,12 +48,13 @@ class MODULE_CURL
      * @since 6.1.0
      */
     private $deprecatedRequest = [
-        'get' => requestMethod::METHOD_GET,
-        'post' => requestMethod::METHOD_POST,
-        'put' => requestMethod::METHOD_PUT,
-        'delete' => requestMethod::METHOD_DELETE,
-        'head' => requestMethod::METHOD_HEAD,
-        'request' => requestMethod::METHOD_REQUEST,
+        'get' => requestMethod::GET,
+        'post' => requestMethod::POST,
+        'put' => requestMethod::PUT,
+        'delete' => requestMethod::DELETE,
+        'head' => requestMethod::HEAD,
+        'request' => requestMethod::REQUEST,
+        'patch' => requestMethod::PATCH,
     ];
 
     /**
@@ -103,7 +104,7 @@ class MODULE_CURL
      */
     public function doGet($url = '', $postDataType = dataType::NORMAL)
     {
-        return $this->netWrapper->request($url, [], requestMethod::METHOD_GET, $postDataType);
+        return $this->netWrapper->request($url, [], requestMethod::GET, $postDataType);
     }
 
     /**
@@ -128,7 +129,7 @@ class MODULE_CURL
      */
     private function getDeprecatedRequest($requestType)
     {
-        return isset($this->deprecatedRequest[$requestType]) ? $this->deprecatedRequest[$requestType] : requestMethod::METHOD_GET;
+        return isset($this->deprecatedRequest[$requestType]) ? $this->deprecatedRequest[$requestType] : requestMethod::GET;
     }
 
     /**

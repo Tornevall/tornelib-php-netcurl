@@ -453,7 +453,7 @@ class NetWrapper implements WrapperInterface
             $return[$currentRequestUrl] = $this->request(
                 $currentRequestUrl,
                 isset($requestData[0]) ? $requestData[0] : [],
-                isset($requestData[1]) ? $requestData[1] : requestMethod::METHOD_GET,
+                isset($requestData[1]) ? $requestData[1] : requestMethod::GET,
                 isset($requestData[2]) ? $requestData[2] : dataType::NORMAL
             );
         }
@@ -465,7 +465,7 @@ class NetWrapper implements WrapperInterface
      * @throws ExceptionHandler
      * @since 6.1.0
      */
-    public function request($url, $data = [], $method = requestMethod::METHOD_GET, $dataType = dataType::NORMAL)
+    public function request($url, $data = [], $method = requestMethod::GET, $dataType = dataType::NORMAL)
     {
         if (is_array($url)) {
             // If url list an associative array or allowed to run arrays that is not associative, run this
@@ -561,7 +561,7 @@ class NetWrapper implements WrapperInterface
     private function requestExternalExecute(
         $url,
         $data = [],
-        $method = requestMethod::METHOD_GET,
+        $method = requestMethod::GET,
         $dataType = dataType::NORMAL
     ) {
         $this->CONFIG->getStreamHeader();
@@ -607,7 +607,7 @@ class NetWrapper implements WrapperInterface
     private function requestExternal(
         $url,
         $data = [],
-        $method = requestMethod::METHOD_GET,
+        $method = requestMethod::GET,
         $dataType = dataType::NORMAL
     ) {
         $return = null;
@@ -661,7 +661,7 @@ class NetWrapper implements WrapperInterface
     private function getResultFromInternals(
         $url,
         $data = [],
-        $method = requestMethod::METHOD_GET,
+        $method = requestMethod::GET,
         $dataType = dataType::NORMAL
     ) {
         $return = null;
@@ -675,7 +675,7 @@ class NetWrapper implements WrapperInterface
                 Security::getCurrentClassState('SoapClient');
                 $dataType = dataType::SOAP;
             } catch (ExceptionHandler $e) {
-                $method = requestMethod::METHOD_POST;
+                $method = requestMethod::POST;
                 $dataType = dataType::XML;
                 /** @noinspection CallableParameterUseCaseInTypeContextInspection */
                 if (!is_string($data) && !empty($data)) {

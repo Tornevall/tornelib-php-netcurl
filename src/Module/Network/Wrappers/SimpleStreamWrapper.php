@@ -276,7 +276,7 @@ class SimpleStreamWrapper implements WrapperInterface
      * @throws ExceptionHandler
      * @since 6.1.0
      */
-    public function request($url, $data = [], $method = requestMethod::METHOD_GET, $dataType = dataType::NORMAL)
+    public function request($url, $data = [], $method = requestMethod::GET, $dataType = dataType::NORMAL)
     {
         $this->CONFIG->resetStreamData();
         if (!empty($url)) {
@@ -326,20 +326,23 @@ class SimpleStreamWrapper implements WrapperInterface
     {
         $requestMethod = $this->CONFIG->getRequestMethod();
         switch ($requestMethod) {
-            case requestMethod::METHOD_POST:
+            case requestMethod::POST:
                 $this->CONFIG->setDualStreamHttp('method', 'POST');
                 break;
-            case requestMethod::METHOD_PUT:
+            case requestMethod::PUT:
                 $this->CONFIG->setDualStreamHttp('method', 'PUT');
                 break;
-            case requestMethod::METHOD_DELETE:
+            case requestMethod::DELETE:
                 $this->CONFIG->setDualStreamHttp('method', 'DELETE');
                 break;
-            case requestMethod::METHOD_HEAD:
+            case requestMethod::HEAD:
                 $this->CONFIG->setDualStreamHttp('method', 'HEAD');
                 break;
-            case requestMethod::METHOD_REQUEST:
+            case requestMethod::REQUEST:
                 $this->CONFIG->setDualStreamHttp('method', 'REQUEST');
+                break;
+            case requestMethod::PATCH:
+                $this->CONFIG->setDualStreamHttp('method', 'PATCH');
                 break;
             default:
                 $this->CONFIG->setDualStreamHttp('method', 'GET');

@@ -301,7 +301,7 @@ class SoapClientWrapper implements WrapperInterface
      * @return $this|mixed
      * @since 6.1.0
      */
-    public function request($url, $data = [], $method = requestMethod::METHOD_GET, $dataType = dataType::SOAP)
+    public function request($url, $data = [], $method = requestMethod::GET, $dataType = dataType::SOAP)
     {
         if (!empty($url)) {
             $this->CONFIG->setRequestUrl($url);

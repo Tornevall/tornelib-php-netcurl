@@ -64,13 +64,6 @@ NetCURL is tested within a few different suites. Due to the lack of "test time",
 The [Bamboo-server](https://bamboo.tornevall.net) has a history which makes many older PHP versions available. But as of mid-summer 2020, all tests with old versions have been removed. This is also a work that continues. Github tests are only running with non-outdated versions (exception for 5.6) and so are bitbucked targeted. Since bamboo is the flagship of tests, old versions are currently not removed there.
 
 
-### What about 6.0?
-
-Do not use 6.0 - it's obsolete and barely maintained.
-To keep compatibility with v6.0 the plan is to keep the primary class MODULE_CURL callable from a root space.
-But as said, do not use it. Upgrade!
-
-
 ### Other Requirements and dependencies
   
 In its initial state, there are basically no requirements as this module tries to pick the best available driver in runtime.

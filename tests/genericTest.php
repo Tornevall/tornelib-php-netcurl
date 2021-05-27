@@ -1,4 +1,6 @@
-<?php /** @noinspection PhpDeprecationInspection */
+<?php
+/** @noinspection PhpUndefinedMethodInspection */
+/** @noinspection PhpDeprecationInspection */
 
 use PHPUnit\Framework\TestCase;
 use TorneLIB\Exception\Constants;
@@ -14,6 +16,7 @@ class genericTest extends TestCase
 {
     /**
      * @test
+     * @throws ExceptionHandler
      */
     public function getGitTagsNetcurl()
     {
@@ -29,7 +32,9 @@ class genericTest extends TestCase
     public function getGitTagsNetcurlBucket()
     {
         try {
-            $tags = (new NetUtils())->getGitTagsByUrl("https://bitbucket.org/resursbankplugins/resurs-ecomphp/src/master/");
+            $tags = (new NetUtils())->getGitTagsByUrl(
+                "https://bitbucket.org/resursbankplugins/resurs-ecomphp/src/master/"
+            );
             static::assertGreaterThan(
                 2,
                 $tags
@@ -50,6 +55,7 @@ class genericTest extends TestCase
     /**
      * @test
      * Get list of tags between two versions.
+     * @throws ExceptionHandler
      */
     public function getGitTagsByVersion()
     {
@@ -68,6 +74,7 @@ class genericTest extends TestCase
     /**
      * @test
      * Test version tags from chosen version and get a list with versions higher than current.
+     * @throws ExceptionHandler
      */
     public function getHigherVersions()
     {
@@ -118,7 +125,7 @@ class genericTest extends TestCase
     /**
      * @test
      */
-    public function fyrahundrafyra()
+    public function internalServerError()
     {
         try {
             (new NetWrapper())->request('http://ipv4.netcurl.org/http.php?code=500&message=Det+sket+sig');
@@ -168,10 +175,10 @@ class genericTest extends TestCase
 
     /**
      * @test
+     * @throws ExceptionHandler
      */
     public function multiCurlErrorHandlingOneErrorNonAssoc()
     {
-        $extendedException = null;
         /** @noinspection DynamicInvocationViaScopeResolutionInspection */
         /** @noinspection PhpParamsInspection */
         static::expectException(ExceptionHandler::class);
@@ -287,7 +294,7 @@ class genericTest extends TestCase
 
     /**
      * @test
-     * Both the wrapper and the exception returns the same errorcode when the main wrapper is placed outside the try-catch block.
+     * Both wrapper and the exception returns errorCode when the main wrapper is placed outside the try-catch block.
      * @throws ExceptionHandler
      */
     public function regularExceptionTest()

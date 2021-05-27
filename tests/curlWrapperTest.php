@@ -1,4 +1,6 @@
 <?php
+/** @noinspection PhpUndefinedMethodInspection */
+/** @noinspection PhpUndefinedClassInspection */
 /** @noinspection PhpComposerExtensionStubsInspection */
 
 require_once(__DIR__ . '/../vendor/autoload.php');
@@ -10,8 +12,8 @@ use TorneLIB\Exception\ExceptionHandler;
 use TorneLIB\Flags;
 use TorneLIB\Helpers\Browsers;
 use TorneLIB\Helpers\Version;
-use TorneLIB\Model\Type\dataType;
-use TorneLIB\Model\Type\requestMethod;
+use TorneLIB\Model\Type\DataType;
+use TorneLIB\Model\Type\RequestMethod;
 use TorneLIB\Module\Config\WrapperConfig;
 use TorneLIB\Module\Network\Wrappers\CurlWrapper;
 use TorneLIB\MODULE_CURL;
@@ -39,14 +41,14 @@ class curlWrapperTest extends TestCase
             $curlWrapperArgs = new CurlWrapper(
                 'https://ipv4.netcurl.org',
                 [],
-                requestMethod::METHOD_GET,
+                RequestMethod::GET,
                 [
                     'flag1' => 'present',
                     'flag2' => 'available',
                 ]
             );
 
-            // Initialize primary curlwrapper to test with.
+            // Initialize primary curlWrapper to test with.
             $curlWrapper = new CurlWrapper();
         } catch (Exception $e) {
             static::markTestIncomplete(sprintf(
@@ -148,6 +150,17 @@ class curlWrapperTest extends TestCase
     }
 
     /**
+     * @return WrapperConfig
+     * @since 6.1.0
+     */
+    private function setTestAgent()
+    {
+        return (new WrapperConfig())->setUserAgent(
+            sprintf('netcurl-%s', NETCURL_VERSION)
+        );
+    }
+
+    /**
      * @test
      * Make multiple URL request s.
      * @throws ExceptionHandler
@@ -159,8 +172,8 @@ class curlWrapperTest extends TestCase
         $wrapperFirst = (new CurlWrapper())->request([
             [
                 'url' => 'https://ipv4.netcurl.org/',
-                'requestMethod' => requestMethod::METHOD_POST,
-                'dataType' => dataType::NORMAL,
+                'requestMethod' => RequestMethod::POST,
+                'dataType' => DataType::NORMAL,
                 'data' => [
                     'dataRequestMethod' => 'FIRST',
                 ],
@@ -176,8 +189,8 @@ class curlWrapperTest extends TestCase
             ],
             [
                 'url' => 'https://ipv4.netcurl.org/',
-                'requestMethod' => requestMethod::METHOD_POST,
-                'dataType' => dataType::NORMAL,
+                'requestMethod' => RequestMethod::POST,
+                'dataType' => DataType::NORMAL,
                 'data' => [
                     'dataRequestMethod' => 'SECOND',
                 ],
@@ -187,7 +200,7 @@ class curlWrapperTest extends TestCase
             ],
             [
                 'url' => 'https://ipv4.netcurl.org/',
-                'requestMethod' => requestMethod::METHOD_GET,
+                'requestMethod' => RequestMethod::GET,
                 'data' => [
                     'dataRequestMethod' => 'THIRD',
                 ],
@@ -201,9 +214,13 @@ class curlWrapperTest extends TestCase
         ]);
 
         $bodies = [];
+        /** @noinspection PhpUnhandledExceptionInspection */
+        /** @noinspection PhpAssignmentInConditionInspection */
         while ($parsed = $wrapperFirst->getParsed()) {
             $bodies[] = $parsed;
         }
+        /** @noinspection PhpUnhandledExceptionInspection */
+        /** @noinspection PhpAssignmentInConditionInspection */
         while ($parsed = $wrapperSecond->getParsed()) {
             $bodies[] = $parsed;
         }
@@ -220,19 +237,8 @@ class curlWrapperTest extends TestCase
     }
 
     /**
-     * @return WrapperConfig
-     * @since 6.1.0
-     */
-    private function setTestAgent()
-    {
-        return (new WrapperConfig())->setUserAgent(
-            sprintf('netcurl-%s', NETCURL_VERSION)
-        );
-    }
-
-    /**
      * @test
-     * Test the curlwrapper constructor with a basic request.
+     * Test the curlWrapper constructor with a basic request.
      * @throws ExceptionHandler
      * @since 6.1.0
      */
@@ -241,7 +247,7 @@ class curlWrapperTest extends TestCase
         $curlRequest = (new CurlWrapper(
             sprintf('https://ipv4.netcurl.org/?func=%s', __FUNCTION__),
             [],
-            requestMethod::METHOD_GET,
+            RequestMethod::GET,
             [
                 'flag1' => 'present',
                 'flag2' => 'available',
@@ -330,7 +336,7 @@ class curlWrapperTest extends TestCase
             ->request(
                 sprintf('https://ipv4.netcurl.org/?func=%s', __FUNCTION__),
                 ['hello' => 'world'],
-                requestMethod::METHOD_POST
+                RequestMethod::POST
             )
             ->getParsed();
 
@@ -373,7 +379,7 @@ class curlWrapperTest extends TestCase
             ->request(
                 sprintf('https://ipv4.netcurl.org/?func=%s', __FUNCTION__),
                 ['hello' => 'world'],
-                requestMethod::METHOD_GET
+                RequestMethod::GET
             )
             ->getParsed();
 
@@ -394,7 +400,7 @@ class curlWrapperTest extends TestCase
             ->request(
                 sprintf('https://ipv4.netcurl.org/?func=%s', __FUNCTION__),
                 ['hello' => 'world'],
-                requestMethod::METHOD_POST
+                RequestMethod::POST
             )
             ->getParsed();
 
@@ -712,6 +718,7 @@ class curlWrapperTest extends TestCase
     /**
      * @test
      * @since 6.1.0
+     * @noinspection PhpDeprecationInspection
      */
     public function getLibraryVersion()
     {
@@ -775,6 +782,7 @@ class curlWrapperTest extends TestCase
 
     /**
      * @test
+     * @throws ExceptionHandler
      */
     public function curlWrapperDefaultZeroTimeout()
     {
@@ -786,6 +794,7 @@ class curlWrapperTest extends TestCase
 
     /**
      * @test
+     * @throws ExceptionHandler
      */
     public function setSigStandard()
     {

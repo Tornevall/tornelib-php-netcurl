@@ -1,4 +1,8 @@
 <?php
+
+/** @noinspection PhpUndefinedMethodInspection */
+/** @noinspection PhpUndefinedNamespaceInspection */
+/** @noinspection PhpUndefinedClassInspection */
 /** @noinspection PhpComposerExtensionStubsInspection */
 
 require_once(__DIR__ . '/../vendor/autoload.php');

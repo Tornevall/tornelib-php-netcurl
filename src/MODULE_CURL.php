@@ -9,15 +9,15 @@ namespace TorneLIB;
 use ReflectionException;
 use TorneLIB\Exception\Constants;
 use TorneLIB\Exception\ExceptionHandler;
-use TorneLIB\Model\Type\dataType;
-use TorneLIB\Model\Type\requestMethod;
+use TorneLIB\Model\Type\DataType;
+use TorneLIB\Model\Type\RequestMethod;
 use TorneLIB\Module\Config\WrapperConfig;
 use TorneLIB\Module\Network\NetWrapper;
 use TorneLIB\Utils\Generic;
 
 /**
  * Class MODULE_CURL
- * Passthrough client that v6.0 remember.
+ * Pass through client that v6.0 remember.
  *
  * @package TorneLIB
  * @since 6.0.20
@@ -48,13 +48,13 @@ class MODULE_CURL
      * @since 6.1.0
      */
     private $deprecatedRequest = [
-        'get' => requestMethod::GET,
-        'post' => requestMethod::POST,
-        'put' => requestMethod::PUT,
-        'delete' => requestMethod::DELETE,
-        'head' => requestMethod::HEAD,
-        'request' => requestMethod::REQUEST,
-        'patch' => requestMethod::PATCH,
+        'get' => RequestMethod::GET,
+        'post' => RequestMethod::POST,
+        'put' => RequestMethod::PUT,
+        'delete' => RequestMethod::DELETE,
+        'head' => RequestMethod::HEAD,
+        'request' => RequestMethod::REQUEST,
+        'patch' => RequestMethod::PATCH,
     ];
 
     /**
@@ -96,90 +96,30 @@ class MODULE_CURL
      * Backward compatible request doGet from v6.0.
      *
      * @param string $url Input URL.
-     * @param dataType|int $postDataType Data type of request (NORMAL, JSON, XML, etc).
+     * @param int|DataType $postDataType Data type of request (NORMAL, JSON, XML, etc).
      * @return mixed|null Returns the response.
      * @throws ExceptionHandler
      * @deprecated Avoid this method. Use request.
      * @since 6.1.0
      */
-    public function doGet($url = '', $postDataType = dataType::NORMAL)
+    public function doGet($url = '', $postDataType = DataType::NORMAL)
     {
-        return $this->netWrapper->request($url, [], requestMethod::GET, $postDataType);
+        return $this->netWrapper->request($url, [], RequestMethod::GET, (int)$postDataType);
     }
 
     /**
      * Allows strict identification in user-agent header.
      *
-     * @param $activation
+     * @param bool $activation
      * @param bool $allowPhpRelease
      * @return MODULE_CURL
      * @since 6.1.0
      */
-    public function setIdentifiers($activation, $allowPhpRelease = false)
-    {
+    public function setIdentifiers(
+        $activation,
+        $allowPhpRelease = false
+    ) {
         $this->netWrapper->setIdentifiers($activation, $allowPhpRelease);
-
-        return $this;
-    }
-
-    /**
-     * @param $requestType
-     * @return int|requestMethod
-     * @since 6.1.0
-     */
-    private function getDeprecatedRequest($requestType)
-    {
-        return isset($this->deprecatedRequest[$requestType]) ? $this->deprecatedRequest[$requestType] : requestMethod::GET;
-    }
-
-    /**
-     * @param $deprecatedRequestName
-     * @param $arguments
-     * @return mixed|NetWrapper|null
-     * @throws ExceptionHandler
-     * @since 6.1.1
-     */
-    private function getDeprecatedRequestResult($deprecatedRequestName, $arguments)
-    {
-        if ($deprecatedRequestName === 'get') {
-            $return = $this->netWrapper->request(
-                isset($arguments[0]) ? $arguments[0] : null,
-                [],
-                $this->getDeprecatedRequest('get'),
-                isset($arguments[1]) ? $arguments[1] : null
-            );
-        } else {
-            $return = $this->netWrapper->request(
-                isset($arguments[0]) ? $arguments[0] : null,
-                isset($arguments[1]) ? $arguments[1] : null,
-                isset($deprecatedRequestName) ? $this->getDeprecatedRequest(
-                    $deprecatedRequestName
-                ) : $this->getDeprecatedRequest('post'),
-                isset($arguments[2]) ? $arguments[2] : null
-            );
-        }
-
-        return $return;
-    }
-
-    /**
-     * @param $name
-     * @return $this
-     * @throws ExceptionHandler
-     * @since 6.1.0
-     */
-    private function isObsolete($name)
-    {
-        if (in_array($name, $this->deprecatedMethod, false)) {
-            throw new ExceptionHandler(
-                sprintf(
-                    'This method (%s) is obsolete and no longer part of %s.',
-                    $name,
-                    __CLASS__
-                ),
-                Constants::LIB_METHOD_OBSOLETE
-            );
-        }
 
         return $this;
     }
@@ -187,8 +127,8 @@ class MODULE_CURL
     /**
      * Callable functions that should be propagated (eventually) to other wrapper parts.
      *
-     * @param $name
-     * @param $arguments
+     * @param string $name
+     * @param array $arguments
      * @return mixed|null
      * @throws ExceptionHandler
      * @since 6.1.0
@@ -230,7 +170,9 @@ class MODULE_CURL
             $arguments = array_merge([$requestName], $arguments);
             $getFlagResponse = call_user_func_array([$this->flags, 'getFlag'], $arguments);
 
-            if (!is_null($this->netWrapper) && method_exists($this->netWrapper, $name)) {
+            if ($this->netWrapper !== null &&
+                method_exists($this->netWrapper, $name)
+            ) {
                 return call_user_func_array(
                     [$this->netWrapper, $name],
                     $arguments
@@ -245,5 +187,67 @@ class MODULE_CURL
         }
 
         return null;
+    }
+
+    /**
+     * @param string $name
+     * @return $this
+     * @throws ExceptionHandler
+     * @since 6.1.0
+     */
+    private function isObsolete($name)
+    {
+        if (in_array($name, $this->deprecatedMethod, false)) {
+            throw new ExceptionHandler(
+                sprintf(
+                    'This method (%s) is obsolete and no longer part of %s.',
+                    $name,
+                    __CLASS__
+                ),
+                Constants::LIB_METHOD_OBSOLETE
+            );
+        }
+
+        return $this;
+    }
+
+    /**
+     * @param string $deprecatedRequestName
+     * @param array $arguments
+     * @return mixed|NetWrapper|null
+     * @throws ExceptionHandler
+     * @since 6.1.1
+     */
+    private function getDeprecatedRequestResult($deprecatedRequestName, $arguments)
+    {
+        if ($deprecatedRequestName === 'get') {
+            $return = $this->netWrapper->request(
+                isset($arguments[0]) ? $arguments[0] : '',
+                [],
+                (int)$this->getDeprecatedRequest('get'),
+                isset($arguments[1]) ? $arguments[1] : 0
+            );
+        } else {
+            $return = $this->netWrapper->request(
+                isset($arguments[0]) ? $arguments[0] : '',
+                isset($arguments[1]) ? $arguments[1] : [],
+                (int)!empty($deprecatedRequestName) ?
+                    $this->getDeprecatedRequest($deprecatedRequestName) : $this->getDeprecatedRequest('post'),
+                isset($arguments[2]) ? $arguments[2] : 0
+            );
+        }
+
+        return $return;
+    }
+
+    /**
+     * @param string $requestType
+     * @return int
+     * @since 6.1.0
+     */
+    private function getDeprecatedRequest($requestType)
+    {
+        return (int)isset($this->deprecatedRequest[$requestType]) ?
+            $this->deprecatedRequest[$requestType] : RequestMethod::GET;
     }
 }

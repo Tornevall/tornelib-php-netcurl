@@ -1,11 +1,13 @@
 <?php
+/** @noinspection PhpUndefinedMethodInspection */
+/** @noinspection PhpUndefinedClassInspection */
 
 require_once(__DIR__ . '/../vendor/autoload.php');
 
 use PHPUnit\Framework\TestCase;
 use TorneLIB\IO\Data\Arrays;
-use TorneLIB\Model\Type\dataType;
-use TorneLIB\Model\Type\requestMethod;
+use TorneLIB\Model\Type\DataType;
+use TorneLIB\Model\Type\RequestMethod;
 use TorneLIB\Module\Network\NetWrapper;
 use TorneLIB\Module\Network\Wrappers\RssWrapper;
 
@@ -52,8 +54,8 @@ class rssWrapperTest extends TestCase
                 ->request(
                     'https://www.tornevalls.se/feed/',
                     [],
-                    requestMethod::METHOD_GET,
-                    dataType::NORMAL
+                    RequestMethod::GET,
+                    DataType::NORMAL
                 )->getParsed();
 
 
@@ -94,8 +96,8 @@ class rssWrapperTest extends TestCase
                 ->request(
                     'https://www.tornevalls.se/feed/',
                     [],
-                    requestMethod::METHOD_GET,
-                    dataType::RSS_XML
+                    RequestMethod::GET,
+                    DataType::RSS_XML
                 )->getParsed();
 
             if (method_exists($rssFeed, 'getTitle')) {

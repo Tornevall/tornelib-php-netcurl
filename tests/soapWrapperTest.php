@@ -1,4 +1,6 @@
 <?php
+/** @noinspection PhpUndefinedNamespaceInspection */
+/** @noinspection PhpUndefinedClassInspection */
 /** @noinspection PhpComposerExtensionStubsInspection */
 /** @noinspection PhpUndefinedMethodInspection */
 
@@ -31,11 +33,34 @@ if (!Security::getCurrentClassState('SoapClient', false)) {
  */
 class soapWrapperTest extends TestCase
 {
+    /**
+     * @var string
+     */
     private $rEcomPipeU = 'tornevall';
+
+    /**
+     * @var string
+     */
     private $rEcomPipeP = '2suyqJRXyd8YBGxTz42xr7g1tCWW6M2R';
+
+    /**
+     * @var string
+     */
     private $wsdl = 'https://test.resurs.com/ecommerce-test/ws/V4/SimplifiedShopFlowService?wsdl';
+
+    /**
+     * @var string
+     */
     private $wsdl_config = 'https://test.resurs.com/ecommerce-test/ws/V4/ConfigurationService?wsdl';
+
+    /**
+     * @var string
+     */
     private $no_wsdl = 'https://test.resurs.com/ecommerce-test/ws/V4/SimplifiedShopFlowService';
+
+    /**
+     * @var string
+     */
     private $netcurlWsdl = 'https://tests.netcurl.org/tornevall_network/index.wsdl?wsdl';
 
     /**
@@ -86,6 +111,7 @@ class soapWrapperTest extends TestCase
     /**
      * @test
      * @throws ExceptionHandler
+     * @noinspection PhpUnusedLocalVariableInspection
      */
     public function getSoapEmbeddedRandomRequest()
     {
@@ -116,8 +142,9 @@ class soapWrapperTest extends TestCase
     /**
      * @test
      * Test writing directly to stream_context instead of going through WrapperConfig. Also trying to use
-     * overwritable flagset, as user_agent is normally internally protected from overwriting when going this way.
+     * over-writable flag set, as user_agent is normally internally protected from overwriting when going this way.
      * @throws ExceptionHandler
+     * @noinspection PhpUnusedLocalVariableInspection
      */
     public function getSoapEmbeddedRandomRequestInstantStream()
     {
@@ -500,6 +527,7 @@ class soapWrapperTest extends TestCase
 
     /**
      * @test
+     * @throws ExceptionHandler
      */
     public function setSoapTimeout()
     {

@@ -1,5 +1,7 @@
 <?php
 
+/** @noinspection PhpUndefinedMethodInspection */
+/** @noinspection PhpUndefinedClassInspection */
 require_once(__DIR__ . '/../vendor/autoload.php');
 
 use PHPUnit\Framework\TestCase;
@@ -10,6 +12,7 @@ use TorneLIB\Module\Config\WrapperDriver;
 use TorneLIB\Module\Network\NetWrapper;
 use TorneLIB\Module\Network\Wrappers\CurlWrapper;
 
+/** @noinspection PhpUndefinedMethodInspection */
 Flag::setFlag('strict_resource', false);
 
 /**
@@ -188,6 +191,8 @@ class netWrapperTest extends TestCase
 
     /**
      * @test
+     * @throws ExceptionHandler
+     * @throws ReflectionException
      */
     public function setSignature()
     {
@@ -200,7 +205,7 @@ class netWrapperTest extends TestCase
             $parseRequest = (new NetWrapper())->request('https://ipv4.netcurl.org')->getParsed();
             WrapperConfig::deleteSignature();
             static::assertEquals($theName, $parseRequest->HTTP_USER_AGENT);
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             WrapperConfig::deleteSignature();
             static::markTestSkipped(
                 sprintf(
@@ -236,6 +241,7 @@ class netWrapperTest extends TestCase
 
     /**
      * @test
+     * @throws ExceptionHandler
      */
     public function wrapperDefaultZeroTimeout()
     {

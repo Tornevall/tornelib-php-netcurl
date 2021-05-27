@@ -17,9 +17,9 @@ use TorneLIB\Helpers\GenericParser;
 use TorneLIB\Helpers\Version;
 use TorneLIB\IO\Data\Arrays;
 use TorneLIB\Model\Interfaces\WrapperInterface;
-use TorneLIB\Model\Type\authType;
-use TorneLIB\Model\Type\dataType;
-use TorneLIB\Model\Type\requestMethod;
+use TorneLIB\Model\Type\AuthType;
+use TorneLIB\Model\Type\DataType;
+use TorneLIB\Model\Type\RequestMethod;
 use TorneLIB\Module\Config\WrapperConfig;
 use TorneLIB\Module\Config\WrapperCurlOpt;
 use TorneLIB\Utils\Generic;
@@ -466,14 +466,14 @@ class CurlWrapper implements WrapperInterface
         }
 
         switch ($dataType) {
-            case dataType::XML:
+            case DataType::XML:
                 $this->setCurlPostXmlHeader($curlHandle, $requestData);
                 break;
-            case dataType::JSON:
+            case DataType::JSON:
                 $this->setCurlPostJsonHeader($curlHandle, $requestData);
                 break;
             default:
-                if ($requestMethod === requestMethod::POST) {
+                if ($requestMethod === RequestMethod::POST) {
                     $this->setOptionCurl($curlHandle, CURLOPT_POST, true);
                 }
                 $this->setOptionCurl($curlHandle, CURLOPT_POSTFIELDS, $requestData);
@@ -567,22 +567,22 @@ class CurlWrapper implements WrapperInterface
         }
 
         switch ($requestMethod) {
-            case requestMethod::POST:
+            case RequestMethod::POST:
                 $this->setOptionCurl($curlHandle, CURLOPT_CUSTOMREQUEST, 'POST');
                 break;
-            case requestMethod::DELETE:
+            case RequestMethod::DELETE:
                 $this->setOptionCurl($curlHandle, CURLOPT_CUSTOMREQUEST, 'DELETE');
                 break;
-            case requestMethod::HEAD:
+            case RequestMethod::HEAD:
                 $this->setOptionCurl($curlHandle, CURLOPT_CUSTOMREQUEST, 'HEAD');
                 break;
-            case requestMethod::PUT:
+            case RequestMethod::PUT:
                 $this->setOptionCurl($curlHandle, CURLOPT_CUSTOMREQUEST, 'PUT');
                 break;
-            case requestMethod::REQUEST:
+            case RequestMethod::REQUEST:
                 $this->setOptionCurl($curlHandle, CURLOPT_CUSTOMREQUEST, 'REQUEST');
                 break;
-            case requestMethod::PATCH:
+            case RequestMethod::PATCH:
                 $this->setOptionCurl($curlHandle, CURLOPT_CUSTOMREQUEST, 'PATCH');
                 break;
             default:
@@ -855,7 +855,7 @@ class CurlWrapper implements WrapperInterface
      * @return CurlWrapper
      * @since 6.1.0
      */
-    public function setAuthentication($username, $password, $authType = authType::BASIC)
+    public function setAuthentication($username, $password, $authType = AuthType::BASIC)
     {
         $this->CONFIG->setAuthentication($username, $password, $authType);
 
@@ -1004,7 +1004,7 @@ class CurlWrapper implements WrapperInterface
      * @throws ExceptionHandler
      * @since 6.1.0
      */
-    public function request($url = '', $data = [], $method = requestMethod::GET, $dataType = dataType::NORMAL)
+    public function request($url = '', $data = [], $method = RequestMethod::GET, $dataType = DataType::NORMAL)
     {
         $this->CONFIG->request($url, $data, $method, $dataType);
         $this->getCurlRequest();

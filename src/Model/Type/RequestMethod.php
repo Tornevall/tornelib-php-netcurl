@@ -11,7 +11,7 @@ namespace TorneLIB\Model\Type;
  *
  * @package TorneLIB\Model\Type
  */
-abstract class requestMethod
+abstract class RequestMethod
 {
     const GET = 0;
     const POST = 1;

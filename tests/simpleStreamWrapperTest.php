@@ -6,8 +6,8 @@ require_once(__DIR__ . '/../vendor/autoload.php');
 
 use PHPUnit\Framework\TestCase;
 use TorneLIB\Exception\ExceptionHandler;
-use TorneLIB\Model\Type\dataType;
-use TorneLIB\Model\Type\requestMethod;
+use TorneLIB\Model\Type\DataType;
+use TorneLIB\Model\Type\RequestMethod;
 use TorneLIB\Module\Config\WrapperConfig;
 use TorneLIB\Module\Network\NetWrapper;
 use TorneLIB\Module\Network\Wrappers\CurlWrapper;
@@ -68,7 +68,7 @@ class simpleStreamWrapperTest extends TestCase
             [
                 'postData' => ['var1' => 'val1'],
             ],
-            requestMethod::POST
+            RequestMethod::POST
         )->getParsed();
 
         static::assertTrue(
@@ -94,8 +94,8 @@ class simpleStreamWrapperTest extends TestCase
             [
                 'postData' => ['var1' => 'val1'],
             ],
-            requestMethod::POST,
-            dataType::JSON
+            RequestMethod::POST,
+            DataType::JSON
         )->getParsed();
 
         static::assertTrue(
@@ -121,8 +121,8 @@ class simpleStreamWrapperTest extends TestCase
             [
                 'postData' => ['var1' => 'val1'],
             ],
-            requestMethod::POST,
-            dataType::XML
+            RequestMethod::POST,
+            DataType::XML
         )->getParsed();
 
         static::assertTrue(

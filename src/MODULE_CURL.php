@@ -9,8 +9,8 @@ namespace TorneLIB;
 use ReflectionException;
 use TorneLIB\Exception\Constants;
 use TorneLIB\Exception\ExceptionHandler;
-use TorneLIB\Model\Type\dataType;
-use TorneLIB\Model\Type\requestMethod;
+use TorneLIB\Model\Type\DataType;
+use TorneLIB\Model\Type\RequestMethod;
 use TorneLIB\Module\Config\WrapperConfig;
 use TorneLIB\Module\Network\NetWrapper;
 use TorneLIB\Utils\Generic;
@@ -48,13 +48,13 @@ class MODULE_CURL
      * @since 6.1.0
      */
     private $deprecatedRequest = [
-        'get' => requestMethod::GET,
-        'post' => requestMethod::POST,
-        'put' => requestMethod::PUT,
-        'delete' => requestMethod::DELETE,
-        'head' => requestMethod::HEAD,
-        'request' => requestMethod::REQUEST,
-        'patch' => requestMethod::PATCH,
+        'get' => RequestMethod::GET,
+        'post' => RequestMethod::POST,
+        'put' => RequestMethod::PUT,
+        'delete' => RequestMethod::DELETE,
+        'head' => RequestMethod::HEAD,
+        'request' => RequestMethod::REQUEST,
+        'patch' => RequestMethod::PATCH,
     ];
 
     /**
@@ -96,15 +96,15 @@ class MODULE_CURL
      * Backward compatible request doGet from v6.0.
      *
      * @param string $url Input URL.
-     * @param int|dataType $postDataType Data type of request (NORMAL, JSON, XML, etc).
+     * @param int|DataType $postDataType Data type of request (NORMAL, JSON, XML, etc).
      * @return mixed|null Returns the response.
      * @throws ExceptionHandler
      * @deprecated Avoid this method. Use request.
      * @since 6.1.0
      */
-    public function doGet($url = '', $postDataType = dataType::NORMAL)
+    public function doGet($url = '', $postDataType = DataType::NORMAL)
     {
-        return $this->netWrapper->request($url, [], requestMethod::GET, (int)$postDataType);
+        return $this->netWrapper->request($url, [], RequestMethod::GET, (int)$postDataType);
     }
 
     /**
@@ -248,6 +248,6 @@ class MODULE_CURL
     private function getDeprecatedRequest($requestType)
     {
         return (int)isset($this->deprecatedRequest[$requestType]) ?
-            $this->deprecatedRequest[$requestType] : requestMethod::GET;
+            $this->deprecatedRequest[$requestType] : RequestMethod::GET;
     }
 }

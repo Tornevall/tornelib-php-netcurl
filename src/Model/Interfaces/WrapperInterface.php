@@ -7,9 +7,9 @@
 
 namespace TorneLIB\Model\Interfaces;
 
-use TorneLIB\Model\Type\authType;
-use TorneLIB\Model\Type\dataType;
-use TorneLIB\Model\Type\requestMethod;
+use TorneLIB\Model\Type\AuthType;
+use TorneLIB\Model\Type\DataType;
+use TorneLIB\Model\Type\RequestMethod;
 use TorneLIB\Module\Config\WrapperConfig;
 use TorneLIB\Utils\Generic;
 
@@ -55,7 +55,7 @@ interface WrapperInterface
      *
      * @param string $username
      * @param string $password
-     * @param authType $authType
+     * @param AuthType $authType
      * @return array
      * @since 6.1.0
      */
@@ -94,7 +94,7 @@ interface WrapperInterface
     public function getCode();
 
     /**
-     * Get current version of netcurl, either from docblocks or internal settings.
+     * Get current version of netcurl, either from doc blocks or internal settings.
      *
      * @return string
      */
@@ -106,8 +106,8 @@ interface WrapperInterface
      * @param string|array $url
      * @param array $data
      * @param int $method
-     * @param int|dataType $dataType
+     * @param int|DataType $dataType
      * @return mixed
      */
-    public function request($url, $data = [], $method = requestMethod::GET, $dataType = dataType::NORMAL);
+    public function request($url, $data = [], $method = RequestMethod::GET, $dataType = DataType::NORMAL);
 }

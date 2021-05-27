@@ -12,8 +12,8 @@ use TorneLIB\Exception\ExceptionHandler;
 use TorneLIB\Flags;
 use TorneLIB\Helpers\Browsers;
 use TorneLIB\Helpers\Version;
-use TorneLIB\Model\Type\dataType;
-use TorneLIB\Model\Type\requestMethod;
+use TorneLIB\Model\Type\DataType;
+use TorneLIB\Model\Type\RequestMethod;
 use TorneLIB\Module\Config\WrapperConfig;
 use TorneLIB\Module\Network\Wrappers\CurlWrapper;
 use TorneLIB\MODULE_CURL;
@@ -41,7 +41,7 @@ class curlWrapperTest extends TestCase
             $curlWrapperArgs = new CurlWrapper(
                 'https://ipv4.netcurl.org',
                 [],
-                requestMethod::GET,
+                RequestMethod::GET,
                 [
                     'flag1' => 'present',
                     'flag2' => 'available',
@@ -172,8 +172,8 @@ class curlWrapperTest extends TestCase
         $wrapperFirst = (new CurlWrapper())->request([
             [
                 'url' => 'https://ipv4.netcurl.org/',
-                'requestMethod' => requestMethod::POST,
-                'dataType' => dataType::NORMAL,
+                'requestMethod' => RequestMethod::POST,
+                'dataType' => DataType::NORMAL,
                 'data' => [
                     'dataRequestMethod' => 'FIRST',
                 ],
@@ -189,8 +189,8 @@ class curlWrapperTest extends TestCase
             ],
             [
                 'url' => 'https://ipv4.netcurl.org/',
-                'requestMethod' => requestMethod::POST,
-                'dataType' => dataType::NORMAL,
+                'requestMethod' => RequestMethod::POST,
+                'dataType' => DataType::NORMAL,
                 'data' => [
                     'dataRequestMethod' => 'SECOND',
                 ],
@@ -200,7 +200,7 @@ class curlWrapperTest extends TestCase
             ],
             [
                 'url' => 'https://ipv4.netcurl.org/',
-                'requestMethod' => requestMethod::GET,
+                'requestMethod' => RequestMethod::GET,
                 'data' => [
                     'dataRequestMethod' => 'THIRD',
                 ],
@@ -247,7 +247,7 @@ class curlWrapperTest extends TestCase
         $curlRequest = (new CurlWrapper(
             sprintf('https://ipv4.netcurl.org/?func=%s', __FUNCTION__),
             [],
-            requestMethod::GET,
+            RequestMethod::GET,
             [
                 'flag1' => 'present',
                 'flag2' => 'available',
@@ -336,7 +336,7 @@ class curlWrapperTest extends TestCase
             ->request(
                 sprintf('https://ipv4.netcurl.org/?func=%s', __FUNCTION__),
                 ['hello' => 'world'],
-                requestMethod::POST
+                RequestMethod::POST
             )
             ->getParsed();
 
@@ -379,7 +379,7 @@ class curlWrapperTest extends TestCase
             ->request(
                 sprintf('https://ipv4.netcurl.org/?func=%s', __FUNCTION__),
                 ['hello' => 'world'],
-                requestMethod::GET
+                RequestMethod::GET
             )
             ->getParsed();
 
@@ -400,7 +400,7 @@ class curlWrapperTest extends TestCase
             ->request(
                 sprintf('https://ipv4.netcurl.org/?func=%s', __FUNCTION__),
                 ['hello' => 'world'],
-                requestMethod::POST
+                RequestMethod::POST
             )
             ->getParsed();
 

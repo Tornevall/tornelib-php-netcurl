@@ -9,11 +9,11 @@ namespace TorneLIB\Module\Config;
 use Exception;
 use TorneLIB\Exception\Constants;
 use TorneLIB\Exception\ExceptionHandler;
-use TorneLIB\Module\Network\Wrappers\CurlWrapper;
-use TorneLIB\Module\Network\Wrappers\SoapClientWrapper;
-use TorneLIB\Module\Network\Wrappers\SimpleStreamWrapper;
-use TorneLIB\Module\Network\Wrappers\RssWrapper;
 use TorneLIB\Model\Interfaces\WrapperInterface;
+use TorneLIB\Module\Network\Wrappers\CurlWrapper;
+use TorneLIB\Module\Network\Wrappers\RssWrapper;
+use TorneLIB\Module\Network\Wrappers\SimpleStreamWrapper;
+use TorneLIB\Module\Network\Wrappers\SoapClientWrapper;
 
 /**
  * Class WrapperDriver
@@ -63,62 +63,27 @@ class WrapperDriver
     private static $useRegisteredWrappersFirst = false;
 
     /**
-     * Register external wrapper class as useble if it implements the wrapper interface.
+     * Returns proper wrapper for internal wrapper requests, depending on external available wrappers.
      *
-     * @param $wrapperClass
+     * @param $wrapperName
+     * @param bool $testOnly
+     * @return mixed
      * @throws ExceptionHandler
      * @since 6.1.0
      */
-    private static function registerClassInterface($wrapperClass)
+    public static function getWrapperAllowed($wrapperName, $testOnly = false)
     {
-        $badClass = false;
-
-        $wrapperClassName = get_class($wrapperClass);
-        if (!isset(self::$externalWrapperList[$wrapperClassName])) {
-            if (self::registerCheckImplements($wrapperClass)) {
-                self::$externalWrapperList[$wrapperClassName] = $wrapperClass;
-            } else {
-                $badClass = true;
-            }
+        // If there are no available external wrappers, let getWrapper do its actions and throw exceptions if
+        // the internal wrapper fails to load.
+        if (!count(self::$externalWrapperList)) {
+            $return = self::getWrapper($wrapperName, $testOnly);
+        } else {
+            // If there are available external wrappers, just try to load external wrapper and proceed
+            // without noise on failures, as we'd like to try to use the externals first. Always.
+            $return = self::getWrapper($wrapperName, true);
         }
 
-        self::registerCheckBadClass($badClass, $wrapperClass);
-    }
-
-    /**
-     * Check if class is not properly registered and throw exception.
-     *
-     * @param $badClass
-     * @param $wrapperClass
-     * @throws ExceptionHandler
-     * @since 6.1.0
-     */
-    private static function registerCheckBadClass($badClass, $wrapperClass)
-    {
-        if ($badClass) {
-            throw new ExceptionHandler(
-                sprintf(
-                    'Unable to register class %s in %s with wrong interface.',
-                    get_class($wrapperClass),
-                    __CLASS__
-                ),
-                Constants::LIB_CLASS_UNAVAILABLE
-            );
-        }
-    }
-
-    /**
-     * Checks if registering class implements WrapperInterface.
-     *
-     * @param $wrapperClass
-     * @return bool
-     * @since 6.1.0
-     */
-    private static function registerCheckImplements($wrapperClass)
-    {
-        $implements = class_implements($wrapperClass);
-
-        return in_array(WrapperInterface::class, $implements, false);
+        return $return;
     }
 
     /**
@@ -162,27 +127,15 @@ class WrapperDriver
     }
 
     /**
-     * Returns proper wrapper for internal wrapper requests, depending on external available wrappers.
+     * Get list of available wrappers, both internal and external.
      *
-     * @param $wrapperName
-     * @param bool $testOnly
-     * @return mixed
-     * @throws ExceptionHandler
+     * @return array
      * @since 6.1.0
      */
-    public static function getWrapperAllowed($wrapperName, $testOnly = false)
+    public static function getWrappers()
     {
-        // If there are no available external wrappers, let getWrapper do its actions and throw exceptions if
-        // the internal wrapper fails to load.
-        if (!count(self::$externalWrapperList)) {
-            $return = self::getWrapper($wrapperName, $testOnly);
-        } else {
-            // If there are available external wrappers, just try to load external wrapper and proceed
-            // without noise on failures, as we'd like to try to use the externals first. Always.
-            $return = self::getWrapper($wrapperName, true);
-        }
-
-        return $return;
+        // return self::$wrappers;
+        return array_merge(self::$wrappers, self::$externalWrapperList);
     }
 
     /**
@@ -256,6 +209,65 @@ class WrapperDriver
     }
 
     /**
+     * Register external wrapper class as useble if it implements the wrapper interface.
+     *
+     * @param $wrapperClass
+     * @throws ExceptionHandler
+     * @since 6.1.0
+     */
+    private static function registerClassInterface($wrapperClass)
+    {
+        $badClass = false;
+
+        $wrapperClassName = get_class($wrapperClass);
+        if (!isset(self::$externalWrapperList[$wrapperClassName])) {
+            if (self::registerCheckImplements($wrapperClass)) {
+                self::$externalWrapperList[$wrapperClassName] = $wrapperClass;
+            } else {
+                $badClass = true;
+            }
+        }
+
+        self::registerCheckBadClass($badClass, $wrapperClass);
+    }
+
+    /**
+     * Checks if registering class implements WrapperInterface.
+     *
+     * @param $wrapperClass
+     * @return bool
+     * @since 6.1.0
+     */
+    private static function registerCheckImplements($wrapperClass)
+    {
+        $implements = class_implements($wrapperClass);
+
+        return in_array(WrapperInterface::class, $implements, false);
+    }
+
+    /**
+     * Check if class is not properly registered and throw exception.
+     *
+     * @param $badClass
+     * @param $wrapperClass
+     * @throws ExceptionHandler
+     * @since 6.1.0
+     */
+    private static function registerCheckBadClass($badClass, $wrapperClass)
+    {
+        if ($badClass) {
+            throw new ExceptionHandler(
+                sprintf(
+                    'Unable to register class %s in %s with wrong interface.',
+                    get_class($wrapperClass),
+                    __CLASS__
+                ),
+                Constants::LIB_CLASS_UNAVAILABLE
+            );
+        }
+    }
+
+    /**
      * If this is true NetWrapper will try the registered drivers before the internal.
      *
      * @return bool
@@ -264,18 +276,6 @@ class WrapperDriver
     public static function getRegisteredWrappersFirst()
     {
         return self::$useRegisteredWrappersFirst;
-    }
-
-    /**
-     * Get list of available wrappers, both internal and external.
-     *
-     * @return array
-     * @since 6.1.0
-     */
-    public static function getWrappers()
-    {
-        // return self::$wrappers;
-        return array_merge(self::$wrappers, self::$externalWrapperList);
     }
 
     /**

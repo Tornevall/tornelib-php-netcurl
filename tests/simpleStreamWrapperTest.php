@@ -1,9 +1,10 @@
 <?php
 
+/** @noinspection PhpUndefinedMethodInspection */
+
 require_once(__DIR__ . '/../vendor/autoload.php');
 
 use PHPUnit\Framework\TestCase;
-use TorneLIB\Config\Flag;
 use TorneLIB\Exception\ExceptionHandler;
 use TorneLIB\Model\Type\dataType;
 use TorneLIB\Model\Type\requestMethod;
@@ -17,10 +18,11 @@ class simpleStreamWrapperTest extends TestCase
     /**
      * @test
      * @since 6.1.0
+     * @noinspection SpellCheckingInspection
      */
     public function getStreamWrapper()
     {
-        // Base streamwrapper (file_get_contents, fopen, etc) is only allowed if allow_url_fopen is available.
+        // Base streamWrapper (file_get_contents, fopen, etc) is only allowed if allow_url_fopen is available.
         $stream = (new SimpleStreamWrapper());
 
         /** @noinspection PhpUnitTestsInspection */
@@ -66,7 +68,7 @@ class simpleStreamWrapperTest extends TestCase
             [
                 'postData' => ['var1' => 'val1'],
             ],
-            requestMethod::METHOD_POST
+            requestMethod::POST
         )->getParsed();
 
         static::assertTrue(
@@ -92,7 +94,7 @@ class simpleStreamWrapperTest extends TestCase
             [
                 'postData' => ['var1' => 'val1'],
             ],
-            requestMethod::METHOD_POST,
+            requestMethod::POST,
             dataType::JSON
         )->getParsed();
 
@@ -119,7 +121,7 @@ class simpleStreamWrapperTest extends TestCase
             [
                 'postData' => ['var1' => 'val1'],
             ],
-            requestMethod::METHOD_POST,
+            requestMethod::POST,
             dataType::XML
         )->getParsed();
 

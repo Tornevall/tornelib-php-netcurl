@@ -267,7 +267,7 @@ class WrapperConfig
      * @link https://curl.haxx.se/libcurl/c/curl_easy_setopt.html
      * @since 6.1.0
      */
-    private function setTimeout($timeout = 300, $useMillisec = false)
+    public function setTimeout($timeout = 300, $useMillisec = false)
     {
         /**
          * CURLOPT_TIMEOUT (Entire request) Everything has to be established and get finished on this time limit.
@@ -1240,8 +1240,8 @@ class WrapperConfig
      *
      * @param $username
      * @param $password
-     * @param int $authType
-     * @param int $authSource
+     * @param int|authType $authType
+     * @param int|authSource $authSource
      * @return WrapperConfig
      * @since 6.1.0
      */
@@ -1677,7 +1677,7 @@ class WrapperConfig
      * @since 6.1.0
      * @noinspection PhpUnusedPrivateMethodInspection
      */
-    private function getTimeout()
+    public function getTimeout()
     {
         $cTimeout = null;
         $eTimeout = null;

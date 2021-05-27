@@ -1,5 +1,8 @@
 <?php
 
+/** @noinspection PhpUndefinedMethodInspection */
+/** @noinspection PhpUndefinedClassInspection */
+
 use PHPUnit\Framework\TestCase;
 use TorneLIB\Exception\Constants;
 use TorneLIB\Flags;

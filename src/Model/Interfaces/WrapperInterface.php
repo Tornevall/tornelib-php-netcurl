@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Copyright © Tomas Tornevall / Tornevall Networks. All rights reserved.
  * See LICENSE.md for license details.
@@ -52,8 +53,8 @@ interface WrapperInterface
     /**
      * Authentication setup for all modules. Default setup is to use Basic Auth.
      *
-     * @param $username
-     * @param $password
+     * @param string $username
+     * @param string $password
      * @param authType $authType
      * @return array
      * @since 6.1.0
@@ -102,10 +103,10 @@ interface WrapperInterface
     /**
      * Default request method. Replaces doGet, doPost, doPut, doDelete, etc.
      *
-     * @param $url
+     * @param string|array $url
      * @param array $data
-     * @param $method
-     * @param int $dataType
+     * @param int $method
+     * @param int|dataType $dataType
      * @return mixed
      */
     public function request($url, $data = [], $method = requestMethod::GET, $dataType = dataType::NORMAL);

@@ -88,8 +88,8 @@ class NetWrapper implements WrapperInterface
 
     /**
      * Allows strict identification in user-agent header.
-     * @param $activation
-     * @param $allowPhpRelease
+     * @param bool $activation
+     * @param bool $allowPhpRelease
      * @return NetWrapper
      * @since 6.1.0
      */
@@ -122,14 +122,15 @@ class NetWrapper implements WrapperInterface
     public function getVersion()
     {
         return isset($this->version) && !empty($this->version) ?
-            $this->version : (new Generic())->getVersionByAny(__DIR__, 3, WrapperConfig::class);
+            $this->version : (string)(new Generic())->getVersionByAny(__DIR__, 3, WrapperConfig::class);
     }
 
     /**
-     * @param $timeout
+     * @param int $timeout
      * @param false $useMillisec
      * @return $this
      * @since 6.1.3
+     * @noinspection SpellCheckingInspection
      */
     public function setTimeout($timeout, $useMillisec = false)
     {
@@ -167,15 +168,15 @@ class NetWrapper implements WrapperInterface
     }
 
     /**
-     * @param $username
-     * @param $password
-     * @param int $authType
+     * @param string $username
+     * @param string $password
+     * @param authType|int $authType
      * @return NetWrapper
      * @since 6.1.0
      */
     public function setAuthentication($username, $password, $authType = authType::BASIC)
     {
-        $this->CONFIG->setAuthentication($username, $password, $authType);
+        $this->CONFIG->setAuthentication($username, $password, (int)$authType);
 
         return $this;
     }

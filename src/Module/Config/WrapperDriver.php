@@ -73,7 +73,7 @@ class WrapperDriver
     {
         $badClass = false;
 
-        $wrapperClassName = @get_class($wrapperClass);
+        $wrapperClassName = get_class($wrapperClass);
         if (!isset(self::$externalWrapperList[$wrapperClassName])) {
             if (self::registerCheckImplements($wrapperClass)) {
                 self::$externalWrapperList[$wrapperClassName] = $wrapperClass;
@@ -138,7 +138,7 @@ class WrapperDriver
 
         $allWrappers = self::getWrappers();
         foreach ($allWrappers as $wrapperClass) {
-            $currentWrapperClass = @get_class($wrapperClass);
+            $currentWrapperClass = get_class($wrapperClass);
             if ($currentWrapperClass === $wrapperNameClass ||
                 $currentWrapperClass === sprintf('TorneLIB\Module\Network\Wrappers\%s', $wrapperNameClass)
             ) {
@@ -157,11 +157,6 @@ class WrapperDriver
                 Constants::LIB_NETCURL_NETWRAPPER_NO_DRIVER_FOUND
             );
         }
-
-        // When instance handling resided in Netwrapper, the last instance was always stored internally.
-        // This is not necessary here.
-        // @todo Remove this entirely in future releases.
-        //self::$instance = $return;
 
         return $return;
     }
@@ -234,9 +229,9 @@ class WrapperDriver
     }
 
     /**
-     * Register a new wrapperclass for netcurl (NetWrapper).
+     * Register a new wrapperClass for netcurl (NetWrapper).
      *
-     * @param $wrapperClass
+     * @param object $wrapperClass
      * @param bool $tryFirst
      * @return string
      * @throws ExceptionHandler
@@ -261,7 +256,7 @@ class WrapperDriver
     }
 
     /**
-     * If this is true Netwrapper will try the registered drivers before the internal.
+     * If this is true NetWrapper will try the registered drivers before the internal.
      *
      * @return bool
      * @since 6.1.0

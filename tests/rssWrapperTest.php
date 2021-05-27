@@ -1,4 +1,6 @@
 <?php
+/** @noinspection PhpUndefinedMethodInspection */
+/** @noinspection PhpUndefinedClassInspection */
 
 require_once(__DIR__ . '/../vendor/autoload.php');
 
@@ -52,7 +54,7 @@ class rssWrapperTest extends TestCase
                 ->request(
                     'https://www.tornevalls.se/feed/',
                     [],
-                    requestMethod::METHOD_GET,
+                    requestMethod::GET,
                     dataType::NORMAL
                 )->getParsed();
 
@@ -94,7 +96,7 @@ class rssWrapperTest extends TestCase
                 ->request(
                     'https://www.tornevalls.se/feed/',
                     [],
-                    requestMethod::METHOD_GET,
+                    requestMethod::GET,
                     dataType::RSS_XML
                 )->getParsed();
 

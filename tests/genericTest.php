@@ -264,7 +264,8 @@ class genericTest extends TestCase
         } else {
             static::markTestIncomplete(
                 sprintf(
-                    '%s expected an exception but received null.', __FUNCTION__
+                    '%s expected an exception but received null.',
+                    __FUNCTION__
                 )
             );
         }

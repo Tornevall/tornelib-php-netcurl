@@ -98,6 +98,10 @@ class GenericParser
                 break;
             case (bool)preg_match('/\/json/i', $contentType):
                 // If this check is not a typecasted check, things will break bad.
+                if (empty($content)) {
+                    // If content is empty, we don't need to parse anything (to maintain normal behaviour from older PHP versions than 8.1).
+                    break;
+                }
                 if (is_array($content)) {
                     // Did we get bad content?
                     $content = json_encode($content);

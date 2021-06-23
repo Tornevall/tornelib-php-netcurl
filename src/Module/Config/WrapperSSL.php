@@ -202,8 +202,7 @@ class WrapperSSL
         $this->context['ssl']['allow_self_signed'] = $selfsignedBooleanValue;
 
         if (!$verifyBooleanValue || $selfsignedBooleanValue) {
-            $mt = microtime(true)*1000;
-            $this->securityLevelChanges[$mt] = $this->context;
+            $this->securityLevelChanges[$time()] = $this->context;
         }
 
         return $this;

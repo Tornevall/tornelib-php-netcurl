@@ -98,6 +98,9 @@ class GenericParser
                 break;
             case (bool)preg_match('/\/json/i', $contentType):
                 // If this check is not a typecasted check, things will break bad.
+                if (empty($content)) {
+                    $content = [];
+                }
                 if (is_array($content)) {
                     // Did we get bad content?
                     $content = json_encode($content);

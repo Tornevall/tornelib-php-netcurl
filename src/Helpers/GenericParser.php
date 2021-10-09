@@ -164,6 +164,7 @@ class GenericParser
             $domList = $domListData;
         }
         $return = [];
+        $error = false;
         if (isset($domList) && count($domList)) {
             /**
              * @var int $domItemIndex
@@ -187,40 +188,23 @@ class GenericParser
                             foreach ($extractKeys as $extractKey) {
                                 try {
                                     switch ($extractKey) {
-                                        case 'value':
-                                            $newExtraction['mainNode'][$extractKey] = isset($mainNode->nodeValue) ? trim($mainNode->nodeValue) : null;
-                                            if (isset($subNode['node']->nodeValue)) {
-                                                $newExtraction['subNode'][$extractKey] = trim($subNode['node']->nodeValue);
-                                            } else {
-                                                if (self::getNodeListCount($subNode['node'])) {
-                                                    $subNodeItem = $subNode['node']->item(0);
-                                                    $newExtraction['subNode'][$extractKey] = trim($subNodeItem->nodeValue);
-                                                } else {
-                                                    $newExtraction['subNode'][$extractKey] = null;
-                                                }
-                                            }
-                                            break;
                                         default:
-                                            if (!empty($attribute = self::getAttributeFromDom($domItem['node'], $extractKey))) {
+                                            if (!empty($attribute = self::getAttributeFromDom($mainNode['node'], $extractKey))) {
                                                 $newExtraction['mainNode'][$extractKey] = $attribute;
-                                            } elseif (!empty($attribute = self::getAttributeFromDom($mainNode['node'], $extractKey))) {
+                                            } elseif (!empty($attribute = self::getAttributeFromDom($domItem['node'], $extractKey))) {
                                                 $newExtraction['mainNode'][$extractKey] = $attribute;
                                             } else {
                                                 $newExtraction['mainNode'][$extractKey] = null;
                                             }
 
-                                            if ($attribute = self::getAttributeFromDom($subNode['node'], $extractKey)) {
+                                            if (!empty($attribute = self::getAttributeFromDom($subNode['node'], $extractKey))) {
                                                 $newExtraction['subNode'][$extractKey] = $attribute;
                                             } else {
                                                 $newExtraction['subNode'][$extractKey] = null;
                                             }
                                     }
                                 } catch (Exception $e) {
-                                    // Do not store and return failures.
-                                    /*$return['errors'][] = [
-                                        'code' => $e->getCode(),
-                                        'message' => $e->getMessage(),
-                                    ];*/
+                                    $error = true;
                                 }
                                 $return[$domItemIndex][$elementName] = $newExtraction;
                             }
@@ -339,17 +323,16 @@ class GenericParser
         $return = null;
         if (method_exists($domItem, 'getAttribute') && $returnAttribute = $domItem->getAttribute($attributeKey)) {
             $return = $returnAttribute;
-            if (empty($return) && isset($domItem->nodeValue) && !empty($domItem->nodeValue)) {
-                $nodeValue = $domItem->nodeValue;
-            }
         } elseif (self::getNodeListCount($domItem)) {
             $testAttribute = self::getAttributeFromDom($domItem->item(0), $attributeKey);
             if (!empty($testAttribute)) {
                 $return = $testAttribute;
             }
+        } elseif ($attributeKey === 'value' && isset($domItem->nodeValue) && !empty($domItem->nodeValue)) {
+            $return = $domItem->nodeValue;
         }
 
-        return $return;
+        return trim($return);
     }
 
     /**

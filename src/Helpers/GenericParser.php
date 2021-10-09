@@ -75,9 +75,10 @@ class GenericParser
     }
 
     /**
-     * @param array $domListData
-     * @param array $elements
-     * @param array $extractKeys
+     * Value extractor for elements in a xpath. Merges into a human readable array, depending on the requested keys.
+     * @param array $domListData An array with elements.
+     * @param array $elements Array of xpaths that defines where to look for content.
+     * @param array $extractKeys Values to extract from each element.
      * @return array
      * @since 6.1.5
      */
@@ -90,10 +91,20 @@ class GenericParser
         }
         $return = [];
         if (isset($domList) && count($domList)) {
+            /**
+             * @var int $domItemIndex
+             * @var array $domItem
+             */
             foreach ($domList as $domItemIndex => $domItem) {
+                /**
+                 * @var string $elementName The name of the element that should be generated for humans.
+                 * @var string $elementInformation xpath string.
+                 */
                 foreach ($elements as $elementName => $elementInformation) {
                     if ($extractedSubPath = GenericParser::getBySubXPath($domItem, $elementInformation)) {
+                        /** @var \DOMElement $mainNode */
                         $mainNode = $extractedSubPath['mainNode'];
+                        /** @var array $subNode */
                         $subNode = $extractedSubPath['subNode'];
                         if (is_array($extractKeys) && count($extractKeys)) {
                             $newExtraction = $extractedSubPath;
@@ -107,11 +118,7 @@ class GenericParser
                                             if (isset($subNode['node']->nodeValue)) {
                                                 $newExtraction['subNode'][$extractKey] = trim($subNode['node']->nodeValue);
                                             } else {
-                                                if (method_exists(
-                                                        $subNode['node'],
-                                                        'item'
-                                                    ) && $subNode['node']->count()
-                                                ) {
+                                                if (self::getNodeListCount($subNode['node'])) {
                                                     $subNodeItem = $subNode['node']->item(0);
                                                     $newExtraction['subNode'][$extractKey] = trim($subNodeItem->nodeValue);
                                                 } else {
@@ -126,9 +133,7 @@ class GenericParser
                                                 $newExtraction['mainNode'][$extractKey] = null;
                                             }
                                             // Extract first item from subnode if it exists or nullify the data.
-                                            if (method_exists($subNode['node'], 'item') &&
-                                                $subNode['node']->count()
-                                            ) {
+                                            if (self::getNodeListCount($subNode['node'])) {
                                                 $subNodeItem = $subNode['node']->item(0);
                                                 $newExtraction['subNode'][$extractKey] = trim($subNodeItem->getAttribute($extractKey));
                                             } else {
@@ -155,6 +160,8 @@ class GenericParser
     }
 
     /**
+     * Get element by sub-xpath.
+     *
      * @param array $domItem
      * @param string $subXpath
      * @since 6.1.5
@@ -187,6 +194,8 @@ class GenericParser
     }
 
     /**
+     * Continue merge the xpath with further xpath data.
+     *
      * @param $xpath
      * @param $currentPath
      * @param \DOMDocument $domDoc
@@ -211,6 +220,32 @@ class GenericParser
     }
 
     /**
+     * Count number of available nodes in a DOMNodeList.
+     * count() works from PHP 7.2, but not for older releases.
+     * This function also works as a validator to make sure the node is a proper node.
+     *
+     * @param \DOMNodeList $nodeList
+     * @return int
+     * @since 6.1.5
+     */
+    private static function getNodeListCount($nodeList)
+    {
+        $nodeListCount = 0;
+        if (version_compare(PHP_VERSION, '7.2', '>=')) {
+            if (method_exists($nodeList, 'item')) {
+                $nodeListCount = $nodeList->count();
+            }
+        } elseif (isset($nodeList->length)) {
+            $nodeListCount = $nodeList->length;
+        }
+
+        return (int)$nodeListCount;
+    }
+
+    /**
+     * Follow the requested array and extract a proper value from each element, if exists. If not, null is returned
+     * to mark the missing data.
+     *
      * @param $xPath
      * @param $fromElementRequestArray
      * @return mixed
@@ -219,17 +254,18 @@ class GenericParser
      */
     public static function getValuesFromXPath($xPath, $fromElementRequestArray)
     {
-        $return = null;
         if (!is_array($fromElementRequestArray) || !count($fromElementRequestArray)) {
             throw new Exception(sprintf('%s Exception: Not a valid array path', __FUNCTION__), 404);
         }
         foreach ($fromElementRequestArray as $followKey) {
-            $xPath = $xPath[$followKey];
+            $xPath = isset($xPath[$followKey]) ? $xPath[$followKey] : null;
         }
         return $xPath;
     }
 
     /**
+     * Initial method to extract expath data from html content.
+     *
      * @param $htmlString
      * @param $xpath
      * @return array
@@ -243,6 +279,7 @@ class GenericParser
 
     /**
      * Extract DOMDocument data by xpath.
+     *
      * @param $html
      * @param $xpath
      * @return array
@@ -271,6 +308,8 @@ class GenericParser
     }
 
     /**
+     * Get content from xpath elements, with XPathfinder..
+     *
      * @param $domDoc
      * @param $xpath
      * @param $return
@@ -284,9 +323,9 @@ class GenericParser
             $nodeList = $finder->query($xpath);
             $return['domDocument'] = $domDoc;
 
-            if (!empty($nodeList) || (method_exists($nodeList, 'count') && $nodeList->count() > 0)) {
+            if (!empty($nodeList) || self::getNodeListCount($nodeList)) {
                 /** @var \DOMNodeList $nodeList */
-                for ($nodeIndex = 0; $nodeIndex < $nodeList->count(); $nodeIndex++) {
+                for ($nodeIndex = 0; $nodeIndex < self::getNodeListCount($nodeList); $nodeIndex++) {
                     try {
                         /** @var \DOMElement $nodeItem */
                         $nodeItem = $nodeList->item($nodeIndex);

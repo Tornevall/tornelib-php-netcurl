@@ -177,7 +177,6 @@ class GenericParser
                 foreach ($elements as $elementName => $elementInformation) {
                     /** @var array $extractedSubPath */
                     if ($extractedSubPath = GenericParser::getBySubXPath($domItem, $elementInformation)) {
-                        /** @var \DOMElement $mainNode */
                         $mainNode = $extractedSubPath['mainNode'];
                         /** @var array $subNode */
                         $subNode = $extractedSubPath['subNode'];
@@ -202,30 +201,26 @@ class GenericParser
                                             }
                                             break;
                                         default:
-                                            if ($mainNodeCount = self::getNodeListCount($mainNode['node'])) {
-                                                $mainNodeItem = $mainNode['node']->item(0);
-                                                $newExtraction['mainNode'][$extractKey] = trim(
-                                                    $mainNodeItem->getAttribute($extractKey)
-                                                );
+                                            if (!empty($attribute = self::getAttributeFromDom($domItem['node'], $extractKey))) {
+                                                $newExtraction['mainNode'][$extractKey] = $attribute;
+                                            } elseif (!empty($attribute = self::getAttributeFromDom($mainNode['node'], $extractKey))) {
+                                                $newExtraction['mainNode'][$extractKey] = $attribute;
                                             } else {
                                                 $newExtraction['mainNode'][$extractKey] = null;
                                             }
-                                            // Extract first item from subnode if it exists or nullify the data.
-                                            if (self::getNodeListCount($subNode['node'])) {
-                                                $subNodeItem = $subNode['node']->item(0);
-                                                $newExtraction['subNode'][$extractKey] = trim(
-                                                    $subNodeItem->getAttribute($extractKey)
-                                                );
+
+                                            if ($attribute = self::getAttributeFromDom($subNode['node'], $extractKey)) {
+                                                $newExtraction['subNode'][$extractKey] = $attribute;
                                             } else {
                                                 $newExtraction['subNode'][$extractKey] = null;
                                             }
                                     }
                                 } catch (Exception $e) {
                                     // Do not store and return failures.
-                                    $return['errors'][] = [
+                                    /*$return['errors'][] = [
                                         'code' => $e->getCode(),
                                         'message' => $e->getMessage(),
-                                    ];
+                                    ];*/
                                 }
                                 $return[$domItemIndex][$elementName] = $newExtraction;
                             }
@@ -332,6 +327,29 @@ class GenericParser
         }
 
         return (int)$nodeListCount;
+    }
+
+    /**
+     * @param $domItem
+     * @param $attributeKey
+     * @since 6.1.5
+     */
+    private static function getAttributeFromDom($domItem, $attributeKey)
+    {
+        $return = null;
+        if (method_exists($domItem, 'getAttribute') && $returnAttribute = $domItem->getAttribute($attributeKey)) {
+            $return = $returnAttribute;
+            if (empty($return) && isset($domItem->nodeValue) && !empty($domItem->nodeValue)) {
+                $nodeValue = $domItem->nodeValue;
+            }
+        } elseif (self::getNodeListCount($domItem)) {
+            $testAttribute = self::getAttributeFromDom($domItem->item(0), $attributeKey);
+            if (!empty($testAttribute)) {
+                $return = $testAttribute;
+            }
+        }
+
+        return $return;
     }
 
     /**

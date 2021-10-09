@@ -31,9 +31,21 @@ class domDocumentTest extends TestCase
         $nodeInfo = GenericParser::getElementsByXPath($xData, $elements, ['href', 'value']);
         $articles = [];
         foreach ($nodeInfo as $node) {
-            $href = GenericParser::getValuesFromXPath($node, ['subtitle', 'mainNode', 'href']);
-            $hrefText = GenericParser::getValuesFromXPath($node, ['subtitle', 'subNode', 'value']);
-            $description = GenericParser::getValuesFromXPath($node, ['lead', 'subNode', 'value']);
+            $href = GenericParser::getValuesFromXPath(
+                $node,
+                ['subtitle', 'mainNode', 'href'],
+                ['subtitle' => 'mainNode', 'lead' => 'subNode', 'href' => 'mainNode']
+            );
+            $hrefText = GenericParser::getValuesFromXPath(
+                $node,
+                ['subtitle', 'subNode', 'value'],
+                ['subtitle' => 'mainNode', 'lead' => 'subNode', 'href' => 'mainNode']
+            );
+            $description = GenericParser::getValuesFromXPath(
+                $node,
+                ['lead', 'subNode', 'value'],
+                ['subtitle' => 'mainNode', 'lead' => 'subNode', 'href' => 'mainNode']
+            );
             if (!empty($href)) {
                 $articles[$href] = [
                     'title' => $hrefText,

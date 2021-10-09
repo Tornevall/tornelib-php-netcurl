@@ -428,7 +428,7 @@ class GenericParser
             foreach ($elements as $elementName => $elementItem) {
                 $return[$nodeIndex][$elementName] = [];
                 foreach ($extractValueArray as $extractValueKey) {
-                    if (!isset($valueNodeContainer[$elementName])) {
+                    if ($extractValueKey !== 'value' && !isset($valueNodeContainer[$extractValueKey])) {
                         throw new Exception(
                             sprintf(
                                 '%s exception: Can not find %s in valueNodeContainer',
@@ -438,13 +438,16 @@ class GenericParser
                             404
                         );
                     }
+
+                    // Nulling valuekey here means that we want to fill all elements found.
                     $return[$nodeIndex][$elementName][$extractValueKey] = self::getValuesFromXPath(
                         $node,
                         [
                             $elementName,
-                            $valueNodeContainer[$extractValueKey],
+                            isset($valueNodeContainer[$extractValueKey]) ? $valueNodeContainer[$extractValueKey] : $extractValueKey,
                             $extractValueKey,
-                        ]
+                        ],
+                        $valueNodeContainer
                     );
                 }
             }
@@ -463,13 +466,16 @@ class GenericParser
      * @throws Exception
      * @since 6.1.5
      */
-    public static function getValuesFromXPath($xPath, $fromElementRequestArray)
+    public static function getValuesFromXPath($xPath, $fromElementRequestArray, $valueNodeContainer)
     {
         if (!is_array($fromElementRequestArray) || !count($fromElementRequestArray)) {
             throw new Exception(sprintf('%s Exception: Not a valid array path', __FUNCTION__), 404);
         }
         $inElement = $fromElementRequestArray[0];
         $inNode = $fromElementRequestArray[1];
+        if ($inNode === 'value') {
+            $inNode = $valueNodeContainer[$inElement];
+        }
         $thisKey = $fromElementRequestArray[2];
 
         if (isset($xPath[$inElement][$inNode][$thisKey])) {

@@ -442,7 +442,7 @@ class GenericParser
                         $node,
                         [
                             $elementName,
-                            $valueNodeContainer[$elementName],
+                            $valueNodeContainer[$extractValueKey],
                             $extractValueKey,
                         ]
                     );

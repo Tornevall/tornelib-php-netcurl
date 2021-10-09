@@ -75,6 +75,80 @@ class GenericParser
     }
 
     /**
+     * @param $content
+     * @param $contentType
+     * @return array|mixed
+     * @since 6.1.0
+     */
+    public static function getParsed($content, $contentType)
+    {
+        $return = $content;
+
+        switch ($contentType) {
+            case !empty($contentType) && (bool)preg_match('/\/xml|\+xml/i', $contentType):
+                // More detection possibilites.
+                /* <?xml version="1.0" encoding="UTF-8"?><rss version="2.0"*/
+
+                // If Laminas is available, prefer that engine before simple xml.
+                if ((bool)preg_match('/\/xml|\+xml/i', $contentType) && class_exists('Laminas\Feed\Reader\Reader')) {
+                    $return = (new RssWrapper())->getParsed($content);
+                    break;
+                }
+                $return = (new Content())->getFromXml($content);
+                break;
+            case (bool)preg_match('/\/json/i', $contentType):
+                // If this check is not a typecasted check, things will break bad.
+                if (is_array($content)) {
+                    // Did we get bad content?
+                    $content = json_encode($content);
+                }
+                $return = json_decode($content, false);
+                break;
+            default:
+                break;
+        }
+
+        return $return;
+    }
+
+    /**
+     * getContentFromXPath is an automated feature that collects the behaviour of a manual handling of xpath requests.
+     *
+     * @param $html
+     * @param $xpath
+     * @param $elements
+     * @param $extractValueArray
+     * @param $valueNodeContainer
+     * @return array
+     * @throws Exception
+     * @since 6.1.5
+     * @link https://docs.tornevall.net/display/TORNEVALL/Generating+content+from+DOMDocument
+     */
+    public static function getContentFromXPath($html, $xpath, $elements, $extractValueArray, $valueNodeContainer)
+    {
+        $nodeInfo = GenericParser::getElementsByXPath(
+            self::getFromXPath(
+                $html,
+                $xpath
+            ),
+            $elements,
+            $extractValueArray
+        );
+
+        $renderedArray = self::getRenderedArrayFromXPathNodes(
+            $nodeInfo,
+            $elements,
+            $extractValueArray,
+            $valueNodeContainer
+        );
+
+        return [
+            'nodeInfo' => $nodeInfo,
+            'rendered' => $renderedArray,
+        ];
+    }
+
+    /**
      * Value extractor for elements in a xpath. Merges into a human readable array, depending on the requested keys.
      * @param array $domListData An array with elements.
      * @param array $elements Array of xpaths that defines where to look for content.
@@ -101,6 +175,7 @@ class GenericParser
                  * @var string $elementInformation xpath string.
                  */
                 foreach ($elements as $elementName => $elementInformation) {
+                    /** @var array $extractedSubPath */
                     if ($extractedSubPath = GenericParser::getBySubXPath($domItem, $elementInformation)) {
                         /** @var \DOMElement $mainNode */
                         $mainNode = $extractedSubPath['mainNode'];
@@ -128,14 +203,18 @@ class GenericParser
                                             break;
                                         default:
                                             if (method_exists($mainNode, 'getAttribute')) {
-                                                $newExtraction['mainNode'][$extractKey] = trim($mainNode->getAttribute($extractKey));
+                                                $newExtraction['mainNode'][$extractKey] = trim(
+                                                    $mainNode->getAttribute($extractKey)
+                                                );
                                             } else {
                                                 $newExtraction['mainNode'][$extractKey] = null;
                                             }
                                             // Extract first item from subnode if it exists or nullify the data.
                                             if (self::getNodeListCount($subNode['node'])) {
                                                 $subNodeItem = $subNode['node']->item(0);
-                                                $newExtraction['subNode'][$extractKey] = trim($subNodeItem->getAttribute($extractKey));
+                                                $newExtraction['subNode'][$extractKey] = trim(
+                                                    $subNodeItem->getAttribute($extractKey)
+                                                );
                                             } else {
                                                 $newExtraction['subNode'][$extractKey] = null;
                                             }
@@ -243,27 +322,6 @@ class GenericParser
     }
 
     /**
-     * Follow the requested array and extract a proper value from each element, if exists. If not, null is returned
-     * to mark the missing data.
-     *
-     * @param $xPath
-     * @param $fromElementRequestArray
-     * @return mixed
-     * @throws Exception
-     * @since 6.1.5
-     */
-    public static function getValuesFromXPath($xPath, $fromElementRequestArray)
-    {
-        if (!is_array($fromElementRequestArray) || !count($fromElementRequestArray)) {
-            throw new Exception(sprintf('%s Exception: Not a valid array path', __FUNCTION__), 404);
-        }
-        foreach ($fromElementRequestArray as $followKey) {
-            $xPath = isset($xPath[$followKey]) ? $xPath[$followKey] : null;
-        }
-        return $xPath;
-    }
-
-    /**
      * Initial method to extract expath data from html content.
      *
      * @param $htmlString
@@ -352,39 +410,67 @@ class GenericParser
     }
 
     /**
-     * @param $content
-     * @param $contentType
-     * @return array|mixed
-     * @since 6.1.0
+     * Dynamically render an array with xpath requested elements and values.
+     *
+     * @param $nodeList
+     * @param $elements
+     * @param $extractValueArray
+     * @param $valueNodeContainer
+     * @return array
+     * @throws Exception
+     * @since 6.1.5
      */
-    public static function getParsed($content, $contentType)
+    public static function getRenderedArrayFromXPathNodes($nodeList, $elements, $extractValueArray, $valueNodeContainer)
     {
-        $return = $content;
-
-        switch ($contentType) {
-            case !empty($contentType) && (bool)preg_match('/\/xml|\+xml/i', $contentType):
-                // More detection possibilites.
-                /* <?xml version="1.0" encoding="UTF-8"?><rss version="2.0"*/
-
-                // If Laminas is available, prefer that engine before simple xml.
-                if ((bool)preg_match('/\/xml|\+xml/i', $contentType) && class_exists('Laminas\Feed\Reader\Reader')) {
-                    $return = (new RssWrapper())->getParsed($content);
-                    break;
+        $return = [];
+        foreach ($nodeList as $nodeIndex => $node) {
+            $return[$nodeIndex] = [];
+            foreach ($elements as $elementName => $elementItem) {
+                $return[$nodeIndex][$elementName] = [];
+                foreach ($extractValueArray as $extractValueKey) {
+                    if (!isset($valueNodeContainer[$elementName])) {
+                        throw new Exception(
+                            sprintf(
+                                '%s exception: Can not find %s in valueNodeContainer',
+                                __FUNCTION__,
+                                $elementName
+                            ),
+                            404
+                        );
+                    }
+                    $return[$nodeIndex][$elementName][$extractValueKey] = self::getValuesFromXPath(
+                        $node,
+                        [
+                            $elementName,
+                            $valueNodeContainer[$elementName],
+                            $extractValueKey,
+                        ]
+                    );
                 }
-                $return = (new Content())->getFromXml($content);
-                break;
-            case (bool)preg_match('/\/json/i', $contentType):
-                // If this check is not a typecasted check, things will break bad.
-                if (is_array($content)) {
-                    // Did we get bad content?
-                    $content = json_encode($content);
-                }
-                $return = json_decode($content, false);
-                break;
-            default:
-                break;
+            }
         }
 
         return $return;
+    }
+
+    /**
+     * Follow the requested array and extract a proper value from each element, if exists. If not, null is returned
+     * to mark the missing data.
+     *
+     * @param $xPath
+     * @param $fromElementRequestArray
+     * @return mixed
+     * @throws Exception
+     * @since 6.1.5
+     */
+    public static function getValuesFromXPath($xPath, $fromElementRequestArray)
+    {
+        if (!is_array($fromElementRequestArray) || !count($fromElementRequestArray)) {
+            throw new Exception(sprintf('%s Exception: Not a valid array path', __FUNCTION__), 404);
+        }
+        foreach ($fromElementRequestArray as $followKey) {
+            $xPath = isset($xPath[$followKey]) ? $xPath[$followKey] : null;
+        }
+        return $xPath;
     }
 }

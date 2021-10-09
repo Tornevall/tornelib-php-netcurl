@@ -202,9 +202,10 @@ class GenericParser
                                             }
                                             break;
                                         default:
-                                            if (method_exists($mainNode, 'getAttribute')) {
+                                            if ($mainNodeCount = self::getNodeListCount($mainNode['node'])) {
+                                                $mainNodeItem = $mainNode['node']->item(0);
                                                 $newExtraction['mainNode'][$extractKey] = trim(
-                                                    $mainNode->getAttribute($extractKey)
+                                                    $mainNodeItem->getAttribute($extractKey)
                                                 );
                                             } else {
                                                 $newExtraction['mainNode'][$extractKey] = null;
@@ -257,6 +258,11 @@ class GenericParser
             $mainNode = $useNode;
         }
 
+        $mainNodeItem = self::getFromExtendedXpath(
+            $subXpath,
+            $domItem['path'],
+            $domItem['domDocument']
+        );
         $subNodeItem = self::getFromExtendedXpath(
             $subXpath,
             $domItem['path'],
@@ -264,7 +270,7 @@ class GenericParser
         );
 
         $return = [
-            'mainNode' => $mainNode,
+            'mainNode' => $mainNodeItem,
             'subNode' => $subNodeItem,
             'path' => method_exists($mainNode, 'getNodePath') ? $mainNode->getNodePath() : null,
         ];
@@ -289,6 +295,13 @@ class GenericParser
         } else {
             $currentPath .= $xpath;
         }
+        // In some queries we have to dive deep into the finder and jump through more elements before we can properly use
+        // the query. The below example is specific to this problem where we have a lot of child elements in the a-tag,
+        // but where we - to find the time element which is the specific tag in this example - can't make a deep search
+        // past the point where we have at least 3 hops down. The example needs to add /div/span/time to the search.
+        //$qq = $finder->query('/html/body/div[11]/div/div/div[1]/div/div[1]/div[1]/div/a');
+        //$i = $qq->item(0)
+        //$i->childNodes->item(8)->childNodes->item(3)->childNodes->item(1)->getAttribute('datetime')
         /** @var \DOMNodeList $queryResult */
         $queryResult = $finder->query($currentPath);
         return [
@@ -429,14 +442,7 @@ class GenericParser
                 $return[$nodeIndex][$elementName] = [];
                 foreach ($extractValueArray as $extractValueKey) {
                     if ($extractValueKey !== 'value' && !isset($valueNodeContainer[$extractValueKey])) {
-                        throw new Exception(
-                            sprintf(
-                                '%s exception: Can not find %s in valueNodeContainer',
-                                __FUNCTION__,
-                                $elementName
-                            ),
-                            404
-                        );
+                        continue;
                     }
 
                     // Nulling valuekey here means that we want to fill all elements found.
@@ -473,11 +479,6 @@ class GenericParser
         }
         $inElement = $fromElementRequestArray[0];
         $inNode = $fromElementRequestArray[1];
-        // Since we usually looking into a very specific container when it comes to defined containers, for value
-        // that is not specifically i DOMElement attribute, values are always set aside from the attributes and is
-        // always there even if the user does not specify it. Since we only need one value and from the container
-        // for the specific element list, we can prechoose the valuecontainer here and proceed with using that
-        // nodeElement value.
         if ($inNode === 'value') {
             $inNode = $valueNodeContainer[$inElement];
         }

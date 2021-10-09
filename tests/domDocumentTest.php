@@ -63,7 +63,7 @@ class domDocumentTest extends TestCase
                 'lead' => '/*[contains(@class, "lead")]',
             ],
             ['href', 'value'],
-            ['subtitle' => 'mainNode', 'lead' => 'subNode']
+            ['subtitle' => 'mainNode', 'lead' => 'subNode', 'href' => 'mainNode']
         );
 
         static::assertCount(20, $nodeList['rendered']);

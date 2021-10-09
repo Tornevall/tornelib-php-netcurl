@@ -11,6 +11,7 @@ class domDocumentTest extends TestCase
      * @test
      * @testdox Test DOMDocument wrapper.
      * @throws Exception
+     * @since 6.1.5
      */
     function xPathTest()
     {
@@ -41,5 +42,29 @@ class domDocumentTest extends TestCase
             }
         }
         static::assertCount(20, $articles);
+    }
+
+    /**
+     * @test
+     * @testdox As the basic xPathTest but in one shot.
+     * @since 6.1.5
+     */
+    function genericXpathCompiled()
+    {
+        $nodeList = GenericParser::getContentFromXPath(
+            file_get_contents(__DIR__ . '/templates/domdocument_mz.html'),
+            [
+                '//*[@class="inner_article"]/a',
+                '//*[@class="articles_wrapper"]/a',
+            ],
+            [
+                'subtitle' => '/*[contains(@class, "subtitle")]',
+                'lead' => '/*[contains(@class, "lead")]',
+            ],
+            ['href', 'value'],
+            ['subtitle' => 'mainNode', 'lead' => 'subNode'],
+        );
+
+        static::assertCount(20, $nodeList['rendered']);
     }
 }

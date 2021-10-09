@@ -473,6 +473,11 @@ class GenericParser
         }
         $inElement = $fromElementRequestArray[0];
         $inNode = $fromElementRequestArray[1];
+        // Since we usually looking into a very specific container when it comes to defined containers, for value
+        // that is not specifically i DOMElement attribute, values are always set aside from the attributes and is
+        // always there even if the user does not specify it. Since we only need one value and from the container
+        // for the specific element list, we can prechoose the valuecontainer here and proceed with using that
+        // nodeElement value.
         if ($inNode === 'value') {
             $inNode = $valueNodeContainer[$inElement];
         }

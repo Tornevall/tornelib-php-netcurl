@@ -468,9 +468,16 @@ class GenericParser
         if (!is_array($fromElementRequestArray) || !count($fromElementRequestArray)) {
             throw new Exception(sprintf('%s Exception: Not a valid array path', __FUNCTION__), 404);
         }
-        foreach ($fromElementRequestArray as $followKey) {
-            $xPath = isset($xPath[$followKey]) ? $xPath[$followKey] : null;
+        $inElement = $fromElementRequestArray[0];
+        $inNode = $fromElementRequestArray[1];
+        $thisKey = $fromElementRequestArray[2];
+
+        if (isset($xPath[$inElement][$inNode][$thisKey])) {
+            $return = $xPath[$inElement][$inNode][$thisKey];
+        } else {
+            $return = null;
         }
-        return $xPath;
+
+        return $return;
     }
 }

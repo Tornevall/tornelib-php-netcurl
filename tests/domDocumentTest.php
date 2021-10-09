@@ -51,7 +51,8 @@ class domDocumentTest extends TestCase
      */
     function genericXpathCompiled()
     {
-        $nodeList = GenericParser::getContentFromXPath(
+        $nodeList = GenericParser::getContentFromXPath
+        (
             file_get_contents(__DIR__ . '/templates/domdocument_mz.html'),
             [
                 '//*[@class="inner_article"]/a',
@@ -62,7 +63,7 @@ class domDocumentTest extends TestCase
                 'lead' => '/*[contains(@class, "lead")]',
             ],
             ['href', 'value'],
-            ['subtitle' => 'mainNode', 'lead' => 'subNode'],
+            ['subtitle' => 'mainNode', 'lead' => 'subNode']
         );
 
         static::assertCount(20, $nodeList['rendered']);

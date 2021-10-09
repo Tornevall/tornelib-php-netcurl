@@ -269,9 +269,7 @@ class GenericParser
     private static function getFromExtendedXpath($xpath, $currentPath, $domDoc)
     {
         $finder = new \DOMXPath($domDoc);
-        if (is_array($xpath)) {
-            $currentPath .= implode('', $xpath);
-        } else {
+        if (is_string($xpath)) {
             $currentPath .= $xpath;
         }
         // In some queries we have to dive deep into the finder and jump through more elements before we can properly use
@@ -281,8 +279,22 @@ class GenericParser
         //$qq = $finder->query('/html/body/div[11]/div/div/div[1]/div/div[1]/div[1]/div/a');
         //$i = $qq->item(0)
         //$i->childNodes->item(8)->childNodes->item(3)->childNodes->item(1)->getAttribute('datetime')
+
+        //$currentPath .= implode('', $xpath);
+        if (is_array($xpath)) {
+            foreach ($xpath as $xPathItem) {
+                $testPath = $currentPath . $xPathItem;
+                $runQuery = $finder->query($testPath);
+                if (self::getNodeListCount($runQuery)) {
+                    $queryResult = $runQuery;
+                    break;
+                }
+            }
+        } else {
+            $queryResult = $finder->query($currentPath);
+        }
+
         /** @var \DOMNodeList $queryResult */
-        $queryResult = $finder->query($currentPath);
         return [
             'domDocument' => $domDoc,
             'path' => $currentPath,

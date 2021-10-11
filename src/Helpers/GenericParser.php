@@ -122,7 +122,9 @@ class GenericParser
      */
     public static function __callStatic($name, $arguments)
     {
-        if (method_exists(SimpleDomParser::class, $name)) {
+        if (class_exists(SimpleDomParser::class) &&
+            method_exists(SimpleDomParser::class, $name)
+        ) {
             return call_user_func_array([SimpleDomParser::class, $name], $arguments);
         }
 

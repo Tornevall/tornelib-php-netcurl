@@ -900,7 +900,6 @@ class CurlWrapper implements WrapperInterface
      *
      * @param string $url
      * @return mixed
-     * @throws ExceptionHandler
      * @since 6.0
      */
     public function getParsed($url = '')
@@ -943,7 +942,6 @@ class CurlWrapper implements WrapperInterface
      * @param string $specificKey
      * @param string $specificUrl
      * @return string
-     * @throws ExceptionHandler
      * @since 6.0
      */
     public function getHeader($specificKey = '', $specificUrl = '')
@@ -952,7 +950,8 @@ class CurlWrapper implements WrapperInterface
 
         $headerRequest = is_array($this->curlResponseHeaders) ? $this->curlResponseHeaders : [];
 
-        if (!is_null($handleIndexByUrl = $this->getHandleByUrl($specificUrl))) {
+        $handleIndexByUrl = $this->getHandleByUrl($specificUrl);
+        if (!is_null($handleIndexByUrl)) {
             $specificUrl = $handleIndexByUrl;
         }
 

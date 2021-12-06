@@ -175,7 +175,7 @@ class SimpleStreamWrapper implements WrapperInterface
 
     /**
      * @inheritDoc
-     * @throws ExceptionHandler
+     * @return array|mixed
      */
     public function getParsed()
     {

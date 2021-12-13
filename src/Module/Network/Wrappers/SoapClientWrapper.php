@@ -750,6 +750,8 @@ class SoapClientWrapper implements WrapperInterface
     }
 
     /**
+     * @return float
+     * @throws ExceptionHandler
      * @since 6.1.5
      */
     public function getTotalRequestTime()
@@ -760,7 +762,7 @@ class SoapClientWrapper implements WrapperInterface
                 Constants::LIB_NETCURL_SOAP_REQUEST_TIMER_NOT_READY
             );
         }
-        return $this->soapClientTimeEnd - $this->soapClientTimeBegin;
+        return (float)$this->soapClientTimeEnd - $this->soapClientTimeBegin;
     }
 
     /**

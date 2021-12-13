@@ -480,7 +480,13 @@ class soapWrapperTest extends TestCase
                 count($result)
             );
         } catch (Exception $e) {
-            static::assertSame($e->getCode(), 2);
+            if ($e->getCode() !== Constants::LIB_NETCURL_SOAP_TIMEOUT) {
+                static::assertSame($e->getCode(), 2);
+                return;
+            }
+            static::markTestIncomplete(
+                'Test is incomplete due to timeout problems.'
+            );
         }
     }
 
@@ -566,8 +572,6 @@ class soapWrapperTest extends TestCase
             static::assertTrue(
                 $e->getCode() === Constants::LIB_NETCURL_SOAP_TIMEOUT
             );
-            echo $e->getCode() . "\n";
-            echo $e->getMessage() . "\n";
             return;
         }
         static::markTestIncomplete(

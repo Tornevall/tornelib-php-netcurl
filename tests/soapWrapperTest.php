@@ -8,6 +8,7 @@ require_once(__DIR__ . '/../vendor/autoload.php');
 
 use PHPUnit\Framework\TestCase;
 use TorneLIB\Config\Flag;
+use TorneLIB\Exception\Constants;
 use TorneLIB\Exception\ExceptionHandler;
 use TorneLIB\Helpers\Version;
 use TorneLIB\Module\Config\WrapperConfig;
@@ -539,6 +540,34 @@ class soapWrapperTest extends TestCase
             $this->rEcomPipeP
         );
         $wrapper->getPaymentMethods();
+    }
+
+    /**
+     * @test
+     * @throws ExceptionHandler
+     */
+    public function setSoapTimeoutShortFloat()
+    {
+        //static::expectException(ExceptionHandler::class);
+        $wrapper = new SoapClientWrapper($this->wsdl);
+        $wrapper->setTimeout(12, true);
+        $wrapper->setAuthentication(
+            $this->rEcomPipeU,
+            $this->rEcomPipeP
+        );
+        try {
+            $wrapper->getPaymentMethods();
+        } catch (ExceptionHandler $e) {
+            static::assertTrue(
+                $e->getCode() === Constants::LIB_NETCURL_SOAP_POSSIBLE_TIMEOUT
+            );
+            echo $e->getCode() . "\n";
+            echo $e->getMessage() . "\n";
+            return;
+        }
+        static::markTestSkipped(
+            'Test is only here assure some kind of timeout control. This failed, so we can continue in calm.'
+        );
     }
 
     /**

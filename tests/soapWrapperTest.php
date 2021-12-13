@@ -8,6 +8,7 @@ require_once(__DIR__ . '/../vendor/autoload.php');
 
 use PHPUnit\Framework\TestCase;
 use TorneLIB\Config\Flag;
+use TorneLIB\Exception\Constants;
 use TorneLIB\Exception\ExceptionHandler;
 use TorneLIB\Helpers\Version;
 use TorneLIB\Module\Config\WrapperConfig;
@@ -335,12 +336,17 @@ class soapWrapperTest extends TestCase
             // For older PHP versions this renders a very noisy fatal.
             (new SoapClientWrapper($this->no_wsdl))
                 ->setWsdlCache(WSDL_CACHE_DISK)
+                ->setTimeout(5)
                 ->setAuthentication(
                     $this->rEcomPipeU,
                     $this->rEcomPipeP
                 )->getPaymentMethods();
         } catch (ExceptionHandler $e) {
-            static::assertSame($e->getCode(), 500);
+            if ($e->getCode() !== Constants::LIB_NETCURL_SOAP_TIMEOUT) {
+                static::assertSame($e->getCode(), 500);
+                return;
+            }
+            static::markTestIncomplete('Test server timed out. Test skipped.');
         }
     }
 
@@ -474,7 +480,13 @@ class soapWrapperTest extends TestCase
                 count($result)
             );
         } catch (Exception $e) {
-            static::assertSame($e->getCode(), 2);
+            if ($e->getCode() !== Constants::LIB_NETCURL_SOAP_TIMEOUT) {
+                static::assertSame($e->getCode(), 2);
+                return;
+            }
+            static::markTestIncomplete(
+                'Test is incomplete due to timeout problems.'
+            );
         }
     }
 
@@ -539,6 +551,32 @@ class soapWrapperTest extends TestCase
             $this->rEcomPipeP
         );
         $wrapper->getPaymentMethods();
+    }
+
+    /**
+     * @test
+     * @throws ExceptionHandler
+     */
+    public function setSoapTimeoutShortFloat()
+    {
+        //static::expectException(ExceptionHandler::class);
+        $wrapper = new SoapClientWrapper($this->wsdl);
+        $wrapper->setTimeout(12, true);
+        $wrapper->setAuthentication(
+            $this->rEcomPipeU,
+            $this->rEcomPipeP
+        );
+        try {
+            $wrapper->getPaymentMethods();
+        } catch (ExceptionHandler $e) {
+            static::assertTrue(
+                $e->getCode() === Constants::LIB_NETCURL_SOAP_TIMEOUT
+            );
+            return;
+        }
+        static::markTestIncomplete(
+            'Test is only here assure some kind of timeout control. This failed, so we can continue in calm.'
+        );
     }
 
     /**

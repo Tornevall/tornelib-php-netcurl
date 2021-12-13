@@ -336,12 +336,17 @@ class soapWrapperTest extends TestCase
             // For older PHP versions this renders a very noisy fatal.
             (new SoapClientWrapper($this->no_wsdl))
                 ->setWsdlCache(WSDL_CACHE_DISK)
+                ->setTimeout(5)
                 ->setAuthentication(
                     $this->rEcomPipeU,
                     $this->rEcomPipeP
                 )->getPaymentMethods();
         } catch (ExceptionHandler $e) {
-            static::assertSame($e->getCode(), 500);
+            if ($e->getCode() !== Constants::LIB_NETCURL_SOAP_TIMEOUT) {
+                static::assertSame($e->getCode(), 500);
+                return;
+            }
+            static::markTestIncomplete('Test server timed out. Test skipped.');
         }
     }
 
@@ -559,13 +564,13 @@ class soapWrapperTest extends TestCase
             $wrapper->getPaymentMethods();
         } catch (ExceptionHandler $e) {
             static::assertTrue(
-                $e->getCode() === Constants::LIB_NETCURL_SOAP_POSSIBLE_TIMEOUT
+                $e->getCode() === Constants::LIB_NETCURL_SOAP_TIMEOUT
             );
             echo $e->getCode() . "\n";
             echo $e->getMessage() . "\n";
             return;
         }
-        static::markTestSkipped(
+        static::markTestIncomplete(
             'Test is only here assure some kind of timeout control. This failed, so we can continue in calm.'
         );
     }

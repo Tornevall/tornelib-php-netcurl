@@ -727,7 +727,7 @@ class SoapClientWrapper implements WrapperInterface
                     if ($soapClientRequestTimeDiff >= $currentTimeout['CONNECT'] &&
                         $soapClientRequestTimeDiff >= $currentTimeout['REQUEST']
                     ) {
-                        $code = Constants::LIB_NETCURL_SOAP_POSSIBLE_TIMEOUT;
+                        $code = Constants::LIB_NETCURL_SOAP_TIMEOUT;
                         $message .= sprintf(' [soapClientRequestTime: %s]', $this->getTotalRequestTime());
                     }
                 }

@@ -407,8 +407,10 @@ class CurlWrapper implements WrapperInterface
     private function setCurlSslValues($curlHandle)
     {
         $curlSslOptions = $this->CONFIG->getOptions();
-        $verifyHost = $curlSslOptions[WrapperCurlOpt::NETCURL_CURLOPT_SSL_VERIFYHOST];
-        $verifyPeer = $curlSslOptions[WrapperCurlOpt::NETCURL_CURLOPT_SSL_VERIFYPEER];
+        $verifyHost = isset($curlSslOptions[WrapperCurlOpt::NETCURL_CURLOPT_SSL_VERIFYHOST]) ?
+            $curlSslOptions[WrapperCurlOpt::NETCURL_CURLOPT_SSL_VERIFYHOST] : 2;
+        $verifyPeer = isset($curlSslOptions[WrapperCurlOpt::NETCURL_CURLOPT_SSL_VERIFYPEER]) ?
+            $curlSslOptions[WrapperCurlOpt::NETCURL_CURLOPT_SSL_VERIFYPEER] : 1;
 
         // PHP older than 5.4.11 prefers 1 as value. Higher versions prefers 2.
         // However, we no longer support PHP 5.x here.

@@ -509,6 +509,10 @@ class SimpleStreamWrapper implements WrapperInterface
             $name = $compatibilityMethods[$name];
             $return = call_user_func_array([$this, $name], $arguments);
         } elseif (method_exists($this->CONFIG, $name)) {
+            /**
+             * Makeing sure setSsl and other configuration is callable from the StreamWrapper.
+             * @since 6.1.5
+             */
             $return = call_user_func_array(
                 [
                     $this->CONFIG,

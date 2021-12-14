@@ -10,7 +10,6 @@ use TorneLIB\Model\Type\DataType;
 use TorneLIB\Model\Type\RequestMethod;
 use TorneLIB\Module\Config\WrapperConfig;
 use TorneLIB\Module\Network\NetWrapper;
-use TorneLIB\Module\Network\Wrappers\CurlWrapper;
 use TorneLIB\Module\Network\Wrappers\SimpleStreamWrapper;
 
 class simpleStreamWrapperTest extends TestCase
@@ -236,9 +235,10 @@ class simpleStreamWrapperTest extends TestCase
             'https://ipv4.netcurl.org'
         )->getParsed();
 
-        $secondParsed = $wrapper->request(
+        $secondParseRequest = $wrapper->request(
             'https://ipv4.netcurl.org/?secondRequest=1'
-        )->getParsed();
+        );
+        $secondParsed= $secondParseRequest->getParsed();
 
         static::assertTrue(
             isset($parsed->HTTP_MYHEADERISSTATIC, $secondParsed->HTTP_MYHEADERISSTATIC)
@@ -271,32 +271,27 @@ class simpleStreamWrapperTest extends TestCase
     }
 
     /**
-     * @return bool
-     * @throws ExceptionHandler
-     * @noinspection DuplicatedCode
-     * @since 6.1.1
+     * @test
      */
-    private function canProxy()
+    public function selfSignedRequest()
     {
-        $return = false;
+        // Using one of those urls to emulate SSL problems:
+        // https://dev-ssl-self.tornevall.nu
+        // https://dev-ssl-mismatch.tornevall.nu
 
-        $ipList = [
-            '212.63.208.',
-            '10.1.1.',
-        ];
-
-        $wrapperData = (new CurlWrapper())
-            ->setConfig((new WrapperConfig())->setUserAgent('ProxyTestAgent'))
-            ->request('https://ipv4.netcurl.org')->getParsed();
-        if (isset($wrapperData->ip)) {
-            foreach ($ipList as $ip) {
-                if ((bool)preg_match('/' . $ip . '/', $wrapperData->ip)) {
-                    $return = true;
-                    break;
-                }
-            }
+        $wrapper = new SimpleStreamWrapper();
+        $sslFail = false;
+        try {
+            $wrapper->request('https://dev-ssl-self.tornevall.nu');
+        } catch (ExceptionHandler $e) {
+            $sslFail = true;
         }
 
-        return $return;
+        $newSsl = $wrapper->getConfig()->getSsl()->setStrictVerification(false, false);
+        $wrapper->setSsl($newSsl);
+        $newRequest = $wrapper->request('https://dev-ssl-mismatch.tornevall.nu');
+        static::assertTrue(
+            $newRequest instanceof SimpleStreamWrapper && $sslFail
+        );
     }
 }

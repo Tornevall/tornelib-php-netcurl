@@ -211,6 +211,27 @@ class WrapperConfig
     }
 
     /**
+     * @param WrapperSSL $sslWrapper
+     * @return $this
+     * @since 6.1.5
+     */
+    public function setSsl($sslWrapper)
+    {
+        $this->SSL = $sslWrapper;
+
+        return $this;
+    }
+
+    /**
+     * @return WrapperSSL
+     * @since 6.1.5
+     */
+    public function getSsl()
+    {
+        return $this->SSL;
+    }
+
+    /**
      * Preparing curl defaults in a way we like.
      * @return $this
      * @since 6.1.0
@@ -322,6 +343,7 @@ class WrapperConfig
     {
         $this->deleteOption($replace);
         $this->setOption($key, $value);
+
         return $this;
     }
 
@@ -769,9 +791,36 @@ class WrapperConfig
      */
     public function getOptions()
     {
+        $this->getSslOptions();
         $this->setHandledUserAgent();
 
         return $this->options;
+    }
+
+    /**
+     * Change the SSL verification if the SSL Context has changed.
+     * @since 6.1.5
+     */
+    private function getSslOptions()
+    {
+        $sslContext = $this->SSL->getContext();
+        if (!$this->getSslContextState('verify_peer', $sslContext)) {
+            $this->options[$this->getOptionCurl('CURLOPT_SSL_VERIFYPEER')] = 0;
+        }
+        if (!$this->getSslContextState('verify_host', $sslContext)) {
+            $this->options[$this->getOptionCurl('CURLOPT_SSL_VERIFYHOST')] = 0;
+        }
+    }
+
+    /**
+     * @param $key
+     * @param $sslContext
+     * @return mixed|null
+     * @since 6.1.5
+     */
+    private function getSslContextState($key, $sslContext)
+    {
+        return (bool)(isset($sslContext[$key]) ? $sslContext[$key] : null);
     }
 
     /**

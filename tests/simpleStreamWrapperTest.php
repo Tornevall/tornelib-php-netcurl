@@ -10,6 +10,7 @@ use TorneLIB\Model\Type\DataType;
 use TorneLIB\Model\Type\RequestMethod;
 use TorneLIB\Module\Config\WrapperConfig;
 use TorneLIB\Module\Network\NetWrapper;
+use TorneLIB\Module\Network\Wrappers\CurlWrapper;
 use TorneLIB\Module\Network\Wrappers\SimpleStreamWrapper;
 
 class simpleStreamWrapperTest extends TestCase
@@ -238,7 +239,7 @@ class simpleStreamWrapperTest extends TestCase
         $secondParseRequest = $wrapper->request(
             'https://ipv4.netcurl.org/?secondRequest=1'
         );
-        $secondParsed= $secondParseRequest->getParsed();
+        $secondParsed = $secondParseRequest->getParsed();
 
         static::assertTrue(
             isset($parsed->HTTP_MYHEADERISSTATIC, $secondParsed->HTTP_MYHEADERISSTATIC)
@@ -268,6 +269,37 @@ class simpleStreamWrapperTest extends TestCase
                 $response->ip === '212.63.208.8'
             )
         );
+    }
+
+    /**
+     * Required by streamProxy() to find out if proxy testing can be performed.
+     * Do not remove.
+     *
+     * @return bool
+     * @throws ExceptionHandler
+     */
+    private function canProxy()
+    {
+        $return = false;
+
+        $ipList = [
+            '212.63.208.',
+            '10.1.1.',
+        ];
+
+        $wrapperData = (new CurlWrapper())
+            ->setConfig((new WrapperConfig())->setUserAgent('ProxyTestAgent'))
+            ->request('https://ipv4.netcurl.org')->getParsed();
+        if (isset($wrapperData->ip)) {
+            foreach ($ipList as $ip) {
+                if (preg_match('/' . $ip . '/', $wrapperData->ip)) {
+                    $return = true;
+                    break;
+                }
+            }
+        }
+
+        return $return;
     }
 
     /**

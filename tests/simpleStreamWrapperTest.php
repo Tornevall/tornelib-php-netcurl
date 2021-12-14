@@ -236,9 +236,10 @@ class simpleStreamWrapperTest extends TestCase
             'https://ipv4.netcurl.org'
         )->getParsed();
 
-        $secondParsed = $wrapper->request(
+        $secondParseRequest = $wrapper->request(
             'https://ipv4.netcurl.org/?secondRequest=1'
-        )->getParsed();
+        );
+        $secondParsed = $secondParseRequest->getParsed();
 
         static::assertTrue(
             isset($parsed->HTTP_MYHEADERISSTATIC, $secondParsed->HTTP_MYHEADERISSTATIC)
@@ -271,10 +272,11 @@ class simpleStreamWrapperTest extends TestCase
     }
 
     /**
+     * Required by streamProxy() to find out if proxy testing can be performed.
+     * Do not remove.
+     *
      * @return bool
      * @throws ExceptionHandler
-     * @noinspection DuplicatedCode
-     * @since 6.1.1
      */
     private function canProxy()
     {
@@ -290,7 +292,7 @@ class simpleStreamWrapperTest extends TestCase
             ->request('https://ipv4.netcurl.org')->getParsed();
         if (isset($wrapperData->ip)) {
             foreach ($ipList as $ip) {
-                if ((bool)preg_match('/' . $ip . '/', $wrapperData->ip)) {
+                if (preg_match('/' . $ip . '/', $wrapperData->ip)) {
                     $return = true;
                     break;
                 }
@@ -298,5 +300,30 @@ class simpleStreamWrapperTest extends TestCase
         }
 
         return $return;
+    }
+
+    /**
+     * @test
+     */
+    public function selfSignedRequest()
+    {
+        // Using one of those urls to emulate SSL problems:
+        // https://dev-ssl-self.tornevall.nu
+        // https://dev-ssl-mismatch.tornevall.nu
+
+        $wrapper = new SimpleStreamWrapper();
+        $sslFail = false;
+        try {
+            $wrapper->request('https://dev-ssl-self.tornevall.nu');
+        } catch (ExceptionHandler $e) {
+            $sslFail = true;
+        }
+
+        $newSsl = $wrapper->getConfig()->getSsl()->setStrictVerification(false, false);
+        $wrapper->setSsl($newSsl);
+        $newRequest = $wrapper->request('https://dev-ssl-mismatch.tornevall.nu');
+        static::assertTrue(
+            $newRequest instanceof SimpleStreamWrapper && $sslFail
+        );
     }
 }

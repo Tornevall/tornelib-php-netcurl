@@ -302,4 +302,30 @@ class netWrapperTest extends TestCase
 
         return $return;
     }
+
+    /**
+     * @test
+     * @throws ExceptionHandler
+     * @since 6.1.5
+     */
+    public function selfSignedRequest()
+    {
+        // Using one of those urls to emulate SSL problems:
+        // https://dev-ssl-self.tornevall.nu
+        // https://dev-ssl-mismatch.tornevall.nu
+        $wrapper = new NetWrapper();
+        $sslFail = false;
+        try {
+            $failRequest = $wrapper->request('https://dev-ssl-mismatch.tornevall.nu');
+        } catch (ExceptionHandler $e) {
+            $sslFail = true;
+        }
+
+        $newSsl = $wrapper->getConfig()->getSsl()->setStrictVerification(false, false);
+        $wrapper->setSsl($newSsl);
+        $newRequest = $wrapper->request('https://dev-ssl-mismatch.tornevall.nu');
+        static::assertTrue(
+            $newRequest instanceof CurlWrapper && $sslFail
+        );
+    }
 }

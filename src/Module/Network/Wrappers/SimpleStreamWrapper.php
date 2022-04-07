@@ -449,13 +449,13 @@ class SimpleStreamWrapper implements WrapperInterface
     public function getStreamDataContents()
     {
         $this->setStreamErrorHandler();
+        $this->streamClientTimeBegin = microtime(true);
+
         // When requests are failing, this MAY throw warnings.
         // Usually we don't want this method to do this, on for example 404
         // errors, etc as we have our own exception handler below, which does
         // this in a correct way.
         try {
-            $this->streamClientTimeBegin = microtime(true);
-
             $this->streamContentResponseRaw = file_get_contents(
                 $this->CONFIG->getRequestUrl(),
                 false,
@@ -483,6 +483,9 @@ class SimpleStreamWrapper implements WrapperInterface
             }
             throw $e;
         }
+        // Also calculate success requests.
+        $this->streamClientTimeEnd = microtime(true);
+
         // Restore the errorhandler immediately after request if no exceptions are detected during first request.
         restore_error_handler();
 

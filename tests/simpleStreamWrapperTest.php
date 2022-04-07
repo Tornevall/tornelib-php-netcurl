@@ -5,6 +5,7 @@
 require_once(__DIR__ . '/../vendor/autoload.php');
 
 use PHPUnit\Framework\TestCase;
+use TorneLIB\Exception\Constants;
 use TorneLIB\Exception\ExceptionHandler;
 use TorneLIB\Model\Type\DataType;
 use TorneLIB\Model\Type\RequestMethod;
@@ -300,6 +301,35 @@ class simpleStreamWrapperTest extends TestCase
         }
 
         return $return;
+    }
+
+    /**
+     * Test used for both timeouts and refusals.
+     * @test
+     */
+    public function stdRequest() {
+        $streamWrapper = new SimpleStreamWrapper();
+        try {
+            //$streamWrapper->setTimeout(3);
+            $streamWrapper->request('https://test.resurs.com');
+        } catch (Exception $e) {
+            if ($e->getCode() === Constants::LIB_NETCURL_TIMEOUT ||
+                $e->getCode() === Constants::LIB_NETCURL_CONNECTION_REFUSED
+            ) {
+                static::assertTrue(
+                    $e->getCode() === Constants::LIB_NETCURL_CONNECTION_REFUSED ||
+                    $e->getCode() === Constants::LIB_NETCURL_TIMEOUT
+                );
+                return;
+            }
+
+            static::markTestSkipped('Exception is accepted due to the request. Skipped.');
+            return;
+        }
+
+        // Ignore above if it works. Used for testing LIB_NETCURL_CONNECTION_REFUSED, but for curl.
+        // For curl, we get this in a natural way.
+        static::assertTrue(true);
     }
 
     /**

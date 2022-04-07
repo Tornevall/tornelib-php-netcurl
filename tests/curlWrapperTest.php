@@ -794,6 +794,23 @@ class curlWrapperTest extends TestCase
 
     /**
      * @test
+     */
+    public function stdRequest() {
+        $curlWrapper = new CurlWrapper();
+        try {
+            $curlWrapper->request('https://test.resurs.com');
+        } catch (Exception $e) {
+            static::assertTrue($e->getCode() === CURLE_COULDNT_CONNECT);
+            return;
+        }
+
+        // Ignore above if it works. Used for testing LIB_NETCURL_CONNECTION_REFUSED, but for curl.
+        // For curl, we get this in a natural way.
+        static::assertTrue(true);
+    }
+
+    /**
+     * @test
      * @throws ExceptionHandler
      */
     public function setSigStandard()

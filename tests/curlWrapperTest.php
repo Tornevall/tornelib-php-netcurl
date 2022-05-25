@@ -437,22 +437,6 @@ class curlWrapperTest extends TestCase
 
     /**
      * @test
-     * @throws ExceptionHandler
-     * @since 6.1.2
-     */
-    public function getParsedResponse()
-    {
-        static::expectException(ExceptionHandler::class);
-
-        $curlWrapperRequest = new CurlWrapper();
-        $curlWrapperRequest->request('https://ipv4.netcurl.org');
-        /** @noinspection ForgottenDebugOutputInspection */
-        $p = $curlWrapperRequest->getParsedResponse();
-        static::assertTrue(isset($p->ip));
-    }
-
-    /**
-     * @test
      * Ask for multiple urls.
      * @throws ExceptionHandler
      * @since 6.1.0

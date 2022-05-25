@@ -384,11 +384,6 @@ class NetWrapper implements WrapperInterface
      */
     public function __call($name, $arguments)
     {
-        $compatibilityMethods = $this->CONFIG->getCompatibilityMethods();
-        if (isset($compatibilityMethods[$name])) {
-            $name = $compatibilityMethods[$name];
-        }
-
         if ($name === 'setAuth') {
             // Abbreviation for setAuthentication.
             return call_user_func_array([$this, 'setAuthentication'], $arguments);

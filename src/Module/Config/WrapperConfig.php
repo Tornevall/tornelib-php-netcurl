@@ -534,23 +534,6 @@ class WrapperConfig
     }
 
     /**
-     * Returns compatibility functions from for example NetCurl 6.0.
-     * @return array
-     * @since 6.1.2
-     * @noinspection PhpFullyQualifiedNameUsageInspection
-     */
-    public function getCompatibilityMethods()
-    {
-        $return = [];
-        if (class_exists('\TorneLIB\Compatibility\NetCurl\Methods')) {
-            /** @noinspection PhpUndefinedClassInspection */
-            $return = \TorneLIB\Compatibility\NetCurl\Methods::getCompatibilityMethods();
-        }
-
-        return $return;
-    }
-
-    /**
      * Throw on any code that matches the store throwableHttpCode (use with setThrowableHttpCodes())
      *
      * @param string $httpMessageString

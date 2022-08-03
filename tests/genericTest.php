@@ -102,9 +102,8 @@ class genericTest extends TestCase
             (new NetWrapper())->getVersion()
         );
 
-        static::assertCount(
-            0,
-            $info
+        static::assertTrue(
+            count($info) > 0
         );
     }
 

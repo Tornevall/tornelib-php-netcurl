@@ -626,7 +626,8 @@ class CurlWrapper implements WrapperInterface
         }
 
         foreach ($this->customPreHeaders as $headerKey => $headerValue) {
-            $testHead = explode(":", $headerValue, 2);
+            //$testHead = explode(":", $headerValue, 2);
+            $testHead = is_string($headerValue) ? explode(":", $headerValue, 2) : $headerValue;
             if (isset($testHead[1])) {
                 $this->customHeaders[] = $headerValue;
             } elseif (!is_numeric($headerKey)) {

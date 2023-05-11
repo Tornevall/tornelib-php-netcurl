@@ -644,11 +644,13 @@ class WrapperConfig
      * @param null $requestData
      * @param null $requestMethod
      * @return array
+     * @throws Exception
      * @since 6.1.0
      */
     public function getRequestData($dataType = null, $requestData = null, $requestMethod = null)
     {
         if (is_null($dataType)) {
+            /** @var DataType $dataType */
             $dataType = $this->requestDataType;
         }
         if (is_null($requestData)) {

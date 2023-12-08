@@ -5,7 +5,7 @@ namespace TorneLIB;
 if (!class_exists('MODULE_CURL', NETCURL_CLASS_EXISTS_AUTOLOAD) && !class_exists('TorneLIB\MODULE_CURL',
         NETCURL_CLASS_EXISTS_AUTOLOAD)) {
     if (!defined('NETCURL_CURL_RELEASE')) {
-        define('NETCURL_CURL_RELEASE', '6.0.29');
+        define('NETCURL_CURL_RELEASE', '6.0.33');
     }
     if (!defined('NETCURL_CURL_MODIFY')) {
         define('NETCURL_CURL_MODIFY', '20231208');

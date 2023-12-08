@@ -15,3 +15,8 @@ in a near future be imported here.
 
 There's a [Mailinglist](https://lists.tornevall.net/pipermail/netcurl/) put up for everything concerning netcurl. That's also where you can find release information (for now). You can subscribe to the list [here](https://lists.tornevall.net/mailman/listinfo/netcurl).
 
+# PHP 5.3 and lower versions and some old notes
+
+Guides: https://confluence.atlassian.com/x/e8YWN for more examples.
+- apt-add-repository ppa:sergey-dryabzhinsky/php53
+- apt-add-repository ppa:sergey-dryabzhinsky/packages

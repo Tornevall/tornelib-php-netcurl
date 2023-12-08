@@ -5,10 +5,10 @@ namespace TorneLIB;
 if (!class_exists('MODULE_CURL', NETCURL_CLASS_EXISTS_AUTOLOAD) && !class_exists('TorneLIB\MODULE_CURL',
         NETCURL_CLASS_EXISTS_AUTOLOAD)) {
     if (!defined('NETCURL_CURL_RELEASE')) {
-        define('NETCURL_CURL_RELEASE', '6.0.28');
+        define('NETCURL_CURL_RELEASE', '6.0.29');
     }
     if (!defined('NETCURL_CURL_MODIFY')) {
-        define('NETCURL_CURL_MODIFY', '20200511');
+        define('NETCURL_CURL_MODIFY', '20231208');
     }
     if (!defined('NETCURL_CURL_CLIENTNAME')) {
         define('NETCURL_CURL_CLIENTNAME', 'MODULE_CURL');
@@ -2470,7 +2470,7 @@ if (!class_exists('MODULE_CURL', NETCURL_CLASS_EXISTS_AUTOLOAD) && !class_exists
          */
         public function getCode($ResponseContent = null)
         {
-            if (method_exists($ResponseContent, "getCode")) {
+            if (is_object($ResponseContent) && !is_null($ResponseContent) && method_exists($ResponseContent, "getCode")) {
                 return $ResponseContent->getCode();
             }
 

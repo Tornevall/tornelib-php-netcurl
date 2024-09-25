@@ -11,9 +11,6 @@
     "tornevall/tornelib-php-utils": "6.1.*",
     "tornevall/tornelib-php-version": "6.1.*"
   },
-  "require-dev": {
-    "phpunit/phpunit": "^10.5"
-  },
   "authors": [
     {
       "name": "Tomas Tornevall",

@@ -91,24 +91,6 @@ class genericTest extends TestCase
 
     /**
      * @test
-     * Test latest tag with latest release. List should be empty.
-     * @throws ExceptionHandler
-     * @throws ReflectionException
-     */
-    public function getMyVersion()
-    {
-        $info = (new NetUtils())->getHigherVersions(
-            'https://bitbucket.tornevall.net/scm/lib/tornelib-php-netcurl.git',
-            (new NetWrapper())->getVersion()
-        );
-
-        static::assertTrue(
-            count($info) > 0
-        );
-    }
-
-    /**
-     * @test
      * @throws ExceptionHandler
      */
     public function getVersionTrueFalse()

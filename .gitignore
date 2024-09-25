@@ -10,3 +10,5 @@ build
 .php_cs.cache
 coverage
 phpunit9
+.phpunit.cache
+phpunit.xml.bak

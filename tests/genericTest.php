@@ -109,7 +109,7 @@ class genericTest extends TestCase
     public function internalServerError()
     {
         try {
-            (new NetWrapper())->request('http://ipv4.netcurl.org/http.php?code=500&message=Det+sket+sig');
+            (new NetWrapper())->request('http://ipv4.fraudbl.org/http.php?code=500&message=Det+sket+sig');
         } catch (ExceptionHandler $e) {
             static::assertSame($e->getMessage(), 'Error 500 returned from server: "500 Det sket sig".');
         }
@@ -124,9 +124,9 @@ class genericTest extends TestCase
         try {
             (new NetWrapper())->request(
                 [
-                    'http://ipv4.netcurl.org/http.php?code=200&message=Funktionsduglig',
-                    'http://ipv4.netcurl.org/http.php?code=500&message=Kass',
-                    'http://ipv4.netcurl.org/http.php?code=201&message=Mittemellan',
+                    'http://ipv4.fraudbl.org/http.php?code=200&message=Funktionsduglig',
+                    'http://ipv4.fraudbl.org/http.php?code=500&message=Kass',
+                    'http://ipv4.fraudbl.org/http.php?code=201&message=Mittemellan',
                 ]
             );
         } catch (ExceptionHandler $e) {
@@ -138,7 +138,7 @@ class genericTest extends TestCase
         if ($extendedException !== null) {
             /** @noinspection PhpUndefinedMethodInspection */
             $properParsed = $extendedException->getParsed(
-                'http://ipv4.netcurl.org/http.php?code=200&message=Funktionsduglig'
+                'http://ipv4.fraudbl.org/http.php?code=200&message=Funktionsduglig'
             );
 
             static::assertTrue(
@@ -167,9 +167,9 @@ class genericTest extends TestCase
             ->setAllowInternalMulti(true)
             ->request(
                 [
-                    'http://ipv4.netcurl.org/http.php?code=200&message=Funktionsduglig',
-                    'http://ipv4.netcurl.org/http.php?code=500&message=Kass',
-                    'http://ipv4.netcurl.org/http.php?code=201&message=Mittemellan',
+                    'http://ipv4.fraudbl.org/http.php?code=200&message=Funktionsduglig',
+                    'http://ipv4.fraudbl.org/http.php?code=500&message=Kass',
+                    'http://ipv4.fraudbl.org/http.php?code=201&message=Mittemellan',
                 ]
             );
     }
@@ -184,10 +184,10 @@ class genericTest extends TestCase
         try {
             (new NetWrapper())->request(
                 [
-                    'http://ipv4.netcurl.org/http.php?code=200&message=Funktionsduglig',
-                    'http://ipv4.netcurl.org/http.php?code=500&message=Kass',
-                    'http://ipv4.netcurl.org/http.php?code=500&message=Trasig',
-                    'http://ipv4.netcurl.org/http.php?code=201&message=Mittemellan',
+                    'http://ipv4.fraudbl.org/http.php?code=200&message=Funktionsduglig',
+                    'http://ipv4.fraudbl.org/http.php?code=500&message=Kass',
+                    'http://ipv4.fraudbl.org/http.php?code=500&message=Trasig',
+                    'http://ipv4.fraudbl.org/http.php?code=201&message=Mittemellan',
                 ]
             );
         } catch (ExceptionHandler $e) {
@@ -200,7 +200,7 @@ class genericTest extends TestCase
         if ($extendedException !== null) {
             /** @noinspection PhpUndefinedMethodInspection */
             $properParsed = $extendedException->getParsed(
-                'http://ipv4.netcurl.org/http.php?code=200&message=Funktionsduglig'
+                'http://ipv4.fraudbl.org/http.php?code=200&message=Funktionsduglig'
             );
 
             static::assertTrue(
@@ -228,8 +228,8 @@ class genericTest extends TestCase
         try {
             (new NetWrapper())->setCurlMultiInstantException()->request(
                 [
-                    'http://ipv4.netcurl.org/http.php?code=500&message=Kass',
-                    'http://ipv4.netcurl.org/http.php?code=200&message=Funktionsduglig',
+                    'http://ipv4.fraudbl.org/http.php?code=500&message=Kass',
+                    'http://ipv4.fraudbl.org/http.php?code=200&message=Funktionsduglig',
                 ]
             );
         } catch (ExceptionHandler $e) {
@@ -242,7 +242,7 @@ class genericTest extends TestCase
         if ($extendedException !== null) {
             /** @noinspection PhpUndefinedMethodInspection */
             $properParsed = $extendedException->getParsed(
-                'http://ipv4.netcurl.org/http.php?code=200&message=Funktionsduglig'
+                'http://ipv4.fraudbl.org/http.php?code=200&message=Funktionsduglig'
             );
 
             static::assertTrue(
@@ -283,7 +283,7 @@ class genericTest extends TestCase
         $code = 0;
         $wrapper = new NetWrapper();
         try {
-            $wrapper->request('http://ipv4.netcurl.org/http.php?code=404&message=Error404+Generated');
+            $wrapper->request('http://ipv4.fraudbl.org/http.php?code=404&message=Error404+Generated');
         } catch (ExceptionHandler $e) {
             $code = $e->getCode();
         }

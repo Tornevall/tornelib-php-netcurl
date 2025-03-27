@@ -42,7 +42,7 @@ class netWrapperTest extends TestCase
     {
         $wrapper = (new NetWrapper())
             ->setConfig($this->setTestAgent())
-            ->request(sprintf('https://ipv4.netcurl.org/?func=%s', __FUNCTION__));
+            ->request(sprintf('https://ipv4.fraudbl.org/?func=%s', __FUNCTION__));
 
         $parsed = $wrapper->getParsed();
 
@@ -68,7 +68,7 @@ class netWrapperTest extends TestCase
     public function extremelyBasic()
     {
         $wrapper = new NetWrapper();
-        $wrapper->request(sprintf('https://ipv4.netcurl.org/'));
+        $wrapper->request(sprintf('https://ipv4.fraudbl.org/'));
         $parsed = $wrapper->getParsed();
         static::assertNotEmpty(filter_var($parsed->ip, FILTER_VALIDATE_IP));
     }
@@ -79,7 +79,7 @@ class netWrapperTest extends TestCase
     public function extremelyBasicOneLiner()
     {
         try {
-            $parsed = (new NetWrapper())->request(sprintf('https://ipv4.netcurl.org/'))->getParsed();
+            $parsed = (new NetWrapper())->request(sprintf('https://ipv4.fraudbl.org/'))->getParsed();
             static::assertNotEmpty(filter_var($parsed->ip, FILTER_VALIDATE_IP));
         } catch (Exception $e) {
             static::markTestSkipped(
@@ -101,7 +101,7 @@ class netWrapperTest extends TestCase
     {
         WrapperConfig::setSignature('Korven skriker.');
         $wrapper = (new NetWrapper())
-            ->request(sprintf('https://ipv4.netcurl.org/?func=%s', __FUNCTION__));
+            ->request(sprintf('https://ipv4.fraudbl.org/?func=%s', __FUNCTION__));
         $parsed = $wrapper->getParsed();
         WrapperConfig::deleteSignature();
 
@@ -117,7 +117,7 @@ class netWrapperTest extends TestCase
         static::expectException(ExceptionHandler::class);
 
         $netWrapperRequest = new NetWrapper();
-        $netWrapperRequest->request('https://ipv4.netcurl.org');
+        $netWrapperRequest->request('https://ipv4.fraudbl.org');
         $p = $netWrapperRequest->getParsedResponse();
         /** @noinspection ForgottenDebugOutputInspection */
         static::assertTrue(isset($p->ip));
@@ -177,11 +177,11 @@ class netWrapperTest extends TestCase
         $wrapper = new NetWrapper();
         $wrapper->setHeader('myHeaderIsStatic', true, true);
         $parsed = $wrapper->request(
-            'https://ipv4.netcurl.org'
+            'https://ipv4.fraudbl.org'
         )->getParsed();
 
         $secondParsed = $wrapper->request(
-            'https://ipv4.netcurl.org/?secondRequest=1'
+            'https://ipv4.fraudbl.org/?secondRequest=1'
         )->getParsed();
 
         static::assertTrue(
@@ -202,7 +202,7 @@ class netWrapperTest extends TestCase
         ];
         WrapperConfig::setSignature($uAgent);
         try {
-            $parseRequest = (new NetWrapper())->request('https://ipv4.netcurl.org')->getParsed();
+            $parseRequest = (new NetWrapper())->request('https://ipv4.fraudbl.org')->getParsed();
             WrapperConfig::deleteSignature();
             static::assertEquals($theName, $parseRequest->HTTP_USER_AGENT);
         } catch (Exception $e) {
@@ -248,7 +248,7 @@ class netWrapperTest extends TestCase
         static::expectException(ExceptionHandler::class);
         $netWrapper = new NetWrapper();
         $netWrapper->setTimeout(1, true);
-        $netWrapper->request('https://ipv4.netcurl.org');
+        $netWrapper->request('https://ipv4.fraudbl.org');
     }
 
     /**
@@ -290,7 +290,7 @@ class netWrapperTest extends TestCase
 
         $wrapperData = (new CurlWrapper())
             ->setConfig((new WrapperConfig())->setUserAgent('ProxyTestAgent'))
-            ->request('https://ipv4.netcurl.org')->getParsed();
+            ->request('https://ipv4.fraudbl.org')->getParsed();
         if (isset($wrapperData->ip)) {
             foreach ($ipList as $ip) {
                 if ((bool)preg_match('/' . $ip . '/', $wrapperData->ip)) {

@@ -12,3 +12,4 @@ coverage
 phpunit9
 .phpunit.cache
 phpunit.xml.bak
+composer.phar

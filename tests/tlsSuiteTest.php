@@ -42,7 +42,7 @@ class tlsSuiteTest extends TestCase
                 )
                     ->request(
                         sprintf(
-                            'https://ipv4.netcurl.org/?func=%s',
+                            'https://ipv4.fraudbl.org/?func=%s',
                             __FUNCTION__
                         )
                     )->getParsed();

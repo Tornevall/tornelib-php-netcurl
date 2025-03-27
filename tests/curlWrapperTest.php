@@ -39,7 +39,7 @@ class curlWrapperTest extends TestCase
     {
         try {
             $curlWrapperArgs = new CurlWrapper(
-                'https://ipv4.netcurl.org',
+                'https://ipv4.fraudbl.org',
                 [],
                 RequestMethod::GET,
                 [
@@ -140,8 +140,8 @@ class curlWrapperTest extends TestCase
     public function basicMultiGet()
     {
         $wrapper = (new CurlWrapper())->setConfig($this->setTestAgent())->request([
-            sprintf('https://ipv4.netcurl.org/ip.php?func=%s', __FUNCTION__),
-            sprintf('https://ipv4.netcurl.org/?func=%s', __FUNCTION__),
+            sprintf('https://ipv4.fraudbl.org/ip.php?func=%s', __FUNCTION__),
+            sprintf('https://ipv4.fraudbl.org/?func=%s', __FUNCTION__),
         ]);
 
         /** @noinspection PhpUnitTestsInspection */
@@ -171,7 +171,7 @@ class curlWrapperTest extends TestCase
         // First request: Custom duplicate request (configurable arrays have higher priority in test).
         $wrapperFirst = (new CurlWrapper())->request([
             [
-                'url' => 'https://ipv4.netcurl.org/',
+                'url' => 'https://ipv4.fraudbl.org/',
                 'requestMethod' => RequestMethod::POST,
                 'dataType' => DataType::NORMAL,
                 'data' => [
@@ -188,7 +188,7 @@ class curlWrapperTest extends TestCase
                 ],
             ],
             [
-                'url' => 'https://ipv4.netcurl.org/',
+                'url' => 'https://ipv4.fraudbl.org/',
                 'requestMethod' => RequestMethod::POST,
                 'dataType' => DataType::NORMAL,
                 'data' => [
@@ -199,7 +199,7 @@ class curlWrapperTest extends TestCase
                 ],
             ],
             [
-                'url' => 'https://ipv4.netcurl.org/',
+                'url' => 'https://ipv4.fraudbl.org/',
                 'requestMethod' => RequestMethod::GET,
                 'data' => [
                     'dataRequestMethod' => 'THIRD',
@@ -209,8 +209,8 @@ class curlWrapperTest extends TestCase
 
         // Second request: Single URL request. No extra data.
         $wrapperSecond = (new CurlWrapper())->request([
-            'https://ipv4.netcurl.org/',
-            'https://ipv4.netcurl.org/',
+            'https://ipv4.fraudbl.org/',
+            'https://ipv4.fraudbl.org/',
         ]);
 
         $bodies = [];
@@ -245,7 +245,7 @@ class curlWrapperTest extends TestCase
     public function curlWrapperConstructor()
     {
         $curlRequest = (new CurlWrapper(
-            sprintf('https://ipv4.netcurl.org/?func=%s', __FUNCTION__),
+            sprintf('https://ipv4.fraudbl.org/?func=%s', __FUNCTION__),
             [],
             RequestMethod::GET,
             [
@@ -271,7 +271,7 @@ class curlWrapperTest extends TestCase
     {
         $wrapper = (new CurlWrapper())
             ->setConfig($this->setTestAgent())
-            ->request(sprintf('https://ipv4.netcurl.org/?func=%s', __FUNCTION__));
+            ->request(sprintf('https://ipv4.fraudbl.org/?func=%s', __FUNCTION__));
 
         $parsed = $wrapper->getParsed();
 
@@ -290,7 +290,7 @@ class curlWrapperTest extends TestCase
     {
         $data = (new CurlWrapper())
             ->setConfig($this->setTestAgent())
-            ->request(sprintf('https://ipv4.netcurl.org/?func=%s', __FUNCTION__));
+            ->request(sprintf('https://ipv4.fraudbl.org/?func=%s', __FUNCTION__));
 
         $contentType = $data->getHeader('content-type');
 
@@ -334,7 +334,7 @@ class curlWrapperTest extends TestCase
         $data = $curlWrapper
             ->setConfig($this->setTestAgent())
             ->request(
-                sprintf('https://ipv4.netcurl.org/?func=%s', __FUNCTION__),
+                sprintf('https://ipv4.fraudbl.org/?func=%s', __FUNCTION__),
                 ['hello' => 'world'],
                 RequestMethod::POST
             )
@@ -377,7 +377,7 @@ class curlWrapperTest extends TestCase
         $data = (new CurlWrapper())
             ->setConfig($this->setTestAgent())
             ->request(
-                sprintf('https://ipv4.netcurl.org/?func=%s', __FUNCTION__),
+                sprintf('https://ipv4.fraudbl.org/?func=%s', __FUNCTION__),
                 ['hello' => 'world'],
                 RequestMethod::GET
             )
@@ -398,7 +398,7 @@ class curlWrapperTest extends TestCase
         $data = $curlWrapper
             ->setConfig($this->setTestAgent())
             ->request(
-                sprintf('https://ipv4.netcurl.org/?func=%s', __FUNCTION__),
+                sprintf('https://ipv4.fraudbl.org/?func=%s', __FUNCTION__),
                 ['hello' => 'world'],
                 RequestMethod::POST
             )
@@ -425,7 +425,7 @@ class curlWrapperTest extends TestCase
             $curlWrapper
                 ->setConfig((new WrapperConfig())->setOptions([CURLOPT_USERAGENT => 'ExternalClientName']))
                 ->request(
-                    sprintf('https://ipv4.netcurl.org/?func=%s', __FUNCTION__)
+                    sprintf('https://ipv4.fraudbl.org/?func=%s', __FUNCTION__)
                 );
 
         if ($this->is300($curlWrapper->getCode())) {
@@ -444,12 +444,12 @@ class curlWrapperTest extends TestCase
     public function multiGetHeader()
     {
         $firstMultiUrl = sprintf(
-            'https://ipv4.netcurl.org/?func=%s&php=%s',
+            'https://ipv4.fraudbl.org/?func=%s&php=%s',
             __FUNCTION__,
             rawurlencode(PHP_VERSION)
         );
         $secondMultiUrl = sprintf(
-            'https://ipv4.netcurl.org/ip.php?func=%s&php=%s',
+            'https://ipv4.fraudbl.org/ip.php?func=%s&php=%s',
             __FUNCTION__,
             rawurlencode(PHP_VERSION)
         );
@@ -480,7 +480,7 @@ class curlWrapperTest extends TestCase
         $wrapper = (new CurlWrapper());
         $wrapper->getConfig()->setRequestUrl(
             sprintf(
-                'https://ipv4.netcurl.org/?func=%s&php=%s',
+                'https://ipv4.fraudbl.org/?func=%s&php=%s',
                 __FUNCTION__,
                 rawurlencode(PHP_VERSION)
             )
@@ -504,7 +504,7 @@ class curlWrapperTest extends TestCase
         $wrapper->setConfig($this->setTestAgent());
         $wrapper->getConfig()->setRequestUrl(
             sprintf(
-                'https://ipv4.netcurl.org/?func=%s&php=%s',
+                'https://ipv4.fraudbl.org/?func=%s&php=%s',
                 __FUNCTION__,
                 rawurlencode(PHP_VERSION)
             )
@@ -602,11 +602,11 @@ class curlWrapperTest extends TestCase
         $wrapper = new CurlWrapper();
         $wrapper->setCurlHeader('myHeaderIsStatic', true, true);
         $parsed = $wrapper->request(
-            'https://ipv4.netcurl.org'
+            'https://ipv4.fraudbl.org'
         )->getParsed();
 
         $secondParsed = $wrapper->request(
-            'https://ipv4.netcurl.org/?secondRequest=1'
+            'https://ipv4.fraudbl.org/?secondRequest=1'
         )->getParsed();
 
         static::assertTrue(
@@ -686,7 +686,7 @@ class curlWrapperTest extends TestCase
 
         $wrapperData = (new CurlWrapper())
             ->setConfig((new WrapperConfig())->setUserAgent('ProxyTestAgent'))
-            ->request('https://ipv4.netcurl.org')->getParsed();
+            ->request('https://ipv4.fraudbl.org')->getParsed();
         if (isset($wrapperData->ip)) {
             foreach ($ipList as $ip) {
                 if ((bool)preg_match('/' . $ip . '/', $wrapperData->ip)) {
@@ -773,7 +773,7 @@ class curlWrapperTest extends TestCase
         static::expectException(ExceptionHandler::class);
         $curlWrapper = new CurlWrapper();
         $curlWrapper->setTimeout(1, true);
-        $curlWrapper->request('https://ipv4.netcurl.org');
+        $curlWrapper->request('https://ipv4.fraudbl.org');
     }
 
     /**

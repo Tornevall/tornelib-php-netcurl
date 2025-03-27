@@ -40,7 +40,7 @@ class simpleStreamWrapperTest extends TestCase
         $stream = (new NetWrapper())->setConfig(
             (new WrapperConfig())->setUserAgent('SimpleStreamWrapper')
         );
-        $response = $stream->request('http://ipv4.netcurl.org/');
+        $response = $stream->request('http://ipv4.fraudbl.org/');
 
         //$body = $response->getBody();
         $parsed = $response->getParsed();
@@ -65,7 +65,7 @@ class simpleStreamWrapperTest extends TestCase
             'hasNoEffectHere'
         );
         $response = $stream->request(
-            'http://ipv4.netcurl.org/',
+            'http://ipv4.fraudbl.org/',
             [
                 'postData' => ['var1' => 'val1'],
             ],
@@ -91,7 +91,7 @@ class simpleStreamWrapperTest extends TestCase
             'hasNoEffectHere'
         );
         $response = $stream->request(
-            'http://ipv4.netcurl.org/',
+            'http://ipv4.fraudbl.org/',
             [
                 'postData' => ['var1' => 'val1'],
             ],
@@ -118,7 +118,7 @@ class simpleStreamWrapperTest extends TestCase
             'hasNoEffectHere'
         );
         $response = $stream->request(
-            'http://ipv4.netcurl.org/',
+            'http://ipv4.fraudbl.org/',
             [
                 'postData' => ['var1' => 'val1'],
             ],
@@ -143,7 +143,7 @@ class simpleStreamWrapperTest extends TestCase
     {
         $stream = (new NetWrapper());
         $stream->setIdentifiers(true);
-        $stream->request('http://ipv4.netcurl.org/')->getParsed();
+        $stream->request('http://ipv4.fraudbl.org/')->getParsed();
         $currentWrapper = $stream->getCurrentWrapperClass(true);
 
         static::assertNotEmpty(
@@ -162,7 +162,7 @@ class simpleStreamWrapperTest extends TestCase
         $stream->setIdentifiers(true, true); // spoofable advanced
         /** @noinspection PhpUndefinedMethodInspection */
         $stream->setUserAgent('World Dominator');
-        $stream->request('http://ipv4.netcurl.org/')->getParsed();
+        $stream->request('http://ipv4.fraudbl.org/')->getParsed();
         $content = $stream->getParsed();
 
         static::assertTrue(
@@ -182,7 +182,7 @@ class simpleStreamWrapperTest extends TestCase
         static::expectException(ExceptionHandler::class);
 
         $streamWrapperRequest = new SimpleStreamWrapper();
-        $streamWrapperRequest->request('https://ipv4.netcurl.org');
+        $streamWrapperRequest->request('https://ipv4.fraudbl.org');
         $p = $streamWrapperRequest->getParsedResponse();
         /** @noinspection ForgottenDebugOutputInspection */
         static::assertTrue(isset($p->ip));
@@ -234,11 +234,11 @@ class simpleStreamWrapperTest extends TestCase
         $wrapper = new SimpleStreamWrapper();
         $wrapper->setHeader('myHeaderIsStatic', true, true);
         $parsed = $wrapper->request(
-            'https://ipv4.netcurl.org'
+            'https://ipv4.fraudbl.org'
         )->getParsed();
 
         $secondParseRequest = $wrapper->request(
-            'https://ipv4.netcurl.org/?secondRequest=1'
+            'https://ipv4.fraudbl.org/?secondRequest=1'
         );
         $secondParsed = $secondParseRequest->getParsed();
 
@@ -290,7 +290,7 @@ class simpleStreamWrapperTest extends TestCase
 
         $wrapperData = (new CurlWrapper())
             ->setConfig((new WrapperConfig())->setUserAgent('ProxyTestAgent'))
-            ->request('https://ipv4.netcurl.org')->getParsed();
+            ->request('https://ipv4.fraudbl.org')->getParsed();
         if (isset($wrapperData->ip)) {
             foreach ($ipList as $ip) {
                 if (preg_match('/' . $ip . '/', $wrapperData->ip)) {

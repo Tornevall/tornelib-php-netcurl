@@ -255,7 +255,7 @@ class netWrapperTest extends TestCase
     /**
      * @return NetWrapper
      */
-    private function testGetBasicWrapper()
+    private function getBasicWrapper()
     {
         return (new NetWrapper())->setConfig($this->setTestAgent());
     }

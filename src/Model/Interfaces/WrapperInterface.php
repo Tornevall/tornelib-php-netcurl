@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Copyright © Tomas Tornevall / Tornevall Networks. All rights reserved.
+ * Copyright © Thomas Tornevall / Tornevall Networks. All rights reserved.
  * See LICENSE.md for license details.
  */
 

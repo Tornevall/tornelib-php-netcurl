@@ -1,6 +1,7 @@
 <?php
 
 /** @noinspection PhpUndefinedMethodInspection */
+
 /** @noinspection PhpUndefinedClassInspection */
 
 use PHPUnit\Framework\TestCase;
@@ -24,10 +25,9 @@ try {
 class sslWrapperTest extends TestCase
 {
     /**
-     * @test
      * @throws Exception
      */
-    public function noSslWrappers()
+    public function testNoSslWrappers()
     {
         /** @noinspection PhpUndefinedMethodInspection */
         Flags::_setFlag('NETCURL_NOSSL_TEST');
@@ -42,19 +42,17 @@ class sslWrapperTest extends TestCase
     }
 
     /**
-     * @test
      * @throws Exception
      */
-    public function sslWrappers()
+    public function testSslWrappers()
     {
         static::assertTrue((new WrapperSSL())->getSslCapabilities());
     }
 
     /**
-     * @test
      * @throws Exception
      */
-    public function strictValidation()
+    public function testStrictValidation()
     {
         $sslAction = new WrapperSSL();
         $sslAction->setStrictVerification(false);
@@ -68,24 +66,13 @@ class sslWrapperTest extends TestCase
          *  - Set own context and validates content by keyed call to getContext()
          *  - Verify that security level changes are "logged".
          */
-        static::assertTrue(
-            !(bool)$sslAction->getContext()['verify_peer'] &&
-            !(new WrapperSSL())->getContext()['allow_self_signed'] &&
-            (new WrapperSSL())->setContext('passphrase', 'simple_phrase')->getContext()['passphrase'] &&
-            (new WrapperSSL())->setContext(
-                'passphrase',
-                'simple_phrase'
-            )->getContext('passphrase') === 'simple_phrase' &&
-            is_array($verifyPeerChange) &&
-            count($verifyPeerChange) === 1
-        );
+        static::assertTrue(!(bool)$sslAction->getContext()['verify_peer'] && !(new WrapperSSL())->getContext()['allow_self_signed'] && (new WrapperSSL())->setContext('passphrase', 'simple_phrase')->getContext()['passphrase'] && (new WrapperSSL())->setContext('passphrase', 'simple_phrase')->getContext('passphrase') === 'simple_phrase' && is_array($verifyPeerChange) && count($verifyPeerChange) === 1);
     }
 
     /**
-     * @test
      * @testdox Make sure the streamcontext are created properly.
      */
-    public function getPreparedSslContext()
+    public function testGetPreparedSslContext()
     {
         /** @noinspection PhpUnitTestsInspection */
         static::assertTrue(is_resource((new WrapperSSL())->getSslStreamContext()['stream_context']));

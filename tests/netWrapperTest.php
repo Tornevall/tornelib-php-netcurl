@@ -22,10 +22,9 @@ Flag::setFlag('strict_resource', false);
 class netWrapperTest extends TestCase
 {
     /**
-     * @test
      * Test the primary wrapper controller.
      */
-    public function majorWrapperControl()
+    public function testMajorWrapperControl()
     {
         $netWrap = new NetWrapper();
         $realWrap = WrapperDriver::getWrappers();
@@ -35,14 +34,11 @@ class netWrapperTest extends TestCase
     }
 
     /**
-     * @test
      * @throws ExceptionHandler
      */
-    public function basicGet()
+    public function testBasicGet()
     {
-        $wrapper = (new NetWrapper())
-            ->setConfig($this->setTestAgent())
-            ->request(sprintf('https://ipv4.fraudbl.org/?func=%s', __FUNCTION__));
+        $wrapper = (new NetWrapper())->setConfig($this->setTestAgent())->request(sprintf('https://ipv4.fraudbl.org/?func=%s', __FUNCTION__));
 
         $parsed = $wrapper->getParsed();
 
@@ -56,16 +52,13 @@ class netWrapperTest extends TestCase
      */
     private function setTestAgent()
     {
-        return (new WrapperConfig())->setUserAgent(
-            sprintf('netcurl-%s', NETCURL_VERSION)
-        );
+        return (new WrapperConfig())->setUserAgent(sprintf('netcurl-%s', NETCURL_VERSION));
     }
 
     /**
-     * @test
      * @throws ExceptionHandler
      */
-    public function extremelyBasic()
+    public function testExtremelyBasic()
     {
         $wrapper = new NetWrapper();
         $wrapper->request(sprintf('https://ipv4.fraudbl.org/'));
@@ -73,35 +66,23 @@ class netWrapperTest extends TestCase
         static::assertNotEmpty(filter_var($parsed->ip, FILTER_VALIDATE_IP));
     }
 
-    /**
-     * @test
-     */
-    public function extremelyBasicOneLiner()
+    public function testExtremelyBasicOneLiner()
     {
         try {
             $parsed = (new NetWrapper())->request(sprintf('https://ipv4.fraudbl.org/'))->getParsed();
             static::assertNotEmpty(filter_var($parsed->ip, FILTER_VALIDATE_IP));
         } catch (Exception $e) {
-            static::markTestSkipped(
-                sprintf(
-                    'Non critical exception in %s: %s (%s).',
-                    __FUNCTION__,
-                    $e->getMessage(),
-                    $e->getCode()
-                )
-            );
+            static::markTestSkipped(sprintf('Non critical exception in %s: %s (%s).', __FUNCTION__, $e->getMessage(), $e->getCode()));
         }
     }
 
     /**
-     * @test
      * @throws ExceptionHandler
      */
-    public function sigGet()
+    public function testSigGet()
     {
         WrapperConfig::setSignature('Korven skriker.');
-        $wrapper = (new NetWrapper())
-            ->request(sprintf('https://ipv4.fraudbl.org/?func=%s', __FUNCTION__));
+        $wrapper = (new NetWrapper())->request(sprintf('https://ipv4.fraudbl.org/?func=%s', __FUNCTION__));
         $parsed = $wrapper->getParsed();
         WrapperConfig::deleteSignature();
 
@@ -109,10 +90,9 @@ class netWrapperTest extends TestCase
     }
 
     /**
-     * @test
      * @throws ExceptionHandler
      */
-    public function getParsedResponse()
+    public function testGetParsedResponse()
     {
         static::expectException(ExceptionHandler::class);
 
@@ -123,10 +103,7 @@ class netWrapperTest extends TestCase
         static::assertTrue(isset($p->ip));
     }
 
-    /**
-     * @test
-     */
-    public function rssBasic()
+    public function testRssBasic()
     {
         try {
             if (!class_exists('Laminas\Feed\Reader\Feed\Rss')) {
@@ -140,66 +117,37 @@ class netWrapperTest extends TestCase
             // Class dependent request.
             if (is_array($rss)) {
                 // Weak assertion.
-                static::assertTrue(
-                    isset($rss[0][0]) && strlen($rss[0][0]) > 5
-                );
+                static::assertTrue(isset($rss[0][0]) && strlen($rss[0][0]) > 5);
             } else {
-                static::assertTrue(
-                    method_exists($rss, 'getTitle')
-                );
+                static::assertTrue(method_exists($rss, 'getTitle'));
             }
         } catch (Exception $e) {
-            static::markTestSkipped(
-                sprintf(
-                    'Non critical exception in %s: %s (%s).',
-                    __FUNCTION__,
-                    $e->getMessage(),
-                    $e->getCode()
-                )
-            );
+            static::markTestSkipped(sprintf('Non critical exception in %s: %s (%s).', __FUNCTION__, $e->getMessage(), $e->getCode()));
         }
     }
 
     /**
-     * @return NetWrapper
-     */
-    private function getBasicWrapper()
-    {
-        return (new NetWrapper())->setConfig($this->setTestAgent());
-    }
-
-    /**
-     * @test
      * @throws ExceptionHandler
      */
-    public function setStaticHeaders()
+    public function testSetStaticHeaders()
     {
         $wrapper = new NetWrapper();
         $wrapper->setHeader('myHeaderIsStatic', true, true);
-        $parsed = $wrapper->request(
-            'https://ipv4.fraudbl.org'
-        )->getParsed();
+        $parsed = $wrapper->request('https://ipv4.fraudbl.org')->getParsed();
 
-        $secondParsed = $wrapper->request(
-            'https://ipv4.fraudbl.org/?secondRequest=1'
-        )->getParsed();
+        $secondParsed = $wrapper->request('https://ipv4.fraudbl.org/?secondRequest=1')->getParsed();
 
-        static::assertTrue(
-            isset($parsed->HTTP_MYHEADERISSTATIC, $secondParsed->HTTP_MYHEADERISSTATIC)
-        );
+        static::assertTrue(isset($parsed->HTTP_MYHEADERISSTATIC, $secondParsed->HTTP_MYHEADERISSTATIC));
     }
 
     /**
-     * @test
      * @throws ExceptionHandler
      * @throws ReflectionException
      */
-    public function setSignature()
+    public function testSetSignature()
     {
         $theName = sprintf('NETCURL-%s', (new NetWrapper())->getVersion());
-        $uAgent = [
-            sprintf('NETCURL-%s', (new NetWrapper())->getVersion()),
-        ];
+        $uAgent = [sprintf('NETCURL-%s', (new NetWrapper())->getVersion()),];
         WrapperConfig::setSignature($uAgent);
         try {
             $parseRequest = (new NetWrapper())->request('https://ipv4.fraudbl.org')->getParsed();
@@ -207,31 +155,18 @@ class netWrapperTest extends TestCase
             static::assertEquals($theName, $parseRequest->HTTP_USER_AGENT);
         } catch (Exception $e) {
             WrapperConfig::deleteSignature();
-            static::markTestSkipped(
-                sprintf(
-                    '%s is currently not working due to server errors: %s (%d)',
-                    __FUNCTION__,
-                    $e->getMessage(),
-                    $e->getCode()
-                )
-            );
+            static::markTestSkipped(sprintf('%s is currently not working due to server errors: %s (%d)', __FUNCTION__, $e->getMessage(), $e->getCode()));
         }
     }
 
-    /**
-     * @test
-     */
-    public function wrapperDefaultMisconfiguredTimeout()
+    public function testWrapperDefaultMisconfiguredTimeout()
     {
         $netWrapper = new NetWrapper();
         $timeout = $netWrapper->getTimeout();
         static::assertTrue(isset($timeout['CONNECT']) && (int)$timeout['CONNECT'] === 5);
     }
 
-    /**
-     * @test
-     */
-    public function wrapperDefaultRealTimeout()
+    public function testWrapperDefaultRealTimeout()
     {
         $netWrapper = new NetWrapper();
         $netWrapper->setTimeout(15);
@@ -240,10 +175,9 @@ class netWrapperTest extends TestCase
     }
 
     /**
-     * @test
      * @throws ExceptionHandler
      */
-    public function wrapperDefaultZeroTimeout()
+    public function testWrapperDefaultZeroTimeout()
     {
         static::expectException(ExceptionHandler::class);
         $netWrapper = new NetWrapper();
@@ -252,10 +186,9 @@ class netWrapperTest extends TestCase
     }
 
     /**
-     * @test
      * @throws ExceptionHandler
      */
-    public function netWrapperProxy()
+    public function testNetWrapperProxy()
     {
         if (!$this->canProxy()) {
             static::markTestSkipped('Can not perform proxy tests with this client. Skipped.');
@@ -263,15 +196,9 @@ class netWrapperTest extends TestCase
         }
 
         /** @var NetWrapper $wrapper */
-        $response = $this->getBasicWrapper()
-            ->setProxy('212.63.208.8:80')
-            ->request('http://identifier.tornevall.net/?inTheProxy')
-            ->getParsed();
+        $response = $this->getBasicWrapper()->setProxy('212.63.208.8:80')->request('http://identifier.tornevall.net/?inTheProxy')->getParsed();
 
-        static::assertTrue(
-            isset($response->ip) &&
-            $response->ip === '212.63.208.8'
-        );
+        static::assertTrue(isset($response->ip) && $response->ip === '212.63.208.8');
     }
 
     /**
@@ -283,14 +210,9 @@ class netWrapperTest extends TestCase
     {
         $return = false;
 
-        $ipList = [
-            '212.63.208.',
-            '10.1.1.',
-        ];
+        $ipList = ['212.63.208.', '10.1.1.',];
 
-        $wrapperData = (new CurlWrapper())
-            ->setConfig((new WrapperConfig())->setUserAgent('ProxyTestAgent'))
-            ->request('https://ipv4.fraudbl.org')->getParsed();
+        $wrapperData = (new CurlWrapper())->setConfig((new WrapperConfig())->setUserAgent('ProxyTestAgent'))->request('https://ipv4.fraudbl.org')->getParsed();
         if (isset($wrapperData->ip)) {
             foreach ($ipList as $ip) {
                 if ((bool)preg_match('/' . $ip . '/', $wrapperData->ip)) {
@@ -304,11 +226,10 @@ class netWrapperTest extends TestCase
     }
 
     /**
-     * @test
      * @throws ExceptionHandler
      * @since 6.1.5
      */
-    public function selfSignedRequest()
+    public function testSelfSignedRequest()
     {
         // Using one of those urls to emulate SSL problems:
         // https://dev-ssl-self.tornevall.nu
@@ -325,11 +246,17 @@ class netWrapperTest extends TestCase
         $wrapper->setSsl($newSsl);
         try {
             $newRequest = $wrapper->request('https://dev-ssl-mismatch.tornevall.nu');
-            static::assertTrue(
-                $newRequest instanceof CurlWrapper && $sslFail
-            );
+            static::assertTrue($newRequest instanceof CurlWrapper && $sslFail);
         } catch (Exception $e) {
             static::markTestSkipped($e->getMessage());
         }
+    }
+
+    /**
+     * @return NetWrapper
+     */
+    private function testGetBasicWrapper()
+    {
+        return (new NetWrapper())->setConfig($this->setTestAgent());
     }
 }

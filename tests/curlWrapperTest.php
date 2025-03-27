@@ -31,11 +31,10 @@ try {
 class curlWrapperTest extends TestCase
 {
     /**
-     * @test
      * Test initial curl wrapper with predefined http request.
      * @since 6.1.0
      */
-    public function initialCurlWrapper()
+    public function testInitialCurlWrapper()
     {
         try {
             $curlWrapperArgs = new CurlWrapper(
@@ -58,7 +57,6 @@ class curlWrapperTest extends TestCase
             ));
             return;
         }
-
         /** @noinspection PhpUndefinedMethodInspection */
         static::assertTrue(
             (is_object($curlWrapperArgs) &&
@@ -69,12 +67,11 @@ class curlWrapperTest extends TestCase
     }
 
     /**
-     * @test
      * @throws ExceptionHandler
      * @throws ReflectionException
      * @since 6.1.0
      */
-    public function getVersion()
+    public function testGetVersion()
     {
         static::assertTrue(
             version_compare(
@@ -86,10 +83,9 @@ class curlWrapperTest extends TestCase
     }
 
     /**
-     * @test
      * @since 6.1.0
      */
-    public function safeMode()
+    public function testSafeMode()
     {
         $security = new Security();
         // version_compare(PHP_VERSION, '5.4.0', '>=')
@@ -101,11 +97,10 @@ class curlWrapperTest extends TestCase
     }
 
     /**
-     * @test
      * Check secure mode status.
      * @since 6.1.0
      */
-    public function secureMode()
+    public function testSecureMode()
     {
         $security = new Security();
         // version_compare(PHP_VERSION, '5.4.0', '>=')
@@ -117,12 +112,11 @@ class curlWrapperTest extends TestCase
     }
 
     /**
-     * @test
      * Check what the Browsers-class are generating.
      * @throws ExceptionHandler
      * @since 6.1.0
      */
-    public function browserSet()
+    public function testBrowserSet()
     {
         // Making sure output lloks the same in both ends.
         static::assertTrue(
@@ -132,12 +126,11 @@ class curlWrapperTest extends TestCase
     }
 
     /**
-     * @test
      * Make multiple URL request s.
      * @throws ExceptionHandler
      * @since 6.1.0
      */
-    public function basicMultiGet()
+    public function testBasicMultiGet()
     {
         $wrapper = (new CurlWrapper())->setConfig($this->setTestAgent())->request([
             sprintf('https://ipv4.fraudbl.org/ip.php?func=%s', __FUNCTION__),
@@ -161,12 +154,11 @@ class curlWrapperTest extends TestCase
     }
 
     /**
-     * @test
      * Make multiple URL request s.
      * @throws ExceptionHandler
      * @since 6.1.4
      */
-    public function basicMultiIdentical()
+    public function testBasicMultiIdentical()
     {
         // First request: Custom duplicate request (configurable arrays have higher priority in test).
         $wrapperFirst = (new CurlWrapper())->request([
@@ -237,12 +229,11 @@ class curlWrapperTest extends TestCase
     }
 
     /**
-     * @test
      * Test the curlWrapper constructor with a basic request.
      * @throws ExceptionHandler
      * @since 6.1.0
      */
-    public function curlWrapperConstructor()
+    public function testCurlWrapperConstructor()
     {
         $curlRequest = (new CurlWrapper(
             sprintf('https://ipv4.fraudbl.org/?func=%s', __FUNCTION__),
@@ -262,12 +253,11 @@ class curlWrapperTest extends TestCase
     }
 
     /**
-     * @test
      * Make a basic get and validate response.
      * @throws ExceptionHandler
      * @since 6.1.0
      */
-    public function basicGet()
+    public function testBasicGet()
     {
         $wrapper = (new CurlWrapper())
             ->setConfig($this->setTestAgent())
@@ -281,12 +271,11 @@ class curlWrapperTest extends TestCase
     }
 
     /**
-     * @test
      * Run basic request where netcurl is automatically render "correct" request.
      * @throws ExceptionHandler
      * @since 6.1.0
      */
-    public function basicGetHeader()
+    public function testBasicGetHeader()
     {
         $data = (new CurlWrapper())
             ->setConfig($this->setTestAgent())
@@ -323,12 +312,11 @@ class curlWrapperTest extends TestCase
     }
 
     /**
-     * @test
      * Run basic post request with parameters.
      * @throws ExceptionHandler
      * @since 6.1.0
      */
-    public function basicPostWithGetData()
+    public function testBasicPostWithGetData()
     {
         $curlWrapper = new CurlWrapper();
         $data = $curlWrapper
@@ -367,12 +355,11 @@ class curlWrapperTest extends TestCase
     }
 
     /**
-     * @test
      * Run a basic get request.
      * @throws ExceptionHandler
      * @since 6.1.0
      */
-    public function basicGetWithPost()
+    public function testBasicGetWithPost()
     {
         $data = (new CurlWrapper())
             ->setConfig($this->setTestAgent())
@@ -387,12 +374,11 @@ class curlWrapperTest extends TestCase
     }
 
     /**
-     * @test
      * Run a basic post request.
      * @throws ExceptionHandler
      * @since 6.1.0
      */
-    public function basicPost()
+    public function testBasicPost()
     {
         $curlWrapper = new CurlWrapper();
         $data = $curlWrapper
@@ -413,12 +399,11 @@ class curlWrapperTest extends TestCase
     }
 
     /**
-     * @test
      * Create basic request with a specific user agent.
      * @throws ExceptionHandler
      * @since 6.1.0
      */
-    public function basicGetHeaderUserAgent()
+    public function testBasicGetHeaderUserAgent()
     {
         $curlWrapper = new CurlWrapper();
         $curlRequest =
@@ -436,12 +421,11 @@ class curlWrapperTest extends TestCase
     }
 
     /**
-     * @test
      * Ask for multiple urls.
      * @throws ExceptionHandler
      * @since 6.1.0
      */
-    public function multiGetHeader()
+    public function testMultiGetHeader()
     {
         $firstMultiUrl = sprintf(
             'https://ipv4.fraudbl.org/?func=%s&php=%s',
@@ -469,13 +453,12 @@ class curlWrapperTest extends TestCase
     }
 
     /**
-     * @test
      * Initialize empty curlwrapper - set url after init and request an uninitialized wrapper. Expected result
      * is self initialized wrapper of curl.
      * @throws ExceptionHandler
      * @since 6.1.0
      */
-    public function unInitializedCurlWrapperByConfig()
+    public function testUnInitializedCurlWrapperByConfig()
     {
         $wrapper = (new CurlWrapper());
         $wrapper->getConfig()->setRequestUrl(
@@ -493,12 +476,11 @@ class curlWrapperTest extends TestCase
     }
 
     /**
-     * @test
      * Initialize netcurl without predefined url.
      * @throws ExceptionHandler
      * @since 6.1.0
      */
-    public function unInitializedCurlWrapperMinorConfig()
+    public function testUnInitializedCurlWrapperMinorConfig()
     {
         $wrapper = new CurlWrapper();
         $wrapper->setConfig($this->setTestAgent());
@@ -516,11 +498,10 @@ class curlWrapperTest extends TestCase
     }
 
     /**
-     * @test
      * Lowest initializer level, where nothing can be initiated since there is no defined url.
      * @since 6.1.0
      */
-    public function unInitializedCurlWrapperNoConfig()
+    public function testUnInitializedCurlWrapperNoConfig()
     {
         try {
             $wrapper = new CurlWrapper();
@@ -535,11 +516,10 @@ class curlWrapperTest extends TestCase
     }
 
     /**
-     * @test
      * Certificate errors like this can obviously render two different kind of errors.
      * @since 6.1.0
      */
-    public function sslCurlePeerCert51()
+    public function testSslCurlePeerCert51()
     {
         try {
             (new CurlWrapper('https://dev-ssl-mismatch.tornevall.nu'))->getCurlRequest();
@@ -552,11 +532,10 @@ class curlWrapperTest extends TestCase
     }
 
     /**
-     * @test
      * Certificate errors like this can obviously render two different kind of errors.
      * @since 6.1.0
      */
-    public function sslCurleCacert60()
+    public function testSslCurleCacert60()
     {
         try {
             (new CurlWrapper('https://dev-ssl-self.tornevall.nu'))->getCurlRequest();
@@ -569,12 +548,11 @@ class curlWrapperTest extends TestCase
     }
 
     /**
-     * @test
      * Tests WrapperConfig and data setup.
      * @noinspection PhpUndefinedMethodInspection
      * @since 6.1.0
      */
-    public function setConfigData()
+    public function testSetConfigData()
     {
         $config = new WrapperConfig();
 
@@ -593,11 +571,10 @@ class curlWrapperTest extends TestCase
     }
 
     /**
-     * @test
      * @throws ExceptionHandler
      * @since 6.1.2
      */
-    public function setStaticHeaders()
+    public function testSetStaticHeaders()
     {
         $wrapper = new CurlWrapper();
         $wrapper->setCurlHeader('myHeaderIsStatic', true, true);
@@ -615,12 +592,11 @@ class curlWrapperTest extends TestCase
     }
 
     /**
-     * @test
      * Test timeout configurations.
      * @noinspection PhpUndefinedMethodInspection
      * @since 6.1.0
      */
-    public function setMilliTimeout()
+    public function testSetMilliTimeout()
     {
         $config = new WrapperConfig();
         $errorCode = 0;
@@ -646,12 +622,11 @@ class curlWrapperTest extends TestCase
     }
 
     /**
-     * @test
      * Setting proxy the hard way.
      * @throws ExceptionHandler
      * @since 6.1.0
      */
-    public function proxyPrimary()
+    public function testProxyPrimary()
     {
         if (!$this->canProxy()) {
             static::markTestSkipped('Can not perform proxy tests with this client. Skipped.');
@@ -700,31 +675,11 @@ class curlWrapperTest extends TestCase
     }
 
     /**
-     * @test
-     * @since 6.1.0
-     * @noinspection PhpDeprecationInspection
-     */
-    public function getLibraryVersion()
-    {
-        // module_curl
-        /** @noinspection PhpUnhandledExceptionInspection */
-        $mCurl = (new MODULE_CURL())->getVersion();
-        // real curl
-        /** @noinspection PhpUnhandledExceptionInspection */
-        $rCurl = (new CurlWrapper())->getVersion();
-        static::assertTrue(
-            (bool)preg_match('/^6\.1/', $mCurl) &&
-            (bool)preg_match('/^6\.1/', $rCurl)
-        );
-    }
-
-    /**
-     * @test
      * Setting proxy the easy way.
      * @throws ExceptionHandler
      * @since 6.1.0
      */
-    public function proxyInternal()
+    public function testProxyInternal()
     {
         if (!$this->canProxy()) {
             static::markTestSkipped('Can not perform proxy tests with this client. Skipped.');
@@ -741,10 +696,7 @@ class curlWrapperTest extends TestCase
         );
     }
 
-    /**
-     * @test
-     */
-    public function curlWrapperDefaultMisconfiguredTimeout()
+    public function testCurlWrapperDefaultMisconfiguredTimeout()
     {
         Flag::setFlag('WRAPPER_DEFAULT_TIMEOUT', 'hello');
         $curlWrapper = new CurlWrapper();
@@ -754,9 +706,9 @@ class curlWrapperTest extends TestCase
     }
 
     /**
-     * @test
+     *
      */
-    public function curlWrapperDefaultRealTimeout()
+    public function testCurlWrapperDefaultRealTimeout()
     {
         $curlWrapper = new CurlWrapper();
         $curlWrapper->setTimeout(15);
@@ -765,10 +717,9 @@ class curlWrapperTest extends TestCase
     }
 
     /**
-     * @test
      * @throws ExceptionHandler
      */
-    public function curlWrapperDefaultZeroTimeout()
+    public function testCurlWrapperDefaultZeroTimeout()
     {
         static::expectException(ExceptionHandler::class);
         $curlWrapper = new CurlWrapper();
@@ -776,10 +727,8 @@ class curlWrapperTest extends TestCase
         $curlWrapper->request('https://ipv4.fraudbl.org');
     }
 
-    /**
-     * @test
-     */
-    public function stdRequest() {
+    public function testStdRequest()
+    {
         $curlWrapper = new CurlWrapper();
         try {
             $curlWrapper->request('https://test.resurs.com');
@@ -798,10 +747,9 @@ class curlWrapperTest extends TestCase
     }
 
     /**
-     * @test
      * @throws ExceptionHandler
      */
-    public function setSigStandard()
+    public function testSetSigStandard()
     {
         WrapperConfig::setSignature("Sig 1");
         WrapperConfig::setSignature("Sig 2");

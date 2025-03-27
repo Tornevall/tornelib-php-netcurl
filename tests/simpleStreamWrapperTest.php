@@ -17,11 +17,10 @@ use TorneLIB\Module\Network\Wrappers\SimpleStreamWrapper;
 class simpleStreamWrapperTest extends TestCase
 {
     /**
-     * @test
      * @since 6.1.0
      * @noinspection SpellCheckingInspection
      */
-    public function getStreamWrapper()
+    public function testGetStreamWrapper()
     {
         // Base streamWrapper (file_get_contents, fopen, etc) is only allowed if allow_url_fopen is available.
         $stream = (new SimpleStreamWrapper());
@@ -35,148 +34,91 @@ class simpleStreamWrapperTest extends TestCase
      * @throws ExceptionHandler
      * @since 6.1.0
      */
-    public function getBasicUrl()
+    public function testGetBasicUrl()
     {
-        $stream = (new NetWrapper())->setConfig(
-            (new WrapperConfig())->setUserAgent('SimpleStreamWrapper')
-        );
-        $response = $stream->request('http://ipv4.fraudbl.org/');
+        $stream = (new NetWrapper())->setConfig((new WrapperConfig())->setUserAgent('SimpleStreamWrapper'));
+        $response = $stream->request('https://ipv4.fraudbl.org/');
 
         //$body = $response->getBody();
         $parsed = $response->getParsed();
 
-        static::assertTrue(
-            isset($parsed->ip, $parsed->HTTP_USER_AGENT) &&
-            $parsed->HTTP_USER_AGENT === 'SimpleStreamWrapper'
-        );
+        static::assertTrue(isset($parsed->ip, $parsed->HTTP_USER_AGENT) && $parsed->HTTP_USER_AGENT === 'SimpleStreamWrapper');
     }
 
     /**
-     * @test
      * @throws ExceptionHandler
      * @since 6.1.0
      */
-    public function getBasicPost()
+    public function testGetBasicPost()
     {
-        $stream = (new SimpleStreamWrapper())->setConfig(
-            (new WrapperConfig())->setUserAgent('SimpleStreamWrapper')
-        )->setAuthentication(
-            'testUser',
-            'hasNoEffectHere'
-        );
-        $response = $stream->request(
-            'http://ipv4.fraudbl.org/',
-            [
-                'postData' => ['var1' => 'val1'],
-            ],
-            RequestMethod::POST
-        )->getParsed();
+        $stream = (new SimpleStreamWrapper())->setConfig((new WrapperConfig())->setUserAgent('SimpleStreamWrapper'))->setAuthentication('testUser', 'hasNoEffectHere');
+        $response = $stream->request('https://ipv4.fraudbl.org/', ['postData' => ['var1' => 'val1'],], RequestMethod::POST)->getParsed();
 
-        static::assertTrue(
-            isset($response->PARAMS_POST, $response->PARAMS_POST->postData)
-        );
+        static::assertTrue(isset($response->PARAMS_POST, $response->PARAMS_POST->postData));
     }
 
     /**
-     * @test
      * @throws ExceptionHandler
      * @since 6.1.0
      */
-    public function getBasicJson()
+    public function testGetBasicJson()
     {
-        $stream = (new SimpleStreamWrapper())->setConfig(
-            (new WrapperConfig())->setUserAgent('SimpleStreamWrapper')
-        )->setAuthentication(
-            'testUser',
-            'hasNoEffectHere'
-        );
-        $response = $stream->request(
-            'http://ipv4.fraudbl.org/',
-            [
-                'postData' => ['var1' => 'val1'],
-            ],
-            RequestMethod::POST,
-            DataType::JSON
-        )->getParsed();
+        $stream = (new SimpleStreamWrapper())->setConfig((new WrapperConfig())->setUserAgent('SimpleStreamWrapper'))->setAuthentication('testUser', 'hasNoEffectHere');
+        $response = $stream->request('https://ipv4.fraudbl.org/', ['postData' => ['var1' => 'val1'],], RequestMethod::POST, DataType::JSON)->getParsed();
 
-        static::assertTrue(
-            isset($response->input) && strlen($response->input) > 4
-        );
+        static::assertTrue(isset($response->input) && strlen($response->input) > 4);
     }
 
     /**
-     * @test
      * @throws ExceptionHandler
      * @since 6.1.0
      */
-    public function getBasicXml()
+    public function testGetBasicXml()
     {
-        $stream = (new SimpleStreamWrapper())->setConfig(
-            (new WrapperConfig())->setUserAgent('SimpleStreamWrapper')
-        )->setAuthentication(
-            'testUser',
-            'hasNoEffectHere'
-        );
-        $response = $stream->request(
-            'http://ipv4.fraudbl.org/',
-            [
-                'postData' => ['var1' => 'val1'],
-            ],
-            RequestMethod::POST,
-            DataType::XML
-        )->getParsed();
+        $stream = (new SimpleStreamWrapper())->setConfig((new WrapperConfig())->setUserAgent('SimpleStreamWrapper'))->setAuthentication('testUser', 'hasNoEffectHere');
+        $response = $stream->request('https://ipv4.fraudbl.org/', ['postData' => ['var1' => 'val1'],], RequestMethod::POST, DataType::XML)->getParsed();
 
-        static::assertTrue(
-            isset($response->input) && strlen($response->input) > 4
-        );
+        static::assertTrue(isset($response->input) && strlen($response->input) > 4);
     }
 
     /**
-     * @test
      * To get access to simplestreamwrapper, set below:
      * allow_url_fopen = Off
      * disable_functions = curl_exec,curl_init,openssl_encrypt
      * @throws ExceptionHandler
      * @since 6.1.0
      */
-    public function getBasicNetwrapper()
+    public function testGetBasicNetwrapper()
     {
         $stream = (new NetWrapper());
         $stream->setIdentifiers(true);
-        $stream->request('http://ipv4.fraudbl.org/')->getParsed();
+        $stream->request('https://ipv4.fraudbl.org/')->getParsed();
         $currentWrapper = $stream->getCurrentWrapperClass(true);
 
-        static::assertNotEmpty(
-            $currentWrapper
-        );
+        static::assertNotEmpty($currentWrapper);
     }
 
     /**
-     * @test
      * @throws ExceptionHandler
      * @since 6.1.0
      */
-    public function getBasicNetwrapperClient()
+    public function testGetBasicNetwrapperClient()
     {
         $stream = (new NetWrapper());
         $stream->setIdentifiers(true, true); // spoofable advanced
         /** @noinspection PhpUndefinedMethodInspection */
         $stream->setUserAgent('World Dominator');
-        $stream->request('http://ipv4.fraudbl.org/')->getParsed();
+        $stream->request('https://ipv4.fraudbl.org/')->getParsed();
         $content = $stream->getParsed();
 
-        static::assertTrue(
-            isset($content->HTTP_USER_AGENT) &&
-            (bool)preg_match('/world dominator/i', $content->HTTP_USER_AGENT)
-        );
+        static::assertTrue(isset($content->HTTP_USER_AGENT) && (bool)preg_match('/world dominator/i', $content->HTTP_USER_AGENT));
     }
 
     /**
-     * @test
      * @throws ExceptionHandler
      * @since 6.1.2
      */
-    public function getParsedResponse()
+    public function testGetParsedResponse()
     {
         /** @noinspection DynamicInvocationViaScopeResolutionInspection */
         static::expectException(ExceptionHandler::class);
@@ -188,10 +130,7 @@ class simpleStreamWrapperTest extends TestCase
         static::assertTrue(isset($p->ip));
     }
 
-    /**
-     * @test
-     */
-    public function streamWrapperDefaultRealTimeout()
+    public function testStreamWrapperDefaultRealTimeout()
     {
         $streamWrapper = new SimpleStreamWrapper();
         $streamWrapper->setTimeout(15);
@@ -199,10 +138,7 @@ class simpleStreamWrapperTest extends TestCase
         static::assertTrue(isset($timeout['CONNECT']) && (int)$timeout['CONNECT'] === 8);
     }
 
-    /**
-     * @test
-     */
-    public function streamWrapperShortTimeout()
+    public function testStreamWrapperShortTimeout()
     {
         $streamWrapper = new SimpleStreamWrapper();
         $streamWrapper->setTimeout(1);
@@ -211,65 +147,46 @@ class simpleStreamWrapperTest extends TestCase
     }
 
     /**
-     * @test
      * @since 6.1.2
      */
-    public function getContextExtractor()
+    public function testGetContextExtractor()
     {
         $wrapperConfig = new WrapperConfig();
         // All compatible assertion.
         /** @noinspection PhpUnitTestsInspection */
-        static::assertTrue(
-            is_array($wrapperConfig->getContentFromStreamContext($wrapperConfig->getStreamContext()))
-        );
+        static::assertTrue(is_array($wrapperConfig->getContentFromStreamContext($wrapperConfig->getStreamContext())));
     }
 
     /**
-     * @test
      * @throws ExceptionHandler
      * @since 6.1.2
      */
-    public function setStaticHeaders()
+    public function testSetStaticHeaders()
     {
         $wrapper = new SimpleStreamWrapper();
         $wrapper->setHeader('myHeaderIsStatic', true, true);
-        $parsed = $wrapper->request(
-            'https://ipv4.fraudbl.org'
-        )->getParsed();
+        $parsed = $wrapper->request('https://ipv4.fraudbl.org')->getParsed();
 
-        $secondParseRequest = $wrapper->request(
-            'https://ipv4.fraudbl.org/?secondRequest=1'
-        );
+        $secondParseRequest = $wrapper->request('https://ipv4.fraudbl.org/?secondRequest=1');
         $secondParsed = $secondParseRequest->getParsed();
 
-        static::assertTrue(
-            isset($parsed->HTTP_MYHEADERISSTATIC, $secondParsed->HTTP_MYHEADERISSTATIC)
-        );
+        static::assertTrue(isset($parsed->HTTP_MYHEADERISSTATIC, $secondParsed->HTTP_MYHEADERISSTATIC));
     }
 
     /**
-     * @test
      * @throws ExceptionHandler
      * @since 6.1.1
      */
-    public function streamProxy()
+    public function testStreamProxy()
     {
         if (!$this->canProxy()) {
             static::markTestSkipped('Can not perform proxy tests with this client. Skipped.');
             return;
         }
 
-        $response = (new SimpleStreamWrapper())
-            ->setProxy('212.63.208.8:80')
-            ->request('http://identifier.tornevall.net/?inTheProxy')
-            ->getParsed();
+        $response = (new SimpleStreamWrapper())->setProxy('212.63.208.8:80')->request('http://identifier.tornevall.net/?inTheProxy')->getParsed();
 
-        static::assertTrue(
-            isset($response->ip) &&
-            (
-                $response->ip === '212.63.208.8'
-            )
-        );
+        static::assertTrue(isset($response->ip) && ($response->ip === '212.63.208.8'));
     }
 
     /**
@@ -283,14 +200,9 @@ class simpleStreamWrapperTest extends TestCase
     {
         $return = false;
 
-        $ipList = [
-            '212.63.208.',
-            '10.1.1.',
-        ];
+        $ipList = ['212.63.208.', '10.1.1.',];
 
-        $wrapperData = (new CurlWrapper())
-            ->setConfig((new WrapperConfig())->setUserAgent('ProxyTestAgent'))
-            ->request('https://ipv4.fraudbl.org')->getParsed();
+        $wrapperData = (new CurlWrapper())->setConfig((new WrapperConfig())->setUserAgent('ProxyTestAgent'))->request('https://ipv4.fraudbl.org')->getParsed();
         if (isset($wrapperData->ip)) {
             foreach ($ipList as $ip) {
                 if (preg_match('/' . $ip . '/', $wrapperData->ip)) {
@@ -305,21 +217,16 @@ class simpleStreamWrapperTest extends TestCase
 
     /**
      * Test used for both timeouts and refusals.
-     * @test
      */
-    public function stdRequest() {
+    public function testStdRequest()
+    {
         $streamWrapper = new SimpleStreamWrapper();
         try {
             //$streamWrapper->setTimeout(3);
             $streamWrapper->request('https://test.resurs.com');
         } catch (Exception $e) {
-            if ($e->getCode() === Constants::LIB_NETCURL_TIMEOUT ||
-                $e->getCode() === Constants::LIB_NETCURL_CONNECTION_REFUSED
-            ) {
-                static::assertTrue(
-                    $e->getCode() === Constants::LIB_NETCURL_CONNECTION_REFUSED ||
-                    $e->getCode() === Constants::LIB_NETCURL_TIMEOUT
-                );
+            if ($e->getCode() === Constants::LIB_NETCURL_TIMEOUT || $e->getCode() === Constants::LIB_NETCURL_CONNECTION_REFUSED) {
+                static::assertTrue($e->getCode() === Constants::LIB_NETCURL_CONNECTION_REFUSED || $e->getCode() === Constants::LIB_NETCURL_TIMEOUT);
                 return;
             }
 
@@ -332,10 +239,7 @@ class simpleStreamWrapperTest extends TestCase
         static::assertTrue(true);
     }
 
-    /**
-     * @test
-     */
-    public function selfSignedRequest()
+    public function testSelfSignedRequest()
     {
         // Using one of those urls to emulate SSL problems:
         // https://dev-ssl-self.tornevall.nu
@@ -353,9 +257,7 @@ class simpleStreamWrapperTest extends TestCase
         $wrapper->setSsl($newSsl);
         try {
             $newRequest = $wrapper->request('https://dev-ssl-mismatch.tornevall.nu');
-            static::assertTrue(
-                $newRequest instanceof SimpleStreamWrapper && $sslFail
-            );
+            static::assertTrue($newRequest instanceof SimpleStreamWrapper && $sslFail);
         } catch (Exception $e) {
             static::markTestSkipped($e->getMessage());
         }

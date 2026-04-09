@@ -5,6 +5,16 @@ namespace TorneLIB\Helpers;
 class SimpleDomParser
 {
     /**
+     * Guard method_exists() calls against null/scalar inputs under newer PHP versions.
+     *
+     * @param mixed $target
+     */
+    private static function hasMethod($target, string $method): bool
+    {
+        return (is_object($target) || is_string($target)) && method_exists($target, $method);
+    }
+
+    /**
      * getContentFromXPath is an automated feature that collects the behaviour of a manual handling of xpath requests.
      *
      * @param $html
@@ -121,9 +131,9 @@ class SimpleDomParser
     public static function getBySubXPath($domItem, $subXpath)
     {
         /** @var \DOMElement $useNode */
-        $useNode = $domItem['node'];
+        $useNode = $domItem['node'] ?? null;
 
-        if (method_exists($useNode, 'item')) {
+        if (self::hasMethod($useNode, 'item')) {
             /** @var \DOMNodeList $mainNode */
             $mainNode = $useNode->item(0);
         } else {
@@ -144,7 +154,7 @@ class SimpleDomParser
         $return = [
             'mainNode' => $mainNodeItem,
             'subNode' => $subNodeItem,
-            'path' => method_exists($mainNode, 'getNodePath') ? $mainNode->getNodePath() : null,
+            'path' => self::hasMethod($mainNode, 'getNodePath') ? $mainNode->getNodePath() : ($domItem['path'] ?? null),
         ];
 
         return $return;
@@ -207,9 +217,15 @@ class SimpleDomParser
      */
     private static function getNodeListCount($nodeList)
     {
+        if ($nodeList === null) {
+            return 0;
+        }
+
         $nodeListCount = 0;
         if (version_compare(PHP_VERSION, '7.2', '>=')) {
-            if (method_exists($nodeList, 'item')) {
+            if (is_countable($nodeList)) {
+                $nodeListCount = count($nodeList);
+            } elseif (self::hasMethod($nodeList, 'count')) {
                 $nodeListCount = $nodeList->count();
             }
         } elseif (isset($nodeList->length)) {
@@ -227,7 +243,11 @@ class SimpleDomParser
     private static function getAttributeFromDom($domItem, $attributeKey)
     {
         $return = null;
-        if (method_exists($domItem, 'getAttribute') && $returnAttribute = $domItem->getAttribute($attributeKey)) {
+        if ($domItem === null) {
+            return null;
+        }
+
+        if (self::hasMethod($domItem, 'getAttribute') && $returnAttribute = $domItem->getAttribute($attributeKey)) {
             $return = $returnAttribute;
         } elseif (self::getNodeListCount($domItem)) {
             $testAttribute = self::getAttributeFromDom($domItem->item(0), $attributeKey);
@@ -238,7 +258,11 @@ class SimpleDomParser
             $return = $domItem->nodeValue;
         }
 
-        return trim($return);
+        if ($return === null) {
+            return null;
+        }
+
+        return trim((string) $return);
     }
 
     /**

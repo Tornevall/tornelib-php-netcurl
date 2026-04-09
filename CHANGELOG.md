@@ -1,3 +1,9 @@
+# 6.1.10
+
+## Fixes
+
+* Hardened `SimpleDomParser` against null DOM nodes under PHP 8+, so partially matching XPath trees no longer crash on `method_exists(..., null)` during compiled XPath extraction.
+
 # 6.1.3
 
 ## Updates

@@ -41,4 +41,40 @@ class domDocumentTest extends TestCase
 
         static::assertCount(20, $nodeList['rendered']);
     }
+
+    /**
+     * @testdox Null DOM nodes in partially matching XPath trees should not crash on PHP 8+
+     * @since 6.1.10
+     */
+    public function testGenericXpathCompiledWithMissingOptionalNodeDoesNotCrash()
+    {
+        $html = <<<'HTML'
+<!DOCTYPE html>
+<html lang="en">
+  <body>
+    <div class="articles_wrapper">
+      <a href="https://example.test/one">
+        <span class="subtitle">Headline</span>
+      </a>
+    </div>
+  </body>
+</html>
+HTML;
+
+        $nodeList = GenericParser::getContentFromXPath(
+            $html,
+            ['//*[@class="articles_wrapper"]/a'],
+            [
+                'subtitle' => '/*[contains(@class, "subtitle")]',
+                'lead' => '/*[contains(@class, "lead")]',
+            ],
+            ['href', 'value'],
+            ['subtitle' => 'mainNode', 'lead' => 'subNode', 'href' => 'mainNode']
+        );
+
+        static::assertCount(1, $nodeList['rendered']);
+        static::assertSame('https://example.test/one', $nodeList['rendered'][0]['subtitle']['href']);
+        static::assertSame('Headline', $nodeList['rendered'][0]['subtitle']['value']);
+        static::assertNull($nodeList['rendered'][0]['lead']['value']);
+    }
 }

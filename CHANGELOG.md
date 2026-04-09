@@ -4,6 +4,72 @@
 
 * Hardened `SimpleDomParser` against null DOM nodes under PHP 8+, so partially matching XPath trees no longer crash on `method_exists(..., null)` during compiled XPath extraction.
 
+# 6.1.9
+
+## Updates
+
+* Synchronized the library's internal version metadata with the 6.1.9 release line after earlier tag/version drift.
+* Refreshed CI/build configuration for the maintained 6.1 branch, including Bamboo / GitHub workflow updates and newer PHP coverage adjustments.
+
+## Fixes
+
+* Cleaned up and reduced stale test coverage that no longer matched the maintained 6.1 branch.
+* Removed `phpunit` from package metadata again to avoid CI/environment breakage in dependency resolution.
+
+# 6.1.7
+
+## Updates
+
+* [NETCURL-347](https://tracker.tornevall.net/browse/NETCURL-347) - landed in this release together with follow-up cleanup around the 6.1.7 tag.
+* Converted and cleaned PHPUnit XML/test configuration for the maintained 6.1 branch.
+
+## Fixes
+
+* Fixed version reporting (`getMyVersion`) so package/runtime version lookup stays aligned with the tagged release.
+
+# 6.1.6
+
+## Updates
+
+* [NETCURL-346](https://tracker.tornevall.net/browse/NETCURL-346) - wrapper timing/request handling adjustments landed for the 6.1.6 line.
+* Dropped PHP 5.6 support in the maintained 6.1 branch.
+
+## Fixes
+
+* Improved stream-wrapper handling around query results and timeout-related edge cases.
+* Added/fixed regression coverage in curl/netwrapper/simple-stream tests for the 6.1.6 release.
+
+# 6.1.5
+
+## Updates
+
+* [NETCURL-343](https://tracker.tornevall.net/browse/NETCURL-343) - introduced the timeout-handler work for this release.
+* [NETCURL-341](https://tracker.tornevall.net/browse/NETCURL-341) - additional wrapper/config fixes landed for the 6.1.5 line.
+* [NETCURL-340](https://tracker.tornevall.net/browse/NETCURL-340) - follow-up fixes from issue #6 were included in this release.
+* [NETCURL-339](https://tracker.tornevall.net/browse/NETCURL-339) - PHP compatibility/docblock cleanup was included in this release.
+* [NETCURL-338](https://tracker.tornevall.net/browse/NETCURL-338) - spelling/docblock cleanup and related fixes were included in this release.
+
+## Fixes
+
+* [NETCURL-330](https://tracker.tornevall.net/browse/NETCURL-330) - fix for issue #8.
+* [NETCURL-335](https://tracker.tornevall.net/browse/NETCURL-335) - corrected microtime/time handling and related failing tests.
+* Added the `SimpleDomParser`/compiled XPath helper flow together with DOM/XPath regression coverage and fixture data.
+* Reworked XPath value extraction so requested attributes/values can be taken from the configured main/sub-node container.
+
+# 6.1.4
+
+## Updates
+
+* [NETCURL-328](https://tracker.tornevall.net/browse/NETCURL-328) - added `PATCH` request-method support and cleaned up redundant method constants.
+* [NETCURL-329](https://tracker.tornevall.net/browse/NETCURL-329) - MultiCurl now supports several identical requests and per-client header handling.
+* Added the typed `RequestMethod` class and normalized several `Model\Type` class names to PSR-friendly casing.
+
+## Fixes
+
+* [NETCURL-332](https://tracker.tornevall.net/browse/NETCURL-332) - inspection-driven cleanup and compatibility fixes across wrappers/configuration.
+* Restored resource handling for PHP-version differences and corrected body/resource lookup edge cases.
+* Updated README, pipelines, Psalm config, and regression tests to match the 6.1.4 codebase.
+
 # 6.1.3
 
 ## Updates

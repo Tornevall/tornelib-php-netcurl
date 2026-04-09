@@ -20,7 +20,7 @@
 
 ## Updates
 
-* NETCURL-347 - landed in this release together with follow-up cleanup around the 6.1.7 tag.
+* Landed in this release together with follow-up cleanup around the 6.1.7 tag.
 * Converted and cleaned PHPUnit XML/test configuration for the maintained 6.1 branch.
 
 ## Fixes
@@ -31,7 +31,7 @@
 
 ## Updates
 
-* NETCURL-346 - wrapper timing/request handling adjustments landed for the 6.1.6 line.
+* Wrapper timing/request handling adjustments landed for the 6.1.6 line.
 * Dropped PHP 5.6 support in the maintained 6.1 branch.
 
 ## Fixes
@@ -43,16 +43,16 @@
 
 ## Updates
 
-* NETCURL-343 - introduced the timeout-handler work for this release.
-* NETCURL-341 - additional wrapper/config fixes landed for the 6.1.5 line.
-* NETCURL-340 - follow-up fixes from issue #6 were included in this release.
-* NETCURL-339 - PHP compatibility/docblock cleanup was included in this release.
-* NETCURL-338 - spelling/docblock cleanup and related fixes were included in this release.
+* Introduced the timeout-handler work for this release.
+* Additional wrapper/config fixes landed for the 6.1.5 line.
+* Follow-up fixes from an earlier issue were included in this release.
+* PHP compatibility/docblock cleanup was included in this release.
+* Spelling/docblock cleanup and related fixes were included in this release.
 
 ## Fixes
 
-* NETCURL-330 - fix for issue #8.
-* NETCURL-335 - corrected microtime/time handling and related failing tests.
+* Fixed an earlier reported issue.
+* Corrected microtime/time handling and related failing tests.
 * Added the `SimpleDomParser`/compiled XPath helper flow together with DOM/XPath regression coverage and fixture data.
 * Reworked XPath value extraction so requested attributes/values can be taken from the configured main/sub-node container.
 
@@ -60,13 +60,13 @@
 
 ## Updates
 
-* NETCURL-328 - added `PATCH` request-method support and cleaned up redundant method constants.
-* NETCURL-329 - MultiCurl now supports several identical requests and per-client header handling.
+* Added `PATCH` request-method support and cleaned up redundant method constants.
+* MultiCurl now supports several identical requests and per-client header handling.
 * Added the typed `RequestMethod` class and normalized several `Model\Type` class names to PSR-friendly casing.
 
 ## Fixes
 
-* NETCURL-332 - inspection-driven cleanup and compatibility fixes across wrappers/configuration.
+* Inspection-driven cleanup and compatibility fixes across wrappers/configuration.
 * Restored resource handling for PHP-version differences and corrected body/resource lookup edge cases.
 * Updated README, pipelines, Psalm config, and regression tests to match the 6.1.4 codebase.
 
@@ -74,92 +74,92 @@
 
 ## Updates
 
-* NETCURL-319 - setSignature may crash setUserAgent if array is sent into merger, NETCURL-320 opens for overwriting/write protection.
-* NETCURL-323 - Timeout defaults should be flaggable and support millisec, also should native support for timeouts, visually, be passed through the configuration
-* NETCURL-324 - Avoid using flaggables for timeouts in tests
-* NETCURL-325 - Preventing unexpected results in unprepared environments.
+* `setSignature` may crash `setUserAgent` if an array is sent into the merger, and overwrite/write protection was opened up.
+* Timeout defaults should be flaggable and support milliseconds, while native timeout support should also be passed through the configuration.
+* Avoid using flaggables for timeouts in tests.
+* Prevent unexpected results in unprepared environments.
 
 # 6.1.2
 
 ## Updates
 
-* NETCURL-305 - Verify emptyness only
-* NETCURL-308 - Change the way netcurl returns package version information
-* NETCURL-311 - Simplify setCurlHeader again
-* NETCURL-312 - resetCurlRequest() should not reset custom headers on demand
-* NETCURL-313 - Bitbucket pipelines for PHP 8
-* NETCURL-314 - Default internal timeout must be higher than 8 as 4 for connection timeouts is too low
+* Verify emptiness only.
+* Change the way netcurl returns package version information.
+* Simplify `setCurlHeader` again.
+* `resetCurlRequest()` should not reset custom headers on demand.
+* Bitbucket pipelines for PHP 8.
+* Default internal timeout must be higher than 8, since 4 for connection timeouts is too low.
 
 ## Fixes
 
-* NETCURL-302 - Fixed: getParsedResponse is used in rare cases (t-auth)
-* NETCURL-309 - Fixed: Deprecated curldriver is missing proper PHP8 support
-* NETCURL-310 - Fixed: Invisible exit code with unit70 for wsdlcache test
-* NETCURL-316 - Fixed: Fetching version falsely returns wrong version
-* NETCURL-317 - Fixed: Version data falsely reports 6.1.0 when composer.json is missing
+* Fixed: `getParsedResponse` is used in rare cases (`t-auth`).
+* Fixed: deprecated curldriver was missing proper PHP 8 support.
+* Fixed: invisible exit code with `unit70` for the `wsdlcache` test.
+* Fixed: fetching version falsely returned the wrong version.
+* Fixed: version data falsely reported `6.1.0` when `composer.json` was missing.
 
 # 6.1.1
 
 ## Updates
 
-* NETCURL-301 - Use centralized version checker as most of the libraries are only compatible with 5.6 and above
+* Use centralized version checker as most of the libraries are only compatible with 5.6 and above.
 
 ## Fixes
 
-* NETCURL-304 - Fixed: memory exhaustion on lowest php memory limit (resources are no longer resources).
+* Fixed: memory exhaustion on the lowest PHP memory limit (resources are no longer resources).
 
 # 6.1.0
 
 ## Transformed
 
-* NETCURL-200 - Confirm (by driver) that a driver is really available (update interface with requirements)
-* NETCURL-209 - Support stream, when curl is not an option
-* NETCURL-227 - Migrate: getHttpHost()
-* NETCURL-231 - Move out MODULE_NETWORK to own repo
-* NETCURL-232 - Make exceptions global
-* NETCURL-234 - Support immediate inclusions of network libraries
-* NETCURL-238 - Make setTimeout support ms (curlopt_timeout_ms)
-* NETCURL-242 - Disengage from constructor usage
-* NETCURL-243 - Reimport SSL helper
-* NETCURL-244 - Reimport curl module
-* NETCURL-245 - Reimport soapclient
-* NETCURL-247 - The way we set user agent in the SSL module must be able to set in parents
-* NETCURL-249 - setAuth for curl
-* NETCURL-251 - setAuth for soap
-* NETCURL-255 - Add static list of browsers for user-agent 
-* NETCURL-258 - NetWrapper MultiRequest
-* NETCURL-259 - High focus on curl (rebuild from 6.0)
-* NETCURL-260 - Current curl implementation is only using GET and no advantage of Config
-* NETCURL-261 - Make sure setAuthentication is a required standard in the wrapper interface
-* NETCURL-263 - Add errorhandler for multicurl
-* NETCURL-264 - Avoid static constants inside core functions
-* NETCURL-265 - getCurlException($curlHandle, $httpCode) - httpCode is unused. Throw on >400
-* NETCURL-267 - On http head errors (>400) and non empty bodies
-* NETCURL-268 - Add Timeouts
-* NETCURL-269 - Proxy support for stream_context
-* NETCURL-271 - Synchronize with netcurl 6.0 test suites
-* NETCURL-273 - Support driverless environment
-* NETCURL-276 - Use a natural soapcall with call_user_func_array
-* NETCURL-277 - Netwrapper Compatibility Service
-* NETCURL-278 - setChain in 6.1 should throw errors when requested true
-* NETCURL-279 - Make sure setOption is useful in NetWrapper and MODULE_CURL or work has been useless
-* NETCURL-280 - proxy support for curlwrapper and wrappers that is not stream wrappers
-* NETCURL-283 - Use setSignature (?) to make requesting clients set internal clientname/version as userAgent automatically instead of Mozilla
-* NETCURL-285 - Reinstate Environment but in ConfigWrapper to make wsdl transfers go non-cache vs cache, etc
-* NETCURL-286 - Move driver handler into own class
-* NETCURL-287 - Initialize simplified streamSupport
-* NETCURL-288 - Output support for XML in simpler wrappers
-* NETCURL-289 - Open for third party identification rather than standard browser agent
-* NETCURL-291 - SoapClient must be reinitialized each time it is called
-* NETCURL-292 - Support basic rss+xml via GenericParser
-* NETCURL-293 - Try fix proper rss parsing without garbage
-* NETCURL-294 - Make it possible to initialize an empty curlwrapper (without url)
-* NETCURL-295 - MultiNetwrapper (+Soap)
+* Confirm (by driver) that a driver is really available (update interface with requirements).
+* Support stream when curl is not an option.
+* Migrate `getHttpHost()`.
+* Move out `MODULE_NETWORK` to its own repo.
+* Make exceptions global.
+* Support immediate inclusions of network libraries.
+* Make `setTimeout` support milliseconds (`curlopt_timeout_ms`).
+* Disengage from constructor usage.
+* Reimport SSL helper.
+* Reimport curl module.
+* Reimport `soapclient`.
+* The way the SSL module sets user agent must be able to set it in parents.
+* Add `setAuth` for curl.
+* Add `setAuth` for soap.
+* Add a static list of browsers for user agent.
+* Add `NetWrapper` MultiRequest.
+* Put high focus on curl (rebuild from 6.0).
+* The current curl implementation was only using GET and had no advantage of config.
+* Make sure `setAuthentication` is a required standard in the wrapper interface.
+* Add errorhandler for multicurl.
+* Avoid static constants inside core functions.
+* `getCurlException($curlHandle, $httpCode)` had an unused `httpCode`; now throws on `>400`.
+* Handle HTTP head errors (`>400`) and non-empty bodies.
+* Add timeouts.
+* Add proxy support for `stream_context`.
+* Synchronize with netcurl 6.0 test suites.
+* Support driverless environment.
+* Use a natural soap call with `call_user_func_array`.
+* Add `Netwrapper` Compatibility Service.
+* `setChain` in 6.1 should throw errors when requested true.
+* Make sure `setOption` is useful in `NetWrapper` and `MODULE_CURL`.
+* Add proxy support for curlwrapper and wrappers that are not stream wrappers.
+* Use `setSignature` to make requesting clients set internal client name/version as user agent automatically instead of Mozilla.
+* Reinstate Environment in `ConfigWrapper` so WSDL transfers can go non-cache vs cache, etc.
+* Move driver handler into its own class.
+* Initialize simplified `streamSupport`.
+* Add output support for XML in simpler wrappers.
+* Open for third-party identification rather than standard browser agent.
+* `SoapClient` must be reinitialized each time it is called.
+* Support basic `rss+xml` via `GenericParser`.
+* Try to fix proper RSS parsing without garbage.
+* Make it possible to initialize an empty curlwrapper (without URL).
+* Add `MultiNetwrapper` (+Soap).
 
 ## Fixes
 
-* NETCURL-226 - Fixed: PSR4 NetCURL+Network (Phase 1)
-* NETCURL-230 - Fixed: Wordpress driver in prior netcurl is lacking authentication mechanisms
-* NETCURL-246 - Fixed: Pipeline errors for PHP 7.3-7.4
-* NETCURL-272 - Fixed: getSoapEmbeddedRequest() - PHP 5.6+PHP 7.0
-* NETCURL-274 - Fixed: Cached wsdl requests and unauthorized exceptions
+* Fixed: PSR4 NetCURL+Network (Phase 1).
+* Fixed: WordPress driver in prior netcurl lacked authentication mechanisms.
+* Fixed: pipeline errors for PHP 7.3-7.4.
+* Fixed: `getSoapEmbeddedRequest()` for PHP 5.6 + PHP 7.0.
+* Fixed: cached WSDL requests and unauthorized exceptions.

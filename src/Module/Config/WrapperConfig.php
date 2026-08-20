@@ -273,12 +273,21 @@ class WrapperConfig
     {
         if (is_array($curlOptConstant)) {
             foreach ($curlOptConstant as $curlOptKey => $curlOptValue) {
-                $constantValue = @constant($curlOptKey);
-                if (empty($constantValue)) {
+                $constantValue = null;
+
+                if (defined($curlOptKey)) {
+                    $constantValue = constant($curlOptKey);
+                } else {
                     // Fall back to internally stored constants if curl is not there.
-                    $constantValue = @constant('TorneLIB\Module\Config\WrapperCurlOpt::NETCURL_' . $curlOptKey);
+                    $fallbackConstant = 'TorneLIB\\Module\\Config\\WrapperCurlOpt::NETCURL_' . $curlOptKey;
+                    if (defined($fallbackConstant)) {
+                        $constantValue = constant($fallbackConstant);
+                    }
                 }
-                $this->options[$constantValue] = $curlOptValue;
+
+                if ($constantValue !== null && $constantValue !== false) {
+                    $this->options[$constantValue] = $curlOptValue;
+                }
             }
         }
 

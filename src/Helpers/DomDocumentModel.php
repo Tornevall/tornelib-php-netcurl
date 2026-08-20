@@ -135,7 +135,16 @@ class DomDocumentModel implements \IteratorAggregate, \JsonSerializable
         $return = [];
         $root = $this->document->documentElement;
 
-        if (!$root instanceof \DOMElement || !$root->hasAttributes()) {
+        if (!$root instanceof \DOMElement) {
+            return $return;
+        }
+
+        $defaultNamespace = $root->lookupNamespaceURI(null);
+        if (is_string($defaultNamespace) && $defaultNamespace !== '') {
+            $return['default'] = $defaultNamespace;
+        }
+
+        if (!$root->hasAttributes()) {
             return $return;
         }
 
@@ -202,15 +211,19 @@ class DomDocumentModel implements \IteratorAggregate, \JsonSerializable
 
         // Well-formed custom XML does not always have an XML declaration. Try
         // XML first, but only for auto detection; malformed markup falls back
-        // to the forgiving HTML parser.
+        // to the forgiving HTML parser. Ambiguous HTML fragments can be forced
+        // to HTML by passing FORMAT_HTML explicitly.
         $previous = libxml_use_internal_errors(true);
         libxml_clear_errors();
+        $isXml = false;
 
-        $testDocument = new \DOMDocument();
-        $isXml = $testDocument->loadXML($content, LIBXML_NONET);
-
-        libxml_clear_errors();
-        libxml_use_internal_errors($previous);
+        try {
+            $testDocument = new \DOMDocument();
+            $isXml = $testDocument->loadXML($content, LIBXML_NONET);
+        } finally {
+            libxml_clear_errors();
+            libxml_use_internal_errors($previous);
+        }
 
         return $isXml ? self::FORMAT_XML : self::FORMAT_HTML;
     }
@@ -224,17 +237,22 @@ class DomDocumentModel implements \IteratorAggregate, \JsonSerializable
     {
         $previous = libxml_use_internal_errors(true);
         libxml_clear_errors();
-
+        $errors = [];
+        $loaded = false;
         $document = new \DOMDocument();
-        if ($format === self::FORMAT_XML) {
-            $loaded = $document->loadXML($content, LIBXML_NONET);
-        } else {
-            $loaded = $document->loadHTML($content, LIBXML_NONET);
-        }
 
-        $errors = libxml_get_errors();
-        libxml_clear_errors();
-        libxml_use_internal_errors($previous);
+        try {
+            if ($format === self::FORMAT_XML) {
+                $loaded = $document->loadXML($content, LIBXML_NONET);
+            } else {
+                $loaded = $document->loadHTML($content, LIBXML_NONET);
+            }
+
+            $errors = libxml_get_errors();
+        } finally {
+            libxml_clear_errors();
+            libxml_use_internal_errors($previous);
+        }
 
         if (!$loaded) {
             $message = 'Unable to parse DOM content.';

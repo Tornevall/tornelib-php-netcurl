@@ -50,18 +50,18 @@ Installing the network module instead will make features such as getGitTagsByUrl
 
 ## Compatibility
 
-This library do support PHP 5.6 (not lower). However, you should [check here](https://www.php.net/supported-versions.php) to ensure your compatiblity yourself).
+Runtime compatibility is verified by the GitHub Actions compatibility matrix. The current 6.1 source does not parse on PHP 5.6, so PHP 5.6 must not be treated as a supported runtime for the current codebase. Legacy probes for older PHP releases remain useful for documenting the actual lower compatibility boundary.
 
 
 ## Testing: Bamboo, github actions and bitbucket pipelines
 
 NetCURL is tested within a few different suites. Due to the lack of "test time", tests are not entirely fulfilled in the Bitbucket cloud, which is why tests also are executed from other places on commits. Below is a list of those instances.
 
-* [Atlassian Bamboo - 5.6 - 8.0](https://bamboo.tornevall.net/browse/TOR-NC60)
-* [GitHub Actions - 5.6 + 7.3 - 8.0](https://github.com/Tornevall/tornelib-php-netcurl/actions)
-* [Bitbucket Pipelines - 5.6 + 7.3 - 8.0](https://bitbucket.org/tornevallnetworks/tornelib-php-netcurl/addon/pipelines/home)
+* [Atlassian Bamboo](https://bamboo.tornevall.net/browse/TOR-NC60)
+* [GitHub Actions](https://github.com/Tornevall/tornelib-php-netcurl/actions)
+* [Bitbucket Pipelines](https://bitbucket.org/tornevallnetworks/tornelib-php-netcurl/addon/pipelines/home)
 
-The [Bamboo-server](https://bamboo.tornevall.net) has a history which makes many older PHP versions available. But as of mid-summer 2020, all tests with old versions have been removed. This is also a work that continues. Github tests are only running with non-outdated versions (exception for 5.6) and so are bitbucked targeted. Since bamboo is the flagship of tests, old versions are currently not removed there.
+The GitHub Actions matrix is the current compatibility reference. Historical Bamboo and Bitbucket runs may still be useful when investigating older releases, but should not be interpreted as current runtime support for the 6.1 source tree.
 
 
 ### Other Requirements and dependencies

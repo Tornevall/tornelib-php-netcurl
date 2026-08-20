@@ -166,4 +166,20 @@ class structuredDomErrorTest extends TestCase
             libxml_clear_errors();
         }
     }
+
+    /** @testdox XML parsing does not resolve external network entities. */
+    public function testXmlExternalNetworkEntityIsNotResolved()
+    {
+        $xml = <<<'XML'
+<?xml version="1.0"?>
+<!DOCTYPE root [
+    <!ENTITY remote SYSTEM "http://127.0.0.1:9/should-not-be-fetched">
+]>
+<root>&remote;</root>
+XML;
+
+        $document = GenericParser::getDocumentModel($xml, 'xml');
+
+        static::assertNull($document->getRoot()->getValue());
+    }
 }

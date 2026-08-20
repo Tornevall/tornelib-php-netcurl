@@ -206,7 +206,7 @@ class DomNodeModel implements \ArrayAccess, \Countable, \IteratorAggregate, \Jso
             $finder->registerNamespace($prefix, $namespace);
         }
 
-        $result = $finder->query((string)$xpath, $this->domNode);
+        $result = @$finder->query((string)$xpath, $this->domNode);
         if ($result === false) {
             throw new \InvalidArgumentException(sprintf('Invalid XPath query: %s', $xpath));
         }

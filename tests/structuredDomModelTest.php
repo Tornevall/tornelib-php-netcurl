@@ -168,6 +168,21 @@ HTML;
     }
 
     /**
+     * @testdox Well-formed HTML fragments can be forced to HTML instead of XML auto detection.
+     * @since 6.1.11
+     */
+    public function testStructuredExplicitHtmlForAmbiguousFragment()
+    {
+        $fragment = '<div class="card"><span>Fragment</span></div>';
+        $auto = GenericParser::getDocumentModel($fragment);
+        $html = GenericParser::getDocumentModel($fragment, 'html');
+
+        static::assertSame('xml', $auto->getFormat());
+        static::assertSame('html', $html->getFormat());
+        static::assertSame('Fragment', $html->query('//span')->first()->getValue());
+    }
+
+    /**
      * @testdox Explicit namespaces can be used for XML XPath queries.
      * @since 6.1.11
      */

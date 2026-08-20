@@ -81,6 +81,50 @@ jobs:
       - name: Lint source on PHP 5.6
         run: find src -name '*.php' -print0 | xargs -0 -n1 php -l
 
+  driver-capability-probe:
+    name: Driver probe ${{ matrix.name }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: no-curl-stream-fallback
+            disabled-extension: ':curl'
+            disabled-extension-name: 'curl'
+          - name: no-soap-http-fallback
+            disabled-extension: ':soap'
+            disabled-extension-name: 'soap'
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup PHP 8.3 with capability removed
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          extensions: ${{ matrix.disabled-extension }}
+          tools: composer
+      - name: Verify extension is disabled
+        run: php -r 'if (extension_loaded("${{ matrix.disabled-extension-name }}")) { fwrite(STDERR, "Extension was not disabled\n"); exit(1); }'
+      - name: Install dependencies
+        run: composer install --prefer-dist --no-progress
+      - name: Start local HTTP fixture
+        run: |
+          mkdir -p /tmp/netcurl-http-fixture
+          printf '%s' '<response><driver>fallback</driver></response>' > /tmp/netcurl-http-fixture/index.html
+          php -S 127.0.0.1:18765 -t /tmp/netcurl-http-fixture >/tmp/netcurl-http-fixture.log 2>&1 &
+          echo $! > /tmp/netcurl-http-fixture.pid
+          sleep 1
+      - name: Verify stream fallback without cURL
+        if: matrix.name == 'no-curl-stream-fallback'
+        run: |
+          php -r 'require "vendor/autoload.php"; $response = (new \TorneLIB\Module\Network\NetWrapper())->request("http://127.0.0.1:18765/"); if (!($response instanceof \TorneLIB\Module\Network\Wrappers\SimpleStreamWrapper)) { fwrite(STDERR, "Expected SimpleStreamWrapper, got " . get_class($response) . "\n"); exit(2); } if (strpos((string) $response->getBody(), "fallback") === false) { fwrite(STDERR, "Unexpected stream response body\n"); exit(3); }'
+      - name: Verify HTTP/XML fallback without SOAP
+        if: matrix.name == 'no-soap-http-fallback'
+        run: |
+          php -r 'require "vendor/autoload.php"; $response = (new \TorneLIB\Module\Network\NetWrapper())->request("http://127.0.0.1:18765/?wsdl"); if ($response instanceof \TorneLIB\Module\Network\Wrappers\SoapClientWrapper) { fwrite(STDERR, "SoapClientWrapper was selected without SOAP support\n"); exit(2); } if (!($response instanceof \TorneLIB\Module\Network\Wrappers\CurlWrapper)) { fwrite(STDERR, "Expected HTTP fallback through CurlWrapper, got " . get_class($response) . "\n"); exit(3); } if (strpos((string) $response->getBody(), "fallback") === false) { fwrite(STDERR, "Unexpected SOAP fallback response body\n"); exit(4); }'
+      - name: Show local fixture log on failure
+        if: failure()
+        run: cat /tmp/netcurl-http-fixture.log || true
+
   future-probe:
     name: Future probe PHP 8.6
     runs-on: ubuntu-latest

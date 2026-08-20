@@ -6,37 +6,81 @@ on:
   pull_request:
     branches: [ master ]
 
-# PHP 7.3-7.4: phpunit-9.x
 jobs:
-  build-unit-9:
+  supported:
+    name: PHP ${{ matrix.php-version }}
     runs-on: ubuntu-latest
     strategy:
+      fail-fast: false
       matrix:
-        php-version: [ '7.3', '7.4', '8.0', '8.3', '8.4' ]
-    name: PHP ${{ matrix.php-version }}
+        php-version: [ '7.3', '7.4', '8.0', '8.1', '8.2', '8.3', '8.4', '8.5' ]
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
           php-version: ${{ matrix.php-version }}
-          tools: phpunit
-      - name: Validate composer.json and composer.lock
-        run: composer validate
+          tools: composer, phpunit:9
+      - name: Validate composer.json
+        run: composer validate --no-check-lock
       - name: Cache Composer packages
-        id: composer-cache
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: vendor
-          key: ${{ runner.os }}-php-${{ hashFiles('**/composer.lock') }}
+          key: ${{ runner.os }}-php-${{ matrix.php-version }}-${{ hashFiles('composer.json') }}
           restore-keys: |
-            ${{ runner.os }}-php-
+            ${{ runner.os }}-php-${{ matrix.php-version }}-
       - name: Install dependencies
-        if: steps.composer-cache.outputs.cache-hit != 'true'
-        run: composer install --prefer-dist --no-progress --no-suggest
-      - name: Install components
-        run: composer install
-      - name: Install phpunit
-        run: composer require phpunit/phpunit:^9
-      - name: vendor/bin/phpunit
-        run: vendor/bin/phpunit
+        run: composer install --prefer-dist --no-progress
+      - name: Install PHPUnit
+        run: composer require --dev --no-update phpunit/phpunit:^9
+      - name: Update PHPUnit dependencies
+        run: composer update phpunit/phpunit --with-dependencies --prefer-dist --no-progress
+      - name: Run PHPUnit
+        run: vendor/bin/phpunit --no-configuration --bootstrap vendor/autoload.php tests
+
+  legacy-probe:
+    name: Legacy probe PHP ${{ matrix.php-version }}
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - php-version: '7.0'
+            phpunit-version: '6'
+          - php-version: '7.1'
+            phpunit-version: '7'
+          - php-version: '7.2'
+            phpunit-version: '8'
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php-version }}
+          tools: composer:v2, phpunit:${{ matrix.phpunit-version }}
+      - name: Validate composer.json
+        run: composer validate --no-check-lock
+      - name: Check dependency compatibility
+        run: composer update --prefer-dist --no-progress
+      - name: Run PHPUnit compatibility probe
+        run: phpunit --no-configuration --bootstrap vendor/autoload.php tests
+
+  future-probe:
+    name: Future probe PHP 8.6
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.6'
+          tools: composer, phpunit
+      - name: Validate composer.json
+        run: composer validate --no-check-lock
+      - name: Install dependencies
+        run: composer install --prefer-dist --no-progress
+      - name: Run PHPUnit compatibility probe
+        run: phpunit --no-configuration --bootstrap vendor/autoload.php tests

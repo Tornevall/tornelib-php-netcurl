@@ -123,43 +123,18 @@ class DomDocumentModel implements \IteratorAggregate, \JsonSerializable
     }
 
     /**
-     * Discover namespaces declared on the root element.
+     * Discover namespaces available on the document root.
      *
-     * The default XML namespace is mapped to the prefix "default" so callers
-     * can query it using expressions such as //default:item.
+     * Namespace declarations are not normal DOM attributes in PHP, so use the
+     * XPath namespace axis instead of iterating DOMElement::attributes. The
+     * built-in XML namespace is intentionally excluded. The default namespace
+     * is mapped to the synthetic prefix "default".
      *
      * @return array
      */
     public function getNamespaces()
     {
-        $return = [];
-        $root = $this->document->documentElement;
-
-        if (!$root instanceof \DOMElement) {
-            return $return;
-        }
-
-        $defaultNamespace = $root->lookupNamespaceURI(null);
-        if (is_string($defaultNamespace) && $defaultNamespace !== '') {
-            $return['default'] = $defaultNamespace;
-        }
-
-        if (!$root->hasAttributes()) {
-            return $return;
-        }
-
-        foreach ($root->attributes as $attribute) {
-            if ($attribute->nodeName === 'xmlns') {
-                $return['default'] = $attribute->nodeValue;
-                continue;
-            }
-
-            if (strpos($attribute->nodeName, 'xmlns:') === 0) {
-                $return[substr($attribute->nodeName, 6)] = $attribute->nodeValue;
-            }
-        }
-
-        return $return;
+        return self::discoverNamespaces($this->document);
     }
 
     /**
@@ -264,5 +239,57 @@ class DomDocumentModel implements \IteratorAggregate, \JsonSerializable
         }
 
         return $document;
+    }
+
+    /**
+     * @param \DOMDocument $document
+     * @return array
+     */
+    private static function discoverNamespaces(\DOMDocument $document)
+    {
+        $return = [];
+        $root = $document->documentElement;
+
+        if (!$root instanceof \DOMElement) {
+            return $return;
+        }
+
+        $finder = new \DOMXPath($document);
+        $namespaceNodes = $finder->query('namespace::*', $root);
+        if ($namespaceNodes === false) {
+            return $return;
+        }
+
+        foreach ($namespaceNodes as $namespaceNode) {
+            $namespace = (string)$namespaceNode->nodeValue;
+            if ($namespace === '' || $namespace === 'http://www.w3.org/XML/1998/namespace') {
+                continue;
+            }
+
+            $nodeName = (string)$namespaceNode->nodeName;
+            $localName = isset($namespaceNode->localName) ? (string)$namespaceNode->localName : '';
+            $prefix = isset($namespaceNode->prefix) ? (string)$namespaceNode->prefix : '';
+
+            if ($nodeName === 'xmlns' || ($prefix === '' && $localName === 'xmlns')) {
+                $return['default'] = $namespace;
+                continue;
+            }
+
+            if (strpos($nodeName, 'xmlns:') === 0) {
+                $return[substr($nodeName, 6)] = $namespace;
+                continue;
+            }
+
+            if ($prefix === 'xmlns' && $localName !== '') {
+                $return[$localName] = $namespace;
+                continue;
+            }
+
+            if ($nodeName !== '' && $nodeName !== 'xml') {
+                $return[$nodeName] = $namespace;
+            }
+        }
+
+        return $return;
     }
 }

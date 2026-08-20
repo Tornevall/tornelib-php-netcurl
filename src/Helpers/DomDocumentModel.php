@@ -50,6 +50,10 @@ class DomDocumentModel implements \IteratorAggregate, \JsonSerializable
             throw new \InvalidArgumentException('DOM content must be a string.');
         }
 
+        if (trim($content) === '') {
+            throw new \RuntimeException('Unable to parse DOM content: input is empty.');
+        }
+
         $format = strtolower((string)$format);
         if (!in_array($format, [self::FORMAT_AUTO, self::FORMAT_XML, self::FORMAT_HTML], true)) {
             throw new \InvalidArgumentException(sprintf('Unsupported DOM format: %s', $format));
@@ -107,7 +111,7 @@ class DomDocumentModel implements \IteratorAggregate, \JsonSerializable
             $finder->registerNamespace($prefix, $namespace);
         }
 
-        $result = $finder->query($xpath);
+        $result = @$finder->query((string)$xpath);
         if ($result === false) {
             throw new \InvalidArgumentException(sprintf('Invalid XPath query: %s', $xpath));
         }

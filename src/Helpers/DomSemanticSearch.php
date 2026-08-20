@@ -99,18 +99,19 @@ class DomSemanticSearch
         $groups = [];
 
         self::walk($document->getRoot(), function (DomNodeModel $node) use (&$groups) {
-            $signature = self::getStructureSignature($node);
-            if ($signature === null) {
-                return true;
+            foreach (self::getStructureSignatures($node) as $signature) {
+                if (!isset($groups[$signature['key']])) {
+                    $groups[$signature['key']] = ['signature' => $signature, 'nodes' => []];
+                }
+                $groups[$signature['key']]['nodes'][] = $node;
             }
-            if (!isset($groups[$signature['key']])) {
-                $groups[$signature['key']] = ['signature' => $signature, 'nodes' => []];
-            }
-            $groups[$signature['key']]['nodes'][] = $node;
             return true;
         });
 
-        $candidates = [];
+        // Key by XPath so a stable loose class signature can replace an exact
+        // signature that accidentally split the same row family on optional
+        // modifier classes (for example "card" vs "card featured").
+        $candidatesByXpath = [];
         foreach ($groups as $group) {
             $count = count($group['nodes']);
             if ($count < $minimumOccurrences) {
@@ -121,8 +122,9 @@ class DomSemanticSearch
             $sample = $group['nodes'][0];
             $signature = $group['signature'];
             $semanticNames = self::getSemanticTokens($sample);
-            $candidates[] = [
-                'xpath' => self::buildStructureXPath($signature),
+            $xpath = self::buildStructureXPath($signature);
+            $candidate = [
+                'xpath' => $xpath,
                 'count' => $count,
                 'score' => self::scoreStructure($sample, $count, $semanticNames),
                 'tag' => $signature['tag'],
@@ -136,8 +138,13 @@ class DomSemanticSearch
                     'text' => self::preview(self::getTextContent($sample), 240),
                 ],
             ];
+
+            if (!isset($candidatesByXpath[$xpath]) || $count > $candidatesByXpath[$xpath]['count']) {
+                $candidatesByXpath[$xpath] = $candidate;
+            }
         }
 
+        $candidates = array_values($candidatesByXpath);
         usort($candidates, function ($a, $b) {
             if ($a['score'] === $b['score']) {
                 return $b['count'] <=> $a['count'];
@@ -296,6 +303,35 @@ class DomSemanticSearch
             'main' => ['content', 'main'],
         ];
         return isset($map[$local]) ? $map[$local] : [];
+    }
+
+    /**
+     * Return both the exact structure signature and stable per-class
+     * signatures. The latter are intentionally looser so optional modifier
+     * classes do not split one repeated row family into several candidates.
+     *
+     * @return array<int,array<string,mixed>>
+     */
+    private static function getStructureSignatures(DomNodeModel $node)
+    {
+        $signature = self::getStructureSignature($node);
+        if ($signature === null) {
+            return [];
+        }
+
+        $signatures = [$signature];
+        foreach ($signature['classes'] as $class) {
+            $signatures[] = [
+                'key' => implode('|', ['class', $signature['tag'], $class]),
+                'tag' => $signature['tag'],
+                'classes' => [$class],
+                'role' => '',
+                'itemprop' => '',
+                'itemtype' => '',
+            ];
+        }
+
+        return $signatures;
     }
 
     private static function getStructureSignature(DomNodeModel $node)

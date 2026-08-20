@@ -103,7 +103,7 @@ HTML;
         $candidates = DomSemanticSearch::discoverRepeatedStructures($document, 2, 50);
         $candidate = $this->findCandidateByClass($candidates, 'inner_article');
 
-        static::assertNotNull($candidate, 'Expected discovery to find MovieZine a.inner_article rows.');
+        static::assertNotNull($candidate, 'Expected discovery to find MovieZine inner_article rows.');
         static::assertSame(20, $candidate['count']);
 
         $rows = $document->query($candidate['xpath']);
@@ -114,13 +114,15 @@ HTML;
         $titles = DomSemanticSearch::findBySemanticNames($first, ['title', 'headline']);
         $descriptions = DomSemanticSearch::findBySemanticNames($first, ['description', 'lead', 'summary']);
         $dates = DomSemanticSearch::findBySemanticNames($first, ['date', 'published', 'time']);
+        $links = DomSemanticSearch::findBySemanticNames($first, ['link', 'url']);
 
         static::assertNotNull($titles->first());
         static::assertSame('h3', $titles->first()->getName());
         static::assertNotSame('', DomSemanticSearch::getTextContent($titles->first()));
         static::assertNotNull($descriptions->first());
         static::assertNotNull($dates->first());
-        static::assertNotEmpty($first->getAttribute('href'));
+        static::assertNotNull($links->first());
+        static::assertNotEmpty($links->first()->getAttribute('href'));
     }
 
     /** @testdox Socialdemokraterna Sitevision snapshot exposes row, heading, link and description candidates. */

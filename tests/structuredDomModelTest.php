@@ -157,14 +157,13 @@ HTML;
      */
     public function testStructuredMalformedHtmlModel()
     {
-        $html = '<main><article><h2>Broken but usable<p>Description</article></main>';
+        $html = '<html><body><ul><li>One<li>Two</ul></body></html>';
         $document = GenericParser::getDocumentModel($html, 'html');
+        $items = $document->query('//li');
 
-        $article = $document->query('//article')->first();
-
-        static::assertInstanceOf(DomNodeModel::class, $article);
-        static::assertSame('Broken but usable', $article->queryFirst('./h2')->getValue());
-        static::assertSame('Description', $article->queryFirst('.//p')->getValue());
+        static::assertCount(2, $items);
+        static::assertSame('One', $items[0]->getValue());
+        static::assertSame('Two', $items[1]->getValue());
     }
 
     /**

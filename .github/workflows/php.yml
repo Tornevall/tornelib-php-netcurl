@@ -67,6 +67,20 @@ jobs:
       - name: Run PHPUnit compatibility probe
         run: phpunit --no-configuration --bootstrap vendor/autoload.php tests
 
+  php56-syntax-probe:
+    name: Legacy syntax probe PHP 5.6
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '5.6'
+          tools: none
+      - name: Lint source on PHP 5.6
+        run: find src -name '*.php' -print0 | xargs -0 -n1 php -l
+
   future-probe:
     name: Future probe PHP 8.6
     runs-on: ubuntu-latest

@@ -110,6 +110,27 @@ XML;
         static::assertSame('<article>Full content</article>', $item->queryFirst('./content:encoded')->getValue());
     }
 
+    /** @testdox Multiple prefixed RSS namespaces stay available together. */
+    public function testMultipleRssNamespaceExtensions()
+    {
+        $xml = <<<'XML'
+<rss xmlns:media="http://search.yahoo.com/mrss/" xmlns:itunes="http://www.itunes.com/dtds/podcast-1.0.dtd">
+    <channel>
+        <item>
+            <media:content url="https://example.test/audio.mp3" type="audio/mpeg" />
+            <itunes:duration>01:02:03</itunes:duration>
+        </item>
+    </channel>
+</rss>
+XML;
+
+        $item = GenericParser::getDocumentModel($xml, 'xml')->query('/rss/channel/item')->first();
+
+        static::assertSame('https://example.test/audio.mp3', $item->queryFirst('./media:content/@url')->getValue());
+        static::assertSame('audio/mpeg', $item->queryFirst('./media:content/@type')->getValue());
+        static::assertSame('01:02:03', $item->queryFirst('./itunes:duration')->getValue());
+    }
+
     /** @testdox Sitemap default and XHTML namespaces can be traversed without local-name workarounds. */
     public function testSitemapNamespaceTraversal()
     {

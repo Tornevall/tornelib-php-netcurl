@@ -71,6 +71,30 @@ HTML;
         static::assertCount(3, $document->query($candidate['xpath']));
     }
 
+    /** @testdox Optional modifier classes do not split one repeated row family. */
+    public function testRepeatedStructureDiscoveryIgnoresOptionalModifierClasses()
+    {
+        $html = <<<'HTML'
+<!DOCTYPE html>
+<html><body>
+<div class="results">
+    <article class="news-card featured"><h2>One</h2><a href="/one">One</a></article>
+    <article class="news-card"><h2>Two</h2><a href="/two">Two</a></article>
+    <article class="news-card sponsored"><h2>Three</h2><a href="/three">Three</a></article>
+</div>
+</body></html>
+HTML;
+
+        $document = GenericParser::getDocumentModel($html, 'html');
+        $candidates = DomSemanticSearch::discoverRepeatedStructures($document, 2, 20);
+        $candidate = $this->findCandidateByClass($candidates, 'news-card');
+
+        static::assertNotNull($candidate);
+        static::assertSame(3, $candidate['count']);
+        static::assertSame(['news-card'], $candidate['classes']);
+        static::assertCount(3, $document->query($candidate['xpath']));
+    }
+
     /** @testdox Existing real MovieZine snapshot is discoverable without legacy XPath rules. */
     public function testMovieZineSnapshotDiscovery()
     {

@@ -152,6 +152,22 @@ HTML;
     }
 
     /**
+     * @testdox Malformed HTML is accepted when HTML mode is explicitly selected.
+     * @since 6.1.11
+     */
+    public function testStructuredMalformedHtmlModel()
+    {
+        $html = '<main><article><h2>Broken but usable<p>Description</article></main>';
+        $document = GenericParser::getDocumentModel($html, 'html');
+
+        $article = $document->query('//article')->first();
+
+        static::assertInstanceOf(DomNodeModel::class, $article);
+        static::assertSame('Broken but usable', $article->queryFirst('./h2')->getValue());
+        static::assertSame('Description', $article->queryFirst('.//p')->getValue());
+    }
+
+    /**
      * @testdox Explicit namespaces can be used for XML XPath queries.
      * @since 6.1.11
      */
@@ -176,6 +192,50 @@ XML;
     }
 
     /**
+     * @testdox Default XML namespaces are exposed through the default synthetic prefix.
+     * @since 6.1.11
+     */
+    public function testStructuredDefaultNamespaceDiscovery()
+    {
+        $xml = '<feed xmlns="urn:example:feed"><entry><title>Automatic</title></entry></feed>';
+        $document = GenericParser::getDocumentModel($xml, 'xml');
+
+        static::assertSame(['default' => 'urn:example:feed'], $document->getNamespaces());
+
+        $entry = $document->query('//default:entry')->first();
+        static::assertInstanceOf(DomNodeModel::class, $entry);
+        static::assertSame('Automatic', $entry->queryFirst('./default:title')->getValue());
+    }
+
+    /**
+     * @testdox Prefixed XML namespaces can be discovered and queried.
+     * @since 6.1.11
+     */
+    public function testStructuredPrefixedNamespaceDiscovery()
+    {
+        $xml = <<<'XML'
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">
+    <url>
+        <loc>https://example.test/one</loc>
+        <xhtml:link rel="alternate" hreflang="sv" href="https://example.test/sv/one" />
+    </url>
+</urlset>
+XML;
+        $document = GenericParser::getDocumentModel($xml, 'xml');
+        $namespaces = $document->getNamespaces();
+
+        static::assertSame('http://www.sitemaps.org/schemas/sitemap/0.9', $namespaces['default']);
+        static::assertSame('http://www.w3.org/1999/xhtml', $namespaces['xhtml']);
+
+        $url = $document->query('//default:url')->first();
+        static::assertSame('https://example.test/one', $url->queryFirst('./default:loc')->getValue());
+        static::assertSame(
+            'https://example.test/sv/one',
+            $url->queryFirst('./xhtml:link/@href')->getValue()
+        );
+    }
+
+    /**
      * @testdox Auto mode recognizes well-formed XML without an XML declaration.
      * @since 6.1.11
      */
@@ -185,5 +245,183 @@ XML;
 
         static::assertSame('xml', $document->getFormat());
         static::assertSame('value', $document->getRoot()->child->getValue());
+    }
+
+    /**
+     * @testdox Auto mode recognizes explicit HTML documents as HTML.
+     * @since 6.1.11
+     */
+    public function testStructuredAutoDetectsHtmlDocument()
+    {
+        $document = GenericParser::getDocumentModel('<!DOCTYPE html><html><body><p>Hello</p></body></html>');
+
+        static::assertSame('html', $document->getFormat());
+        static::assertSame('Hello', $document->query('//p')->first()->getValue());
+    }
+
+    /**
+     * @testdox Repeated child names become ordered arrays while single children remain scalar values.
+     * @since 6.1.11
+     */
+    public function testStructuredRepeatedChildrenSerialization()
+    {
+        $document = GenericParser::getDocumentModel(
+            '<root><tag>one</tag><tag>two</tag><single>three</single></root>',
+            'xml'
+        );
+
+        static::assertSame(
+            [
+                'root' => [
+                    'tag' => ['one', 'two'],
+                    'single' => 'three',
+                ],
+            ],
+            $document->toArray()
+        );
+    }
+
+    /**
+     * @testdox Attributes and direct text are preserved together in JSON-friendly output.
+     * @since 6.1.11
+     */
+    public function testStructuredAttributeAndValueSerialization()
+    {
+        $document = GenericParser::getDocumentModel('<root><price currency="SEK">199</price></root>', 'xml');
+
+        static::assertSame(
+            [
+                'root' => [
+                    'price' => [
+                        '_attributes' => ['currency' => 'SEK'],
+                        '_value' => '199',
+                    ],
+                ],
+            ],
+            $document->toArray()
+        );
+    }
+
+    /**
+     * @testdox CDATA content is exposed as the node value without parsing embedded markup as children.
+     * @since 6.1.11
+     */
+    public function testStructuredCdataValue()
+    {
+        $xml = '<root><description><![CDATA[<p>Hello & goodbye</p>]]></description></root>';
+        $description = GenericParser::getDocumentModel($xml, 'xml')->getRoot()->description;
+
+        static::assertSame('<p>Hello & goodbye</p>', $description->getValue());
+        static::assertCount(0, $description);
+    }
+
+    /**
+     * @testdox XML entities are decoded by DOM before values are exposed.
+     * @since 6.1.11
+     */
+    public function testStructuredXmlEntityValue()
+    {
+        $xml = '<root><title>Tom &amp; Jerry &lt;3</title></root>';
+        $title = GenericParser::getDocumentModel($xml, 'xml')->getRoot()->title;
+
+        static::assertSame('Tom & Jerry <3', $title->getValue());
+    }
+
+    /**
+     * @testdox Empty elements remain present and serialize to null.
+     * @since 6.1.11
+     */
+    public function testStructuredEmptyElement()
+    {
+        $root = GenericParser::getDocumentModel('<root><empty/><blank>   </blank></root>', 'xml')->getRoot();
+
+        static::assertTrue(isset($root->empty));
+        static::assertNull($root->empty->getValue());
+        static::assertNull($root->blank->getValue());
+        static::assertSame(['empty' => null, 'blank' => null], $root->toArray());
+    }
+
+    /**
+     * @testdox Node models support property, array, iterator and count traversal consistently.
+     * @since 6.1.11
+     */
+    public function testStructuredNodeTraversalInterfaces()
+    {
+        $root = GenericParser::getDocumentModel('<root><one>1</one><two>2</two></root>', 'xml')->getRoot();
+
+        static::assertCount(2, $root);
+        static::assertTrue(isset($root['one']));
+        static::assertFalse(isset($root['missing']));
+        static::assertSame('1', $root['one']->getValue());
+        static::assertSame('2', $root->two->getValue());
+
+        $names = [];
+        foreach ($root as $child) {
+            $names[] = $child->getName();
+        }
+
+        static::assertSame(['one', 'two'], $names);
+    }
+
+    /**
+     * @testdox Node collections support count, first, all, array access and iteration.
+     * @since 6.1.11
+     */
+    public function testStructuredCollectionTraversalInterfaces()
+    {
+        $items = GenericParser::getModelsFromXPath('<root><item>A</item><item>B</item></root>', '//item', 'xml');
+
+        static::assertCount(2, $items);
+        static::assertSame('A', $items->first()->getValue());
+        static::assertCount(2, $items->all());
+        static::assertTrue(isset($items[1]));
+        static::assertFalse(isset($items[2]));
+        static::assertNull($items[2]);
+        static::assertSame(['A', 'B'], $items->toArray());
+        static::assertSame(json_encode(['A', 'B']), json_encode($items));
+    }
+
+    /**
+     * @testdox A document iterator exposes direct children of the root node in source order.
+     * @since 6.1.11
+     */
+    public function testStructuredDocumentIterator()
+    {
+        $document = GenericParser::getDocumentModel('<root><first/><second/></root>', 'xml');
+        $names = [];
+
+        foreach ($document as $child) {
+            $names[] = $child->getName();
+        }
+
+        static::assertSame(['first', 'second'], $names);
+    }
+
+    /**
+     * @testdox XPath queries with no matches return an empty collection rather than null.
+     * @since 6.1.11
+     */
+    public function testStructuredNoXPathMatchesReturnsEmptyCollection()
+    {
+        $document = GenericParser::getDocumentModel('<root><item>one</item></root>', 'xml');
+        $matches = $document->query('//missing');
+
+        static::assertInstanceOf(DomNodeCollection::class, $matches);
+        static::assertCount(0, $matches);
+        static::assertNull($matches->first());
+    }
+
+    /**
+     * @testdox Attribute XPath matches are represented as node models with their attribute value.
+     * @since 6.1.11
+     */
+    public function testStructuredAttributeXPathResult()
+    {
+        $document = GenericParser::getDocumentModel('<root><link href="https://example.test/"/></root>', 'xml');
+        $attribute = $document->query('//link/@href')->first();
+
+        static::assertInstanceOf(DomNodeModel::class, $attribute);
+        static::assertSame('href', $attribute->getName());
+        static::assertSame('https://example.test/', $attribute->getValue());
     }
 }

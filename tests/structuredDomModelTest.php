@@ -99,6 +99,33 @@ XML;
     }
 
     /**
+     * @testdox XPath matches can be queried relative to each matched model.
+     * @since 6.1.11
+     */
+    public function testStructuredRelativeXPathOnMatchedNode()
+    {
+        $xml = <<<'XML'
+<feed>
+    <item id="one">
+        <title>First item</title>
+        <link href="https://example.test/one" />
+    </item>
+    <item id="two">
+        <title>Second item</title>
+        <link href="https://example.test/two" />
+    </item>
+</feed>
+XML;
+
+        $items = GenericParser::getModelsFromXPath($xml, '/feed/item', 'xml');
+
+        static::assertCount(2, $items);
+        static::assertSame('First item', $items[0]->queryFirst('./title')->getValue());
+        static::assertSame('https://example.test/one', $items[0]->queryFirst('./link')->getAttribute('href'));
+        static::assertSame('https://example.test/two', $items[1]->queryFirst('./link/@href')->getValue());
+    }
+
+    /**
      * @testdox HTML uses the forgiving HTML parser and remains XPath-queryable.
      * @since 6.1.11
      */
@@ -121,6 +148,7 @@ HTML;
         static::assertCount(2, $articles);
         static::assertSame('1', $articles[0]->getAttribute('data-id'));
         static::assertSame('First', $articles[0]->h2->getValue());
+        static::assertSame('First', $articles[0]->queryFirst('./h2')->getValue());
     }
 
     /**
@@ -141,6 +169,10 @@ XML;
 
         static::assertCount(1, $entries);
         static::assertSame('Namespaced', $entries[0]->get('title')->getValue());
+        static::assertSame(
+            'Namespaced',
+            $entries[0]->queryFirst('./feed:title', ['feed' => 'urn:example:feed'])->getValue()
+        );
     }
 
     /**

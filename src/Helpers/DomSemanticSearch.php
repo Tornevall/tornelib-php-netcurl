@@ -110,7 +110,7 @@ class DomSemanticSearch
 
         // Key by XPath so a stable loose class signature can replace an exact
         // signature that accidentally split the same row family on optional
-        // modifier classes (for example "card" vs "card featured").
+        // modifier classes or even different wrapper tag names.
         $candidatesByXpath = [];
         foreach ($groups as $group) {
             $count = count($group['nodes']);
@@ -306,9 +306,9 @@ class DomSemanticSearch
     }
 
     /**
-     * Return both the exact structure signature and stable per-class
-     * signatures. The latter are intentionally looser so optional modifier
-     * classes do not split one repeated row family into several candidates.
+     * Return the exact signature plus loose class signatures. A class-only
+     * wildcard signature is included as well, because real sites sometimes use
+     * the same row class on different wrapper tags (MovieZine is one example).
      *
      * @return array<int,array<string,mixed>>
      */
@@ -322,8 +322,16 @@ class DomSemanticSearch
         $signatures = [$signature];
         foreach ($signature['classes'] as $class) {
             $signatures[] = [
-                'key' => implode('|', ['class', $signature['tag'], $class]),
+                'key' => implode('|', ['class-tag', $signature['tag'], $class]),
                 'tag' => $signature['tag'],
+                'classes' => [$class],
+                'role' => '',
+                'itemprop' => '',
+                'itemtype' => '',
+            ];
+            $signatures[] = [
+                'key' => implode('|', ['class-any-tag', $class]),
+                'tag' => '*',
                 'classes' => [$class],
                 'role' => '',
                 'itemprop' => '',
@@ -366,7 +374,10 @@ class DomSemanticSearch
 
     private static function buildStructureXPath(array $signature)
     {
-        $conditions = ['local-name()=' . self::xpathLiteral($signature['tag'])];
+        $conditions = [];
+        if ($signature['tag'] !== '*') {
+            $conditions[] = 'local-name()=' . self::xpathLiteral($signature['tag']);
+        }
         foreach ($signature['classes'] as $class) {
             $conditions[] = "contains(concat(' ', normalize-space(@class), ' '), " . self::xpathLiteral(' ' . $class . ' ') . ')';
         }
@@ -380,7 +391,9 @@ class DomSemanticSearch
 
     private static function scoreStructure(DomNodeModel $sample, $count, array $semanticNames)
     {
-        $score = min(20, (int)$count * 2);
+        // Occurrence count must matter enough that a complete row family wins
+        // over a narrower structural variant of the same content.
+        $score = min(40, (int)$count * 2);
         $tag = strtolower((string)$sample->getName());
         $tagScores = ['article' => 10, 'item' => 10, 'entry' => 10, 'li' => 5, 'tr' => 5, 'a' => 3, 'section' => 2, 'div' => 1];
         $score += isset($tagScores[$tag]) ? $tagScores[$tag] : 0;

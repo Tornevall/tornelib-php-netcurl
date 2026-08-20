@@ -25,13 +25,17 @@ class DomNodeModel implements \ArrayAccess, \Countable, \IteratorAggregate, \Jso
     /** @var DomNodeModel[] */
     private $children = [];
 
+    /** @var \DOMNode|null */
+    private $domNode;
+
     /**
      * @param string $name
      * @param string|null $value
      * @param array $attributes
      * @param DomNodeModel[] $children
+     * @param \DOMNode|null $domNode
      */
-    public function __construct($name, $value = null, array $attributes = [], array $children = [])
+    public function __construct($name, $value = null, array $attributes = [], array $children = [], $domNode = null)
     {
         foreach ($children as $child) {
             if (!$child instanceof self) {
@@ -39,10 +43,15 @@ class DomNodeModel implements \ArrayAccess, \Countable, \IteratorAggregate, \Jso
             }
         }
 
+        if ($domNode !== null && !$domNode instanceof \DOMNode) {
+            throw new \InvalidArgumentException('DomNodeModel source node must be a DOMNode instance.');
+        }
+
         $this->name = (string)$name;
         $this->value = $value === null ? null : (string)$value;
         $this->attributes = $attributes;
         $this->children = array_values($children);
+        $this->domNode = $domNode;
     }
 
     /**
@@ -83,7 +92,7 @@ class DomNodeModel implements \ArrayAccess, \Countable, \IteratorAggregate, \Jso
             $value = null;
         }
 
-        return new self($node->nodeName, $value, $attributes, $children);
+        return new self($node->nodeName, $value, $attributes, $children, $node);
     }
 
     /**
@@ -159,6 +168,69 @@ class DomNodeModel implements \ArrayAccess, \Countable, \IteratorAggregate, \Jso
         }
 
         return new DomNodeCollection($nodes);
+    }
+
+    /**
+     * Run an XPath query relative to this node.
+     *
+     * This is intentionally separate from get()/children(): simple XML/RSS can
+     * use object traversal, while irregular HTML and namespaced XML can keep
+     * using XPath without falling back to the legacy rendered-array API.
+     *
+     * @param string $xpath
+     * @param array $namespaces prefix => namespace URI
+     * @return DomNodeCollection
+     */
+    public function query($xpath, array $namespaces = [])
+    {
+        if (!$this->domNode instanceof \DOMNode) {
+            throw new \LogicException('Relative XPath requires a model created from a DOM node.');
+        }
+
+        $document = $this->domNode instanceof \DOMDocument ? $this->domNode : $this->domNode->ownerDocument;
+        if (!$document instanceof \DOMDocument) {
+            throw new \LogicException('Relative XPath requires an owner DOMDocument.');
+        }
+
+        $finder = new \DOMXPath($document);
+        $registered = self::getDocumentNamespaces($document);
+
+        foreach ($namespaces as $prefix => $namespace) {
+            $registered[$prefix] = $namespace;
+        }
+
+        foreach ($registered as $prefix => $namespace) {
+            if ($prefix === '' || $namespace === '') {
+                continue;
+            }
+            $finder->registerNamespace($prefix, $namespace);
+        }
+
+        $result = $finder->query((string)$xpath, $this->domNode);
+        if ($result === false) {
+            throw new \InvalidArgumentException(sprintf('Invalid XPath query: %s', $xpath));
+        }
+
+        $nodes = [];
+        foreach ($result as $node) {
+            if ($node instanceof \DOMNode) {
+                $nodes[] = self::fromDomNode($node);
+            }
+        }
+
+        return new DomNodeCollection($nodes);
+    }
+
+    /**
+     * Return the first model from a relative XPath query.
+     *
+     * @param string $xpath
+     * @param array $namespaces
+     * @return self|null
+     */
+    public function queryFirst($xpath, array $namespaces = [])
+    {
+        return $this->query($xpath, $namespaces)->first();
     }
 
     /**
@@ -293,5 +365,43 @@ class DomNodeModel implements \ArrayAccess, \Countable, \IteratorAggregate, \Jso
     public function jsonSerialize()
     {
         return $this->toArray();
+    }
+
+    /**
+     * Discover namespaces declared on the document root.
+     *
+     * @param \DOMDocument $document
+     * @return array
+     */
+    private static function getDocumentNamespaces(\DOMDocument $document)
+    {
+        $return = [];
+        $root = $document->documentElement;
+
+        if (!$root instanceof \DOMElement) {
+            return $return;
+        }
+
+        $defaultNamespace = $root->lookupNamespaceURI(null);
+        if (is_string($defaultNamespace) && $defaultNamespace !== '') {
+            $return['default'] = $defaultNamespace;
+        }
+
+        if (!$root->hasAttributes()) {
+            return $return;
+        }
+
+        foreach ($root->attributes as $attribute) {
+            if ($attribute->nodeName === 'xmlns') {
+                $return['default'] = $attribute->nodeValue;
+                continue;
+            }
+
+            if (strpos($attribute->nodeName, 'xmlns:') === 0) {
+                $return[substr($attribute->nodeName, 6)] = $attribute->nodeValue;
+            }
+        }
+
+        return $return;
     }
 }

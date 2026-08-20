@@ -368,7 +368,7 @@ class DomNodeModel implements \ArrayAccess, \Countable, \IteratorAggregate, \Jso
     }
 
     /**
-     * Discover namespaces declared on the document root.
+     * Discover namespaces available on the document root.
      *
      * @param \DOMDocument $document
      * @return array
@@ -382,23 +382,39 @@ class DomNodeModel implements \ArrayAccess, \Countable, \IteratorAggregate, \Jso
             return $return;
         }
 
-        $defaultNamespace = $root->lookupNamespaceURI(null);
-        if (is_string($defaultNamespace) && $defaultNamespace !== '') {
-            $return['default'] = $defaultNamespace;
-        }
-
-        if (!$root->hasAttributes()) {
+        $finder = new \DOMXPath($document);
+        $namespaceNodes = $finder->query('namespace::*', $root);
+        if ($namespaceNodes === false) {
             return $return;
         }
 
-        foreach ($root->attributes as $attribute) {
-            if ($attribute->nodeName === 'xmlns') {
-                $return['default'] = $attribute->nodeValue;
+        foreach ($namespaceNodes as $namespaceNode) {
+            $namespace = (string)$namespaceNode->nodeValue;
+            if ($namespace === '' || $namespace === 'http://www.w3.org/XML/1998/namespace') {
                 continue;
             }
 
-            if (strpos($attribute->nodeName, 'xmlns:') === 0) {
-                $return[substr($attribute->nodeName, 6)] = $attribute->nodeValue;
+            $nodeName = (string)$namespaceNode->nodeName;
+            $localName = isset($namespaceNode->localName) ? (string)$namespaceNode->localName : '';
+            $prefix = isset($namespaceNode->prefix) ? (string)$namespaceNode->prefix : '';
+
+            if ($nodeName === 'xmlns' || ($prefix === '' && $localName === 'xmlns')) {
+                $return['default'] = $namespace;
+                continue;
+            }
+
+            if (strpos($nodeName, 'xmlns:') === 0) {
+                $return[substr($nodeName, 6)] = $namespace;
+                continue;
+            }
+
+            if ($prefix === 'xmlns' && $localName !== '') {
+                $return[$localName] = $namespace;
+                continue;
+            }
+
+            if ($nodeName !== '' && $nodeName !== 'xml') {
+                $return[$nodeName] = $namespace;
             }
         }
 

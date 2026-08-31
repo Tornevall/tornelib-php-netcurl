@@ -102,7 +102,6 @@ class GenericParser
             case (bool)preg_match('/\/json/i', $contentType):
                 // If this check is not a typecasted check, things will break bad.
                 if (is_array($content)) {
-                    // Did we get bad content?
                     $content = json_encode($content);
                 }
                 $return = json_decode($content, false);
@@ -126,6 +125,12 @@ class GenericParser
             method_exists(SimpleDomParser::class, $name)
         ) {
             return call_user_func_array([SimpleDomParser::class, $name], $arguments);
+        }
+
+        if (class_exists(StructuredDomParser::class) &&
+            method_exists(StructuredDomParser::class, $name)
+        ) {
+            return call_user_func_array([StructuredDomParser::class, $name], $arguments);
         }
 
         throw new Exception(

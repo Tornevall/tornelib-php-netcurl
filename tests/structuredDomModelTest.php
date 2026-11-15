@@ -151,6 +151,31 @@ HTML;
         static::assertSame('First', $articles[0]->queryFirst('./h2')->getValue());
     }
 
+    /** @testdox UTF-8 HTML fragments preserve text and attribute values. */
+    public function testUtf8HtmlFragmentWithoutCharset()
+    {
+        $html = '<section><article><h2>Räksmörgås</h2>' .
+            '<a title="Öppet" href="/kafé">Läs mer</a></article></section>';
+        $document = GenericParser::getDocumentModel($html, 'html');
+        $heading = $document->query('//h2')->first();
+        $link = $document->query('//a')->first();
+
+        static::assertSame('Räksmörgås', $heading->getValue());
+        static::assertSame('Öppet', $link->getAttribute('title'));
+        static::assertSame('/kafé', $link->getAttribute('href'));
+        static::assertSame('Räksmörgås', \TorneLIB\Helpers\DomSemanticSearch::getTextContent($heading));
+    }
+
+    /** @testdox An explicit legacy HTML charset declaration is respected. */
+    public function testExplicitLatin1HtmlCharset()
+    {
+        $html = '<html><head><meta charset="ISO-8859-1"></head><body><h2>R' .
+            "\xE4" . 'ksm' . "\xF6" . 'rg' . "\xE5" . 's</h2></body></html>';
+        $document = GenericParser::getDocumentModel($html, 'html');
+
+        static::assertSame('Räksmörgås', $document->query('//h2')->first()->getValue());
+    }
+
     /**
      * @testdox Malformed HTML is accepted when HTML mode is explicitly selected.
      * @since 6.1.11

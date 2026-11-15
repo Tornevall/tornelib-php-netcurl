@@ -350,7 +350,8 @@ class DomSemanticSearch
         }
 
         $attributes = $node->getAttributes();
-        $classes = self::attributeTokens(isset($attributes['class']) ? $attributes['class'] : null);
+        // Preserve source class casing for case-sensitive XPath predicates.
+        $classes = self::attributeTokens(isset($attributes['class']) ? $attributes['class'] : null, false);
         sort($classes);
         $role = isset($attributes['role']) ? trim((string)$attributes['role']) : '';
         $itemprop = isset($attributes['itemprop']) ? trim((string)$attributes['itemprop']) : '';
@@ -376,7 +377,13 @@ class DomSemanticSearch
     {
         $conditions = [];
         if ($signature['tag'] !== '*') {
-            $conditions[] = 'local-name()=' . self::xpathLiteral($signature['tag']);
+            // XPath local-name() excludes namespace prefixes.
+            $tag = (string)$signature['tag'];
+            if (strpos($tag, ':') !== false) {
+                $parts = explode(':', $tag);
+                $tag = end($parts);
+            }
+            $conditions[] = 'local-name()=' . self::xpathLiteral($tag);
         }
         foreach ($signature['classes'] as $class) {
             $conditions[] = "contains(concat(' ', normalize-space(@class), ' '), " . self::xpathLiteral(' ' . $class . ' ') . ')';
@@ -435,14 +442,20 @@ class DomSemanticSearch
         }
     }
 
-    private static function attributeTokens($value)
+    private static function attributeTokens($value, $lowercase = true)
     {
         $value = trim((string)$value);
         if ($value === '') {
             return [];
         }
         $tokens = preg_split('/\s+/u', $value, -1, PREG_SPLIT_NO_EMPTY);
-        return is_array($tokens) ? array_values(array_unique(array_map('strtolower', $tokens))) : [];
+        if (!is_array($tokens)) {
+            return [];
+        }
+        if ($lowercase) {
+            $tokens = array_map('strtolower', $tokens);
+        }
+        return array_values(array_unique($tokens));
     }
 
     private static function increment(array &$target, $value)

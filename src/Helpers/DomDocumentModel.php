@@ -224,7 +224,7 @@ class DomDocumentModel implements \IteratorAggregate, \JsonSerializable
             if ($format === self::FORMAT_XML) {
                 $loaded = $document->loadXML($content, LIBXML_NONET);
             } else {
-                $loaded = $document->loadHTML($content, LIBXML_NONET);
+                $loaded = $document->loadHTML(self::prepareHtmlContent($content), LIBXML_NONET);
             }
 
             $errors = libxml_get_errors();
@@ -243,6 +243,32 @@ class DomDocumentModel implements \IteratorAggregate, \JsonSerializable
         }
 
         return $document;
+    }
+
+    /**
+     * Preserve UTF-8 HTML fragments with no declared encoding. Libxml's HTML
+     * parser otherwise assumes Latin-1. Explicit charset declarations win.
+     *
+     * @param string $content
+     * @return string
+     */
+    private static function prepareHtmlContent($content)
+    {
+        if (preg_match('/<meta\b[^>]*\bcharset\s*=/i', $content) ||
+            preg_match('/^\s*<\?xml\b[^>]*\bencoding\s*=/i', $content)) {
+            return $content;
+        }
+
+        if (!preg_match('//u', $content)) {
+            return $content;
+        }
+
+        // Strip the UTF-8 BOM before prepending an encoding declaration.
+        if (substr($content, 0, 3) === "\xEF\xBB\xBF") {
+            $content = substr($content, 3);
+        }
+
+        return '<?xml encoding="UTF-8"?>' . $content;
     }
 
     /**

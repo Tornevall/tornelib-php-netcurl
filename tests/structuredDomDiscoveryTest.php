@@ -154,6 +154,34 @@ HTML;
         static::assertStringContainsString('05 augusti 2026', DomSemanticSearch::getTextContent($metadata->first()));
     }
 
+    /** @testdox XPath discovery preserves mixed-case class names. */
+    public function testMixedCaseClassNamesGenerateMatchingXPath()
+    {
+        $html = '<main><article class="NewsCard"><h2>One</h2></article>' .
+            '<article class="NewsCard"><h2>Two</h2></article></main>';
+        $document = GenericParser::getDocumentModel($html, 'html');
+        $candidates = DomSemanticSearch::discoverRepeatedStructures($document, 2, 30);
+        $candidate = $this->findCandidateByClass($candidates, 'NewsCard');
+
+        static::assertNotNull($candidate);
+        static::assertSame(2, $candidate['count']);
+        static::assertCount(2, $document->query($candidate['xpath']));
+    }
+
+    /** @testdox Namespaced XML discovery generates a matching local-name XPath. */
+    public function testNamespacedXmlGeneratesMatchingXPath()
+    {
+        $xml = '<root xmlns:x="urn:example"><x:entry class="card">One</x:entry>' .
+            '<x:entry class="card">Two</x:entry></root>';
+        $document = GenericParser::getDocumentModel($xml, 'xml');
+        $candidates = DomSemanticSearch::discoverRepeatedStructures($document, 2, 30);
+        $candidate = $this->findCandidateByClass($candidates, 'card');
+
+        static::assertNotNull($candidate);
+        static::assertSame(2, $candidate['count']);
+        static::assertCount(2, $document->query($candidate['xpath']));
+    }
+
     /** @testdox GenericParser exposes discovery without changing legacy parser method names. */
     public function testGenericParserDiscoveryFacade()
     {

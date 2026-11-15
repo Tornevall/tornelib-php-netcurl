@@ -21,7 +21,7 @@ Historical entries below are kept as historical records. Do not invent or guess 
 
 ## Testing
 
-* Recognize libcurl certificate verification error 60 alongside legacy SSL verification codes in the existing certificate-mismatch test. [#20](https://github.com/Tornevall/tornelib-php-netcurl/issues/20)
+* Recognize libcurl certificate verification error 60 alongside legacy SSL codes and skip the external SSL-mismatch fixture test on DNS/connect/timeout errors instead of reporting unrelated network outages as regressions. [#20](https://github.com/Tornevall/tornelib-php-netcurl/issues/20)
 * Expand the maintained 6.1 suite with deterministic configuration, input/output, driver-registration and compatibility-contract coverage. [#20](https://github.com/Tornevall/tornelib-php-netcurl/issues/20) [#22](https://github.com/Tornevall/tornelib-php-netcurl/issues/22)
 * Expand PHP-version and runtime-capability CI, including explicit no-cURL and no-SOAP scenarios. [#14](https://github.com/Tornevall/tornelib-php-netcurl/issues/14)
 

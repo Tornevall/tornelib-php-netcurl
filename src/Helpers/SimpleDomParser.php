@@ -208,7 +208,7 @@ class SimpleDomParser
 
     /**
      * Count number of available nodes in a DOMNodeList.
-     * count() works from PHP 7.2, but not for older releases.
+     * Prefer native Countable support when available and fall back to DOMNodeList::length on older PHP versions.
      * This function also works as a validator to make sure the node is a proper node.
      *
      * @param \DOMNodeList $nodeList
@@ -221,18 +221,15 @@ class SimpleDomParser
             return 0;
         }
 
-        $nodeListCount = 0;
-        if (version_compare(PHP_VERSION, '7.2', '>=')) {
-            if (is_countable($nodeList)) {
-                $nodeListCount = count($nodeList);
-            } elseif (self::hasMethod($nodeList, 'count')) {
-                $nodeListCount = $nodeList->count();
-            }
-        } elseif (isset($nodeList->length)) {
-            $nodeListCount = $nodeList->length;
+        if (function_exists('is_countable') && \is_countable($nodeList)) {
+            return (int)count($nodeList);
         }
 
-        return (int)$nodeListCount;
+        if (self::hasMethod($nodeList, 'count')) {
+            return (int)$nodeList->count();
+        }
+
+        return isset($nodeList->length) ? (int)$nodeList->length : 0;
     }
 
     /**

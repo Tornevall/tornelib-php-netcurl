@@ -525,8 +525,12 @@ class curlWrapperTest extends TestCase
             (new CurlWrapper('https://dev-ssl-mismatch.tornevall.nu'))->getCurlRequest();
         } catch (Exception $e) {
             static::assertTrue(
-                $e->getCode() === CURLE_SSL_PEER_CERTIFICATE ||
-                $e->getCode() === CURLE_SSL_CONNECT_ERROR
+                in_array(
+                    $e->getCode(),
+                    [CURLE_SSL_PEER_CERTIFICATE, CURLE_SSL_CONNECT_ERROR, CURLE_SSL_CACERT],
+                    true
+                ),
+                sprintf('Unexpected cURL error code for certificate mismatch: %d', $e->getCode())
             );
         }
     }

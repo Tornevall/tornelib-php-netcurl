@@ -35,6 +35,11 @@ Old Confluence documentation is no longer the maintained documentation target.
 
 ## Opt-in structured DOM parsing and discovery
 
+These APIs are introduced in NetCurl 6.1.11 (upon tagging/release). Existing
+`^6.1` Composer consumers remain on the same major/minor constraint. NetCurl
+still exposes the legacy `NetWrapper`, `MODULE_CURL` compatibility facade and
+`SimpleDomParser` methods; none of these paths are replaced by DOM discovery.
+
 The structured DOM API is additive to the existing XPath parser. Existing calls to
 `SimpleDomParser::getFromXPath()`, `SimpleDomParser::getContentFromXPath()`, and
 `GenericParser` legacy methods preserve their previous return structures.

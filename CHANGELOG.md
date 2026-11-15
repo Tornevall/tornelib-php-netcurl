@@ -1,3 +1,26 @@
+# Changelog policy
+
+From this maintenance work onward, every changelog item that represents a feature, fix, compatibility change or other trackable implementation work must link to its GitHub issue/ticket.
+
+Historical entries below are kept as historical records. Do not invent or guess issue mappings for old entries where a reliable ticket reference is unavailable.
+
+# Unreleased
+
+## Fixes
+
+* Fix PHP 7.2 DOM/XPath counting by using capability detection instead of calling `is_countable()` where it is unavailable. [#17](https://github.com/Tornevall/tornelib-php-netcurl/issues/17)
+* Allow `WrapperConfig`/`NetWrapper` to initialize without the cURL extension so automatic stream fallback can actually occur. [#23](https://github.com/Tornevall/tornelib-php-netcurl/issues/23)
+
+## Testing
+
+* Expand the maintained 6.1 suite with deterministic configuration, input/output, driver-registration and compatibility-contract coverage. [#20](https://github.com/Tornevall/tornelib-php-netcurl/issues/20) [#22](https://github.com/Tornevall/tornelib-php-netcurl/issues/22)
+* Expand blocking PHP CI to 7.3-8.5, add non-blocking legacy 7.0-7.2 and PHP 8.6 compatibility probes, and test no-cURL/no-SOAP fallback against local HTTP fixtures. Remove the obsolete PHP 5.6 syntax probe after 5.6 support was withdrawn. [#14](https://github.com/Tornevall/tornelib-php-netcurl/issues/14)
+
+## Documentation
+
+* Remove the stale PHP 5.6 compatibility claim from maintained documentation. [#25](https://github.com/Tornevall/tornelib-php-netcurl/issues/25)
+* Move the maintained public documentation target from old Confluence pages to Tornevall Tools and require issue-linked changelog entries going forward. [#27](https://github.com/Tornevall/tornelib-php-netcurl/issues/27)
+
 # 6.1.10
 
 ## Fixes

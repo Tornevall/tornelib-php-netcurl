@@ -6,6 +6,10 @@ Historical entries below are kept as historical records. Do not invent or guess 
 
 # Unreleased
 
+## Release preparation
+
+* Prepare the NetCurl 6.1.11 package metadata for the opt-in structured DOM addition without changing existing 6.1 dependency constraints. The 6.1.11 tag/release must be created separately after merge. [#12](https://github.com/Tornevall/tornelib-php-netcurl/issues/12)
+
 ## Features
 
 * Add opt-in, traversable XML/HTML DOM document/node models, semantic discovery, reusable XPath candidates and the additive `GenericParser` facade while preserving the existing `SimpleDomParser` contract. [#12](https://github.com/Tornevall/tornelib-php-netcurl/issues/12)

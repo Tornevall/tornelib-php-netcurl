@@ -33,6 +33,43 @@ Implementation history, defects and version planning are tracked in GitHub:
 
 Old Confluence documentation is no longer the maintained documentation target.
 
+## Opt-in structured DOM parsing and discovery
+
+These APIs are introduced in NetCurl 6.1.11 (upon tagging/release). Existing
+`^6.1` Composer consumers remain on the same major/minor constraint. NetCurl
+still exposes the legacy `NetWrapper`, `MODULE_CURL` compatibility facade and
+`SimpleDomParser` methods; none of these paths are replaced by DOM discovery.
+
+The structured DOM API is additive to the existing XPath parser. Existing calls to
+`SimpleDomParser::getFromXPath()`, `SimpleDomParser::getContentFromXPath()`, and
+`GenericParser` legacy methods preserve their previous return structures.
+
+```php
+use TorneLIB\Helpers\GenericParser;
+
+$html = '<article class="news-card"><h2>Example</h2></article>';
+$document = GenericParser::getDocumentModel($html, 'html');
+$matches = $document->query('//h2');
+$inventory = GenericParser::getDomElementInventory($html, 'html');
+$repeating = GenericParser::discoverDomStructures($html, 'html');
+$titles = GenericParser::findElementsBySemanticNames($html, ['title'], 'html');
+```
+
+`getDocumentModel()` accepts `auto`, `xml`, and `html`. The document and
+node models support traversal, XPath queries, namespaced XML and array/JSON
+serialization. `DomSemanticSearch` supplies generic semantic element discovery,
+element inventories, and repeated-structure candidates. It does not extract or
+store application-specific RSS data. Structured parsing must be explicitly
+selected; it does not replace the legacy XPath implementation.
+
+Parsing is local, disables external network entity fetching, and restores the
+previous libxml error mode. The DOM tests include legacy compatibility, real-site
+HTML snapshots, namespaces, malformed documents and direct attribute XPath.
+
+See [issue #12](https://github.com/Tornevall/tornelib-php-netcurl/issues/12)
+and [PR #13](https://github.com/Tornevall/tornelib-php-netcurl/pull/13)
+for scope and implementation details.
+
 ## cURL, streams, SOAP and XML
 
 cURL is the preferred general HTTP driver when available, but it is not supposed to be a hard requirement for generic requests. NetCurl is designed to select the best usable driver at runtime.

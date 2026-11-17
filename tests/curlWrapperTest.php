@@ -524,9 +524,26 @@ class curlWrapperTest extends TestCase
         try {
             (new CurlWrapper('https://dev-ssl-mismatch.tornevall.nu'))->getCurlRequest();
         } catch (Exception $e) {
+            // A remote fixture timeout or network outage cannot verify the
+            // expected certificate mismatch; preserve the check when reachable.
+            if (in_array(
+                $e->getCode(),
+                [CURLE_OPERATION_TIMEDOUT, CURLE_COULDNT_CONNECT, CURLE_COULDNT_RESOLVE_HOST],
+                true
+            )) {
+                $this->markTestSkipped(sprintf(
+                    'External SSL certificate fixture unavailable (cURL error %d).',
+                    $e->getCode()
+                ));
+            }
+
             static::assertTrue(
-                $e->getCode() === CURLE_SSL_PEER_CERTIFICATE ||
-                $e->getCode() === CURLE_SSL_CONNECT_ERROR
+                in_array(
+                    $e->getCode(),
+                    [CURLE_SSL_PEER_CERTIFICATE, CURLE_SSL_CONNECT_ERROR, CURLE_SSL_CACERT],
+                    true
+                ),
+                sprintf('Unexpected cURL error code for certificate mismatch: %d', $e->getCode())
             );
         }
     }

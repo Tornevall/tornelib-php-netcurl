@@ -6,6 +6,14 @@ Historical entries below are kept as historical records. Do not invent or guess 
 
 # Unreleased
 
+## Release preparation
+
+* Prepare the NetCurl 6.1.11 package metadata for the opt-in structured DOM addition without changing existing 6.1 dependency constraints. The 6.1.11 tag/release must be created separately after merge. [#12](https://github.com/Tornevall/tornelib-php-netcurl/issues/12)
+
+## Features
+
+* Add opt-in, traversable XML/HTML DOM document/node models, semantic discovery, reusable XPath candidates and the additive `GenericParser` facade while preserving the existing `SimpleDomParser` contract. [#12](https://github.com/Tornevall/tornelib-php-netcurl/issues/12)
+
 ## Fixes
 
 * Fix PHP 7.2 DOM/XPath counting by using capability detection instead of calling `is_countable()` where it is unavailable. [#17](https://github.com/Tornevall/tornelib-php-netcurl/issues/17)
@@ -13,6 +21,7 @@ Historical entries below are kept as historical records. Do not invent or guess 
 
 ## Testing
 
+* Recognize libcurl certificate verification error 60 alongside legacy SSL codes and skip the external SSL-mismatch fixture test on DNS/connect/timeout errors instead of reporting unrelated network outages as regressions. [#20](https://github.com/Tornevall/tornelib-php-netcurl/issues/20)
 * Expand the maintained 6.1 suite with deterministic configuration, input/output, driver-registration and compatibility-contract coverage. [#20](https://github.com/Tornevall/tornelib-php-netcurl/issues/20) [#22](https://github.com/Tornevall/tornelib-php-netcurl/issues/22)
 * Expand PHP-version and runtime-capability CI, including explicit no-cURL and no-SOAP scenarios. [#14](https://github.com/Tornevall/tornelib-php-netcurl/issues/14)
 

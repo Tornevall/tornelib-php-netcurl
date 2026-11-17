@@ -64,7 +64,7 @@ HTML;
 
         static::assertNotNull($candidate);
         static::assertSame(3, $candidate['count']);
-        static::assertStringContainsString('news-card', $candidate['xpath']);
+        static::assertTrue(strpos($candidate['xpath'], 'news-card') !== false);
         static::assertGreaterThan(0, $candidate['score']);
 
         $document = GenericParser::getDocumentModel($html, 'html');
@@ -147,11 +147,11 @@ HTML;
 
         static::assertNotNull($headings->first());
         static::assertSame('a', $headings->first()->getName());
-        static::assertStringContainsString('Socialdemokraterna går till val', DomSemanticSearch::getTextContent($headings->first()));
+        static::assertTrue(strpos(DomSemanticSearch::getTextContent($headings->first()), 'Socialdemokraterna går till val') !== false);
         static::assertSame('/nyheter/2026/2026-08-05-socialdemokraterna-gar-till-val-pa-att-stoppa-sloseriet-med-skattepengar', $links->first()->getAttribute('href'));
-        static::assertStringContainsString('Mikael Damberg', DomSemanticSearch::getTextContent($descriptions->first()));
+        static::assertTrue(strpos(DomSemanticSearch::getTextContent($descriptions->first()), 'Mikael Damberg') !== false);
         static::assertNotNull($metadata->first());
-        static::assertStringContainsString('05 augusti 2026', DomSemanticSearch::getTextContent($metadata->first()));
+        static::assertTrue(strpos(DomSemanticSearch::getTextContent($metadata->first()), '05 augusti 2026') !== false);
     }
 
     /** @testdox XPath discovery preserves mixed-case class names. */

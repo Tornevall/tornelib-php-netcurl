@@ -6,9 +6,11 @@ Historical entries below are kept as historical records. Do not invent or guess 
 
 # Unreleased
 
-## Release preparation
+# 6.1.11
 
-* Prepare the NetCurl 6.1.11 package metadata for the opt-in structured DOM addition without changing existing 6.1 dependency constraints. The 6.1.11 tag/release must be created separately after merge. [#12](https://github.com/Tornevall/tornelib-php-netcurl/issues/12)
+## Updates
+
+* Release NetCurl 6.1.11 with unchanged 6.1 dependency constraints, additive DOM discovery APIs and the expanded PHP compatibility matrix. [#12](https://github.com/Tornevall/tornelib-php-netcurl/issues/12) [#14](https://github.com/Tornevall/tornelib-php-netcurl/issues/14)
 
 ## Features
 
@@ -21,6 +23,7 @@ Historical entries below are kept as historical records. Do not invent or guess 
 
 ## Testing
 
+* Keep new DOM regression tests compatible with PHPUnit 6 on the PHP 7.0 legacy probe, without changing application code or test expectations. [#31](https://github.com/Tornevall/tornelib-php-netcurl/issues/31)
 * Recognize libcurl certificate verification error 60 alongside legacy SSL codes and skip the external SSL-mismatch fixture test on DNS/connect/timeout errors instead of reporting unrelated network outages as regressions. [#20](https://github.com/Tornevall/tornelib-php-netcurl/issues/20)
 * Expand the maintained 6.1 suite with deterministic configuration, input/output, driver-registration and compatibility-contract coverage. [#20](https://github.com/Tornevall/tornelib-php-netcurl/issues/20) [#22](https://github.com/Tornevall/tornelib-php-netcurl/issues/22)
 * Expand blocking PHP CI to 7.3-8.5, add non-blocking legacy 7.0-7.2 and PHP 8.6 compatibility probes, and test no-cURL/no-SOAP fallback against local HTTP fixtures. Remove the obsolete PHP 5.6 syntax probe after 5.6 support was withdrawn. [#14](https://github.com/Tornevall/tornelib-php-netcurl/issues/14)

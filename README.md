@@ -104,6 +104,29 @@ Compatibility work and legacy probes are tracked in:
 - [#14 - Expand PHP compatibility CI matrix](https://github.com/Tornevall/tornelib-php-netcurl/issues/14)
 - [#20 - Expand and stabilize the NetCurl 6.1 test suite](https://github.com/Tornevall/tornelib-php-netcurl/issues/20)
 
+## PHP compatibility CI
+
+The blocking PHP matrix tests 7.3, 7.4 and every PHP 8 release from 8.0
+through 8.5. The separate PHP 8.6 job is a non-blocking forward-compatibility
+probe while PHP 8.6 is in release-candidate status.
+
+PHP 7.0-7.2 run as non-blocking legacy probes. PHP 5.6 is not supported
+by the maintained 6.1 source and is not included in the matrix.
+
+Two PHP 8.3 capability jobs explicitly disable cURL and SOAP separately
+and verify the corresponding automatic transport fallback against a local
+HTTP fixture. These tests do not require public DNS.
+
+The legacy full PHPUnit suite also contains live-network tests using
+`ipv4.fraudbl.org` for IP/HTTP responses and separate Tornevall SSL
+fixtures. Availability-related failures in those tests are distinct from
+deterministic driver and parser regressions. Obsolete netcurl.org IP-check
+URLs are not used by the maintained test suite.
+
+See [#14](https://github.com/Tornevall/tornelib-php-netcurl/issues/14)
+for the version matrix and [#20](https://github.com/Tornevall/tornelib-php-netcurl/issues/20)
+for ongoing deterministic test coverage.
+
 ## Current built-in driver support
 
 - cURL

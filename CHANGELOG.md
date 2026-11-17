@@ -23,7 +23,8 @@ Historical entries below are kept as historical records. Do not invent or guess 
 
 * Recognize libcurl certificate verification error 60 alongside legacy SSL codes and skip the external SSL-mismatch fixture test on DNS/connect/timeout errors instead of reporting unrelated network outages as regressions. [#20](https://github.com/Tornevall/tornelib-php-netcurl/issues/20)
 * Expand the maintained 6.1 suite with deterministic configuration, input/output, driver-registration and compatibility-contract coverage. [#20](https://github.com/Tornevall/tornelib-php-netcurl/issues/20) [#22](https://github.com/Tornevall/tornelib-php-netcurl/issues/22)
-* Expand PHP-version and runtime-capability CI, including explicit no-cURL and no-SOAP scenarios. [#14](https://github.com/Tornevall/tornelib-php-netcurl/issues/14)
+* Expand blocking PHP CI to 7.3-8.5, add non-blocking legacy 7.0-7.2 and PHP 8.6 compatibility probes, and test no-cURL/no-SOAP fallback against local HTTP fixtures. Remove the obsolete PHP 5.6 syntax probe after 5.6 support was withdrawn. [#14](https://github.com/Tornevall/tornelib-php-netcurl/issues/14)
+* Normalize SSL fixture verification failures vs DNS/connect/timeout errors without weakening the actual certificate checks; unavailable external fixtures now skip rather than fail the compatibility matrix. [#20](https://github.com/Tornevall/tornelib-php-netcurl/issues/20)
 
 ## Documentation
 

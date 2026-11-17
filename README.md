@@ -158,6 +158,20 @@ See:
 - [#16 - Remove MODULE_CURL in 6.2 and consolidate the networking API](https://github.com/Tornevall/tornelib-php-netcurl/issues/16)
 - [#22 - Define the cross-version NetCurl compatibility contract](https://github.com/Tornevall/tornelib-php-netcurl/issues/22)
 
+## Release tagging
+
+Releases are based on an explicit matching version in `composer.json` and the
+first numbered release section in `CHANGELOG.md`. When a commit on `master`
+passes the `PHP Composer` workflow, the dedicated release workflow checks that
+the tested commit is still the latest `master` commit and that its version tag
+does not already exist. Only then does it create the GitHub tag and release using
+the changelog section as release notes.
+
+This keeps source changes and unverified PR commits from being tagged. The
+existing `^6.1` dependency constraint remains compatible with 6.1.11.
+
+Release tracking: [#31](https://github.com/Tornevall/tornelib-php-netcurl/issues/31).
+
 ## Changelog policy
 
 From the current maintenance work onward, changelog entries for features, fixes and compatibility changes link to their GitHub issue/ticket. Historical changelog entries are kept as historical records and are not assigned guessed ticket references.

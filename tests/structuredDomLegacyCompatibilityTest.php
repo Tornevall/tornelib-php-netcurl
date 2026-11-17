@@ -29,10 +29,10 @@ class structuredDomLegacyCompatibilityTest extends TestCase
             ]
         );
 
-        static::assertIsArray($result);
+        static::assertTrue(is_array($result));
         static::assertArrayHasKey('rendered', $result);
         static::assertCount(20, $result['rendered']);
-        static::assertIsArray($result['rendered'][0]);
+        static::assertTrue(is_array($result['rendered'][0]));
         static::assertArrayHasKey('subtitle', $result['rendered'][0]);
         static::assertArrayHasKey('lead', $result['rendered'][0]);
     }

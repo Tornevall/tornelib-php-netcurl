@@ -167,6 +167,12 @@ class WrapperConfig
     private $SSL;
 
     /**
+     * Last SSL verification policy synchronized with the cURL options.
+     * @var array|null
+     */
+    private $sslVerificationState = null;
+
+    /**
      * User data that normally can not be overwritten more than once (when not exists).
      * @var array
      * @since 6.1.0
@@ -798,7 +804,8 @@ class WrapperConfig
     }
 
     /**
-     * Change the SSL verification if the SSL Context has changed. This modification has only one state.
+     * Synchronize cURL verification options when the SSL policy changes.
+     * Preserve explicitly configured cURL options while the policy is unchanged.
      *
      * @return $this
      * @since 6.1.5
@@ -806,11 +813,24 @@ class WrapperConfig
     private function setContextSsl()
     {
         $sslContext = $this->SSL->getContext();
-        if (!$this->getSslContextState('verify_peer', $sslContext)) {
-            $this->options[$this->getOptionCurl('CURLOPT_SSL_VERIFYPEER')] = 0;
-        }
-        if (!$this->getSslContextState('verify_host', $sslContext)) {
-            $this->options[$this->getOptionCurl('CURLOPT_SSL_VERIFYHOST')] = 0;
+        $verificationOptions = [
+            'verify_peer' => ['CURLOPT_SSL_VERIFYPEER', 1],
+            'verify_host' => ['CURLOPT_SSL_VERIFYHOST', 2],
+        ];
+
+        foreach ($verificationOptions as $contextKey => $option) {
+            $enabled = $this->getSslContextState($contextKey, $sslContext);
+            $previous = isset($this->sslVerificationState[$contextKey]) ?
+                $this->sslVerificationState[$contextKey] : null;
+
+            // Initially apply relaxed policies; thereafter update in both directions.
+            if (($previous === null && !$enabled) ||
+                ($previous !== null && $previous !== $enabled)
+            ) {
+                $this->options[$this->getOptionCurl($option[0])] = $enabled ? $option[1] : 0;
+            }
+
+            $this->sslVerificationState[$contextKey] = $enabled;
         }
 
         return $this;

@@ -15,7 +15,7 @@ Historical entries below are kept as historical records. Do not invent or guess 
 
 ## Testing
 
-* Verify reused cURL and stream clients send the expected method and raw request body across nonempty/empty POST, POST-to-GET, empty JSON/XML and explicit empty-string transitions against a localhost HTTP fixture. [#37](https://github.com/Tornevall/tornelib-php-netcurl/issues/37)
+* Verify reused cURL and stream clients send the expected method and raw request body across nonempty/empty POST, POST-to-GET, explicit nonempty GET-body compatibility, empty JSON/XML and explicit empty-string transitions against a localhost HTTP fixture. [#37](https://github.com/Tornevall/tornelib-php-netcurl/issues/37)
 * Add deterministic driver isolation, interleaved localhost HTTP-response/configuration, and external driver registration/priority regression coverage. [#36](https://github.com/Tornevall/tornelib-php-netcurl/issues/36)
 * Add deterministic handle-identity and local HTTP multi-request tests for distinct headers, HTTP status codes, parsed bodies, and repeated URLs across PHP versions. [#35](https://github.com/Tornevall/tornelib-php-netcurl/issues/35)
 * Add deterministic regression coverage for repeated strict/relaxed TLS transitions, independent peer and host settings, configuration replacement, and direct cURL option compatibility. [#34](https://github.com/Tornevall/tornelib-php-netcurl/issues/34)

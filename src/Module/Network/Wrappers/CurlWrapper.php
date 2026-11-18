@@ -588,8 +588,21 @@ class CurlWrapper implements WrapperInterface
                 $this->setOptionCurl($curlHandle, CURLOPT_CUSTOMREQUEST, 'PATCH');
                 break;
             default:
-                // A reused client must not retain cURL's previous POST mode.
-                $this->setOptionCurl($curlHandle, CURLOPT_HTTPGET, true);
+                // Preserve legacy GET bodies when the caller supplies data.
+                // Reset POST mode only when this GET has no request body.
+                $requestData = $this->CONFIG->getRequestData();
+                if (is_array($urlData) && array_key_exists('data', $urlData)) {
+                    $dataType = isset($urlData['dataType']) ?
+                        $urlData['dataType'] : $this->CONFIG->getRequestDataType();
+                    $requestData = $this->CONFIG->getRequestData(
+                        $dataType,
+                        $urlData['data'],
+                        $requestMethod
+                    );
+                }
+                if ($requestData === '' || $requestData === []) {
+                    $this->setOptionCurl($curlHandle, CURLOPT_HTTPGET, true);
+                }
                 // Making sure we send data in proper formatting if there is bad user configuration.
                 // Bad configuration is when both GET+POST data parameters are sent as a GET when the
                 // correct set up in that case is a POST.

@@ -8,11 +8,13 @@ Historical entries below are kept as historical records. Do not invent or guess 
 
 ## Fixes
 
+* Keep cURL multi-response headers associated with their actual handles on PHP 7 (resources) and PHP 8+ (objects), using strict identity instead of integer casting; unknown handles no longer pollute another request's headers. [#35](https://github.com/Tornevall/tornelib-php-netcurl/issues/35)
 * Restore strict cURL certificate and hostname verification after an SSL policy changes from relaxed to strict on a reused configuration; preserve explicit legacy cURL overrides until the SSL policy changes. [#34](https://github.com/Tornevall/tornelib-php-netcurl/issues/34)
 
 ## Testing
 
 * Isolate custom-driver test fixtures by URL scheme so deterministic priority assertions also hold on PHP 8.6 with PHPUnit 13, which does not honor legacy process-isolation annotations. [#20](https://github.com/Tornevall/tornelib-php-netcurl/issues/20) [#22](https://github.com/Tornevall/tornelib-php-netcurl/issues/22)
+* Add deterministic handle-identity and local HTTP multi-request tests for distinct headers, HTTP status codes, parsed bodies, and repeated URLs across PHP versions. [#35](https://github.com/Tornevall/tornelib-php-netcurl/issues/35)
 * Add deterministic regression coverage for repeated strict/relaxed TLS transitions, independent peer and host settings, configuration replacement, and direct cURL option compatibility. [#34](https://github.com/Tornevall/tornelib-php-netcurl/issues/34)
 
 # 6.1.11

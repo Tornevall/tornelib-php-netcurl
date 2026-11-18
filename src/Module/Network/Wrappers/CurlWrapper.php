@@ -1254,6 +1254,10 @@ class CurlWrapper implements WrapperInterface
 
         if ($this->isCurlMulti) {
             $curlHandleId = $this->getHandleByResourceId($curlHandle);
+            if ($curlHandleId === null) {
+                // Never attribute an unknown handle's headers to another request.
+                return strlen($header);
+            }
         }
 
         if (count($headSplit) < 2) {
@@ -1281,38 +1285,22 @@ class CurlWrapper implements WrapperInterface
     }
 
     /**
-     * Get stored (multi) resource index via resource id.
+     * Resolve a multi handle by identity, not by casting it to an integer.
+     * PHP 7 cURL resources and PHP 8 CurlHandle objects both support ===.
      *
      * @param mixed $resource
-     * @return int
+     * @return int|null
      * @since 6.1.4
      */
     private function getHandleByResourceId($resource)
     {
-        $return = null;
-        $currentResource = $this->getCurlResource($resource);
         foreach ($this->curlMultiHandleObjects as $idx => $resourceObject) {
-            if ($this->getCurlResource($resourceObject) === $currentResource) {
-                $return = $idx;
-                break;
+            if ($resourceObject === $resource) {
+                return $idx;
             }
         }
 
-        return (int)$return;
-    }
-
-    /**
-     * @param $resource
-     * @return int
-     * @since 6.1.4
-     */
-    private function getCurlResource($resource)
-    {
-        // get_resource_id for PHP 8 works as long as the curl resource really is a resource.
-        // Which it is not. So to maintain everything, we use this method in case of future changes.
-        $return = (int)$resource;
-
-        return $return;
+        return null;
     }
 
     /**

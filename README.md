@@ -91,6 +91,10 @@ Relevant runtime capabilities:
 
 See the Tools documentation for examples and exact behavior.
 
+## Independent transport state
+
+Each internal request through `NetWrapper` uses a fresh built-in transport instance. Available drivers are discovered globally, but response bodies, status codes, headers and request configuration are not shared between independent `NetWrapper` clients or successive requests. A previously returned transport response remains available after another request runs. Caller-registered external transport objects preserve their existing registration and priority semantics and are not copied or reconstructed. See [#36](https://github.com/Tornevall/tornelib-php-netcurl/issues/36).
+
 ## cURL multi-request response isolation
 
 When calling `CurlWrapper::request()` with multiple URLs, cURL tracks each simultaneous handle separately on PHP 7 and PHP 8+. Response headers and status codes remain associated with their respective request indices, including when the same URL is requested more than once. Use `getHeader($headerName, $requestIndex)` and `getCode($requestIndex)` to distinguish duplicate URLs; URL-based header lookup identifies the first matching entry. Bodies can be consumed in request order with `getParsed()`. Regression coverage uses a local HTTP server without external DNS. See [#35](https://github.com/Tornevall/tornelib-php-netcurl/issues/35).

@@ -1,102 +1,183 @@
 # NETCURL 6.1
 
+NetCurl is a transport-flexible PHP communication library. Its core purpose is to let callers make a request without hard-coding whether cURL, PHP streams, SOAP, RSS/XML, or a registered custom driver must perform it.
+
 ## Installation
 
-Recommended installation method: composer install/require. See below.
+Recommended standalone installation:
 
+```bash
+composer require tornevall/tornelib-php-netcurl:^6.1
+```
 
-### Install as standalone
+If you also need the separate network/domain/address utility package:
 
-    require tornevall/tornevall/tornelib-php-netcurl:^6.1
+```bash
+composer require tornevall/tornelib-php-network:^6.1
+```
 
+## Documentation
 
-### Install with the entire networking suite
+The maintained public documentation now lives in Tornevall Tools:
 
-    require tornevall/tornevall/tornelib-php-network:^6.1
+- [NetCurl documentation - English](https://tools.tornevall.net/docs/en/netcurl)
+- [NetCurl documentation - Swedish](https://tools.tornevall.net/docs/sv/netcurl)
 
+The guide contains practical examples for normal requests, JSON/XML, SOAP/WSDL, RSS/XML, raw/parsed responses, headers, authentication, proxies, timeouts, multi-request handling, custom drivers, and migration away from `MODULE_CURL`.
 
-### Enabling curl and SOAP
+Implementation history, defects and version planning are tracked in GitHub:
 
-Depending on your needs, you can start with nothing in your hands. Curl is the primary handle that has many more features than the other drivers. It is however actually not required. A proper installation in Ubuntu however may look like this:
+- [NetCurl issues](https://github.com/Tornevall/tornelib-php-netcurl/issues)
+- [6.1 test expansion](https://github.com/Tornevall/tornelib-php-netcurl/issues/20)
+- [Cross-version compatibility contract](https://github.com/Tornevall/tornelib-php-netcurl/issues/22)
 
-    apt-get install php-curl php-xml php-json php-soap
+Old Confluence documentation is no longer the maintained documentation target.
 
+## Opt-in structured DOM parsing and discovery
 
-* XML is not required unless you want SOAP and so on.
-* SSL: OpenSSL or similar (if doing https requests).
-* SOAP: SoapClient and XML-drivers (if doing https requests).
-* CURL (if you prefer curl before streams).
-* allow_url_fopen (if you have no access to curl, this has to be enabled).
+These APIs are introduced in NetCurl 6.1.11 (upon tagging/release). Existing
+`^6.1` Composer consumers remain on the same major/minor constraint. NetCurl
+still exposes the legacy `NetWrapper`, `MODULE_CURL` compatibility facade and
+`SimpleDomParser` methods; none of these paths are replaced by DOM discovery.
 
-## Packages
+The structured DOM API is additive to the existing XPath parser. Existing calls to
+`SimpleDomParser::getFromXPath()`, `SimpleDomParser::getContentFromXPath()`, and
+`GenericParser` legacy methods preserve their previous return structures.
 
-Source code can be found at [bitbucket repository](https://bitbucket.tornevall.net/projects/LIB/repos/tornelib-php-netcurl/browse), to make upgrading more stable. It is mirrored to [github](https://github.com/Tornevall/tornelib-php-netcurl) but new releases and tags are submitted (when ready) to [github](https://github.com/Tornevall/tornelib-php-netcurl) to maintain maximum stability (do we trust bitbucket? yes - our own server).
+```php
+use TorneLIB\Helpers\GenericParser;
 
+$html = '<article class="news-card"><h2>Example</h2></article>';
+$document = GenericParser::getDocumentModel($html, 'html');
+$matches = $document->query('//h2');
+$inventory = GenericParser::getDomElementInventory($html, 'html');
+$repeating = GenericParser::discoverDomStructures($html, 'html');
+$titles = GenericParser::findElementsBySemanticNames($html, ['title'], 'html');
+```
 
-## Contact, information and documents
+`getDocumentModel()` accepts `auto`, `xml`, and `html`. The document and
+node models support traversal, XPath queries, namespaced XML and array/JSON
+serialization. `DomSemanticSearch` supplies generic semantic element discovery,
+element inventories, and repeated-structure candidates. It does not extract or
+store application-specific RSS data. Structured parsing must be explicitly
+selected; it does not replace the legacy XPath implementation.
 
-Documentation for v6.1 is located [here](https://docs.tornevall.net/display/TORNEVALL/NETCURLv6.1).
-There's a [Mailinglist](https://lists.tornevall.net/pipermail/netcurl/) put up for everything concerning netcurl. That's also where you can find release information (for now). You can subscribe to the list [here](https://lists.tornevall.net/mailman/listinfo/netcurl).
-Feel free to join the project from [JIRA](https://tracker.tornevall.net/projects/NETCURL). And don't be afraid of leaving feedback!
+Parsing is local, disables external network entity fetching, and restores the
+previous libxml error mode. The DOM tests include legacy compatibility, real-site
+HTML snapshots, namespaces, malformed documents and direct attribute XPath.
 
+See [issue #12](https://github.com/Tornevall/tornelib-php-netcurl/issues/12)
+and [PR #13](https://github.com/Tornevall/tornelib-php-netcurl/pull/13)
+for scope and implementation details.
 
-# Getting started
+## cURL, streams, SOAP and XML
 
-* [MODULE_CURL 6.1](https://docs.tornevall.net/display/TORNEVALL/NETCURLv6.1)
-* [Getting started: Individual Modules](https://docs.tornevall.net/x/EAB4Aw)
+cURL is the preferred general HTTP driver when available, but it is not supposed to be a hard requirement for generic requests. NetCurl is designed to select the best usable driver at runtime.
 
-Installing the network module instead will make features such as getGitTagsByUrl fully available.
+A typical installation may include:
 
+```bash
+apt-get install php-curl php-xml php-soap
+```
+
+Relevant runtime capabilities:
+
+- cURL: preferred general HTTP transport when available.
+- PHP streams / `allow_url_fopen`: fallback path for compatible HTTP requests when cURL is unavailable.
+- SOAP: `SoapClient` for WSDL/SOAP requests when available.
+- XML: used for XML/SOAP-related parsing and fallback paths.
+- RSS/XML: supported through the RSS wrapper and parsing layer.
+- External drivers: applications can register implementations of the wrapper interface and choose whether they run before or after built-in drivers.
+
+See the Tools documentation for examples and exact behavior.
+
+## TLS verification
+
+NetCurl uses strict certificate and hostname verification by default for cURL and stream connections. Use `$wrapper->getConfig()->getSsl()->setStrictVerification(false)` only when an explicit, temporary relaxation is required, and re-enable verification with `setStrictVerification(true)`. On a reused configuration, changing the SSL policy now updates cURL peer and host verification in both directions; legacy cURL options explicitly set through `WrapperConfig::setOption()` are left alone until the SSL policy changes. See [#34](https://github.com/Tornevall/tornelib-php-netcurl/issues/34).
 
 ## Compatibility
 
-This library do support PHP 5.6 (not lower). However, you should [check here](https://www.php.net/supported-versions.php) to ensure your compatiblity yourself).
+The old PHP 5.6 support claim is no longer valid for the current 6.1 source tree.
 
+Runtime compatibility is verified by the maintained GitHub Actions compatibility matrix. Historical Bamboo and Bitbucket runs can still be useful when investigating old releases, but they must not be treated as the current compatibility reference.
 
-## Testing: Bamboo, github actions and bitbucket pipelines
+- [GitHub Actions](https://github.com/Tornevall/tornelib-php-netcurl/actions)
 
-NetCURL is tested within a few different suites. Due to the lack of "test time", tests are not entirely fulfilled in the Bitbucket cloud, which is why tests also are executed from other places on commits. Below is a list of those instances.
+Compatibility work and legacy probes are tracked in:
 
-* [Atlassian Bamboo - 5.6 - 8.0](https://bamboo.tornevall.net/browse/TOR-NC60)
-* [GitHub Actions - 5.6 + 7.3 - 8.0](https://github.com/Tornevall/tornelib-php-netcurl/actions)
-* [Bitbucket Pipelines - 5.6 + 7.3 - 8.0](https://bitbucket.org/tornevallnetworks/tornelib-php-netcurl/addon/pipelines/home)
+- [#14 - Expand PHP compatibility CI matrix](https://github.com/Tornevall/tornelib-php-netcurl/issues/14)
+- [#20 - Expand and stabilize the NetCurl 6.1 test suite](https://github.com/Tornevall/tornelib-php-netcurl/issues/20)
 
-The [Bamboo-server](https://bamboo.tornevall.net) has a history which makes many older PHP versions available. But as of mid-summer 2020, all tests with old versions have been removed. This is also a work that continues. Github tests are only running with non-outdated versions (exception for 5.6) and so are bitbucked targeted. Since bamboo is the flagship of tests, old versions are currently not removed there.
+## PHP compatibility CI
 
+The blocking PHP matrix tests 7.3, 7.4 and every PHP 8 release from 8.0
+through 8.5. The separate PHP 8.6 job is a non-blocking forward-compatibility
+probe while PHP 8.6 is in release-candidate status.
 
-### Other Requirements and dependencies
-  
-In its initial state, there are basically no requirements as this module tries to pick the best available driver in runtime.
+PHP 7.0-7.2 run as non-blocking legacy probes. PHP 5.6 is not supported
+by the maintained 6.1 source and is not included in the matrix.
 
+Two PHP 8.3 capability jobs explicitly disable cURL and SOAP separately
+and verify the corresponding automatic transport fallback against a local
+HTTP fixture. These tests do not require public DNS.
 
-## Using real RSS feeds
+The legacy full PHPUnit suite also contains live-network tests using
+`ipv4.fraudbl.org` for IP/HTTP responses and separate Tornevall SSL
+fixtures. Availability-related failures in those tests are distinct from
+deterministic driver and parser regressions. Obsolete netcurl.org IP-check
+URLs are not used by the maintained test suite.
 
-When using composer to install netcurl, also add the following to composer by for example this:
+See [#14](https://github.com/Tornevall/tornelib-php-netcurl/issues/14)
+for the version matrix and [#20](https://github.com/Tornevall/tornelib-php-netcurl/issues/20)
+for ongoing deterministic test coverage.
 
-    composer require laminas/laminas-feed
+## Current built-in driver support
 
-If you prefer to use laminas http driver, you should also install it with laminas/laminas-http:
+- cURL
+- PHP stream/file-get-contents transport
+- SoapClient
+- RSS/XML
+- externally registered custom drivers
 
-    composer require laminas/laminas-http
+Sockets are not currently a built-in NetCurl transport.
 
-It is however not necessary with that driver, since netcurl will fall back to its own drivers if laminas is missing that driver. You should also know that if you use laminas-http it runs on pretty much defaults and therefore probably also uses **Laminas\\Http\\Client** as User-Agent.
-You can request RSS feeds without laminas, however you're kind of on your own by doing this. In that case, you'll get the entries in SimpleXML formatting. 
+## RSS dependencies
 
-## Library Support
+For richer RSS feed support, install Laminas Feed:
 
-### Current
+```bash
+composer require laminas/laminas-feed
+```
 
-* curl
-* The simplest form of streamdriver and the binary safe file_get_contents (instead of the fopen-drivers that is based on the same system).
-* SoapClient
-* RSS feeds
+NetCurl keeps fallback behavior for RSS/XML so optional feed libraries do not automatically become hard requirements.
 
+## `MODULE_CURL`
 
-#### Will you support sockets?
+`MODULE_CURL` is a legacy compatibility facade retained in 6.1 for older clients. New 6.1 code should prefer `TorneLIB\Module\Network\NetWrapper`.
 
-Not yet. This driver requires more, so this is put on hold.
+`MODULE_CURL` is deprecated in 6.1 and planned for removal in 6.2. Compatibility work is deliberately preserving the useful request/driver/input/output behavior rather than preserving the old class forever.
 
+See:
 
-## Will something break if I upgrade?
+- [#16 - Remove MODULE_CURL in 6.2 and consolidate the networking API](https://github.com/Tornevall/tornelib-php-netcurl/issues/16)
+- [#22 - Define the cross-version NetCurl compatibility contract](https://github.com/Tornevall/tornelib-php-netcurl/issues/22)
 
-No. Version 6.1 is written to reach compatibility with v6.0, but with modernized code and PSR-4. However, do not use MODULE_CURL. Make sure you check out https://docs.tornevall.net/x/DoBPAw before deciding to run anything as older PHP-releases could be incompatible. However, if they are, so are probably you.
+## Release tagging
+
+Releases are based on an explicit matching version in `composer.json` and the
+first numbered release section in `CHANGELOG.md`. When a commit on `master`
+passes the `PHP Composer` workflow, the dedicated release workflow checks that
+the tested commit is still the latest `master` commit and that its version tag
+does not already exist. Only then does it create the GitHub tag and release using
+the changelog section as release notes.
+
+This keeps source changes and unverified PR commits from being tagged. The
+existing `^6.1` dependency constraint remains compatible with 6.1.11.
+
+Release tracking: [#31](https://github.com/Tornevall/tornelib-php-netcurl/issues/31).
+
+## Changelog policy
+
+From the current maintenance work onward, changelog entries for features, fixes and compatibility changes link to their GitHub issue/ticket. Historical changelog entries are kept as historical records and are not assigned guessed ticket references.
+
+See [CHANGELOG.md](CHANGELOG.md).

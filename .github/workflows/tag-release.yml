@@ -1,0 +1,73 @@
+name: Tag validated NetCurl releases
+
+on:
+  workflow_run:
+    workflows: [PHP Composer]
+    types: [completed]
+    branches: [master]
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    name: Tag and publish tested package
+    if: ${{ github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.event == 'push' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out validated master commit
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.workflow_run.head_sha }}
+          fetch-depth: 0
+
+      - name: Verify release metadata and publish
+        shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          CHECKED_SHA: ${{ github.event.workflow_run.head_sha }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+
+          git fetch origin master
+          current_master="$(git rev-parse FETCH_HEAD)"
+          if [ "$current_master" != "$CHECKED_SHA" ]; then
+            echo "Validated commit is no longer the tip of master; skipping release."
+            exit 0
+          fi
+
+          version="$(php -r '$manifest = json_decode(file_get_contents("composer.json"), true); echo $manifest["version"] ?? "";')"
+          if ! [[ "$version" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "Composer package version is missing or invalid."
+            exit 1
+          fi
+
+          latest_changelog_version="$(sed -n -E 's/^# ([0-9]+\.[0-9]+\.[0-9]+)$/\1/p' CHANGELOG.md | head -n 1)"
+          if [ "$latest_changelog_version" != "$version" ]; then
+            echo "The first numbered changelog version does not match composer.json; skipping release."
+            exit 0
+          fi
+
+          if git ls-remote --exit-code --tags origin "refs/tags/$version" >/dev/null 2>&1; then
+            echo "Tag $version already exists; nothing to release."
+            exit 0
+          fi
+
+          notes_file="$RUNNER_TEMP/netcurl-release-notes.md"
+          awk -v version="$version" '
+            $0 == "# " version { in_release = 1; next }
+            in_release && /^# [0-9]+\.[0-9]+\.[0-9]+$/ { exit }
+            in_release { print }
+          ' CHANGELOG.md > "$notes_file"
+
+          if ! grep -q '[^[:space:]]' "$notes_file"; then
+            echo "Refusing to create an empty release."
+            exit 1
+          fi
+
+          gh release create "$version" \
+            --repo "$GH_REPO" \
+            --target "$CHECKED_SHA" \
+            --title "NetCurl $version" \
+            --notes-file "$notes_file"

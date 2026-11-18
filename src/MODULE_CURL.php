@@ -21,7 +21,7 @@ use TorneLIB\Utils\Generic;
  *
  * @package TorneLIB
  * @since 6.0.20
- * @deprecated You should consider NetWrapper instead.
+ * @deprecated Deprecated in 6.1. Use NetWrapper instead. Scheduled for removal in 6.2.0.
  */
 class MODULE_CURL
 {

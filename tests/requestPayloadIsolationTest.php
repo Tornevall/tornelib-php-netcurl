@@ -73,9 +73,12 @@ class requestPayloadIsolationTest extends TestCase
             ['POST', RequestMethod::POST, DataType::NORMAL, [], ''],
             ['GET', RequestMethod::GET, DataType::NORMAL, [], ''],
             ['POST', RequestMethod::POST, DataType::JSON, ['secret' => 'json-sentinel'], '{"secret":"json-sentinel"}'],
+            ['GET', RequestMethod::GET, DataType::NORMAL, [], ''],
             ['POST', RequestMethod::POST, DataType::JSON, [], '[]'],
+            ['GET', RequestMethod::GET, DataType::NORMAL, [], ''],
             ['POST', RequestMethod::POST, DataType::JSON, '', ''],
             ['POST', RequestMethod::POST, DataType::XML, '<root><secret>xml-sentinel</secret></root>', '<root><secret>xml-sentinel</secret></root>'],
+            ['GET', RequestMethod::GET, DataType::NORMAL, [], ''],
             ['POST', RequestMethod::POST, DataType::XML, '', ''],
             ['GET', RequestMethod::GET, DataType::NORMAL, [], ''],
             // Until #38 updates GET encoding, an explicitly supplied body is preserved.

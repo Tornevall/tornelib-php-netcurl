@@ -11,7 +11,7 @@ $statusCodes = [
 ];
 
 http_response_code(isset($statusCodes[$case]) ? $statusCodes[$case] : 400);
-header('Content-Type: application/json');
+header('Content-Type: ' . ($case === 'second' ? 'application/json; charset=utf-8' : 'application/json'));
 header('X-Request-ID: ' . $requestId);
 header('X-Response-Case: ' . $case);
 

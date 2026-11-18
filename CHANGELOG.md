@@ -8,7 +8,7 @@ Historical entries below are kept as historical records. Do not invent or guess 
 
 ## Fixes
 
-* Reset request payloads for every call, including empty arrays, empty strings and null, in configuration, cURL and stream transports; restore GET mode after a POST without resending the old body. [#37](https://github.com/Tornevall/tornelib-php-netcurl/issues/37)
+* Reset request payloads for every call, including empty arrays, empty strings and null, in configuration, cURL and stream transports; restore GET mode after a POST when the next GET has no payload while preserving existing explicit nonempty GET-body behavior. [#37](https://github.com/Tornevall/tornelib-php-netcurl/issues/37)
 * Isolate built-in transport response and configuration state by constructing a fresh driver for each internal request, while retaining static driver availability discovery and caller-owned registered external drivers. [#36](https://github.com/Tornevall/tornelib-php-netcurl/issues/36)
 * Keep cURL multi-response headers associated with their actual handles on PHP 7 (resources) and PHP 8+ (objects), using strict identity instead of integer casting; unknown handles no longer pollute another request's headers. [#35](https://github.com/Tornevall/tornelib-php-netcurl/issues/35)
 * Restore strict cURL certificate and hostname verification after an SSL policy changes from relaxed to strict on a reused configuration; preserve explicit legacy cURL overrides until the SSL policy changes. [#34](https://github.com/Tornevall/tornelib-php-netcurl/issues/34)

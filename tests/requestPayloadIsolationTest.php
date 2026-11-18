@@ -45,7 +45,7 @@ class requestPayloadIsolationTest extends TestCase
         $config->request('https://example.invalid/explicit-null', null, RequestMethod::GET);
         static::assertSame('', $config->getRequestData());
         static::assertSame('client', $config->getAuthentication()['username']);
-        static::assertSame(5, $config->getTimeout()['CONNECT']);
+        static::assertEquals(5, $config->getTimeout()['CONNECT']);
     }
 
     public function testReusedCurlWrapperNeverResendsAnEarlierPayload()

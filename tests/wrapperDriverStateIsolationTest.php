@@ -214,11 +214,14 @@ class wrapperDriverStateIsolationTest extends TestCase
         // legacy process-isolation annotations.
         $registry = new ReflectionProperty(WrapperDriver::class, 'externalWrapperList');
         $priority = new ReflectionProperty(WrapperDriver::class, 'useRegisteredWrappersFirst');
+        $instanceClass = new ReflectionProperty(WrapperDriver::class, 'instanceClass');
         $registry->setAccessible(true);
         $priority->setAccessible(true);
+        $instanceClass->setAccessible(true);
 
         $previousRegistry = $registry->getValue();
         $previousPriority = $priority->getValue();
+        $previousInstanceClass = $instanceClass->getValue();
         try {
             $external = new StateIsolationExternalDriver();
             WrapperDriver::register($external, true);
@@ -237,6 +240,7 @@ class wrapperDriverStateIsolationTest extends TestCase
         } finally {
             $registry->setValue($previousRegistry);
             $priority->setValue($previousPriority);
+            $instanceClass->setValue($previousInstanceClass);
         }
     }
 }

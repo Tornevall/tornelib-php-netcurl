@@ -462,9 +462,7 @@ class CurlWrapper implements WrapperInterface
             ) {
                 $dataType = $urlData['dataType'];
             }
-            if (isset($urlData['data']) &&
-                !empty($urlData['data'])
-            ) {
+            if (array_key_exists('data', $urlData)) {
                 $requestData = $this->CONFIG->getRequestData($dataType, $urlData['data'], $requestMethod);
             }
         }
@@ -590,6 +588,8 @@ class CurlWrapper implements WrapperInterface
                 $this->setOptionCurl($curlHandle, CURLOPT_CUSTOMREQUEST, 'PATCH');
                 break;
             default:
+                // A reused client must not retain cURL's previous POST mode.
+                $this->setOptionCurl($curlHandle, CURLOPT_HTTPGET, true);
                 // Making sure we send data in proper formatting if there is bad user configuration.
                 // Bad configuration is when both GET+POST data parameters are sent as a GET when the
                 // correct set up in that case is a POST.

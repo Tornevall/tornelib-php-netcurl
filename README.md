@@ -93,7 +93,7 @@ See the Tools documentation for examples and exact behavior.
 
 ## Request payload isolation on reused clients
 
-Each `request()` call replaces the previous request data, including when the supplied data is `[]`, `''` or `null`. A normal empty array represents an empty body; JSON empty arrays are encoded as `[]`. Switching from POST to GET resets the cURL request method rather than retaining the previous POST body. Persistent client configuration (such as authentication and timeout) remains available. This is covered by local HTTP fixture regression tests for cURL and PHP streams. See [#37](https://github.com/Tornevall/tornelib-php-netcurl/issues/37).
+Each `request()` call replaces the previous request data, including when the supplied data is `[]`, `''` or `null`. A normal empty array represents an empty body; JSON empty arrays are encoded as `[]`. Switching from POST to an empty GET resets cURL's POST mode rather than retaining the previous request body; explicitly supplied nonempty GET bodies retain their legacy behavior pending [#38](https://github.com/Tornevall/tornelib-php-netcurl/issues/38). Persistent client configuration (such as authentication and timeout) remains available. This is covered by local HTTP fixture regression tests for cURL and PHP streams. See [#37](https://github.com/Tornevall/tornelib-php-netcurl/issues/37).
 
 ## Independent transport state
 

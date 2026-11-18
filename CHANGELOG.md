@@ -6,6 +6,14 @@ Historical entries below are kept as historical records. Do not invent or guess 
 
 # Unreleased
 
+## Fixes
+
+* Restore strict cURL certificate and hostname verification after an SSL policy changes from relaxed to strict on a reused configuration; preserve explicit legacy cURL overrides until the SSL policy changes. [#34](https://github.com/Tornevall/tornelib-php-netcurl/issues/34)
+
+## Testing
+
+* Add deterministic regression coverage for repeated strict/relaxed TLS transitions, independent peer and host settings, configuration replacement, and direct cURL option compatibility. [#34](https://github.com/Tornevall/tornelib-php-netcurl/issues/34)
+
 # 6.1.11
 
 ## Updates

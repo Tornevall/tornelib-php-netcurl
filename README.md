@@ -91,6 +91,10 @@ Relevant runtime capabilities:
 
 See the Tools documentation for examples and exact behavior.
 
+## TLS verification
+
+NetCurl uses strict certificate and hostname verification by default for cURL and stream connections. Use `$wrapper->getConfig()->getSsl()->setStrictVerification(false)` only when an explicit, temporary relaxation is required, and re-enable verification with `setStrictVerification(true)`. On a reused configuration, changing the SSL policy now updates cURL peer and host verification in both directions; legacy cURL options explicitly set through `WrapperConfig::setOption()` are left alone until the SSL policy changes. See [#34](https://github.com/Tornevall/tornelib-php-netcurl/issues/34).
+
 ## Compatibility
 
 The old PHP 5.6 support claim is no longer valid for the current 6.1 source tree.

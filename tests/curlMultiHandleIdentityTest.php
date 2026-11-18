@@ -73,6 +73,8 @@ class curlMultiHandleIdentityTest extends TestCase
                 static::assertSame('handle-' . $index, $wrapper->getHeader('X-Request-ID', $index));
             }
         } finally {
+            // No actual multi handle was initialized in this reflection-only test.
+            $this->getPrivateProperty('isCurlMulti')->setValue($wrapper, false);
             foreach ($handles as $handle) {
                 curl_close($handle);
             }

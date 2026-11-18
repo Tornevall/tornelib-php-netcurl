@@ -92,6 +92,13 @@ class requestPayloadIsolationTest extends TestCase
             static::assertTrue(is_object($payload), 'Fixture returned invalid JSON at step ' . $index);
             static::assertSame($case[0], $payload->method, 'HTTP method mismatch at step ' . $index);
             static::assertSame($case[4], $payload->body, 'Request body mismatch at step ' . $index);
+
+            if ($wrapper instanceof CurlWrapper) {
+                // Transport-generated request values cannot become persistent defaults.
+                $options = $wrapper->getConfig()->getOptions();
+                static::assertArrayNotHasKey(CURLOPT_POSTFIELDS, $options);
+                static::assertArrayNotHasKey(CURLOPT_CUSTOMREQUEST, $options);
+            }
         }
     }
 

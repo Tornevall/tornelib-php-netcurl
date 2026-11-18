@@ -91,6 +91,10 @@ Relevant runtime capabilities:
 
 See the Tools documentation for examples and exact behavior.
 
+## cURL multi-request response isolation
+
+When calling `CurlWrapper::request()` with multiple URLs, cURL tracks each simultaneous handle separately on PHP 7 and PHP 8+. Response headers and status codes remain associated with their respective request indices, including when the same URL is requested more than once. Use `getHeader($headerName, $requestIndex)` and `getCode($requestIndex)` to distinguish duplicate URLs; URL-based header lookup identifies the first matching entry. Bodies can be consumed in request order with `getParsed()`. Regression coverage uses a local HTTP server without external DNS. See [#35](https://github.com/Tornevall/tornelib-php-netcurl/issues/35).
+
 ## TLS verification
 
 NetCurl uses strict certificate and hostname verification by default for cURL and stream connections. Use `$wrapper->getConfig()->getSsl()->setStrictVerification(false)` only when an explicit, temporary relaxation is required, and re-enable verification with `setStrictVerification(true)`. On a reused configuration, changing the SSL policy now updates cURL peer and host verification in both directions; legacy cURL options explicitly set through `WrapperConfig::setOption()` are left alone until the SSL policy changes. See [#34](https://github.com/Tornevall/tornelib-php-netcurl/issues/34).

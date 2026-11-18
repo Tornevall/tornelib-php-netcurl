@@ -286,7 +286,7 @@ class CurlWrapper implements WrapperInterface
         $this->setCurlRequestMethod($curlHandle, $urlData);
         $this->setCurlCustomHeaders($curlHandle);
         if (!empty($url)) {
-            $this->setOptionCurl($curlHandle, CURLOPT_URL, $url);
+            $this->setOptionCurl($curlHandle, CURLOPT_URL, $url, false);
         }
 
         return $this;
@@ -377,9 +377,11 @@ class CurlWrapper implements WrapperInterface
      * @return bool
      * @since 6.1.0
      */
-    public function setOptionCurl($curlHandle, $curlOpt, $value)
+    public function setOptionCurl($curlHandle, $curlOpt, $value, $persist = true)
     {
-        $this->CONFIG->setOption($curlOpt, $value);
+        if ($persist) {
+            $this->CONFIG->setOption($curlOpt, $value);
+        }
         return curl_setopt($curlHandle, $curlOpt, $value);
     }
 
@@ -476,9 +478,9 @@ class CurlWrapper implements WrapperInterface
                 break;
             default:
                 if ($requestMethod === RequestMethod::POST) {
-                    $this->setOptionCurl($curlHandle, CURLOPT_POST, true);
+                    $this->setOptionCurl($curlHandle, CURLOPT_POST, true, false);
                 }
-                $this->setOptionCurl($curlHandle, CURLOPT_POSTFIELDS, $requestData);
+                $this->setOptionCurl($curlHandle, CURLOPT_POSTFIELDS, $requestData, false);
                 break;
         }
 
@@ -504,7 +506,7 @@ class CurlWrapper implements WrapperInterface
 
         $this->customPreHeaders['Content-Type'] = 'Content-Type: text/xml; charset=utf-8';
         $this->customPreHeaders['Content-Length'] = strlen($requestData);
-        $this->setOptionCurl($curlHandle, CURLOPT_POSTFIELDS, $requestData);
+        $this->setOptionCurl($curlHandle, CURLOPT_POSTFIELDS, $requestData, false);
 
         return $this;
     }
@@ -526,7 +528,7 @@ class CurlWrapper implements WrapperInterface
 
         $this->customPreHeaders['Content-Type'] = $jsonContentType;
         $this->customPreHeaders['Content-Length'] = strlen($requestData);
-        $this->setOptionCurl($curlHandle, CURLOPT_POSTFIELDS, $requestData);
+        $this->setOptionCurl($curlHandle, CURLOPT_POSTFIELDS, $requestData, false);
 
         return $this;
     }
@@ -570,22 +572,22 @@ class CurlWrapper implements WrapperInterface
 
         switch ($requestMethod) {
             case RequestMethod::POST:
-                $this->setOptionCurl($curlHandle, CURLOPT_CUSTOMREQUEST, 'POST');
+                $this->setOptionCurl($curlHandle, CURLOPT_CUSTOMREQUEST, 'POST', false);
                 break;
             case RequestMethod::DELETE:
-                $this->setOptionCurl($curlHandle, CURLOPT_CUSTOMREQUEST, 'DELETE');
+                $this->setOptionCurl($curlHandle, CURLOPT_CUSTOMREQUEST, 'DELETE', false);
                 break;
             case RequestMethod::HEAD:
-                $this->setOptionCurl($curlHandle, CURLOPT_CUSTOMREQUEST, 'HEAD');
+                $this->setOptionCurl($curlHandle, CURLOPT_CUSTOMREQUEST, 'HEAD', false);
                 break;
             case RequestMethod::PUT:
-                $this->setOptionCurl($curlHandle, CURLOPT_CUSTOMREQUEST, 'PUT');
+                $this->setOptionCurl($curlHandle, CURLOPT_CUSTOMREQUEST, 'PUT', false);
                 break;
             case RequestMethod::REQUEST:
-                $this->setOptionCurl($curlHandle, CURLOPT_CUSTOMREQUEST, 'REQUEST');
+                $this->setOptionCurl($curlHandle, CURLOPT_CUSTOMREQUEST, 'REQUEST', false);
                 break;
             case RequestMethod::PATCH:
-                $this->setOptionCurl($curlHandle, CURLOPT_CUSTOMREQUEST, 'PATCH');
+                $this->setOptionCurl($curlHandle, CURLOPT_CUSTOMREQUEST, 'PATCH', false);
                 break;
             default:
                 // Preserve legacy GET bodies when the caller supplies data.
@@ -601,12 +603,12 @@ class CurlWrapper implements WrapperInterface
                     );
                 }
                 if ($requestData === '' || $requestData === []) {
-                    $this->setOptionCurl($curlHandle, CURLOPT_HTTPGET, true);
+                    $this->setOptionCurl($curlHandle, CURLOPT_HTTPGET, true, false);
                 }
                 // Making sure we send data in proper formatting if there is bad user configuration.
                 // Bad configuration is when both GET+POST data parameters are sent as a GET when the
                 // correct set up in that case is a POST.
-                $this->setOptionCurl($curlHandle, CURLOPT_CUSTOMREQUEST, 'GET');
+                $this->setOptionCurl($curlHandle, CURLOPT_CUSTOMREQUEST, 'GET', false);
                 break;
         }
 
@@ -660,7 +662,7 @@ class CurlWrapper implements WrapperInterface
     private function setupHeaders($curlHandle)
     {
         if (count($this->customHeaders)) {
-            $this->setOptionCurl($curlHandle, CURLOPT_HTTPHEADER, $this->customHeaders);
+            $this->setOptionCurl($curlHandle, CURLOPT_HTTPHEADER, $this->customHeaders, false);
         }
 
         return $this;

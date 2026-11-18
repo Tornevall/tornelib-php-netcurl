@@ -108,7 +108,17 @@ class WrapperDriver
                 $currentWrapperClass === sprintf('TorneLIB\Module\Network\Wrappers\%s', $wrapperNameClass)
             ) {
                 self::$instanceClass = $wrapperNameClass;
-                $return = $wrapperClass;
+
+                if (isset(self::$wrappers[$currentWrapperClass]) &&
+                    self::$wrappers[$currentWrapperClass] === $wrapperClass
+                ) {
+                    // Internal registry entries only establish driver availability.
+                    // Request and configuration state must never be shared by clients.
+                    $return = new $currentWrapperClass();
+                } else {
+                    // Registered external driver objects retain their legacy identity.
+                    $return = $wrapperClass;
+                }
                 break;
             }
         }

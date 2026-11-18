@@ -8,11 +8,13 @@ Historical entries below are kept as historical records. Do not invent or guess 
 
 ## Fixes
 
+* Isolate built-in transport response and configuration state by constructing a fresh driver for each internal request, while retaining static driver availability discovery and caller-owned registered external drivers. [#36](https://github.com/Tornevall/tornelib-php-netcurl/issues/36)
 * Keep cURL multi-response headers associated with their actual handles on PHP 7 (resources) and PHP 8+ (objects), using strict identity instead of integer casting; unknown handles no longer pollute another request's headers. [#35](https://github.com/Tornevall/tornelib-php-netcurl/issues/35)
 * Restore strict cURL certificate and hostname verification after an SSL policy changes from relaxed to strict on a reused configuration; preserve explicit legacy cURL overrides until the SSL policy changes. [#34](https://github.com/Tornevall/tornelib-php-netcurl/issues/34)
 
 ## Testing
 
+* Add deterministic driver isolation, interleaved localhost HTTP-response/configuration, and external driver registration/priority regression coverage. [#36](https://github.com/Tornevall/tornelib-php-netcurl/issues/36)
 * Add deterministic handle-identity and local HTTP multi-request tests for distinct headers, HTTP status codes, parsed bodies, and repeated URLs across PHP versions. [#35](https://github.com/Tornevall/tornelib-php-netcurl/issues/35)
 * Add deterministic regression coverage for repeated strict/relaxed TLS transitions, independent peer and host settings, configuration replacement, and direct cURL option compatibility. [#34](https://github.com/Tornevall/tornelib-php-netcurl/issues/34)
 

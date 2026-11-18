@@ -12,6 +12,7 @@ Historical entries below are kept as historical records. Do not invent or guess 
 
 ## Testing
 
+* Isolate custom-driver test fixtures by URL scheme so deterministic priority assertions also hold on PHP 8.6 with PHPUnit 13, which does not honor legacy process-isolation annotations. [#20](https://github.com/Tornevall/tornelib-php-netcurl/issues/20) [#22](https://github.com/Tornevall/tornelib-php-netcurl/issues/22)
 * Add deterministic regression coverage for repeated strict/relaxed TLS transitions, independent peer and host settings, configuration replacement, and direct cURL option compatibility. [#34](https://github.com/Tornevall/tornelib-php-netcurl/issues/34)
 
 # 6.1.11

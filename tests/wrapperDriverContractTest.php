@@ -69,9 +69,17 @@ class NetCurlContractWrapper implements WrapperInterface
         return 'contract-test';
     }
 
+    /**
+     * Keep fake transports separated even when process isolation is unavailable.
+     */
+    protected function getSupportedProtocol()
+    {
+        return 'contract://';
+    }
+
     public function request($url, $data = [], $method = RequestMethod::GET, $dataType = DataType::NORMAL)
     {
-        if (strpos($url, 'contract://') !== 0) {
+        if (strpos($url, $this->getSupportedProtocol()) !== 0) {
             return null;
         }
 
@@ -84,6 +92,18 @@ class NetCurlContractWrapper implements WrapperInterface
         $this->code = 200;
 
         return $this;
+    }
+}
+
+/**
+ * A distinct scheme prevents existing registered fixtures from intercepting
+ * the priority test when a newer PHPUnit ignores docblock process isolation.
+ */
+class NetCurlPriorityContractWrapper extends NetCurlContractWrapper
+{
+    protected function getSupportedProtocol()
+    {
+        return 'priority-contract://';
     }
 }
 
@@ -125,12 +145,12 @@ class wrapperDriverContractTest extends TestCase
      */
     public function testRegisteredWrapperCanTakePriorityWithoutChangingCallerApi()
     {
-        $wrapper = new NetCurlContractWrapper();
+        $wrapper = new NetCurlPriorityContractWrapper();
         $netWrapper = new NetWrapper();
         $netWrapper->register($wrapper, true);
 
         $response = $netWrapper->request(
-            'contract://local-driver',
+            'priority-contract://local-driver',
             ['foo' => 'bar'],
             RequestMethod::PATCH,
             DataType::JSON
@@ -138,7 +158,7 @@ class wrapperDriverContractTest extends TestCase
 
         static::assertSame($wrapper, $response);
         static::assertSame(200, $response->getCode());
-        static::assertSame('contract://local-driver', $response->getBody()['url']);
+        static::assertSame('priority-contract://local-driver', $response->getBody()['url']);
         static::assertSame(['foo' => 'bar'], $response->getBody()['data']);
         static::assertSame(RequestMethod::PATCH, $response->getBody()['method']);
         static::assertSame(DataType::JSON, $response->getBody()['dataType']);

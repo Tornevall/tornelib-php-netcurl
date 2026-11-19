@@ -21,7 +21,7 @@ class wrapperConfigContractTest extends TestCase
         $config = new WrapperConfig();
 
         static::assertSame(
-            '&foo=bar&count=2',
+            'foo=bar&count=2',
             $config->getRequestData(
                 DataType::NORMAL,
                 ['foo' => 'bar', 'count' => 2],

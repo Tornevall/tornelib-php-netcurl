@@ -653,6 +653,73 @@ class WrapperConfig
     }
 
     /**
+     * Resolve the effective URL for ordinary GET parameters without changing
+     * the original URL or the configured request data.
+     *
+     * Query parameters are appended before the fragment and existing query
+     * fields (including duplicate keys) are preserved without reparsing.
+     *
+     * @param string|null $requestUrl
+     * @param mixed|null $requestData
+     * @param int|null $requestMethod
+     * @param int|null $dataType
+     * @return mixed
+     */
+    public function getRequestUrlWithQuery(
+        $requestUrl = null,
+        $requestData = null,
+        $requestMethod = null,
+        $dataType = null
+    ) {
+        if (is_null($requestUrl)) {
+            $requestUrl = $this->requestUrl;
+        }
+        if (is_null($requestMethod)) {
+            $requestMethod = $this->requestMethod;
+        }
+        if (is_null($dataType)) {
+            $dataType = $this->requestDataType;
+        }
+
+        // Explicit JSON/XML data on GET retains its previous raw-body contract.
+        if (!is_string($requestUrl) ||
+            $requestMethod !== RequestMethod::GET ||
+            $dataType !== DataType::NORMAL
+        ) {
+            return $requestUrl;
+        }
+
+        if (is_null($requestData)) {
+            $requestData = $this->requestData;
+        }
+
+        $query = $this->getRequestData(DataType::NORMAL, $requestData, RequestMethod::GET);
+        if (is_array($query) || is_object($query)) {
+            $query = http_build_query($query);
+        }
+        $query = ltrim((string)$query, '?&');
+        if ($query === '') {
+            return $requestUrl;
+        }
+
+        $fragment = '';
+        $fragmentPosition = strpos($requestUrl, '#');
+        if ($fragmentPosition !== false) {
+            $fragment = substr($requestUrl, $fragmentPosition);
+            $requestUrl = substr($requestUrl, 0, $fragmentPosition);
+        }
+
+        $hasQuery = strpos($requestUrl, '?') !== false;
+        $separator = $hasQuery ? '&' : '?';
+        // A trailing ampersand in the path is not a query separator.
+        if ($hasQuery && (substr($requestUrl, -1) === '?' || substr($requestUrl, -1) === '&')) {
+            $separator = '';
+        }
+
+        return $requestUrl . $separator . $query . $fragment;
+    }
+
+    /**
      * Transform requested data into a proper format based on the content-type.
      *
      * @param null $dataType
@@ -693,16 +760,11 @@ class WrapperConfig
                         $this->requestDataContainer = '';
                         return '';
                     }
-                    $requestQuery = '';
-                    if ($requestMethod === RequestMethod::GET && !empty($requestData)) {
-                        // Add POST data to request if anything else follows.
-                        $requestQuery = '&';
-                    }
                     $this->requestDataContainer = $requestData;
                     if ($this->hasData($requestData)) {
                         $httpQuery = http_build_query($requestData);
                         if (!empty($httpQuery)) {
-                            $this->requestDataContainer = $requestQuery . $httpQuery;
+                            $this->requestDataContainer = $httpQuery;
                         }
                     }
                     $return = $this->requestDataContainer;

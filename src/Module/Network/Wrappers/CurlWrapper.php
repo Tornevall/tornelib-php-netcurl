@@ -286,7 +286,26 @@ class CurlWrapper implements WrapperInterface
         $this->setCurlRequestMethod($curlHandle, $urlData);
         $this->setCurlCustomHeaders($curlHandle);
         if (!empty($url)) {
-            $this->setOptionCurl($curlHandle, CURLOPT_URL, $url, false);
+            $requestMethod = $this->CONFIG->getRequestMethod();
+            $dataType = $this->CONFIG->getRequestDataType();
+            $requestData = null;
+            if (is_array($urlData)) {
+                if (isset($urlData['requestMethod'])) {
+                    $requestMethod = $urlData['requestMethod'];
+                }
+                if (isset($urlData['dataType'])) {
+                    $dataType = $urlData['dataType'];
+                }
+                if (array_key_exists('data', $urlData)) {
+                    $requestData = is_null($urlData['data']) ? [] : $urlData['data'];
+                }
+            }
+            $this->setOptionCurl(
+                $curlHandle,
+                CURLOPT_URL,
+                $this->CONFIG->getRequestUrlWithQuery($url, $requestData, $requestMethod, $dataType),
+                false
+            );
         }
 
         return $this;
@@ -453,20 +472,26 @@ class CurlWrapper implements WrapperInterface
         $dataType = $this->CONFIG->getRequestDataType();
         $requestData = $this->CONFIG->getRequestData();
         $requestMethod = $this->CONFIG->getRequestMethod();
-        if (!is_null($urlData)) {
-            if (isset($urlData['requestMethod']) &&
-                !empty($urlData['requestMethod'])
-            ) {
+        if (is_array($urlData)) {
+            if (isset($urlData['requestMethod'])) {
                 $requestMethod = $urlData['requestMethod'];
             }
-            if (isset($urlData['dataType']) &&
-                !empty($urlData['dataType'])
-            ) {
+            if (isset($urlData['dataType'])) {
                 $dataType = $urlData['dataType'];
             }
             if (array_key_exists('data', $urlData)) {
-                $requestData = $this->CONFIG->getRequestData($dataType, $urlData['data'], $requestMethod);
+                $requestData = $this->CONFIG->getRequestData(
+                    $dataType,
+                    is_null($urlData['data']) ? [] : $urlData['data'],
+                    $requestMethod
+                );
             }
+        }
+
+        // Ordinary GET data is encoded in the URL by setupHandle().
+        // Do not set CURLOPT_POSTFIELDS or request-body headers here.
+        if ($requestMethod === RequestMethod::GET && $dataType === DataType::NORMAL) {
+            return $this;
         }
 
         switch ($dataType) {
@@ -563,11 +588,14 @@ class CurlWrapper implements WrapperInterface
     private function setCurlRequestMethod($curlHandle, $urlData = null)
     {
         $requestMethod = $this->CONFIG->getRequestMethod();
-        if (!is_null($urlData) &&
-            isset($urlData['requestMethod']) &&
-            is_numeric($urlData['requestMethod'])
-        ) {
-            $requestMethod = $urlData['requestMethod'];
+        $dataType = $this->CONFIG->getRequestDataType();
+        if (is_array($urlData)) {
+            if (isset($urlData['requestMethod']) && is_numeric($urlData['requestMethod'])) {
+                $requestMethod = $urlData['requestMethod'];
+            }
+            if (isset($urlData['dataType'])) {
+                $dataType = $urlData['dataType'];
+            }
         }
 
         switch ($requestMethod) {
@@ -602,7 +630,11 @@ class CurlWrapper implements WrapperInterface
                         $requestMethod
                     );
                 }
-                if ($requestData === '' || $requestData === []) {
+                // Normal GET parameters are part of the URL, not a body.
+                // Explicitly selected JSON/XML GET bodies keep legacy behavior.
+                if ($dataType === DataType::NORMAL ||
+                    $requestData === '' || $requestData === []
+                ) {
                     $this->setOptionCurl($curlHandle, CURLOPT_HTTPGET, true, false);
                 }
                 // Making sure we send data in proper formatting if there is bad user configuration.

@@ -89,40 +89,93 @@ class rssHttpStatusTest extends TestCase
         });
     }
 
-    public function testOptionalReaderAndHttpClientCombinationsUseTransport()
+    public function testOptionalLaminasDependencyCombinationsPreserveOwnership()
     {
         if (!function_exists('proc_open')) {
             static::markTestSkipped('Subprocess testing requires proc_open.');
         }
 
         $this->withLocalServer(function ($base) {
-            foreach (['reader-only', 'reader-with-http'] as $mode) {
-                $args = escapeshellarg(PHP_BINARY) . ' ' .
-                    escapeshellarg(__DIR__ . '/fixtures/rss-dependency-probe.php') . ' ' .
-                    escapeshellarg($mode) . ' ' . escapeshellarg($base . '?case=rss');
-                $pipes = [];
-                $process = proc_open($args, [
-                    0 => ['pipe', 'r'],
-                    1 => ['pipe', 'w'],
-                    2 => ['pipe', 'w'],
-                ], $pipes);
-                static::assertTrue(is_resource($process), 'Could not start optional reader probe.');
-                fclose($pipes[0]);
-                $stdout = stream_get_contents($pipes[1]);
-                $stderr = stream_get_contents($pipes[2]);
-                fclose($pipes[1]);
-                fclose($pipes[2]);
-                $exit = proc_close($process);
+            $cases = [
+                ['reader-only', 'importString', 0, null, false],
+                ['reader-with-http', 'import', 1, 1, true],
+                ['reader-with-custom', 'import', 1, 1, false],
+            ];
 
-                static::assertSame(0, $exit, $mode . ': ' . $stderr);
-                $response = json_decode($stdout);
-                static::assertTrue(is_object($response), $mode . ': Invalid JSON: ' . $stdout);
-                static::assertSame(200, $response->code);
-                static::assertSame('importString', $response->parser);
-                static::assertSame('Local RSS', $response->title);
-                static::assertTrue($response->hasRawBody);
+            foreach ($cases as $case) {
+                $result = $this->runDependencyProbe($case[0], $base . '?case=rss');
+                static::assertSame(200, $result->code, $case[0] . ' HTTP status');
+                static::assertSame($case[1], $result->parser, $case[0] . ' import path');
+                static::assertSame('Local RSS', $result->title);
+                static::assertSame($case[2], $result->importCalls, 'Reader::import count');
+                static::assertSame($case[3], $result->transportCalls, 'Original HTTP client calls');
+                static::assertSame($case[4], $result->headersPreserved, 'Conditional headers');
+                static::assertTrue($result->hasRawBody, 'Raw downloaded body was not retained');
+                static::assertTrue($result->originalClientRestored, 'Laminas HTTP client not restored');
+                static::assertNull($result->error);
             }
         });
+    }
+
+    public function testLaminasCacheHitDoesNotInventASecondHttpStatus()
+    {
+        $this->withLocalServer(function ($base) {
+            $result = $this->runDependencyProbe('reader-with-http-cache', $base . '?case=rss');
+
+            static::assertSame(200, $result->previousCode);
+            static::assertNull($result->code);
+            static::assertFalse($result->hasRawBody);
+            static::assertSame('import', $result->parser);
+            static::assertSame('Local RSS', $result->title);
+            static::assertSame(2, $result->importCalls);
+            static::assertSame(1, $result->transportCalls);
+            static::assertTrue($result->originalClientRestored);
+        });
+    }
+
+    public function testLaminasHttpErrorsAndMalformedFeedsKeepObservedStatus()
+    {
+        $this->withLocalServer(function ($base) {
+            foreach ([
+                ['reader-with-http-missing', 'missing', 404],
+                ['reader-with-http-missing', 'failure', 503],
+                ['reader-with-http-malformed', 'malformed', 200],
+            ] as $case) {
+                $result = $this->runDependencyProbe($case[0], $base . '?case=' . $case[1]);
+                static::assertSame($case[2], $result->code, $case[1] . ' status');
+                static::assertSame(1, $result->importCalls);
+                static::assertSame(1, $result->transportCalls);
+                static::assertTrue($result->hasRawBody);
+                static::assertTrue($result->originalClientRestored);
+                static::assertNotEmpty($result->error, 'Expected a Laminas import exception');
+            }
+        });
+    }
+
+    private function runDependencyProbe($mode, $url)
+    {
+        $args = escapeshellarg(PHP_BINARY) . ' ' .
+            escapeshellarg(__DIR__ . '/fixtures/rss-dependency-probe.php') . ' ' .
+            escapeshellarg($mode) . ' ' . escapeshellarg($url);
+        $pipes = [];
+        $process = proc_open($args, [
+            0 => ['pipe', 'r'],
+            1 => ['pipe', 'w'],
+            2 => ['pipe', 'w'],
+        ], $pipes);
+        static::assertTrue(is_resource($process), 'Could not start optional Reader probe.');
+        fclose($pipes[0]);
+        $stdout = stream_get_contents($pipes[1]);
+        $stderr = stream_get_contents($pipes[2]);
+        fclose($pipes[1]);
+        fclose($pipes[2]);
+        $exit = proc_close($process);
+
+        static::assertSame(0, $exit, $mode . ': ' . $stderr);
+        $result = json_decode($stdout);
+        static::assertTrue(is_object($result), $mode . ': Invalid JSON ' . $stdout);
+
+        return $result;
     }
 
     private function withLocalServer($callback)

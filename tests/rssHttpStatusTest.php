@@ -39,7 +39,7 @@ class rssHttpStatusTest extends TestCase
             $atom = $wrapper->request($base . '?case=atom');
             static::assertSame($wrapper, $atom);
             static::assertSame(200, $wrapper->getCode());
-            static::assertContains('Local Atom', $wrapper->getBody());
+            static::assertNotFalse(strpos($wrapper->getBody(), 'Local Atom'));
             static::assertNotNull($wrapper->getParsed());
 
             $netWrapper = new NetWrapper();

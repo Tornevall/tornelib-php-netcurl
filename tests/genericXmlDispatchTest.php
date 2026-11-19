@@ -90,7 +90,7 @@ class genericXmlDispatchTest extends TestCase
         static::assertSame(0, $status, 'XML parser probe failed: ' . $errors);
         $results = json_decode($output, true);
         static::assertTrue(is_array($results), 'Invalid parser probe output: ' . $output);
-        static::assertCount(18, $results);
+        static::assertCount(20, $results);
 
         foreach ($results as $name => $result) {
             static::assertSame(

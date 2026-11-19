@@ -183,12 +183,54 @@ class RssWrapper implements WrapperInterface
         $method = RequestMethod::GET,
         $dataType = DataType::NORMAL
     ) {
-        // Every HTTP fetch must use a transport that exposes its actual status.
-        // Laminas can still parse the response independently of its HTTP client.
         $this->requestResponseRaw = null;
         $this->requestResponse = null;
         $this->responseCode = null;
 
+        if (class_exists('Laminas\\Feed\\Reader\\Reader')) {
+            // Keep Laminas in charge of HTTP, RSS/Atom parsing, extensions
+            // and its existing caching behavior whenever a client is ready.
+            if (interface_exists('Laminas\\Feed\\Reader\\Http\\ClientInterface')) {
+                $client = null;
+                try {
+                    $client = \\Laminas\\Feed\\Reader\\Reader::getHttpClient();
+                } catch (\\Error $error) {
+                    if (class_exists('Laminas\\Http\\Client')) {
+                        throw $error;
+                    }
+                    // Without laminas-http or a configured Reader client,
+                    // use NetCurl for the download and Reader for parsing.
+                }
+
+                if ($client !== null) {
+                    $observer = $client instanceof \\Laminas\\Feed\\Reader\\Http\\HeaderAwareClientInterface ?
+                        new RssLaminasHeaderClientObserver($client) :
+                        new RssLaminasClientObserver($client);
+
+                    \\Laminas\\Feed\\Reader\\Reader::setHttpClient($observer);
+                    try {
+                        $this->requestResponse = \\Laminas\\Feed\\Reader\\Reader::import($url);
+                    } finally {
+                        // A Reader cache hit may perform no HTTP request.
+                        // In that case the status must remain unknown.
+                        $this->responseCode = $observer->getStatusCode();
+                        $this->requestResponseRaw = $observer->getResponseBody();
+                        \\Laminas\\Feed\\Reader\\Reader::setHttpClient($client);
+                    }
+
+                    return $this;
+                }
+            } elseif (class_exists('Laminas\\Http\\Client')) {
+                // Compatibility for older Reader integrations without the
+                // observable HTTP client interface: no guessed status.
+                $this->requestResponse = \\Laminas\\Feed\\Reader\\Reader::import($url);
+
+                return $this;
+            }
+        }
+
+        // Fallback only: NetCurl downloads when Laminas has no HTTP client.
+        // Laminas Reader still parses the feed when that package is present.
         $transport = new NetWrapper();
         $transport->setConfig(clone $this->CONFIG);
 
@@ -200,15 +242,13 @@ class RssWrapper implements WrapperInterface
                 DataType::NORMAL
             );
         } catch (ExceptionHandler $exception) {
-            // HTTP errors may throw before NetWrapper::request() returns.
-            // Retain the actual transport status when it is available.
             try {
                 $code = $transport->getCode();
                 if (is_numeric($code) && $code >= 100 && $code <= 599) {
                     $this->responseCode = (int)$code;
                 }
             } catch (Exception $ignored) {
-                // Transport failures without an HTTP response have no status.
+                // Network failures without HTTP responses have no status.
             }
 
             throw $exception;
@@ -217,8 +257,8 @@ class RssWrapper implements WrapperInterface
         $this->responseCode = $naturalRequest->getCode();
         $this->requestResponseRaw = $naturalRequest->getBody();
 
-        if (class_exists('Laminas\Feed\Reader\Reader')) {
-            $this->requestResponse = \Laminas\Feed\Reader\Reader::importString($this->requestResponseRaw);
+        if (class_exists('Laminas\\Feed\\Reader\\Reader')) {
+            $this->requestResponse = \\Laminas\\Feed\\Reader\\Reader::importString($this->requestResponseRaw);
         } else {
             $this->requestResponse = $naturalRequest->getParsed();
         }

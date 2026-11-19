@@ -193,7 +193,7 @@ class RssWrapper implements WrapperInterface
             if (interface_exists('Laminas\\Feed\\Reader\\Http\\ClientInterface')) {
                 $client = null;
                 try {
-                    $client = \Laminas\\Feed\\Reader\\Reader::getHttpClient();
+                    $client = \Laminas\Feed\Reader\Reader::getHttpClient();
                 } catch (\Error $error) {
                     if (class_exists('Laminas\\Http\\Client')) {
                         throw $error;
@@ -203,19 +203,19 @@ class RssWrapper implements WrapperInterface
                 }
 
                 if ($client !== null) {
-                    $observer = $client instanceof \Laminas\\Feed\\Reader\\Http\\HeaderAwareClientInterface ?
+                    $observer = $client instanceof \Laminas\Feed\Reader\Http\HeaderAwareClientInterface ?
                         new RssLaminasHeaderClientObserver($client) :
                         new RssLaminasClientObserver($client);
 
-                    \Laminas\\Feed\\Reader\\Reader::setHttpClient($observer);
+                    \Laminas\Feed\Reader\Reader::setHttpClient($observer);
                     try {
-                        $this->requestResponse = \Laminas\\Feed\\Reader\\Reader::import($url);
+                        $this->requestResponse = \Laminas\Feed\Reader\Reader::import($url);
                     } finally {
                         // A Reader cache hit may perform no HTTP request.
                         // In that case the status must remain unknown.
                         $this->responseCode = $observer->getStatusCode();
                         $this->requestResponseRaw = $observer->getResponseBody();
-                        \Laminas\\Feed\\Reader\\Reader::setHttpClient($client);
+                        \Laminas\Feed\Reader\Reader::setHttpClient($client);
                     }
 
                     return $this;
@@ -223,7 +223,7 @@ class RssWrapper implements WrapperInterface
             } elseif (class_exists('Laminas\\Http\\Client')) {
                 // Compatibility for older Reader integrations without the
                 // observable HTTP client interface: no guessed status.
-                $this->requestResponse = \Laminas\\Feed\\Reader\\Reader::import($url);
+                $this->requestResponse = \Laminas\Feed\Reader\Reader::import($url);
 
                 return $this;
             }
@@ -258,7 +258,7 @@ class RssWrapper implements WrapperInterface
         $this->requestResponseRaw = $naturalRequest->getBody();
 
         if (class_exists('Laminas\\Feed\\Reader\\Reader')) {
-            $this->requestResponse = \Laminas\\Feed\\Reader\\Reader::importString($this->requestResponseRaw);
+            $this->requestResponse = \Laminas\Feed\Reader\Reader::importString($this->requestResponseRaw);
         } else {
             $this->requestResponse = $naturalRequest->getParsed();
         }

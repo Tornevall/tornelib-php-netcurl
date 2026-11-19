@@ -40,6 +40,12 @@ class getQueryParametersTest extends TestCase
             RequestMethod::GET,
             DataType::NORMAL
         ));
+        static::assertSame('https://example.invalid/path&?a=1', $config->getRequestUrlWithQuery(
+            'https://example.invalid/path&',
+            ['a' => 1],
+            RequestMethod::GET,
+            DataType::NORMAL
+        ));
         static::assertSame('https://example.invalid/lookup?old=1&a=1', $config->getRequestUrlWithQuery(
             'https://example.invalid/lookup?old=1&',
             ['a' => 1],

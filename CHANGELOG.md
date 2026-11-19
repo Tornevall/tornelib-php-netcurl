@@ -18,6 +18,7 @@ Historical entries below are kept as historical records. Do not invent or guess 
 
 ## Testing
 
+* Add deterministic parser-only XML/Atom/RSS/SOAP/sitemap/RDF tests with isolated optional Laminas Feed Reader, legacy result-shape assertions and libxml error-state checks. [#40](https://github.com/Tornevall/tornelib-php-netcurl/issues/40)
 * Add deterministic localhost RSS/Atom success, HTTP 404/503, malformed XML, parser-only and isolated Laminas Reader/HTTP/custom-client regression tests, including cache-only imports, conditional headers and client restoration. [#39](https://github.com/Tornevall/tornelib-php-netcurl/issues/39)
 * Add deterministic query-composition, localhost HTTP method/URL/body, stream/cURL parity, NetWrapper facade, multi-request, and POST/PUT/PATCH regression coverage; update one obsolete GET assertion to the corrected contract. [#38](https://github.com/Tornevall/tornelib-php-netcurl/issues/38)
 * Verify reused cURL and stream clients send the expected method and raw request body across nonempty/empty POST, POST-to-empty-GET, empty JSON/XML and explicit empty-string transitions against a localhost HTTP fixture. [#37](https://github.com/Tornevall/tornelib-php-netcurl/issues/37)

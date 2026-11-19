@@ -8,6 +8,7 @@ Historical entries below are kept as historical records. Do not invent or guess 
 
 ## Fixes
 
+* Prevent optional Laminas Feed Reader from parsing generic XML, SOAP or other non-feed responses; recognize actual RSS 2.0, RSS 1.0 and Atom roots or explicit feed media types while preserving legacy generic XML results. [#40](https://github.com/Tornevall/tornelib-php-netcurl/issues/40)
 * Report the actual RSS HTTP status instead of deriving false 404 responses; preserve Laminas Reader URL imports, caching, configured HTTP clients and parsing through temporary status observers, falling back to NetCurl transport only when Laminas HTTP fetching is unavailable. [#39](https://github.com/Tornevall/tornelib-php-netcurl/issues/39)
 * Send ordinary GET parameters in the URL for cURL, streams and multi requests, preserving original query strings, duplicate keys and fragments while omitting GET bodies and retaining explicit JSON/XML GET compatibility. [#38](https://github.com/Tornevall/tornelib-php-netcurl/issues/38)
 * Reset request payloads for every call, including empty arrays, empty strings and null, in configuration, cURL and stream transports; restore GET mode after a POST when the next GET has no payload while preserving existing explicit nonempty GET-body behavior. [#37](https://github.com/Tornevall/tornelib-php-netcurl/issues/37)

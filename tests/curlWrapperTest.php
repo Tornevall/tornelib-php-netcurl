@@ -370,7 +370,11 @@ class curlWrapperTest extends TestCase
             )
             ->getParsed();
 
-        static::assertNotTrue(isset($data->PARAMS_REQUEST->hello));
+        // Standard GET parameters must appear in the URL rather than the body.
+        static::assertTrue(
+            isset($data->PARAMS_GET->hello) &&
+            $data->PARAMS_GET->hello === 'world'
+        );
     }
 
     /**

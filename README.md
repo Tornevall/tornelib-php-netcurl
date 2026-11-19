@@ -103,7 +103,7 @@ See [#39](https://github.com/Tornevall/tornelib-php-netcurl/issues/39).
 
 Generic XML responses (`application/xml`, `text/xml`, `application/soap+xml`, `application/*+xml`, and the legacy `xml` alias) continue to use NetCurl's existing XML conversion and preserve their legacy return structures. Merely installing optional Laminas Feed Reader does not turn unrelated XML, SOAP envelopes or sitemaps into feeds.
 
-If Laminas Feed Reader is available, `GenericParser::getParsed()` delegates to it for explicit RSS/Atom content types (`application/rss+xml`, `application/atom+xml`) or when the XML document's root is verified as RSS 2.0, Atom or RSS 1.0. Feed detection checks the XML root with XMLReader (or DOM when XMLReader is unavailable), does not resolve external XML entities and restores the prior libxml error mode. Without Laminas Feed Reader, the legacy XML conversion remains in use.
+If Laminas Feed Reader is available, `GenericParser::getParsed()` delegates to it for explicit RSS/Atom content types (`application/rss+xml`, `application/atom+xml`) or when the XML document's root is verified as RSS 2.0, RSS 1.0, Atom 1.0 or legacy Atom 0.3. Feed detection checks the XML root with XMLReader (or DOM when XMLReader is unavailable), does not resolve external XML entities and restores the prior libxml error mode. Without Laminas Feed Reader, the legacy XML conversion remains in use.
 
 Explicit `DataType::RSS_XML` requests still use `RssWrapper` directly, leaving feed fetching, caching and parsing to Laminas when available. See [#40](https://github.com/Tornevall/tornelib-php-netcurl/issues/40).
 

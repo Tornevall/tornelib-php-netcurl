@@ -53,6 +53,14 @@ class RssWrapper implements WrapperInterface
     private $requestResponse;
 
     /**
+     * HTTP status from the most recent transport request, or null when
+     * parsing content that did not originate from an HTTP request.
+     *
+     * @var int|null
+     */
+    private $responseCode;
+
+    /**
      * @var WrapperConfig
      */
     private $CONFIG;
@@ -143,12 +151,14 @@ class RssWrapper implements WrapperInterface
     }
 
     /**
-     * Simplified response as Laminas handles most of the data for us.
-     * @return int
+     * Return the HTTP response code supplied by the underlying transport.
+     * Parser-only imports have no HTTP status and return null.
+     *
+     * @return int|null
      */
     public function getCode()
     {
-        return isset($this->requestResponseRaw->entries) ? 200 : 404;
+        return $this->responseCode;
     }
 
     /**
@@ -173,30 +183,43 @@ class RssWrapper implements WrapperInterface
         $method = RequestMethod::GET,
         $dataType = DataType::NORMAL
     ) {
-        // Laminas requires two classes if url should be handled.
-        if (class_exists('Laminas\Feed\Reader\Reader') && class_exists('Laminas\Http\Client')) {
-            $this->requestResponse = \Laminas\Feed\Reader\Reader::import($url);
-        } elseif (class_exists('Laminas\Feed\Reader\Reader')) {
-            // If the http client in laminas is missing, fall back on our local wrappers. But instead of using
-            // the netwrapper type RSS, we'll fetch the data as a regular data request to disable parts of the automation.
-            /** @noinspection NullPointerExceptionInspection */
-            $this->requestResponseRaw = (new NetWrapper())
-                ->request(
-                    $url,
-                    [],
-                    RequestMethod::GET,
-                    DataType::NORMAL
-                )->getBody();
+        // Every HTTP fetch must use a transport that exposes its actual status.
+        // Laminas can still parse the response independently of its HTTP client.
+        $this->requestResponseRaw = null;
+        $this->requestResponse = null;
+        $this->responseCode = null;
+
+        $transport = new NetWrapper();
+        $transport->setConfig(clone $this->CONFIG);
+
+        try {
+            $naturalRequest = $transport->request(
+                $url,
+                [],
+                RequestMethod::GET,
+                DataType::NORMAL
+            );
+        } catch (ExceptionHandler $exception) {
+            // HTTP errors may throw before NetWrapper::request() returns.
+            // Retain the actual transport status when it is available.
+            try {
+                $code = $transport->getCode();
+                if (is_numeric($code) && $code >= 100 && $code <= 599) {
+                    $this->responseCode = (int)$code;
+                }
+            } catch (Exception $ignored) {
+                // Transport failures without an HTTP response have no status.
+            }
+
+            throw $exception;
+        }
+
+        $this->responseCode = $naturalRequest->getCode();
+        $this->requestResponseRaw = $naturalRequest->getBody();
+
+        if (class_exists('Laminas\Feed\Reader\Reader')) {
             $this->requestResponse = \Laminas\Feed\Reader\Reader::importString($this->requestResponseRaw);
         } else {
-            $naturalRequest = (new NetWrapper())
-                ->request(
-                    $url,
-                    [],
-                    RequestMethod::GET,
-                    DataType::NORMAL
-                );
-            $this->requestResponseRaw = $naturalRequest->getBody();
             $this->requestResponse = $naturalRequest->getParsed();
         }
 

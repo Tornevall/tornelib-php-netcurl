@@ -229,7 +229,10 @@ class GenericParser
     private static function isFeedRoot($name, $namespace)
     {
         return ($name === 'rss' && ($namespace === '' || $namespace === null)) ||
-            ($name === 'feed' && $namespace === 'http://www.w3.org/2005/Atom');
+            ($name === 'feed' && (
+                $namespace === 'http://www.w3.org/2005/Atom' ||
+                $namespace === 'http://purl.org/atom/ns#'
+            ));
     }
 
     /**

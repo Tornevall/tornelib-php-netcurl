@@ -16,6 +16,7 @@ Historical entries below are kept as historical records. Do not invent or guess 
 
 ## Testing
 
+* Add deterministic query-composition, localhost HTTP method/URL/body, stream/cURL parity, NetWrapper facade, multi-request, and POST/PUT/PATCH regression coverage; update one obsolete GET assertion to the corrected contract. [#38](https://github.com/Tornevall/tornelib-php-netcurl/issues/38)
 * Verify reused cURL and stream clients send the expected method and raw request body across nonempty/empty POST, POST-to-empty-GET, empty JSON/XML and explicit empty-string transitions against a localhost HTTP fixture. [#37](https://github.com/Tornevall/tornelib-php-netcurl/issues/37)
 * Isolate custom-driver test fixtures by URL scheme so deterministic priority assertions also hold on PHP 8.6 with PHPUnit 13, which does not honor legacy process-isolation annotations. [#20](https://github.com/Tornevall/tornelib-php-netcurl/issues/20) [#22](https://github.com/Tornevall/tornelib-php-netcurl/issues/22)
 * Add deterministic driver isolation, interleaved localhost HTTP-response/configuration, and external driver registration/priority regression coverage. [#36](https://github.com/Tornevall/tornelib-php-netcurl/issues/36)

@@ -8,7 +8,7 @@ Historical entries below are kept as historical records. Do not invent or guess 
 
 ## Fixes
 
-* Report the underlying HTTP transport status from RSS fetches instead of deriving a false 404 from parsed feed entries; use a single transport path with or without optional Laminas modules and preserve unknown status for parser-only imports. [#39](https://github.com/Tornevall/tornelib-php-netcurl/issues/39)
+* Report the actual RSS HTTP status instead of deriving false 404 responses; preserve Laminas Reader URL imports, caching, configured HTTP clients and parsing through temporary status observers, falling back to NetCurl transport only when Laminas HTTP fetching is unavailable. [#39](https://github.com/Tornevall/tornelib-php-netcurl/issues/39)
 * Send ordinary GET parameters in the URL for cURL, streams and multi requests, preserving original query strings, duplicate keys and fragments while omitting GET bodies and retaining explicit JSON/XML GET compatibility. [#38](https://github.com/Tornevall/tornelib-php-netcurl/issues/38)
 * Reset request payloads for every call, including empty arrays, empty strings and null, in configuration, cURL and stream transports; restore GET mode after a POST when the next GET has no payload while preserving existing explicit nonempty GET-body behavior. [#37](https://github.com/Tornevall/tornelib-php-netcurl/issues/37)
 * Isolate built-in transport response and configuration state by constructing a fresh driver for each internal request, while retaining static driver availability discovery and caller-owned registered external drivers. [#36](https://github.com/Tornevall/tornelib-php-netcurl/issues/36)
@@ -17,7 +17,7 @@ Historical entries below are kept as historical records. Do not invent or guess 
 
 ## Testing
 
-* Add deterministic localhost RSS/Atom success, HTTP 404/503, malformed XML, parser-only and isolated Laminas Reader/HTTP dependency-combination regression tests. [#39](https://github.com/Tornevall/tornelib-php-netcurl/issues/39)
+* Add deterministic localhost RSS/Atom success, HTTP 404/503, malformed XML, parser-only and isolated Laminas Reader/HTTP/custom-client regression tests, including cache-only imports, conditional headers and client restoration. [#39](https://github.com/Tornevall/tornelib-php-netcurl/issues/39)
 * Add deterministic query-composition, localhost HTTP method/URL/body, stream/cURL parity, NetWrapper facade, multi-request, and POST/PUT/PATCH regression coverage; update one obsolete GET assertion to the corrected contract. [#38](https://github.com/Tornevall/tornelib-php-netcurl/issues/38)
 * Verify reused cURL and stream clients send the expected method and raw request body across nonempty/empty POST, POST-to-empty-GET, empty JSON/XML and explicit empty-string transitions against a localhost HTTP fixture. [#37](https://github.com/Tornevall/tornelib-php-netcurl/issues/37)
 * Isolate custom-driver test fixtures by URL scheme so deterministic priority assertions also hold on PHP 8.6 with PHPUnit 13, which does not honor legacy process-isolation annotations. [#20](https://github.com/Tornevall/tornelib-php-netcurl/issues/20) [#22](https://github.com/Tornevall/tornelib-php-netcurl/issues/22)

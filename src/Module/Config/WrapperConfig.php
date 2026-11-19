@@ -709,8 +709,10 @@ class WrapperConfig
             $requestUrl = substr($requestUrl, 0, $fragmentPosition);
         }
 
-        $separator = strpos($requestUrl, '?') === false ? '?' : '&';
-        if (substr($requestUrl, -1) === '?' || substr($requestUrl, -1) === '&') {
+        $hasQuery = strpos($requestUrl, '?') !== false;
+        $separator = $hasQuery ? '&' : '?';
+        // A trailing ampersand in the path is not a query separator.
+        if ($hasQuery && (substr($requestUrl, -1) === '?' || substr($requestUrl, -1) === '&')) {
             $separator = '';
         }
 

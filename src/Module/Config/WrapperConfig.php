@@ -688,6 +688,11 @@ class WrapperConfig
                     $return = $this->requestDataContainer;
                     break;
                 case DataType::NORMAL:
+                    // An empty array means no body, not a multipart payload.
+                    if (is_array($requestData) && !count($requestData)) {
+                        $this->requestDataContainer = '';
+                        return '';
+                    }
                     $requestQuery = '';
                     if ($requestMethod === RequestMethod::GET && !empty($requestData)) {
                         // Add POST data to request if anything else follows.
@@ -720,6 +725,8 @@ class WrapperConfig
     public function setRequestData($requestData)
     {
         $this->requestData = $requestData;
+        // A previous request's encoded payload must not survive this update.
+        $this->requestDataContainer = null;
 
         return $this;
     }
@@ -1615,11 +1622,8 @@ class WrapperConfig
         if (!empty($url)) {
             $this->setRequestUrl($url);
         }
-        /** @noinspection CallableParameterUseCaseInTypeContextInspection */
-        /** @var mixed $data */
-        if ((is_string($data) && $data !== '') || (is_array($data) && count($data))) {
-            $this->setRequestData($data);
-        }
+        // Each request owns its data, including empty arrays and empty strings.
+        $this->setRequestData(is_null($data) ? [] : $data);
 
         if ($this->getRequestMethod() !== $method) {
             $this->setRequestMethod($method);

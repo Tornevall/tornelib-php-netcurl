@@ -91,6 +91,10 @@ Relevant runtime capabilities:
 
 See the Tools documentation for examples and exact behavior.
 
+## Request payload isolation on reused clients
+
+Each `request()` call replaces the previous request data, including when the supplied data is `[]`, `''` or `null`. A normal empty array represents an empty body; JSON empty arrays are encoded as `[]`. Switching from POST to an empty GET resets cURL's POST mode rather than retaining the previous request body; explicitly supplied nonempty GET bodies retain their legacy behavior pending [#38](https://github.com/Tornevall/tornelib-php-netcurl/issues/38). Persistent client configuration (such as authentication and timeout) remains available. This is covered by local HTTP fixture regression tests for cURL and PHP streams. See [#37](https://github.com/Tornevall/tornelib-php-netcurl/issues/37).
+
 ## Independent transport state
 
 Each internal request through `NetWrapper` uses a fresh built-in transport instance. Available drivers are discovered globally, but response bodies, status codes, headers and request configuration are not shared between independent `NetWrapper` clients or successive requests. A previously returned transport response remains available after another request runs. Caller-registered external transport objects preserve their existing registration and priority semantics and are not copied or reconstructed. See [#36](https://github.com/Tornevall/tornelib-php-netcurl/issues/36).

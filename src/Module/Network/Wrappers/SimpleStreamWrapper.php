@@ -306,20 +306,8 @@ class SimpleStreamWrapper implements WrapperInterface
     public function request($url, $data = [], $method = RequestMethod::GET, $dataType = DataType::NORMAL)
     {
         $this->CONFIG->resetStreamData();
-        if (!empty($url)) {
-            $this->CONFIG->setRequestUrl($url);
-        }
-        if (is_array($data) && count($data)) {
-            $this->CONFIG->setRequestData($data);
-        }
-
-        if ($this->CONFIG->getRequestMethod() !== $method) {
-            $this->CONFIG->setRequestMethod($method);
-        }
-
-        if ($this->CONFIG->getRequestDataType() !== $dataType) {
-            $this->CONFIG->setRequestDataType($dataType);
-        }
+        // Keep stream request data and method resets consistent with cURL.
+        $this->CONFIG->request($url, $data, $method, $dataType);
 
         $this->getStreamRequest();
 

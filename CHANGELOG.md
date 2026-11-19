@@ -8,12 +8,14 @@ Historical entries below are kept as historical records. Do not invent or guess 
 
 ## Fixes
 
+* Reset request payloads for every call, including empty arrays, empty strings and null, in configuration, cURL and stream transports; restore GET mode after a POST when the next GET has no payload while preserving existing explicit nonempty GET-body behavior. [#37](https://github.com/Tornevall/tornelib-php-netcurl/issues/37)
 * Isolate built-in transport response and configuration state by constructing a fresh driver for each internal request, while retaining static driver availability discovery and caller-owned registered external drivers. [#36](https://github.com/Tornevall/tornelib-php-netcurl/issues/36)
 * Keep cURL multi-response headers associated with their actual handles on PHP 7 (resources) and PHP 8+ (objects), using strict identity instead of integer casting; unknown handles no longer pollute another request's headers. [#35](https://github.com/Tornevall/tornelib-php-netcurl/issues/35)
 * Restore strict cURL certificate and hostname verification after an SSL policy changes from relaxed to strict on a reused configuration; preserve explicit legacy cURL overrides until the SSL policy changes. [#34](https://github.com/Tornevall/tornelib-php-netcurl/issues/34)
 
 ## Testing
 
+* Verify reused cURL and stream clients send the expected method and raw request body across nonempty/empty POST, POST-to-empty-GET, empty JSON/XML and explicit empty-string transitions against a localhost HTTP fixture. [#37](https://github.com/Tornevall/tornelib-php-netcurl/issues/37)
 * Isolate custom-driver test fixtures by URL scheme so deterministic priority assertions also hold on PHP 8.6 with PHPUnit 13, which does not honor legacy process-isolation annotations. [#20](https://github.com/Tornevall/tornelib-php-netcurl/issues/20) [#22](https://github.com/Tornevall/tornelib-php-netcurl/issues/22)
 * Add deterministic driver isolation, interleaved localhost HTTP-response/configuration, and external driver registration/priority regression coverage. [#36](https://github.com/Tornevall/tornelib-php-netcurl/issues/36)
 * Add deterministic handle-identity and local HTTP multi-request tests for distinct headers, HTTP status codes, parsed bodies, and repeated URLs across PHP versions. [#35](https://github.com/Tornevall/tornelib-php-netcurl/issues/35)

@@ -91,6 +91,14 @@ Relevant runtime capabilities:
 
 See the Tools documentation for examples and exact behavior.
 
+## RSS response status and optional parser handling
+
+`RssWrapper::request($url)` uses NetCurl's regular HTTP transport for the feed download, including when Laminas Feed Reader and Laminas HTTP Client are both installed. `getCode()` reports the actual HTTP status returned by that transport, rather than inferring `200` or `404` from parsed feed entries. Failed HTTP requests preserve the underlying exception; if a transport provides an HTTP response code, the code remains available on the RSS wrapper after the exception. Malformed XML does not change the HTTP response status.
+
+Parsing uses Laminas Feed Reader's `importString()` when available and otherwise retains NetCurl's built-in response parser. A direct parser-only call to `getParsed($xml)` makes no HTTP request and `getCode()` returns `null`, meaning no HTTP status is known. `getBody()` provides the raw downloaded feed for requests that fetched data.
+
+See [#39](https://github.com/Tornevall/tornelib-php-netcurl/issues/39).
+
 ## GET query parameters
 
 Ordinary `RequestMethod::GET` requests with `DataType::NORMAL` now place their parameters in the URL, not the request body, for cURL, PHP streams, and cURL multi requests. Keys/values are form-encoded using `http_build_query()`, including nested/repeated array values. Existing query strings (even repeated keys) are kept intact, new fields are appended before URL fragments, and an empty payload adds nothing. A raw, already-encoded query string such as `'a=1&a=2'` is also supported. For example:

@@ -89,11 +89,11 @@ class GenericParser
                 break;
             case 'xml':
             case !empty($contentType) && (bool)preg_match('/\/xml|\+xml/i', $contentType):
-                // More detection possibilites.
-                /* <?xml version="1.0" encoding="UTF-8"?><rss version="2.0"*/
-
-                // If Laminas is available, prefer that engine before simple xml.
-                if ((bool)preg_match('/\/xml|\+xml/i', $contentType) && class_exists('Laminas\Feed\Reader\Reader')) {
+                // Feed parsing is reserved for feed media types or an actual
+                // RSS/Atom document. Generic XML must retain its legacy shape.
+                if (class_exists('Laminas\\Feed\\Reader\\Reader') &&
+                    (self::isFeedContentType($contentType) || self::isFeedXml($content))
+                ) {
                     $return = (new RssWrapper())->getParsed($content);
                     break;
                 }
@@ -111,6 +111,128 @@ class GenericParser
         }
 
         return $return;
+    }
+
+    /**
+     * Explicit feed media types may delegate parsing to Laminas Feed Reader.
+     *
+     * @param string $contentType
+     * @return bool
+     */
+    private static function isFeedContentType($contentType)
+    {
+        return is_string($contentType) &&
+            (bool)preg_match('~/(?:rss|atom)\+xml(?:\s*;|$)~i', trim($contentType));
+    }
+
+    /**
+     * Inspect the XML root without fetching external entities or guessing
+     * from nested elements. Only verified feed roots are delegated to Laminas.
+     *
+     * @param mixed $content
+     * @return bool
+     */
+    private static function isFeedXml($content)
+    {
+        if (!is_string($content) || $content === '') {
+            return false;
+        }
+
+        if (!class_exists('XMLReader') && !class_exists('DOMDocument')) {
+            return false;
+        }
+
+        $previousErrorMode = libxml_use_internal_errors(true);
+        try {
+            if (class_exists('XMLReader')) {
+                $reader = new \XMLReader();
+                try {
+                    if (!@$reader->XML($content, null, LIBXML_NONET)) {
+                        return false;
+                    }
+
+                    while (@$reader->read()) {
+                        if ($reader->nodeType !== \XMLReader::ELEMENT) {
+                            continue;
+                        }
+
+                        if (self::isFeedRoot($reader->localName, $reader->namespaceURI)) {
+                            return true;
+                        }
+
+                        // RSS 1.0 uses rdf:RDF with an RSS-namespace channel.
+                        if ($reader->localName === 'RDF' &&
+                            $reader->namespaceURI === 'http://www.w3.org/1999/02/22-rdf-syntax-ns#'
+                        ) {
+                            while (@$reader->read()) {
+                                if ($reader->nodeType === \XMLReader::ELEMENT &&
+                                    $reader->depth === 1 &&
+                                    $reader->localName === 'channel' &&
+                                    $reader->namespaceURI === 'http://purl.org/rss/1.0/'
+                                ) {
+                                    return true;
+                                }
+                                if ($reader->nodeType === \XMLReader::END_ELEMENT &&
+                                    $reader->depth === 0
+                                ) {
+                                    break;
+                                }
+                            }
+                        }
+
+                        return false;
+                    }
+                } finally {
+                    $reader->close();
+                }
+
+                return false;
+            }
+
+            // DOM remains a safe fallback when the XMLReader extension is absent.
+            $document = new \DOMDocument();
+            if (!@$document->loadXML($content, LIBXML_NONET)) {
+                return false;
+            }
+            $root = $document->documentElement;
+            if (!$root) {
+                return false;
+            }
+            if (self::isFeedRoot($root->localName, $root->namespaceURI)) {
+                return true;
+            }
+            if ($root->localName === 'RDF' &&
+                $root->namespaceURI === 'http://www.w3.org/1999/02/22-rdf-syntax-ns#'
+            ) {
+                foreach ($root->childNodes as $child) {
+                    if ($child instanceof \DOMElement &&
+                        $child->localName === 'channel' &&
+                        $child->namespaceURI === 'http://purl.org/rss/1.0/'
+                    ) {
+                        return true;
+                    }
+                }
+            }
+
+            return false;
+        } finally {
+            libxml_clear_errors();
+            libxml_use_internal_errors($previousErrorMode);
+        }
+    }
+
+    /**
+     * @param string $name
+     * @param string $namespace
+     * @return bool
+     */
+    private static function isFeedRoot($name, $namespace)
+    {
+        return ($name === 'rss' && ($namespace === '' || $namespace === null)) ||
+            ($name === 'feed' && (
+                $namespace === 'http://www.w3.org/2005/Atom' ||
+                $namespace === 'http://purl.org/atom/ns#'
+            ));
     }
 
     /**

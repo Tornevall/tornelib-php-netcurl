@@ -373,6 +373,13 @@ class SimpleStreamWrapper implements WrapperInterface
      */
     private function setStreamRequestData()
     {
+        // Ordinary GET parameters belong in the URL and have no request body.
+        if ($this->CONFIG->getRequestMethod() === RequestMethod::GET &&
+            $this->CONFIG->getRequestDataType() === DataType::NORMAL
+        ) {
+            return $this;
+        }
+
         $requestData = $this->CONFIG->getRequestData();
 
         $this->CONFIG->setDualStreamHttp(
@@ -445,7 +452,7 @@ class SimpleStreamWrapper implements WrapperInterface
         // this in a correct way.
         try {
             $this->streamContentResponseRaw = file_get_contents(
-                $this->CONFIG->getRequestUrl(),
+                $this->CONFIG->getRequestUrlWithQuery(),
                 false,
                 $this->CONFIG->getStreamContext()
             );

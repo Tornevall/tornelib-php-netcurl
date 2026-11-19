@@ -53,6 +53,14 @@ class RssWrapper implements WrapperInterface
     private $requestResponse;
 
     /**
+     * HTTP status from the most recent transport request, or null when
+     * parsing content that did not originate from an HTTP request.
+     *
+     * @var int|null
+     */
+    private $responseCode;
+
+    /**
      * @var WrapperConfig
      */
     private $CONFIG;
@@ -143,12 +151,14 @@ class RssWrapper implements WrapperInterface
     }
 
     /**
-     * Simplified response as Laminas handles most of the data for us.
-     * @return int
+     * Return the HTTP response code supplied by the underlying transport.
+     * Parser-only imports have no HTTP status and return null.
+     *
+     * @return int|null
      */
     public function getCode()
     {
-        return isset($this->requestResponseRaw->entries) ? 200 : 404;
+        return $this->responseCode;
     }
 
     /**
@@ -173,30 +183,83 @@ class RssWrapper implements WrapperInterface
         $method = RequestMethod::GET,
         $dataType = DataType::NORMAL
     ) {
-        // Laminas requires two classes if url should be handled.
-        if (class_exists('Laminas\Feed\Reader\Reader') && class_exists('Laminas\Http\Client')) {
-            $this->requestResponse = \Laminas\Feed\Reader\Reader::import($url);
-        } elseif (class_exists('Laminas\Feed\Reader\Reader')) {
-            // If the http client in laminas is missing, fall back on our local wrappers. But instead of using
-            // the netwrapper type RSS, we'll fetch the data as a regular data request to disable parts of the automation.
-            /** @noinspection NullPointerExceptionInspection */
-            $this->requestResponseRaw = (new NetWrapper())
-                ->request(
-                    $url,
-                    [],
-                    RequestMethod::GET,
-                    DataType::NORMAL
-                )->getBody();
+        $this->requestResponseRaw = null;
+        $this->requestResponse = null;
+        $this->responseCode = null;
+
+        if (class_exists('Laminas\\Feed\\Reader\\Reader')) {
+            // Keep Laminas in charge of HTTP, RSS/Atom parsing, extensions
+            // and its existing caching behavior whenever a client is ready.
+            if (interface_exists('Laminas\\Feed\\Reader\\Http\\ClientInterface')) {
+                $client = null;
+                try {
+                    $client = \Laminas\Feed\Reader\Reader::getHttpClient();
+                } catch (\Error $error) {
+                    if (class_exists('Laminas\\Http\\Client')) {
+                        throw $error;
+                    }
+                    // Without laminas-http or a configured Reader client,
+                    // use NetCurl for the download and Reader for parsing.
+                }
+
+                if ($client !== null) {
+                    $observer = $client instanceof \Laminas\Feed\Reader\Http\HeaderAwareClientInterface ?
+                        new RssLaminasHeaderClientObserver($client) :
+                        new RssLaminasClientObserver($client);
+
+                    \Laminas\Feed\Reader\Reader::setHttpClient($observer);
+                    try {
+                        $this->requestResponse = \Laminas\Feed\Reader\Reader::import($url);
+                    } finally {
+                        // A Reader cache hit may perform no HTTP request.
+                        // In that case the status must remain unknown.
+                        $this->responseCode = $observer->getStatusCode();
+                        $this->requestResponseRaw = $observer->getResponseBody();
+                        \Laminas\Feed\Reader\Reader::setHttpClient($client);
+                    }
+
+                    return $this;
+                }
+            } elseif (class_exists('Laminas\\Http\\Client')) {
+                // Compatibility for older Reader integrations without the
+                // observable HTTP client interface: no guessed status.
+                $this->requestResponse = \Laminas\Feed\Reader\Reader::import($url);
+
+                return $this;
+            }
+        }
+
+        // Fallback only: NetCurl downloads when Laminas has no HTTP client.
+        // Laminas Reader still parses the feed when that package is present.
+        $transport = new NetWrapper();
+        $transport->setConfig(clone $this->CONFIG);
+
+        try {
+            $naturalRequest = $transport->request(
+                $url,
+                [],
+                RequestMethod::GET,
+                DataType::NORMAL
+            );
+        } catch (ExceptionHandler $exception) {
+            try {
+                $code = $transport->getCode();
+                if (is_numeric($code) && $code >= 100 && $code <= 599) {
+                    $this->responseCode = (int)$code;
+                }
+            } catch (Exception $ignored) {
+                // Network failures without HTTP responses have no status.
+            }
+
+            throw $exception;
+        }
+
+        $this->responseCode = $naturalRequest->getCode();
+        $this->requestResponseRaw = $naturalRequest->getBody();
+
+        if (class_exists('Laminas\\Feed\\Reader\\Reader')) {
             $this->requestResponse = \Laminas\Feed\Reader\Reader::importString($this->requestResponseRaw);
         } else {
-            $naturalRequest = (new NetWrapper())
-                ->request(
-                    $url,
-                    [],
-                    RequestMethod::GET,
-                    DataType::NORMAL
-                );
-            $this->requestResponseRaw = $naturalRequest->getBody();
             $this->requestResponse = $naturalRequest->getParsed();
         }
 

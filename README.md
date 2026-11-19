@@ -91,6 +91,14 @@ Relevant runtime capabilities:
 
 See the Tools documentation for examples and exact behavior.
 
+## RSS response status and optional parser handling
+
+`RssWrapper::request($url)` keeps **Laminas Feed Reader in charge of fetching, caching and parsing RSS/Atom** whenever it has an HTTP client, including an application-configured custom client. NetCurl briefly observes the existing Laminas client through its documented HTTP interfaces, reading status and raw body without performing an extra HTTP fetch or replacing RSS parsing. The original Laminas client is restored afterward, including when the import fails. `getCode()` reports the HTTP status actually observed, rather than inferring `200` or `404` from parsed entries. A Laminas cache hit that makes no HTTP request returns `null` as the HTTP status, even if a parsed feed is available.
+
+If Laminas Feed Reader is available without a usable HTTP client, NetCurl downloads the feed and passes it to Laminas `importString()`. Without Laminas Feed Reader, NetCurl uses its existing generic parsing fallback. Failed HTTP responses and malformed content retain their own response/error semantics: an actual response status remains available even when feed parsing fails. A parser-only `getParsed($xml)` call has no HTTP status and returns `null` for `getCode()`. `getBody()` contains the raw response only when one was actually downloaded; it is `null` on cache-only Laminas imports.
+
+See [#39](https://github.com/Tornevall/tornelib-php-netcurl/issues/39).
+
 ## GET query parameters
 
 Ordinary `RequestMethod::GET` requests with `DataType::NORMAL` now place their parameters in the URL, not the request body, for cURL, PHP streams, and cURL multi requests. Keys/values are form-encoded using `http_build_query()`, including nested/repeated array values. Existing query strings (even repeated keys) are kept intact, new fields are appended before URL fragments, and an empty payload adds nothing. A raw, already-encoded query string such as `'a=1&a=2'` is also supported. For example:

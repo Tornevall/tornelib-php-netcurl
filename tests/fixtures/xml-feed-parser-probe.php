@@ -29,6 +29,8 @@ namespace {
     $rss = '<rss version="2.0"><channel><title>RSS</title></channel></rss>';
     $atom = '<?xml version="1.0"?><feed xmlns="http://www.w3.org/2005/Atom">' .
         '<title>Atom</title><id>urn:feed</id><updated>2026-01-01T00:00:00Z</updated></feed>';
+    $atomLegacy = '<feed xmlns="http://purl.org/atom/ns#" version="0.3">' .
+        '<title>Legacy Atom</title><id>urn:legacy:feed</id></feed>';
     $rssOne = '<rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" ' .
         'xmlns="http://purl.org/rss/1.0/"><channel rdf:about="http://example.invalid/">' .
         '<title>RSS One</title></channel></rdf:RDF>';
@@ -59,6 +61,8 @@ namespace {
         'rss-headers' => [$comments, 'application/xml; charset=utf-8', true],
         'atom-content' => [$atom, 'application/xml', true],
         'atom-feed-mimetype' => [$atom, 'application/atom+xml', true],
+        'atom-03-generic-xml' => [$atomLegacy, 'application/xml', true],
+        'atom-03-text-xml' => [$atomLegacy, 'text/xml', true],
         'rss-one' => [$rssOne, 'application/rdf+xml', true],
         'html-unchanged' => [$generic, 'html', false],
     ];

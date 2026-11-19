@@ -91,6 +91,25 @@ Relevant runtime capabilities:
 
 See the Tools documentation for examples and exact behavior.
 
+## GET query parameters
+
+Ordinary `RequestMethod::GET` requests with `DataType::NORMAL` now place their parameters in the URL, not the request body, for cURL, PHP streams, and cURL multi requests. Keys/values are form-encoded using `http_build_query()`, including nested/repeated array values. Existing query strings (even repeated keys) are kept intact, new fields are appended before URL fragments, and an empty payload adds nothing. A raw, already-encoded query string such as `'a=1&a=2'` is also supported. For example:
+
+```php
+use TorneLIB\Model\Type\RequestMethod;
+use TorneLIB\Module\Network\NetWrapper;
+
+$response = (new NetWrapper())->request(
+    'https://example.org/items?filter=active#list',
+    ['page' => 2, 'term' => 'a & b'],
+    RequestMethod::GET
+);
+// Effective URL: https://example.org/items?filter=active&page=2&term=a+%26+b#list
+// No GET request body.
+```
+
+Requests explicitly selecting `DataType::JSON` or `DataType::XML` on GET retain their legacy raw-body handling, rather than being converted to ordinary URL parameters. Raw GET bodies can be unsupported or rejected by intermediaries and should be avoided where possible. POST, PUT, and PATCH continue sending their payloads in the body. See [#38](https://github.com/Tornevall/tornelib-php-netcurl/issues/38).
+
 ## Request payload isolation on reused clients
 
 Each `request()` call replaces the previous request data, including when the supplied data is `[]`, `''` or `null`. A normal empty array represents an empty body; JSON empty arrays are encoded as `[]`. Switching from POST to an empty GET resets cURL's POST mode rather than retaining the previous request body; explicitly supplied nonempty GET bodies retain their legacy behavior pending [#38](https://github.com/Tornevall/tornelib-php-netcurl/issues/38). Persistent client configuration (such as authentication and timeout) remains available. This is covered by local HTTP fixture regression tests for cURL and PHP streams. See [#37](https://github.com/Tornevall/tornelib-php-netcurl/issues/37).
